@@ -1,83 +1,145 @@
 <!DOCTYPE html>
-<html>
+<html lang="bn">
 <head>
-  <base target="_top">
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 0; }
-    
-    /* ১. মেইন হেডার স্টিকি (Main Header) */
-    .main-header { 
-      background-color: #ffffff; 
-      padding: 15px; 
-      text-align: center; 
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      position: sticky; /* মেইন হেডার আটকে থাকবে */
-      top: 0; 
-      z-index: 1000; /* এটি যেন সবার ওপরে থাকে */
-    }
-    
-    h2 { margin: 0; color: #1a73e8; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Database - GitHub</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background-color: #f0f2f5; 
+        }
 
-    .content-area { padding: 20px; }
+        /* ১. মেইন হেডার স্টিকি (Sticky Main Header) */
+        .header-fixed {
+            position: sticky;
+            top: 0;
+            background-color: #1a73e8;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            z-index: 1000; /* এটি যেন সবার ওপরে থাকে */
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .header-fixed h2 { margin: 0; font-size: 24px; }
 
-    /* কন্টেইনারে স্ক্রলবার সেট করা */
-    .table-container { 
-      background: white; 
-      border-radius: 8px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-      overflow: auto; 
-      max-height: 75vh; /* টেবিলের উচ্চতা যাতে স্ক্রিন ছাড়িয়ে না যায় */
-      border: 1px solid #ddd;
-    }
+        .container { 
+            padding: 20px; 
+            max-width: 1200px; 
+            margin: auto; 
+        }
 
-    table { width: 100%; border-collapse: collapse; min-width: 900px; }
-    
-    /* ২. টেবিল হেডার স্টিকি (Table Header) */
-    thead th { 
-      background-color: #4285f4; 
-      color: white; 
-      padding: 15px 12px;
-      text-align: left;
-      position: sticky; /* টেবিল হেডার আটকে থাকবে */
-      top: 0;           /* টেবিল কন্টেইনারের একদম ওপরে */
-      z-index: 100;     /* ডাটা রো এর ওপরে থাকবে */
-      box-shadow: 0 2px 2px rgba(0,0,0,0.1);
-    }
+        /* ২. টেবিল কন্টেইনার এবং স্টিকি টেবিল হেডার */
+        .table-wrapper { 
+            background: white; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            overflow: auto; 
+            max-height: 70vh; /* স্ক্রিনের ৭০% উচ্চতা পর্যন্ত টেবিল থাকবে, তারপর স্ক্রল হবে */
+            position: relative;
+        }
 
-    td { border-bottom: 1px solid #eee; padding: 12px; font-size: 14px; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
-    tr:hover { background-color: #f1f4f9; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 1000px; 
+        }
 
-  </style>
+        /* টেবিল হেডার স্টিকি করার কোড */
+        thead th { 
+            position: sticky; 
+            top: 0; /* এটি টেবিল কন্টেইনারের টপে আটকে থাকবে */
+            background-color: #4285f4; 
+            color: white; 
+            padding: 15px; 
+            text-align: left; 
+            z-index: 100;
+            box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+            font-size: 14px;
+        }
+
+        td { 
+            padding: 12px 15px; 
+            border-bottom: 1px solid #eee; 
+            font-size: 14px; 
+            color: #333;
+        }
+
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f4f9; }
+
+        /* Loader */
+        #loader { 
+            text-align: center; 
+            padding: 50px; 
+            font-weight: bold; 
+            color: #1a73e8; 
+        }
+    </style>
 </head>
 <body>
 
-  <div class="main-header">
-    <h2>Employee Database Management</h2>
-  </div>
-
-  <div class="content-area">
-    <div class="table-container">
-      <table>
-        <thead>
-          <tr>
-            <? for (var j = 0; j < data[0].length; j++) { ?>
-              <th><?= data[0][j] ?></th>
-            <? } ?>
-          </tr>
-        </thead>
-        <tbody>
-          <? for (var i = 1; i < data.length; i++) { ?>
-            <tr>
-              <? for (var j = 0; j < data[i].length; j++) { ?>
-                <td><?= data[i][j] ?></td>
-              <? } ?>
-            </tr>
-          <? } ?>
-        </tbody>
-      </table>
+    <div class="header-fixed">
+        <h2>Employee Management List</h2>
     </div>
-  </div>
+
+    <div class="container">
+        <div id="loader">ডাটা লোড হচ্ছে, দয়া করে অপেক্ষা করুন...</div>
+        
+        <div class="table-wrapper" id="table-display" style="display: none;">
+            <table>
+                <thead id="table-head"></thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // আপনার Web App URL এখানে দিন (শেষে ?type=json যোগ করবেন)
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec?type=json';
+
+        async function loadData() {
+            try {
+                const response = await fetch(scriptUrl, { redirect: 'follow' });
+                const data = await response.json();
+                
+                if (data && data.length > 0) {
+                    renderTable(data);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
+            }
+        }
+
+        function renderTable(data) {
+            const head = document.getElementById('table-head');
+            const body = document.getElementById('table-body');
+
+            // Header Row
+            let headHtml = "<tr>";
+            data[0].forEach(cell => headHtml += `<th>${cell}</th>`);
+            headHtml += "</tr>";
+            head.innerHTML = headHtml;
+
+            // Data Rows
+            let bodyHtml = "";
+            for (let i = 1; i < data.length; i++) {
+                bodyHtml += "<tr>";
+                data[i].forEach(cell => bodyHtml += `<td>${cell || '-'}</td>`);
+                bodyHtml += "</tr>";
+            }
+            body.innerHTML = bodyHtml;
+
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('table-display').style.display = 'block';
+        }
+
+        window.onload = loadData;
+    </script>
 
 </body>
 </html>
