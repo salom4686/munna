@@ -3,17 +3,39 @@
 <head>
   <meta charset="UTF-8">
   <title>Employee Live Table</title>
-  <style>
-    body { font-family: 'Segoe UI', sans-serif; padding: 30px; background-color: #f5f7fa; }
-    h2 { color: #2c3e50; text-align: center; }
-    #table-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
-    th { background-color: #1a73e8; color: white; text-transform: uppercase; font-size: 14px; }
-    tr:hover { background-color: #f1f4f9; }
-    #loader { text-align: center; font-weight: bold; color: #1a73e8; }
+<style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
+    h2 { color: #333; text-align: center; }
+    
+    /* কন্টেইনারে একটি নির্দিষ্ট উচ্চতা (Height) সেট করতে হবে স্টিকি কাজ করার জন্য */
+    .container { 
+      background: white; 
+      padding: 0; 
+      border-radius: 8px; 
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1); 
+      overflow-y: auto; 
+      max-height: 80vh; /* স্ক্রিনের ৮০% পর্যন্ত লম্বা হবে, তারপর স্ক্রল হবে */
+      border: 1px solid #ddd;
+    }
+
+    table { width: 100%; border-collapse: collapse; min-width: 800px; }
+    
+    /* হেডার স্টিকি করার মেইন কোড */
+    th { 
+      background-color: #4285f4; 
+      color: white; 
+      padding: 15px 12px;
+      text-align: left;
+      position: sticky; /* এটি হেডারকে আটকে রাখবে */
+      top: 0;           /* একদম ওপরে আটকে থাকবে */
+      z-index: 10;      /* ডাটার ওপর দিয়ে যেন দেখা যায় */
+      box-shadow: 0 2px 2px rgba(0,0,0,0.1); /* নিচের দিকে হালকা শ্যাডো */
+    }
+
+    td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f1f1; }
   </style>
-</head>
 <body>
 
   <h2>Employee Management List</h2>
