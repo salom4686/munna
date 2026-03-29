@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Live Table</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; padding: 30px; background-color: #f5f7fa; }
+    h2 { color: #2c3e50; text-align: center; }
+    #table-container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { border-bottom: 1px solid #eee; padding: 12px; text-align: left; }
+    th { background-color: #1a73e8; color: white; text-transform: uppercase; font-size: 14px; }
+    tr:hover { background-color: #f1f4f9; }
+    #loader { text-align: center; font-weight: bold; color: #1a73e8; }
+  </style>
+</head>
+<body>
+
+  <h2>Employee Management List</h2>
+  <div id="loader">ডাটা লোড হচ্ছে, অপেক্ষা করুন...</div>
+  <div id="table-container"></div>
+
+  <script>
+    // আপনার ওই স্ক্রিপ্ট URL টি এখানে দিন (শেষে ?type=json যোগ করা বাধ্যতামূলক)
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec?type=json';
+
+    async function loadData() {
+      try {
+        const response = await fetch(scriptUrl, { redirect: 'follow' });
+        const data = await response.json();
+        
+        let table = '<table><thead><tr>';
+        // প্রথম রো (Header) তৈরি
+        data[0].forEach(header => table += `<th>${header}</th>`);
+        table += '</tr></thead><tbody>';
+
+        // বাকি রো (Data) তৈরি
+        for (let i = 1; i < data.length; i++) {
+          table += '<tr>';
+          data[i].forEach(cell => table += `<td>${cell || '-'}</td>`);
+          table += '</tr>';
+        }
+        table += '</tbody></table>';
+
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('table-container').innerHTML = table;
+      } catch (e) {
+        document.getElementById('loader').innerHTML = "ভুল হয়েছে! URL টি ঠিক আছে কি না চেক করুন।";
+      }
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
