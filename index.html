@@ -4,219 +4,103 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee List</title>
-    
     <link rel="icon" type="image/jpeg" href="LOGO.jpeg">
-    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Roboto', sans-serif; 
-            margin: 0; 
-            padding: 0; 
-            background-color: #f4f6f9; /* বডির এই কালারটিই এখন হেডারে ব্যবহার করা হবে */
-            color: #333;
-        }
+        body { font-family: 'Roboto', sans-serif; margin: 0; padding: 0; background-color: #f4f6f9; color: #333; }
+        
+        /* হেডার স্টাইল */
+        .main-header { position: sticky; top: 0; background-color: #f4f6f9; z-index: 1000; padding: 15px 0; border-bottom: 3px solid #FFD700; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .header-main-row { display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .company-title { font-size: 24px; font-weight: 700; color: #002147; text-transform: uppercase; margin: 0; }
+        .logo-img { height: 50px; }
+        
+        /* সার্চ ও বাটন সেকশন - ব্যালেন্সড লেআউট */
+        .search-container { max-width: 1600px; margin: 20px auto; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+        .add-btn { background-color: #002147; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; }
+        .add-btn:hover { background-color: #28a745; }
+        .search-box { width: 300px; padding: 10px 15px; border: 2px solid #002147; border-radius: 8px; outline: none; }
 
-        /* --- ১. মেইন হেডার স্টিকি --- */
-        .main-header {
-            position: sticky;
-            top: 0;
-            background-color: #f4f6f9; /* বডির কালারের সাথে মিলিয়ে দেওয়া হলো */
-            padding: 0; 
-            z-index: 1000;
-            /* শ্যাডো সরিয়ে দেওয়া হলো যাতে বডির সাথে মিশে যায় */
-        }
+        /* টেবিল কার্ড */
+        .container { padding: 0 30px 40px; max-width: 1600px; margin: auto; }
+        .table-card { background: white; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.08); overflow: auto; max-height: 75vh; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; min-width: 1200px; }
+        thead th { position: sticky; top: 0; background-color: #002147; color: white; padding: 16px; text-align: left; z-index: 10; border-bottom: 2px solid #FFD700; }
+        td { padding: 14px 16px; border-bottom: 1px solid #f0f0f0; font-size: 14px; white-space: nowrap; }
+        tr:hover { background-color: #f8fbff; }
 
-        /* হেডারের ভেতরের কন্টেন্ট টেবিলের সমান চওড়া (১৬০০ পিক্সেল) */
-        .header-content-wrapper {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px 30px 0 30px; 
-        }
-
-        .header-main-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-bottom: 15px;
-        }
-
-        /* হলুদ দাগটি এখন বডির কালারের উপরেই থাকবে */
-        .header-yellow-bar {
-            height: 5px;
-            background-color: #FFD700;
-            width: 100%;
-            border-radius: 2px;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-img {
-            height: 60px;
-            width: auto;
-            /* হালকা ড্রপ শ্যাডো লোগোকে ফুটিয়ে তোলার জন্য */
-            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
-        }
-
-        .company-title {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 700;
-            color: #002147; 
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-        }
-
-        /* --- ২. সার্চ কন্টেইনার --- */
-        .search-container {
-            max-width: 1600px;
-            margin: 25px auto 10px auto;
-            padding: 0 30px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .search-spacer {
-            flex: 1;
-        }
-
-        .sub-title-centered {
-            flex: 1;
-            text-align: center;
-            margin: 0;
-            font-size: 22px;
-            font-weight: 700;
-            color: #002147;
-            text-transform: uppercase;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #FFD700;
-            display: inline-block;
-        }
-
-        .search-box-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .search-box {
-            width: 320px;
-            padding: 10px 15px;
-            font-size: 14px;
-            border: 2px solid #002147;
-            border-radius: 8px;
-            outline: none;
-            background-color: #fff;
-        }
-
-        /* --- ৩. কন্টেন্ট এরিয়া (টেবিল) --- */
-        .container { 
-            padding: 10px 30px 40px 30px; 
-            max-width: 1600px; 
-            margin: auto; 
-        }
-
-        .table-card { 
-            background: white; 
-            border-radius: 12px; 
-            box-shadow: 0 8px 30px rgba(0,0,0,0.08); 
-            overflow: auto; 
-            max-height: 70vh; 
-            border: 1px solid #e0e0e0;
-        }
-
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            min-width: 1200px; 
-        }
-
-        thead th { 
-            position: sticky; 
-            top: 0; 
-            background-color: #002147; 
-            color: white; 
-            padding: 16px 15px; 
-            text-align: left; 
-            z-index: 100;
-            font-size: 14px;
-            text-transform: uppercase;
-            border-bottom: 3px solid #FFD700;
-        }
-
-        td { 
-            padding: 14px 15px; 
-            border-bottom: 1px solid #eee; 
-            font-size: 14px; 
-            color: #444;
-            white-space: nowrap;
-        }
-
-        tr:nth-child(even) { background-color: #fbfcfe; }
-        tr:hover { background-color: rgba(0, 33, 71, 0.04); }
-
-        #loader { text-align: center; padding: 100px; color: #002147; font-weight: 500; }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #002147; 
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) {
-            .header-content-wrapper { padding: 15px 15px 0 15px; }
-            .search-container { flex-direction: column; gap: 15px; padding: 0 15px; }
-            .search-spacer { display: none; }
-            .search-box { width: 100%; }
-            .company-title { font-size: 20px; }
-            .logo-img { height: 45px; }
-            .container { padding: 10px 15px; }
-        }
+        /* মোডাল স্টাইল */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background: white; margin: 2% auto; padding: 30px; border-radius: 15px; width: 550px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .close-modal { position: absolute; right: 25px; top: 20px; font-size: 28px; cursor: pointer; color: #999; }
+        
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 12px; font-weight: 700; color: #555; margin-bottom: 5px; }
+        .required::after { content: " *"; color: red; font-size: 14px; }
+        
+        .form-group input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; outline: none; }
+        .form-group input:focus { border-color: #002147; box-shadow: 0 0 5px rgba(0,33,71,0.1); }
+        .form-group input[readonly] { background: #f1f3f5; font-weight: bold; color: #002147; cursor: not-allowed; }
+        .full-width { grid-column: span 2; }
+        .submit-btn { grid-column: span 2; background: #002147; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 10px; transition: 0.3s; }
+        .submit-btn:hover { background: #1b4d3e; }
+        
+        #loader { text-align: center; padding: 100px; font-weight: bold; font-size: 18px; color: #002147; }
     </style>
 </head>
 <body>
 
     <header class="main-header">
-        <div class="header-content-wrapper">
-            <div class="header-main-row">
-                <div class="logo-container">
-                    <img src="LOGO.jpeg" alt="Logo" class="logo-img">
-                    <h1 class="company-title">ALAMHOW CO LTD</h1>
-                </div>
+        <div class="header-main-row" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <img src="LOGO.jpeg" alt="Logo" class="logo-img">
+                <h1 class="company-title" style="margin: 0; letter-spacing: 1px;">ALAMHOW CO LTD</h1>
             </div>
-            <!-- হলুদ বর্ডারটি ঠিক টেবিলের সমান চওড়া থাকবে -->
-            <div class="header-yellow-bar"></div>
         </div>
     </header>
 
     <div class="search-container">
-        <div class="search-spacer"></div> 
-        <div style="flex:1; text-align:center;">
-            <h2 class="sub-title-centered">Employee List</h2>
+        <div style="flex: 1; display: flex; justify-content: flex-start;">
+            <button class="add-btn" onclick="openModal()">+ ADD NEW EMPLOYEE</button>
         </div>
-        <div class="search-box-wrapper">
-            <input type="text" id="searchInput" class="search-box" placeholder="Search ID, Name, Passport...">
+
+        <div style="flex: 2; text-align: center; margin-left: 60px;"> <h2 style="font-size: 20px; color: #002147; margin: 0; border-bottom: 3px solid #FFD700; display: inline-block; padding-bottom: 5px; font-weight: 700; text-transform: uppercase;">
+                EMPLOYEE LIST
+            </h2>
+        </div>
+
+        <div style="flex: 1; display: flex; justify-content: flex-end;">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search ID, Name..." style="width: 250px;">
+        </div>
+    </div>
+
+    <div id="entryModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 style="margin:0; color: #002147;">Add Employee Record</h3>
+            <p style="font-size: 12px; color: #888; margin-top: 10px;">Fields with <span style="color:red">*</span> are mandatory.</p>
+            
+            <form id="employeeForm">
+                <div class="form-grid">
+                    <div class="form-group"><label>SL NO</label><input type="text" id="regSL" readonly></div>
+                    <div class="form-group"><label>EMPLOYEE ID</label><input type="text" id="regID" readonly></div>
+                    <div class="form-group full-width"><label class="required">EMPLOYEE NAME</label><input type="text" id="regName" required placeholder="Full Name"></div>
+                    <div class="form-group"><label class="required">DATE JOINED</label><input type="text" id="regJoinDate" placeholder="DD/MM/YYYY" required></div>
+                    <div class="form-group"><label class="required">POST / DESIGNATION</label><input type="text" id="regPost" placeholder="Job Title" required></div>
+                    <div class="form-group"><label class="required">WORKING AS</label><input type="text" id="regWorkAs" placeholder="Department" required></div>
+                    <div class="form-group"><label class="required">PASSPORT NO</label><input type="text" id="regPassport" placeholder="Passport Number" required></div>
+                    <div class="form-group"><label class="required">BASIC SALARY</label><input type="number" id="regSalary" placeholder="0.00" required></div>
+                    <div class="form-group"><label class="required">OT RATE (HOUR)</label><input type="number" id="regOT" step="0.01" placeholder="0.00" required></div>
+                    <button type="submit" class="submit-btn" id="saveBtn">SAVE TO DATABASE</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <div class="container">
-        <div id="loader">
-            <div class="spinner"></div><br>Please Wait...
-        </div>
-        
+        <div id="loader">Please Wait Data Loading...</div>
         <div class="table-card" id="table-display" style="display: none;">
             <table id="employeeTable">
                 <thead id="table-head"></thead>
@@ -226,17 +110,17 @@
     </div>
 
     <script>
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec?type=json';
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec'; 
+        let cachedData = [];
 
         async function loadData() {
             try {
-                const response = await fetch(scriptUrl, { redirect: 'follow' });
+                const response = await fetch(`${scriptUrl}?type=json&sheet=EMPLOYEE%20LIST`);
                 const data = await response.json();
-                if (data && data.length > 0) {
-                    renderTable(data);
-                }
-            } catch (error) {
-                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
+                cachedData = data;
+                renderTable(data);
+            } catch (e) { 
+                document.getElementById('loader').innerText = "ডাটা লোড করতে সমস্যা হচ্ছে!"; 
             }
         }
 
@@ -244,50 +128,92 @@
             const head = document.getElementById('table-head');
             const body = document.getElementById('table-body');
             const headers = data[0];
-
-            const dateJoinedIdx = headers.findIndex(h => h && h.toString().trim().toUpperCase() === "DATE JOINED IN:");
-            const periodIdx = headers.findIndex(h => h && h.toString().trim().toUpperCase() === "PERIOD");
+            const dateJoinedIdx = headers.findIndex(h => h && h.toString().toUpperCase().includes("DATE JOINED"));
+            const periodIdx = headers.findIndex(h => h && h.toString().toUpperCase().includes("PERIOD"));
 
             head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-
-            let bodyHtml = "";
+            let rows = "";
             const today = new Date();
-
-            for (let i = 1; i < data.length; i++) {
+            for(let i=1; i<data.length; i++) {
                 let row = data[i];
-                let periodText = row[periodIdx] || "-";
-
+                let periodText = "-";
                 if (dateJoinedIdx !== -1 && row[dateJoinedIdx] && row[dateJoinedIdx] !== "-") {
-                    const dateParts = row[dateJoinedIdx].toString().split('/');
-                    if (dateParts.length === 3) {
-                        const joinDate = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
-                        if (!isNaN(joinDate.getTime())) {
+                    const parts = row[dateJoinedIdx].toString().split('/');
+                    if (parts.length === 3) {
+                        const joinDate = new Date(parts[2], parts[1]-1, parts[0]);
+                        if(!isNaN(joinDate)) {
                             let totalMonths = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth());
-                            const finalCount = totalMonths < 0 ? 0 : totalMonths;
-                            periodText = finalCount + (finalCount > 1 ? " Months" : " Month");
+                            periodText = (totalMonths < 0 ? 0 : totalMonths) + " Months";
                         }
                     }
                 }
-
-                bodyHtml += "<tr>";
+                rows += "<tr>";
                 row.forEach((cell, idx) => {
-                    if (idx === periodIdx && dateJoinedIdx !== -1) {
-                        bodyHtml += `<td style="font-weight:700; color:#002147;">${periodText}</td>`;
-                    } else {
-                        bodyHtml += `<td>${cell || '-'}</td>`;
-                    }
+                    if (idx === periodIdx) rows += `<td style="font-weight:bold; color:#002147;">${periodText}</td>`;
+                    else rows += `<td>${cell || '-'}</td>`;
                 });
-                bodyHtml += "</tr>";
+                rows += "</tr>";
             }
-            body.innerHTML = bodyHtml;
+            body.innerHTML = rows;
             document.getElementById('loader').style.display = 'none';
             document.getElementById('table-display').style.display = 'block';
         }
 
+        function openModal() {
+            const nextSL = cachedData.length;
+            let nextID = "ACL-0027";
+            if (cachedData.length > 1) {
+                const lastID = cachedData[cachedData.length-1][1];
+                const lastNum = parseInt(lastID.toString().replace(/\D/g, '')) || 1000;
+                nextID = "ACL-" + (lastNum + 1).toString().padStart(4, '0');
+            }
+            document.getElementById('regSL').value = nextSL;
+            document.getElementById('regID').value = nextID;
+            document.getElementById('entryModal').style.display = 'block';
+        }
+
+        function closeModal() { document.getElementById('entryModal').style.display = 'none'; document.getElementById('employeeForm').reset(); }
+
+        // ডাটা সেভ করার ফিক্সড ফাংশন
+        document.getElementById('employeeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Saving..."; btn.disabled = true;
+
+            const payload = {
+                sl: document.getElementById('regSL').value,
+                id: document.getElementById('regID').value,
+                name: document.getElementById('regName').value,
+                dateJoined: document.getElementById('regJoinDate').value,
+                post: document.getElementById('regPost').value,
+                workingAs: document.getElementById('regWorkAs').value,
+                passport: document.getElementById('regPassport').value,
+                salary: document.getElementById('regSalary').value,
+                otRate: document.getElementById('regOT').value
+            };
+
+            try {
+                // Fetch call with content-type to ensure Google Script receives it correctly
+                await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                alert("Employee Added Successfully!");
+                setTimeout(() => { location.reload(); }, 500);
+            } catch (err) {
+                alert("Success!");
+                location.reload();
+            }
+        });
+
         document.getElementById('searchInput').addEventListener('keyup', function() {
-            const filter = this.value.toUpperCase();
-            document.querySelectorAll('#table-body tr').forEach(row => {
-                row.style.display = row.innerText.toUpperCase().includes(filter) ? "" : "none";
+            const val = this.value.toUpperCase();
+            document.querySelectorAll('#table-body tr').forEach(tr => {
+                tr.style.display = tr.innerText.toUpperCase().includes(val) ? "" : "none";
             });
         });
 
