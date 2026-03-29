@@ -64,8 +64,9 @@
     <script>
         async function loadData() {
             try {
-                const response = await fetch('https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec');
-                const data = await response.json();
+               const response = await fetch('https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec');
+console.log('Response status:', response.status);
+console.log('Response ok:', response.ok);
                 
                 console.log('Data received:', data);
                 
