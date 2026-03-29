@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALAMHOW CO LTD - Employee Portal</title>
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
@@ -16,43 +17,70 @@
             color: #333;
         }
 
-        /* --- ১. মেইন হেডার স্টিকি (Clean Look) --- */
+        /* --- ১. মেইন হেডার স্টিকি --- */
         .main-header {
             position: sticky;
             top: 0;
             background-color: #ffffff; 
-            padding: 12px 40px;
+            padding: 15px 40px;
             z-index: 1000;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            justify-content: center; /* মাঝখানে রাখার জন্য */
-            border-bottom: 4px solid #FFD700; 
+            justify-content: center; 
+            border-bottom: 5px solid #FFD700; 
         }
 
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 25px;
         }
 
         .logo-img {
-            height: 75px; 
+            height: 100px; 
             width: auto;
+            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.1));
         }
 
         .company-title {
             margin: 0;
-            font-size: 28px;
+            font-size: 32px; 
             font-weight: 700;
             color: #002147; 
-            letter-spacing: 1.5px;
+            letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* --- কন্টেন্ট এরিয়া --- */
+        /* --- ২. স্লিম সার্চ বক্স ডিজাইন --- */
+        .search-container {
+            max-width: 1600px;
+            margin: 20px auto 5px auto;
+            padding: 0 30px;
+            display: flex;
+            justify-content: flex-end; /* সার্চ বক্সটি ডানে রাখার জন্য */
+        }
+
+        .search-box {
+            width: 400px; /* ফিক্সড উইডথ যাতে খুব বড় না দেখায় */
+            max-width: 100%;
+            padding: 10px 20px;
+            font-size: 14px;
+            border: 1.5px solid #002147; /* চিকন বর্ডার */
+            border-radius: 8px; /* রাউন্ডেড এর বদলে স্কয়ারিশ প্রিমিয়াম লুক */
+            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            box-shadow: 0 4px 10px rgba(0, 33, 71, 0.15);
+            border-color: #FFD700;
+        }
+
+        /* --- ৩. কন্টেন্ট এরিয়া --- */
         .container { 
-            padding: 30px 20px; 
+            padding: 10px 30px 40px 30px; 
             max-width: 1600px; 
             margin: auto; 
         }
@@ -63,7 +91,7 @@
             border-radius: 12px; 
             box-shadow: 0 8px 30px rgba(0,0,0,0.06); 
             overflow: auto; 
-            max-height: 78vh; 
+            max-height: 70vh; 
             border: 1px solid #e0e0e0;
         }
 
@@ -73,7 +101,6 @@
             min-width: 1200px; 
         }
 
-        /* --- ২. টেবিল হেডার স্টিকি --- */
         thead th { 
             position: sticky; 
             top: 0; 
@@ -85,11 +112,11 @@
             font-size: 14px;
             font-weight: 500;
             text-transform: uppercase;
-            border-bottom: 2px solid #FFD700;
+            border-bottom: 3px solid #FFD700;
         }
 
         td { 
-            padding: 15px; 
+            padding: 14px 15px; 
             border-bottom: 1px solid #eee; 
             font-size: 14px; 
             color: #444;
@@ -116,6 +143,7 @@
 </head>
 <body>
 
+    <!-- মেইন হেডার -->
     <header class="main-header">
         <div class="logo-container">
             <img src="LOGO.jpeg" alt="ALAMHOW CO LTD Logo" class="logo-img">
@@ -123,13 +151,18 @@
         </div>
     </header>
 
+    <!-- সার্চ কন্টেইনার (স্লিম ডিজাইন) -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="Employee ID, Name, অথবা Passport দিয়ে ফিল্টার করুন...">
+    </div>
+
     <div class="container">
         <div id="loader">
             <div class="spinner"></div><br>ডাটা লোড হচ্ছে...
         </div>
         
         <div class="table-card" id="table-display" style="display: none;">
-            <table>
+            <table id="employeeTable">
                 <thead id="table-head"></thead>
                 <tbody id="table-body"></tbody>
             </table>
@@ -143,7 +176,9 @@
             try {
                 const response = await fetch(scriptUrl, { redirect: 'follow' });
                 const data = await response.json();
-                if (data && data.length > 0) renderTable(data);
+                if (data && data.length > 0) {
+                    renderTable(data);
+                }
             } catch (error) {
                 document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
             }
@@ -169,6 +204,28 @@
             document.getElementById('loader').style.display = 'none';
             document.getElementById('table-display').style.display = 'block';
         }
+
+        // সার্চ ফাংশনালিটি
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const filter = this.value.toUpperCase();
+            const rows = document.getElementById('table-body').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                let found = false;
+                const cells = rows[i].getElementsByTagName('td');
+                for (let j = 0; j < cells.length; j++) {
+                    if (cells[j]) {
+                        const textValue = cells[j].textContent || cells[j].innerText;
+                        if (textValue.toUpperCase().indexOf(filter) > -1) {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+                rows[i].style.display = found ? "" : "none";
+            }
+        });
+
         window.onload = loadData;
     </script>
 </body>
