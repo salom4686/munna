@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALAMHOW CO LTD - Employee Live Table</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <title>ALAMHOW CO LTD - Employee Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        /* লোগো কালার অ্যাডজাস্টমেন্ট: ডার্ক ব্লু এবং হলুদ */
         * { box-sizing: border-box; }
         body { 
             font-family: 'Roboto', sans-serif; 
@@ -17,19 +16,18 @@
             color: #333;
         }
 
-        /* --- ১. মেইন হেডার স্টিকি --- */
+        /* --- ১. মেইন হেডার স্টিকি (Clean Look) --- */
         .main-header {
             position: sticky;
             top: 0;
             background-color: #ffffff; 
-            color: #002147;
-            padding: 12px 30px;
+            padding: 12px 40px;
             z-index: 1000;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            border-bottom: 4px solid #FFD700; /* লোগোর হলুদ কালার */
+            justify-content: center; /* মাঝখানে রাখার জন্য */
+            border-bottom: 4px solid #FFD700; 
         }
 
         .logo-container {
@@ -39,51 +37,40 @@
         }
 
         .logo-img {
-            height: 70px; /* লোগোর উচ্চতা */
+            height: 75px; 
             width: auto;
         }
 
         .company-title {
             margin: 0;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             color: #002147; 
-            letter-spacing: 1.2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-        }
-
-        .header-right {
-            font-size: 15px;
-            color: #555;
-            font-weight: 500;
-            background-color: rgba(255, 215, 0, 0.15);
-            padding: 8px 15px;
-            border-radius: 20px;
         }
 
         /* --- কন্টেন্ট এরিয়া --- */
         .container { 
-            padding: 40px 30px; 
+            padding: 30px 20px; 
             max-width: 1600px; 
             margin: auto; 
         }
 
-        /* --- টেবিল কন্টেইনার এবং স্টিকি টেবিল হেডার --- */
+        /* --- টেবিল কার্ড এবং স্টিকি টেবিল হেডার --- */
         .table-card { 
             background: white; 
             border-radius: 12px; 
             box-shadow: 0 8px 30px rgba(0,0,0,0.06); 
             overflow: auto; 
-            max-height: 75vh; 
+            max-height: 78vh; 
             border: 1px solid #e0e0e0;
-            position: relative;
         }
 
         table { 
             width: 100%; 
             border-collapse: collapse; 
             min-width: 1200px; 
-            table-layout: auto;
         }
 
         /* --- ২. টেবিল হেডার স্টিকি --- */
@@ -92,62 +79,39 @@
             top: 0; 
             background-color: #002147; 
             color: white; 
-            padding: 20px 15px; 
+            padding: 18px 15px; 
             text-align: left; 
             z-index: 100;
             font-size: 14px;
             font-weight: 500;
             text-transform: uppercase;
-            letter-spacing: 0.8px;
             border-bottom: 2px solid #FFD700;
         }
 
-        /* কলাম উইডথ (শিট অনুযায়ী অ্যাডজাস্ট করা যেতে পারে) */
-        th:nth-child(1) { width: 70px; } /* SL NO */
-        th:nth-child(2) { width: 140px; } /* Employee ID */
-        th:nth-child(3) { width: 250px; } /* Employee Name */
-
         td { 
-            padding: 16px 15px; 
+            padding: 15px; 
             border-bottom: 1px solid #eee; 
-            font-size: 15px; 
+            font-size: 14px; 
             color: #444;
             white-space: nowrap;
         }
 
         tr:nth-child(even) { background-color: #fbfcfe; }
-        
-        tr:hover { 
-            background-color: rgba(0, 33, 71, 0.04); 
-            cursor: pointer;
-        }
+        tr:hover { background-color: rgba(0, 33, 71, 0.04); }
 
         /* Loader */
-        #loader { 
-            text-align: center; 
-            padding: 80px; 
-            font-size: 20px;
-            font-weight: 500; 
-            color: #002147; 
-        }
-        
+        #loader { text-align: center; padding: 100px; color: #002147; font-weight: 500; }
         .spinner {
-            border: 5px solid #f3f3f3;
-            border-top: 5px solid #002147; 
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #002147; 
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 35px;
+            height: 35px;
             animation: spin 1s linear infinite;
             display: inline-block;
-            vertical-align: middle;
-            margin-right: 20px;
+            margin-bottom: 10px;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -157,14 +121,11 @@
             <img src="LOGO.jpeg" alt="ALAMHOW CO LTD Logo" class="logo-img">
             <h1 class="company-title">ALAMHOW CO LTD</h1>
         </div>
-        <div class="header-right">
-            Employee Live Database
-        </div>
     </header>
 
     <div class="container">
         <div id="loader">
-            <div class="spinner"></div> ডাটা লোড হচ্ছে, দয়া করে অপেক্ষা করুন...
+            <div class="spinner"></div><br>ডাটা লোড হচ্ছে...
         </div>
         
         <div class="table-card" id="table-display" style="display: none;">
@@ -176,20 +137,15 @@
     </div>
 
     <script>
-        // আপনার Web App URL এখানে দিন (শেষে ?type=json যোগ করবেন)
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbyo1KzMfWqUwo2mbQV0zQQ8lDCa8_tERtrEdS2WuFWhZnnY5MVQ5dADY_4A8GJWLLwL/exec?type=json';
 
         async function loadData() {
             try {
                 const response = await fetch(scriptUrl, { redirect: 'follow' });
                 const data = await response.json();
-                
-                if (data && data.length > 0) {
-                    renderTable(data);
-                }
+                if (data && data.length > 0) renderTable(data);
             } catch (error) {
-                console.error("Error:", error);
-                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে! URL ঠিক আছে কি না পরীক্ষা করুন।";
+                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
             }
         }
 
@@ -197,20 +153,15 @@
             const head = document.getElementById('table-head');
             const body = document.getElementById('table-body');
 
-            // Header Row
             let headHtml = "<tr>";
             data[0].forEach(cell => headHtml += `<th>${cell}</th>`);
             headHtml += "</tr>";
             head.innerHTML = headHtml;
 
-            // Data Rows
             let bodyHtml = "";
             for (let i = 1; i < data.length; i++) {
                 bodyHtml += "<tr>";
-                data[i].forEach(cell => {
-                    let cellData = cell || '-';
-                    bodyHtml += `<td>${cellData}</td>`;
-                });
+                data[i].forEach(cell => bodyHtml += `<td>${cell || '-'}</td>`);
                 bodyHtml += "</tr>";
             }
             body.innerHTML = bodyHtml;
@@ -218,9 +169,7 @@
             document.getElementById('loader').style.display = 'none';
             document.getElementById('table-display').style.display = 'block';
         }
-
         window.onload = loadData;
     </script>
-
 </body>
 </html>
