@@ -3,93 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Database - GitHub</title>
+    <title>ALAMHOW CO LTD - Employee List</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
     <style>
+        /* লোগো কালার প্যালেট: 
+           ডার্ক ব্লু (লোগো): #002147
+           ইয়েলো (লোগো স্কাফোল্ডিং): #FFD700
+           ব্যাকগ্রাউন্ড: #f4f6f9
+        */
+
         * { box-sizing: border-box; }
         body { 
-            font-family: 'Segoe UI', Tahoma, sans-serif; 
+            font-family: 'Roboto', sans-serif; 
             margin: 0; 
             padding: 0; 
-            background-color: #f0f2f5; 
+            background-color: #f4f6f9; /* লাইট গ্রে ব্যাকগ্রাউন্ড */
+            color: #333;
         }
 
-        /* ১. মেইন হেডার স্টিকি (Sticky Main Header) */
-        .header-fixed {
+        /* --- ১. মেইন হেডার স্টিকি --- */
+        .main-header {
             position: sticky;
             top: 0;
-            background-color: #1a73e8;
-            color: white;
-            padding: 15px 0;
-            text-align: center;
-            z-index: 1000; /* এটি যেন সবার ওপরে থাকে */
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            background-color: #ffffff; /* হোয়াইট ব্যাকগ্রাউন্ড ফর হেডার */
+            color: #002147;
+            padding: 10px 20px;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #FFD700; /* লোগোর হলুদ কালার বর্ডার */
         }
-        .header-fixed h2 { margin: 0; font-size: 24px; }
 
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            height: 60px; /* লোগোর উচ্চতা */
+            width: auto;
+        }
+
+        .company-title {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #002147; /* লোগোর গাঢ় নীল */
+            letter-spacing: 1px;
+        }
+
+        .header-right {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* --- কন্টেন্ট এরিয়া --- */
         .container { 
-            padding: 20px; 
-            max-width: 1200px; 
+            padding: 30px 20px; 
+            max-width: 1400px; 
             margin: auto; 
         }
 
-        /* ২. টেবিল কন্টেইনার এবং স্টিকি টেবিল হেডার */
-        .table-wrapper { 
+        /* --- টেবিল কন্টেইনার এবং স্টিকি টেবিল হেডার --- */
+        .table-card { 
             background: white; 
-            border-radius: 8px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            border-radius: 12px; 
+            box-shadow: 0 6px 18px rgba(0,0,0,0.08); 
             overflow: auto; 
-            max-height: 70vh; /* স্ক্রিনের ৭০% উচ্চতা পর্যন্ত টেবিল থাকবে, তারপর স্ক্রল হবে */
+            max-height: 75vh; /* স্ক্রিনের ৭৫% উচ্চতা */
+            border: 1px solid #e0e0e0;
             position: relative;
         }
 
         table { 
             width: 100%; 
             border-collapse: collapse; 
-            min-width: 1000px; 
+            min-width: 1100px; 
+            table-layout: fixed; /* কলামের প্রস্থ স্থির রাখার জন্য */
         }
 
-        /* টেবিল হেডার স্টিকি করার কোড */
+        /* --- ২. টেবিল হেডার স্টিকি --- */
         thead th { 
             position: sticky; 
-            top: 0; /* এটি টেবিল কন্টেইনারের টপে আটকে থাকবে */
-            background-color: #4285f4; 
+            top: 0; 
+            background-color: #002147; /* লোগোর গাঢ় নীল */
             color: white; 
-            padding: 15px; 
+            padding: 18px 15px; 
             text-align: left; 
             z-index: 100;
-            box-shadow: 0 2px 2px rgba(0,0,0,0.1);
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #FFD700; /* হলুদ বর্ডার */
         }
+
+        /* কলাম উইডথ অ্যাডজাস্টমেন্ট (আপনার শিট অনুযায়ী পরিবর্তন করতে পারেন) */
+        th:nth-child(1) { width: 60px; } /* SL NO */
+        th:nth-child(2) { width: 120px; } /* ID */
+        th:nth-child(3) { width: 200px; } /* Name */
+        th:nth-child(6) { width: 150px; } /* Post */
 
         td { 
-            padding: 12px 15px; 
+            padding: 15px; 
             border-bottom: 1px solid #eee; 
             font-size: 14px; 
-            color: #333;
+            color: #444;
+            white-space: nowrap; /* টেক্সট ভেঙে নিচের লাইনে যাবে না */
+            overflow: hidden;
+            text-overflow: ellipsis; /* বড় টেক্সটের শেষে ... দেখাবে */
         }
 
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #f1f4f9; }
+        tr:nth-child(even) { background-color: #fbfcfe; }
+        
+        tr:hover { 
+            background-color: rgba(255, 215, 0, 0.1); /* হলুদ কালারের হালকা ব্যাকগ্রাউন্ড অন হোভার */
+            cursor: pointer;
+        }
 
         /* Loader */
         #loader { 
             text-align: center; 
-            padding: 50px; 
-            font-weight: bold; 
-            color: #1a73e8; 
+            padding: 60px; 
+            font-size: 18px;
+            font-weight: 500; 
+            color: #002147; 
         }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #FFD700; /* হলুদ স্পিনার */
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
     </style>
 </head>
 <body>
 
-    <div class="header-fixed">
-        <h2>Employee Management List</h2>
-    </div>
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="logo.png" alt="ALAMHOW CO LTD Logo" class="logo-img">
+            <h1 class="company-title">EMPLOYEE MANAGEMENT SYSTEM</h1>
+        </div>
+        <div class="header-right">
+            LIVE DATABASE
+        </div>
+    </header>
 
     <div class="container">
-        <div id="loader">ডাটা লোড হচ্ছে, দয়া করে অপেক্ষা করুন...</div>
+        <div id="loader">
+            <div class="spinner"></div> ডাটা লোড হচ্ছে, দয়া করে অপেক্ষা করুন...
+        </div>
         
-        <div class="table-wrapper" id="table-display" style="display: none;">
+        <div class="table-card" id="table-display" style="display: none;">
             <table>
                 <thead id="table-head"></thead>
                 <tbody id="table-body"></tbody>
@@ -111,7 +193,7 @@
                 }
             } catch (error) {
                 console.error("Error:", error);
-                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
+                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে! URL চেক করুন।";
             }
         }
 
@@ -121,7 +203,7 @@
 
             // Header Row
             let headHtml = "<tr>";
-            data[0].forEach(cell => headHtml += `<th>${cell}</th>`);
+            data[0].forEach(cell => headHtml += `<th title="${cell}">${cell}</th>`);
             headHtml += "</tr>";
             head.innerHTML = headHtml;
 
@@ -129,7 +211,10 @@
             let bodyHtml = "";
             for (let i = 1; i < data.length; i++) {
                 bodyHtml += "<tr>";
-                data[i].forEach(cell => bodyHtml += `<td>${cell || '-'}</td>`);
+                data[i].forEach(cell => {
+                    let cellData = cell || '-';
+                    bodyHtml += `<td title="${cellData}">${cellData}</td>`;
+                });
                 bodyHtml += "</tr>";
             }
             body.innerHTML = bodyHtml;
