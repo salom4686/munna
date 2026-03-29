@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee List</title>
+    
+    <link rel="icon" type="image/jpeg" href="LOGO.jpeg">
+    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
     
     <style>
         * { box-sizing: border-box; }
@@ -12,46 +16,65 @@
             font-family: 'Roboto', sans-serif; 
             margin: 0; 
             padding: 0; 
-            background-color: #f4f6f9; 
+            background-color: #f4f6f9; /* বডির এই কালারটিই এখন হেডারে ব্যবহার করা হবে */
             color: #333;
         }
 
-        /* --- ১. মেইন হেডার স্টিকি (লোগোসহ) --- */
+        /* --- ১. মেইন হেডার স্টিকি --- */
         .main-header {
             position: sticky;
             top: 0;
-            background-color: #ffffff; 
-            padding: 15px 40px;
+            background-color: #f4f6f9; /* বডির কালারের সাথে মিলিয়ে দেওয়া হলো */
+            padding: 0; 
             z-index: 1000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            /* শ্যাডো সরিয়ে দেওয়া হলো যাতে বডির সাথে মিশে যায় */
+        }
+
+        /* হেডারের ভেতরের কন্টেন্ট টেবিলের সমান চওড়া (১৬০০ পিক্সেল) */
+        .header-content-wrapper {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px 30px 0 30px; 
+        }
+
+        .header-main-row {
             display: flex;
             align-items: center;
-            justify-content: center; 
-            border-bottom: 5px solid #FFD700; 
+            justify-content: center;
+            padding-bottom: 15px;
+        }
+
+        /* হলুদ দাগটি এখন বডির কালারের উপরেই থাকবে */
+        .header-yellow-bar {
+            height: 5px;
+            background-color: #FFD700;
+            width: 100%;
+            border-radius: 2px;
         }
 
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 20px; /* লোগো এবং নামের দূরত্ব */
+            gap: 15px;
         }
 
         .logo-img {
-            height: 70px; /* লোগোর সাইজ */
+            height: 60px;
             width: auto;
+            /* হালকা ড্রপ শ্যাডো লোগোকে ফুটিয়ে তোলার জন্য */
             filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
         }
 
         .company-title {
             margin: 0;
-            font-size: 32px; 
+            font-size: 28px;
             font-weight: 700;
             color: #002147; 
-            letter-spacing: 2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
         }
 
-        /* --- ২. সার্চ কন্টেইনার এবং Employee List এক লাইনে --- */
+        /* --- ২. সার্চ কন্টেইনার --- */
         .search-container {
             max-width: 1600px;
             margin: 25px auto 10px auto;
@@ -69,14 +92,13 @@
             flex: 1;
             text-align: center;
             margin: 0;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #002147;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            padding-bottom: 5px;
             border-bottom: 2px solid #FFD700;
             display: inline-block;
-            padding-bottom: 5px;
         }
 
         .search-box-wrapper {
@@ -86,22 +108,16 @@
         }
 
         .search-box {
-            width: 350px;
-            max-width: 100%;
-            padding: 10px 20px;
+            width: 320px;
+            padding: 10px 15px;
             font-size: 14px;
-            border: 2.5px solid #002147;
+            border: 2px solid #002147;
             border-radius: 8px;
             outline: none;
-            transition: all 0.3s ease;
+            background-color: #fff;
         }
 
-        .search-box:focus {
-            box-shadow: 0 4px 10px rgba(0, 33, 71, 0.15);
-            border-color: #FFD700;
-        }
-
-        /* --- ৩. কন্টেন্ট এরিয়া --- */
+        /* --- ৩. কন্টেন্ট এরিয়া (টেবিল) --- */
         .container { 
             padding: 10px 30px 40px 30px; 
             max-width: 1600px; 
@@ -111,7 +127,7 @@
         .table-card { 
             background: white; 
             border-radius: 12px; 
-            box-shadow: 0 8px 30px rgba(0,0,0,0.06); 
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08); 
             overflow: auto; 
             max-height: 70vh; 
             border: 1px solid #e0e0e0;
@@ -128,11 +144,10 @@
             top: 0; 
             background-color: #002147; 
             color: white; 
-            padding: 18px 15px; 
+            padding: 16px 15px; 
             text-align: left; 
             z-index: 100;
             font-size: 14px;
-            font-weight: 500;
             text-transform: uppercase;
             border-bottom: 3px solid #FFD700;
         }
@@ -148,7 +163,6 @@
         tr:nth-child(even) { background-color: #fbfcfe; }
         tr:hover { background-color: rgba(0, 33, 71, 0.04); }
 
-        /* Loader */
         #loader { text-align: center; padding: 100px; color: #002147; font-weight: 500; }
         .spinner {
             border: 4px solid #f3f3f3;
@@ -162,33 +176,39 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* মোবাইল রেসপনসিভ */
         @media (max-width: 768px) {
-            .search-container {
-                flex-direction: column;
-                gap: 15px;
-            }
+            .header-content-wrapper { padding: 15px 15px 0 15px; }
+            .search-container { flex-direction: column; gap: 15px; padding: 0 15px; }
             .search-spacer { display: none; }
             .search-box { width: 100%; }
-            .company-title { font-size: 24px; }
-            .logo-img { height: 50px; }
+            .company-title { font-size: 20px; }
+            .logo-img { height: 45px; }
+            .container { padding: 10px 15px; }
         }
     </style>
 </head>
 <body>
 
     <header class="main-header">
-        <div class="logo-container">
-            <img src="LOGO.jpeg" alt="ALAMHOW CO LTD Logo" class="logo-img">
-            <h1 class="company-title">ALAMHOW CO LTD</h1>
+        <div class="header-content-wrapper">
+            <div class="header-main-row">
+                <div class="logo-container">
+                    <img src="LOGO.jpeg" alt="Logo" class="logo-img">
+                    <h1 class="company-title">ALAMHOW CO LTD</h1>
+                </div>
+            </div>
+            <!-- হলুদ বর্ডারটি ঠিক টেবিলের সমান চওড়া থাকবে -->
+            <div class="header-yellow-bar"></div>
         </div>
     </header>
 
     <div class="search-container">
         <div class="search-spacer"></div> 
-        <h2 class="sub-title-centered">Employee List</h2>
+        <div style="flex:1; text-align:center;">
+            <h2 class="sub-title-centered">Employee List</h2>
+        </div>
         <div class="search-box-wrapper">
-            <input type="text" id="searchInput" class="search-box" placeholder="Employee ID, Name, or Passport ...">
+            <input type="text" id="searchInput" class="search-box" placeholder="Search ID, Name, Passport...">
         </div>
     </div>
 
@@ -223,42 +243,52 @@
         function renderTable(data) {
             const head = document.getElementById('table-head');
             const body = document.getElementById('table-body');
+            const headers = data[0];
 
-            let headHtml = "<tr>";
-            data[0].forEach(cell => headHtml += `<th>${cell}</th>`);
-            headHtml += "</tr>";
-            head.innerHTML = headHtml;
+            const dateJoinedIdx = headers.findIndex(h => h && h.toString().trim().toUpperCase() === "DATE JOINED IN:");
+            const periodIdx = headers.findIndex(h => h && h.toString().trim().toUpperCase() === "PERIOD");
+
+            head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
 
             let bodyHtml = "";
+            const today = new Date();
+
             for (let i = 1; i < data.length; i++) {
+                let row = data[i];
+                let periodText = row[periodIdx] || "-";
+
+                if (dateJoinedIdx !== -1 && row[dateJoinedIdx] && row[dateJoinedIdx] !== "-") {
+                    const dateParts = row[dateJoinedIdx].toString().split('/');
+                    if (dateParts.length === 3) {
+                        const joinDate = new Date(parseInt(dateParts[2]), parseInt(dateParts[1]) - 1, parseInt(dateParts[0]));
+                        if (!isNaN(joinDate.getTime())) {
+                            let totalMonths = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth());
+                            const finalCount = totalMonths < 0 ? 0 : totalMonths;
+                            periodText = finalCount + (finalCount > 1 ? " Months" : " Month");
+                        }
+                    }
+                }
+
                 bodyHtml += "<tr>";
-                data[i].forEach(cell => bodyHtml += `<td>${cell || '-'}</td>`);
+                row.forEach((cell, idx) => {
+                    if (idx === periodIdx && dateJoinedIdx !== -1) {
+                        bodyHtml += `<td style="font-weight:700; color:#002147;">${periodText}</td>`;
+                    } else {
+                        bodyHtml += `<td>${cell || '-'}</td>`;
+                    }
+                });
                 bodyHtml += "</tr>";
             }
             body.innerHTML = bodyHtml;
-
             document.getElementById('loader').style.display = 'none';
             document.getElementById('table-display').style.display = 'block';
         }
 
         document.getElementById('searchInput').addEventListener('keyup', function() {
             const filter = this.value.toUpperCase();
-            const rows = document.getElementById('table-body').getElementsByTagName('tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                let found = false;
-                const cells = rows[i].getElementsByTagName('td');
-                for (let j = 0; j < cells.length; j++) {
-                    if (cells[j]) {
-                        const textValue = cells[j].textContent || cells[j].innerText;
-                        if (textValue.toUpperCase().indexOf(filter) > -1) {
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                rows[i].style.display = found ? "" : "none";
-            }
+            document.querySelectorAll('#table-body tr').forEach(row => {
+                row.style.display = row.innerText.toUpperCase().includes(filter) ? "" : "none";
+            });
         });
 
         window.onload = loadData;
