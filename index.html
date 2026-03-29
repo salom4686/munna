@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee List</title>
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
@@ -16,32 +15,8 @@
             background-color: #f4f6f9; 
             color: #333;
         }
-/* টাইটেল এবং সাব-টাইটেলকে উপর-নিচ করার জন্য */
-.title-group {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* লেখাগুলো বাম দিক থেকে সমান থাকবে */
-}
 
-.company-title {
-    margin: 0;
-    font-size: 32px; 
-    font-weight: 700;
-    color: #002147; 
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    line-height: 1.2; /* লাইনের দূরত্ব কমানোর জন্য */
-}
-
-.sub-title {
-    margin: 0;
-    font-size: 18px;
-    color: #FFD700; /* গোল্ডেন কালার দিলে ভালো দেখাবে */
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-        /* --- ১. মেইন হেডার স্টিকি --- */
+        /* --- ১. মেইন হেডার স্টিকি (লোগোসহ) --- */
         .main-header {
             position: sticky;
             top: 0;
@@ -58,13 +33,13 @@
         .logo-container {
             display: flex;
             align-items: center;
-            gap: 25px;
+            gap: 20px; /* লোগো এবং নামের দূরত্ব */
         }
 
         .logo-img {
-            height: 100px; 
+            height: 70px; /* লোগোর সাইজ */
             width: auto;
-            filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.1));
+            filter: drop-shadow(0px 2px 4px rgba(0,0,0,0.1));
         }
 
         .company-title {
@@ -76,24 +51,48 @@
             text-transform: uppercase;
         }
 
-        /* --- ২. স্লিম সার্চ বক্স ডিজাইন --- */
+        /* --- ২. সার্চ কন্টেইনার এবং Employee List এক লাইনে --- */
         .search-container {
             max-width: 1600px;
-            margin: 20px auto 5px auto;
+            margin: 25px auto 10px auto;
             padding: 0 30px;
             display: flex;
-            justify-content: flex-end; /* সার্চ বক্সটি ডানে রাখার জন্য */
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-spacer {
+            flex: 1;
+        }
+
+        .sub-title-centered {
+            flex: 1;
+            text-align: center;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            color: #002147;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid #FFD700;
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .search-box-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
         }
 
         .search-box {
-            width: 400px; /* ফিক্সড উইডথ যাতে খুব বড় না দেখায় */
+            width: 350px;
             max-width: 100%;
             padding: 10px 20px;
             font-size: 14px;
-            border: 2.5px solid #002147; /* চিকন বর্ডার */
-            border-radius: 8px; /* রাউন্ডেড এর বদলে স্কয়ারিশ প্রিমিয়াম লুক */
+            border: 2.5px solid #002147;
+            border-radius: 8px;
             outline: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
             transition: all 0.3s ease;
         }
 
@@ -102,14 +101,13 @@
             border-color: #FFD700;
         }
 
-        /* --- ৩. কন্টেন্ট এরিয়া --- */
+        /* --- ৩. কন্টেন্ট এরিয়া --- */
         .container { 
             padding: 10px 30px 40px 30px; 
             max-width: 1600px; 
             margin: auto; 
         }
 
-        /* --- টেবিল কার্ড এবং স্টিকি টেবিল হেডার --- */
         .table-card { 
             background: white; 
             border-radius: 12px; 
@@ -163,22 +161,35 @@
             margin-bottom: 10px;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* মোবাইল রেসপনসিভ */
+        @media (max-width: 768px) {
+            .search-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            .search-spacer { display: none; }
+            .search-box { width: 100%; }
+            .company-title { font-size: 24px; }
+            .logo-img { height: 50px; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- মেইন হেডার -->
-  <header class="main-header">
-    <div class="logo-container">
-        <img src="LOGO.jpeg" alt="ALAMHOW CO LTD Logo" class="logo-img">
-        <div class="title-group"> <h1 class="company-title">ALAMHOW CO LTD</h1>
-            <p class="sub-title">Employee List</p> </div>
-    </div>
-</header>
+    <header class="main-header">
+        <div class="logo-container">
+            <img src="LOGO.jpeg" alt="ALAMHOW CO LTD Logo" class="logo-img">
+            <h1 class="company-title">ALAMHOW CO LTD</h1>
+        </div>
+    </header>
 
-    <!-- সার্চ কন্টেইনার (স্লিম ডিজাইন) -->
     <div class="search-container">
-        <input type="text" id="searchInput" class="search-box" placeholder="Employee ID, Name, or Passport ...">
+        <div class="search-spacer"></div> 
+        <h2 class="sub-title-centered">Employee List</h2>
+        <div class="search-box-wrapper">
+            <input type="text" id="searchInput" class="search-box" placeholder="Employee ID, Name, or Passport ...">
+        </div>
     </div>
 
     <div class="container">
@@ -205,7 +216,7 @@
                     renderTable(data);
                 }
             } catch (error) {
-                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
+                document.getElementById('loader').innerHTML = "ডাটা লোড করতে ব্যর্থ হয়েছে!";
             }
         }
 
@@ -230,7 +241,6 @@
             document.getElementById('table-display').style.display = 'block';
         }
 
-        // সার্চ ফাংশনালিটি
         document.getElementById('searchInput').addEventListener('keyup', function() {
             const filter = this.value.toUpperCase();
             const rows = document.getElementById('table-body').getElementsByTagName('tr');
