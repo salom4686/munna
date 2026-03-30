@@ -158,40 +158,67 @@
             }
         }
 
-        function renderTable(data) {
-            const head = document.getElementById('table-head');
-            const body = document.getElementById('table-body');
-            const headers = data[0];
-            const dateJoinedIdx = headers.findIndex(h => h && h.toString().toUpperCase().includes("DATE JOINED"));
-            const periodIdx = headers.findIndex(h => h && h.toString().toUpperCase().includes("PERIOD"));
+       function renderTable(data) {
+    const head = document.getElementById('table-head');
+    const body = document.getElementById('table-body');
+    const headers = data[0]; 
 
-            head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-            let rows = "";
-            const today = new Date();
-            for(let i=1; i<data.length; i++) {
-                let row = data[i];
-                let periodText = "-";
-                if (dateJoinedIdx !== -1 && row[dateJoinedIdx] && row[dateJoinedIdx] !== "-") {
-                    const parts = row[dateJoinedIdx].toString().split('/');
-                    if (parts.length === 3) {
-                        const joinDate = new Date(parts[2], parts[1]-1, parts[0]);
-                        if(!isNaN(joinDate)) {
-                            let totalMonths = (today.getFullYear() - joinDate.getFullYear()) * 12 + (today.getMonth() - joinDate.getMonth());
-                            periodText = (totalMonths < 0 ? 0 : totalMonths) + " Months";
-                        }
-                    }
-                }
-                rows += "<tr>";
-                row.forEach((cell, idx) => {
-                    if (idx === periodIdx) rows += `<td style="font-weight:bold; color:#002147;">${periodText}</td>`;
-                    else rows += `<td>${cell || '-'}</td>`;
-                });
-                rows += "</tr>";
-            }
-            body.innerHTML = rows;
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('table-display').style.display = 'block';
+    // হেডার তৈরি
+    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+    
+    let rows = "";
+    
+    // ১ নম্বর ইন্ডেক্স থেকে লুপ শুরু (ডাটা রো)
+    for(let i = 1; i < data.length; i++) {
+        let row = data[i];
+
+        // চেক করা হচ্ছে B কলাম (index 1) খালি কি না
+        // যদি B কলামে কোনো ডাটা না থাকে, তবে সেই রো এবং তার পরের সব বাদ যাবে
+        if (!row[1] || row[1].toString().trim() === "") {
+            continue; 
         }
+
+        rows += "<tr>";
+        row.forEach((cell) => {
+            rows += `<td>${cell || '-'}</td>`;
+        });
+        rows += "</tr>";
+    }
+    
+    body.innerHTML = rows;
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('table-display').style.display = 'block';
+}function renderTable(data) {
+    const head = document.getElementById('table-head');
+    const body = document.getElementById('table-body');
+    const headers = data[0]; 
+
+    // হেডার তৈরি
+    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+    
+    let rows = "";
+    
+    // ১ নম্বর ইন্ডেক্স থেকে লুপ শুরু (ডাটা রো)
+    for(let i = 1; i < data.length; i++) {
+        let row = data[i];
+
+        // চেক করা হচ্ছে B কলাম (index 1) খালি কি না
+        // যদি B কলামে কোনো ডাটা না থাকে, তবে সেই রো এবং তার পরের সব বাদ যাবে
+        if (!row[1] || row[1].toString().trim() === "") {
+            continue; 
+        }
+
+        rows += "<tr>";
+        row.forEach((cell) => {
+            rows += `<td>${cell || '-'}</td>`;
+        });
+        rows += "</tr>";
+    }
+    
+    body.innerHTML = rows;
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('table-display').style.display = 'block';
+}
 
         function openModal() {
             const nextSL = cachedData.length;
