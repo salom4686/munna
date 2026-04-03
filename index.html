@@ -162,12 +162,10 @@
 
       <div class="filter-group">
         <label>Start Date:</label>
-        <!-- Custom Date Picker Class added -->
         <input type="text" id="startDate" class="form-control form-control-sm custom-date-input" placeholder="Select Start Date">
       </div>
       <div class="filter-group">
         <label>End Date:</label>
-        <!-- Custom Date Picker Class added -->
         <input type="text" id="endDate" class="form-control form-control-sm custom-date-input" placeholder="Select End Date">
       </div>
       <div class="filter-group">
@@ -225,16 +223,12 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-  /**
-   * আপনার ডিপ্লয় করা Google Apps Script Web App URL এখানে দিন
-   */
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUTUqS8NS7nARLXSr_tbkoBnsmcxeGnOCSSmL4d1ZHxvg4PwlYiFpwMxGoy9XwJRuF1g/exec";
+
 
   let rawData = [];
   let colIndexMap = {}; 
   const DAYS_IN_MONTH = 30;
-  
-  // Flatpickr Instance variables
   let startPicker, endPicker;
 
   const displayHeaders = [
@@ -250,20 +244,14 @@
     loadDataFromAPI(); 
   };
 
-  /**
-   * Flatpickr কাস্টম ডেটপিকার ইনিশিয়ালাইজেশন
-   */
   function initCustomDatePickers() {
     const config = {
-      dateFormat: "Y-m-d", // Internal processing format
+      dateFormat: "Y-m-d",
       altInput: true,
-      altFormat: "d-m-Y",  // User display format
+      altFormat: "d-m-Y",
       allowInput: true,
-      onChange: function() {
-        processData();
-      }
+      onChange: function() { processData(); }
     };
-    
     startPicker = flatpickr("#startDate", config);
     endPicker = flatpickr("#endDate", config);
   }
@@ -272,20 +260,17 @@
     try {
       const response = await fetch(WEB_APP_URL);
       const data = await response.json();
-      
       if (!data || data.length === 0) {
         document.getElementById('loader').innerHTML = "<span class='text-danger'>No data found or access denied.</span>";
         return;
       }
-      
       rawData = data;
       mapSheetColumns(data[0]); 
       populateStaticFilters(data);
       document.getElementById('loader').style.display = 'none';
       processData();
     } catch (error) {
-      console.error("Fetch Error:", error);
-      document.getElementById('loader').innerHTML = "<span class='text-danger'>Error fetching data. Check your Web App URL.</span>";
+      document.getElementById('loader').innerHTML = "<span class='text-danger'>Error fetching data.</span>";
     }
   }
 
@@ -299,11 +284,8 @@
   function processData() {
     const search = document.getElementById("searchInput").value.toLowerCase();
     const searchType = document.getElementById("searchType").value;
-    
-    // Flatpickr থেকে ভ্যালু নেওয়া হচ্ছে
     const start = document.getElementById("startDate").value;
     const end = document.getElementById("endDate").value;
-    
     const fEmp = document.getElementById("empFilter").value;
     const fSide = document.getElementById("sideFilter").value;
     const fType = document.getElementById("columnSelector").value;
@@ -329,7 +311,6 @@
       }
 
       let match = matchSearch;
-      // Date filtering logic
       if (match && start) {
         const startDateObj = new Date(start + "T00:00:00");
         if (rDate < startDateObj) match = false;
@@ -338,10 +319,8 @@
         const endDateObj = new Date(end + "T23:59:59");
         if (rDate > endDateObj) match = false;
       }
-      
       if (match && fEmp && rId !== fEmp) match = false;
       if (match && fSide && rSide !== fSide) match = false;
-      
       if (match && fType && fTypeVal) {
         const targetColIdx = colIndexMap[fType];
         if (targetColIdx !== undefined) {
@@ -353,7 +332,6 @@
     });
 
     const isSummaryNeeded = (start || end || fEmp || fSide || (fType && fTypeVal));
-    
     if (isSummaryNeeded) {
       document.getElementById('bodyRoot').classList.add('summary-mode');
       renderSummaryView(filteredRows);
@@ -368,12 +346,10 @@
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
     document.getElementById('tableFoot').innerHTML = "";
-
     thead.innerHTML = '<tr><th>SL</th>' + displayHeaders.map(h => {
        const isLeft = ["EMPLOYEE NAME", "PASSPORT NO", "SIDE NAME", "DESIGNATION"].includes(h);
        return `<th class="${isLeft ? 'align-left' : ''}">${h}</th>`;
     }).join('') + '</tr>';
-
     let bHtml = '';
     rows.forEach((row, idx) => {
       bHtml += `<tr><td>${idx+1}</td>`;
@@ -391,7 +367,6 @@
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
     const tfoot = document.getElementById('tableFoot');
-    
     const summary = {};
     rows.forEach(row => {
       const id = row[colIndexMap["EMPLOYEE ID"]];
@@ -423,11 +398,8 @@
         <th colspan="3" class="deduction-col">TOTAL DEDUCTION</th><th rowspan="2" class="highlight-col">NEED SALARY</th>
       </tr>
       <tr>
-        <th class="deduction-col">ADVANCE</th>
-        <th class="deduction-col">NPS</th>
-        <th class="deduction-col">CSG</th>
-      </tr>
-    `;
+        <th class="deduction-col">ADVANCE</th><th class="deduction-col">NPS</th><th class="deduction-col">CSG</th>
+      </tr>`;
 
     let bHtml = '';
     let g_mBasic = 0, g_att = 0, g_actBasic = 0, g_otHrs = 0, g_otAmt = 0;
@@ -454,18 +426,12 @@
       </tr>`;
     });
     tbody.innerHTML = bHtml;
-    
     tfoot.innerHTML = `
       <tr class="grand-total-row">
         <td colspan="4" class="text-end">GRAND TOTAL:</td>
-        <td>${g_mBasic.toFixed(2)}</td>
-        <td class="total-attendance-col">${g_att}</td>
-        <td>${g_actBasic.toFixed(2)}</td>
-        <td>${g_otHrs.toFixed(2)}</td>
-        <td>${g_otAmt.toFixed(2)}</td>
-        <td class="deduction-col">${g_adv.toFixed(2)}</td>
-        <td class="deduction-col">${g_nps.toFixed(2)}</td>
-        <td class="deduction-col">${g_csg.toFixed(2)}</td>
+        <td>${g_mBasic.toFixed(2)}</td><td class="total-attendance-col">${g_att}</td>
+        <td>${g_actBasic.toFixed(2)}</td><td>${g_otHrs.toFixed(2)}</td><td>${g_otAmt.toFixed(2)}</td>
+        <td class="deduction-col">${g_adv.toFixed(2)}</td><td class="deduction-col">${g_nps.toFixed(2)}</td><td class="deduction-col">${g_csg.toFixed(2)}</td>
         <td class="highlight-col">${g_need.toFixed(2)}</td>
       </tr>`;
   }
@@ -540,19 +506,12 @@
     return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : new Date(s);
   }
 
-  function refreshData() {
-    resetFilters();
-    document.getElementById('loader').style.display = 'block';
-    loadDataFromAPI();
-  }
+  function refreshData() { resetFilters(); document.getElementById('loader').style.display = 'block'; loadDataFromAPI(); }
 
   function resetFilters() {
     document.getElementById("searchInput").value = "";
-    
-    // Flatpickr রিসেট করা হচ্ছে
     if(startPicker) startPicker.clear();
     if(endPicker) endPicker.clear();
-    
     document.getElementById("empFilter").value = "";
     document.getElementById("sideFilter").value = "";
     document.getElementById("columnSelector").value = "";
@@ -565,7 +524,7 @@
                       document.getElementById('tableFoot').innerHTML !== "";
     
     if (!isSummary) { 
-      alert("Please apply a filter (Date, Employee or Side) to generate the Summary Report before previewing."); 
+      alert("Please apply a filter to generate the Summary Report before previewing."); 
       return; 
     }
 
@@ -578,58 +537,75 @@
     if (startInput) {
       const dateObj = new Date(startInput);
       const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-      monthYearDisplay = monthNames[dateObj.getMonth()] + "-" + dateObj.getFullYear();
+      monthYearDisplay = monthNames[dateObj.getMonth()] + " " + dateObj.getFullYear();
     } else {
-      monthYearDisplay = "All Data";
+      monthYearDisplay = "Full Report";
     }
-
-    const mainTitle = "ALAMHOW CO LTD";
-    const subTitle = "Salary Sheet - " + monthYearDisplay;
-    const generatedDate = new Date().toLocaleDateString();
 
     const previewWindow = window.open('', '_blank');
     previewWindow.document.write(`
       <html>
         <head>
-          <title>${subTitle}</title>
+          <title>ALAMHOW - Salary Sheet</title>
           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
           <style>
-            @page { size: landscape; margin: 15mm 10mm 15mm 10mm; }
-            body { font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; background: #fff; color: #000; }
-            .report-container { padding: 5px; }
-            .report-header { border-bottom: 3px solid #1d3a6d; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; padding-bottom: 8px; text-align: center; }
-            .report-header h2 { color: #1d3a6d; margin: 0; font-weight: 800; font-size: 24px; }
-            .report-header p { margin: 2px 0 0; font-size: 16px; font-weight: 600; color: #000; }
-            .gen-date { position: absolute; top: 15px; right: 15px; font-size: 11px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px !important; }
-            th { background-color: #f0f2f5 !important; border: 1px solid #000 !important; padding: 6px 3px !important; text-align: center; font-weight: bold; }
+            @page { size: landscape; margin: 10mm; }
+            body { font-family: 'Segoe UI', sans-serif; margin: 0; padding: 20px; background: #fff; min-height: 100vh; position: relative; }
+            .report-header { border-bottom: 3px solid #1d3a6d; margin-bottom: 15px; text-align: center; padding-bottom: 10px; }
+            .report-header h2 { color: #1d3a6d; margin: 0; font-weight: 800; font-size: 26px; }
+            .report-header p { margin: 5px 0 0; font-size: 18px; font-weight: 600; }
+            
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 11px !important; }
+            th { background-color: #f0f2f5 !important; border: 1px solid #000 !important; padding: 6px 3px !important; text-align: center; }
             td { border: 1px solid #000 !important; padding: 5px 3px !important; text-align: center; }
-            .align-left { text-align: left !important; padding-left: 6px !important; }
+            .align-left { text-align: left !important; padding-left: 8px !important; }
             .grand-total-row { background-color: #f1f3f5 !important; font-weight: bold; }
-            .signature-section { display: flex; justify-content: space-between; margin-top: 60px; }
-            .sig-box { text-align: center; width: 22%; border-top: 1.5px solid #000; padding-top: 5px; font-size: 11px; }
-            .no-print-btn { position: fixed; top: 15px; left: 15px; padding: 8px 20px; background: #1d3a6d; color: white; border: none; cursor: pointer; font-weight: bold; }
-            @media print { .no-print-btn { display: none; } }
+            
+            /* Signature Section - Fixed at the bottom for Printing */
+            .signature-container { 
+              display: flex; 
+              justify-content: space-between; 
+              width: 100%; 
+              padding-top: 50px;
+              margin-top: auto; 
+            }
+            .sig-box { 
+              text-align: center; 
+              width: 20%; 
+              border-top: 1.5px solid #000; 
+              padding-top: 8px; 
+              font-size: 12px; 
+              font-weight: bold;
+              color: #333;
+            }
+
+            .no-print-btn { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: #1d3a6d; color: white; border: none; font-weight: bold; border-radius: 4px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+            
+            @media print { 
+              .no-print-btn { display: none; }
+              body { padding: 0; }
+              .signature-container { position: absolute; bottom: 0; left: 0; }
+            }
           </style>
         </head>
         <body>
-          <button class="no-print-btn" onclick="window.print()">PRINT REPORT</button>
-          <div class="report-container">
-              <div class="gen-date">Generated: ${generatedDate}</div>
-              <div class="report-header">
-                <h2>${mainTitle}</h2>
-                <p>${subTitle}</p>
-              </div>
-              <table>
-                <thead>${tableHeader}</thead>
-                <tbody>${tableBody}<tr class="grand-total-row">${tableFooter}</tr></tbody>
-              </table>
-              <div class="signature-section">
-                  <div class="sig-box">PREPARED BY</div>
-                  <div class="sig-box">CHECKED BY</div>
-                  <div class="sig-box">AUTHORIZED BY</div>
-                  <div class="sig-box">APPROVED BY</div>
-              </div>
+          <button class="no-print-btn" onclick="window.print()">PRINT / PDF</button>
+          
+          <div class="report-header">
+            <h2>ALAMHOW CO LTD</h2>
+            <p>Monthly Salary Sheet - ${monthYearDisplay}</p>
+          </div>
+
+          <table>
+            <thead>${tableHeader}</thead>
+            <tbody>${tableBody}<tr class="grand-total-row">${tableFooter}</tr></tbody>
+          </table>
+
+          <div class="signature-container">
+            <div class="sig-box">Prepared By</div>
+            <div class="sig-box">Checked By</div>
+            <div class="sig-box">Authorized By</div>
+            <div class="sig-box">Approved By</div>
           </div>
         </body>
       </html>
