@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ALAMHOW CO LTD - Attendance & Salary System</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --brand-blue: #1d3a6d; 
+      --header-text: #ffffff;
+      --bg-light: #f4f6f9;
+      --accent-yellow: #fff9e6;
+      --btn-reset: #dc3545;
+      --highlight-green: #e6fffa;
+    }
+
+    body {
+      background-color: var(--bg-light);
+      padding: 15px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    .main-card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+      margin: 0 auto;
+      border: 1px solid #e0e0e0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 94vh;
+    }
+
+    .page-header {
+      background-color: #ffffff;
+      padding: 15px 20px;
+      border-bottom: 4px solid var(--brand-blue);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-title h2 { color: var(--brand-blue); font-weight: 800; margin: 0; font-size: 1.5rem; }
+
+    .filter-section {
+      padding: 15px;
+      background: #f8f9fc;
+      border-bottom: 1px solid #eee;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      align-items: end;
+      flex-shrink: 0;
+    }
+
+    .filter-group label { font-size: 11px; font-weight: 700; color: var(--brand-blue); margin-bottom: 4px; display: block; text-transform: uppercase; }
+
+    .btn-action { font-size: 12px; padding: 6px 15px; font-weight: 600; }
+    .btn-reset { background-color: var(--btn-reset); color: white; border: none; }
+
+    .summary-bar {
+      padding: 10px 20px;
+      background: #eef2f7;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      gap: 25px;
+      font-weight: bold;
+      color: var(--brand-blue);
+      font-size: 14px;
+    }
+
+    .table-responsive { overflow: auto; flex-grow: 1; position: relative; }
+
+    .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+
+    .attendance-table thead th {
+      background-color: var(--brand-blue) !important;
+      color: var(--header-text) !important;
+      padding: 10px 10px;
+      text-align: center;
+      font-size: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      border: 1px solid #142a50;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .attendance-table tbody td {
+      padding: 8px 6px;
+      text-align: center;
+      font-size: 12px;
+      border: 1px solid #e0e0e0;
+      white-space: nowrap;
+    }
+
+    .total-attendance-col { background-color: var(--accent-yellow); font-weight: 800; color: var(--brand-blue); }
+    .highlight-col { background-color: var(--highlight-green); font-weight: 700; color: #0d685b; }
+    .deduction-col { background-color: #fff1f1; color: #a94442; }
+    .grand-total-row { background-color: #f1f3f5; font-weight: 800; color: #000; position: sticky; bottom: 0; z-index: 5; }
+
+    #typeValueGroup { display: none; }
+    .align-left { text-align: left !important; padding-left: 10px !important; }
+    #loader { padding: 50px; text-align: center; color: var(--brand-blue); }
+
+    .search-input-group { display: flex; gap: 0; }
+    .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 120px; background-color: #e9ecef; border-right: none; }
+    .search-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; }
+
+    @media print {
+      .filter-section, .btn-action, .summary-bar, .no-print, #loader, .page-header { display: none !important; }
+      .attendance-table thead th { position: static !important; }
+      body { padding: 0; background-color: white; }
+      .main-card { border: none; box-shadow: none; max-height: none; overflow: visible; }
+    }
+  </style>
+</head>
+<body id="bodyRoot">
+
+<div class="container-fluid">
+  <div class="main-card">
+    <div class="page-header">
+      <div class="brand-title">
+        <h2>ALAMHOW CO LTD</h2>
+        <span style="font-size: 0.9rem; color: #666;">Monthly Attendance & Salary Summary</span>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-action btn-outline-secondary" onclick="openPreview()">Preview Report</button>
+        <button class="btn btn-action btn-primary" onclick="refreshData()">Refresh Data</button>
+      </div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-group" style="grid-column: span 2;">
+        <label>Search By Information:</label>
+        <div class="search-input-group">
+          <select id="searchType" class="form-select form-select-sm" onchange="processData()">
+            <option value="ALL">ALL</option>
+            <option value="EMPLOYEE ID">ID</option>
+            <option value="EMPLOYEE NAME">NAME</option>
+            <option value="PASSPORT NO">PASSPORT</option>
+          </select>
+          <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Type here to search..." onkeyup="processData()">
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Start Date:</label>
+        <input type="date" id="startDate" class="form-control form-control-sm" onchange="processData()">
+      </div>
+      <div class="filter-group">
+        <label>End Date:</label>
+        <input type="date" id="endDate" class="form-control form-control-sm" onchange="processData()">
+      </div>
+      <div class="filter-group">
+        <label>Employee Dropdown:</label>
+        <select id="empFilter" class="form-select form-select-sm" onchange="processData()"></select>
+      </div>
+      <div class="filter-group">
+        <label>Side Name:</label>
+        <select id="sideFilter" class="form-select form-select-sm" onchange="processData()"></select>
+      </div>
+      
+      <div class="filter-group">
+        <label>Filter Type:</label>
+        <select id="columnSelector" class="form-select form-select-sm" onchange="handleTypeChange()">
+          <option value="">-- Select Type --</option>
+          <option value="STATUS">STATUS</option>
+          <option value="HOLIDAY">HOLIDAY</option>
+          <option value="SUNDAY WORK">SUNDAY WORK</option>
+        </select>
+      </div>
+
+      <div class="filter-group" id="typeValueGroup">
+        <label id="typeValueLabel">Value:</label>
+        <select id="typeValueSelect" class="form-select form-select-sm" onchange="processData()">
+          <option value="">-- Select Value --</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <button class="btn btn-sm btn-reset btn-action w-100" onclick="resetFilters()">Clear Filter</button>
+      </div>
+    </div>
+
+    <div class="summary-bar" id="summaryBar">
+      <span>Total Employees: <span id="statEmp">0</span></span>
+      <span>Total Attendance: <span id="statPresent">0</span></span>
+    </div>
+
+    <div id="loader">
+      <div class="spinner-border spinner-border-sm" role="status"></div>
+      <span class="ms-2">Fetching Data from Google...</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table attendance-table" id="attendanceTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot id="tableFoot"></tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  /**
+   * আপনার ডিপ্লয় করা Google Apps Script Web App URL এখানে দিন
+   * অবশ্যই 'Who has access: Anyone' দিয়ে নতুন ডিপ্লয়মেন্ট করবেন।
+   */
+  const WEB_APP_URL = "আপনার_স্ক্রিপ্ট_ইউআরএল_এখানে_দিন";
+
+  let rawData = [];
+  let colIndexMap = {}; 
+  const DAYS_IN_MONTH = 30;
+
+  const displayHeaders = [
+    "ISSUE DATE", "ISSUE TIME", "SL NO", "ATTENDANCE DATE", "EMPLOYEE ID", 
+    "EMPLOYEE NAME", "DESIGNATION", "JOINING DATE", "PASSPORT NO", "BASIC SALARY", 
+    "TOTAL OT HOURS", "OT RATE (PER HOUR)", "OT AMOUNT", "GROS SALARY", "NEED SALARY", 
+    "STATUS", "HOLIDAY", "SUNDAY WORK", "ATTENDANCE BONUS", "PERFORMANCE BONUS", 
+    "ADVANCE", "NPS 1%", "CSG 1.5%", "WARKING AS", "PERIOD", "SIDE NAME"
+  ];
+
+  window.onload = function() { loadDataFromAPI(); };
+
+  async function loadDataFromAPI() {
+    try {
+      const response = await fetch(WEB_APP_URL);
+      const data = await response.json();
+      
+      if (!data || data.length === 0) {
+        document.getElementById('loader').innerHTML = "<span class='text-danger'>No data found or access denied.</span>";
+        return;
+      }
+      
+      rawData = data;
+      mapSheetColumns(data[0]); 
+      populateStaticFilters(data);
+      document.getElementById('loader').style.display = 'none';
+      processData();
+    } catch (error) {
+      console.error("Fetch Error:", error);
+      document.getElementById('loader').innerHTML = "<span class='text-danger'>Error fetching data. Check your Web App URL and Deployment settings.</span>";
+    }
+  }
+
+  function mapSheetColumns(headers) {
+    colIndexMap = {};
+    headers.forEach((h, i) => {
+      colIndexMap[h.toString().trim().toUpperCase()] = i;
+    });
+  }
+
+  function processData() {
+    const search = document.getElementById("searchInput").value.toLowerCase();
+    const searchType = document.getElementById("searchType").value;
+    const start = document.getElementById("startDate").value;
+    const end = document.getElementById("endDate").value;
+    const fEmp = document.getElementById("empFilter").value;
+    const fSide = document.getElementById("sideFilter").value;
+    const fType = document.getElementById("columnSelector").value;
+    const fTypeVal = document.getElementById("typeValueSelect").value.toLowerCase();
+
+    const dIdx = colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
+    const eIdx = colIndexMap["EMPLOYEE ID"];
+    const sIdx = colIndexMap["SIDE NAME"];
+
+    const filteredRows = rawData.slice(1).filter(row => {
+      const rId = row[eIdx]?.toString().toUpperCase() || "";
+      const rSide = row[sIdx]?.toString().toUpperCase() || "";
+      const rDate = parseDate(row[dIdx]);
+      
+      let matchSearch = true;
+      if (search) {
+        if (searchType === "ALL") {
+          matchSearch = row.join(" ").toLowerCase().includes(search);
+        } else {
+          const colIdx = colIndexMap[searchType];
+          matchSearch = (row[colIdx] || "").toString().toLowerCase().includes(search);
+        }
+      }
+
+      let match = matchSearch;
+      if (match && start && rDate < new Date(start + "T00:00:00")) match = false;
+      if (match && end && rDate > new Date(end + "T23:59:59")) match = false;
+      if (match && fEmp && rId !== fEmp) match = false;
+      if (match && fSide && rSide !== fSide) match = false;
+      
+      if (match && fType && fTypeVal) {
+        const targetColIdx = colIndexMap[fType];
+        if (targetColIdx !== undefined) {
+           const actualVal = (row[targetColIdx] || "").toString().toLowerCase().trim();
+           if (actualVal !== fTypeVal) match = false;
+        }
+      }
+      return match;
+    });
+
+    const isSummaryNeeded = (start || end || fEmp || fSide || (fType && fTypeVal));
+    
+    if (isSummaryNeeded) {
+      document.getElementById('bodyRoot').classList.add('summary-mode');
+      renderSummaryView(filteredRows);
+    } else {
+      document.getElementById('bodyRoot').classList.remove('summary-mode');
+      renderDetailedView(filteredRows);
+    }
+    updateStats();
+  }
+
+  function renderDetailedView(rows) {
+    const thead = document.getElementById('tableHead');
+    const tbody = document.getElementById('tableBody');
+    document.getElementById('tableFoot').innerHTML = "";
+
+    thead.innerHTML = '<tr><th>SL</th>' + displayHeaders.map(h => {
+       const isLeft = ["EMPLOYEE NAME", "PASSPORT NO", "SIDE NAME", "DESIGNATION"].includes(h);
+       return `<th class="${isLeft ? 'align-left' : ''}">${h}</th>`;
+    }).join('') + '</tr>';
+
+    let bHtml = '';
+    rows.forEach((row, idx) => {
+      bHtml += `<tr><td>${idx+1}</td>`;
+      displayHeaders.forEach(h => {
+        const dataIdx = colIndexMap[h.trim().toUpperCase()];
+        let val = (dataIdx !== undefined && row[dataIdx] !== "") ? row[dataIdx] : "-";
+        bHtml += `<td>${val}</td>`;
+      });
+      bHtml += '</tr>';
+    });
+    tbody.innerHTML = bHtml;
+  }
+
+  function renderSummaryView(rows) {
+    const thead = document.getElementById('tableHead');
+    const tbody = document.getElementById('tableBody');
+    const tfoot = document.getElementById('tableFoot');
+    
+    const summary = {};
+    rows.forEach(row => {
+      const id = row[colIndexMap["EMPLOYEE ID"]];
+      if (!id) return;
+      if (!summary[id]) {
+        summary[id] = { 
+          id, name: row[colIndexMap["EMPLOYEE NAME"]], des: row[colIndexMap["DESIGNATION"]],
+          mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0,
+          att: 0, otHrs: 0, otRate: parseFloat(row[colIndexMap["OT RATE (PER HOUR)"]]) || 0,
+          hol: 0, sun: 0, ab: 0, pb: 0, adv: 0
+        };
+      }
+      const st = (row[colIndexMap["STATUS"]] || "").toString().toUpperCase();
+      if (st.startsWith('P') || st === "" || st === "PRESENT") summary[id].att++;
+      summary[id].otHrs += parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
+      summary[id].hol += parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
+      summary[id].sun += parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
+      summary[id].ab += parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0;
+      summary[id].pb += parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0;
+      summary[id].adv += parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
+    });
+
+    thead.innerHTML = `
+      <tr>
+        <th rowspan="2">SL</th><th rowspan="2">ID</th><th rowspan="2" class="align-left">NAME</th>
+        <th rowspan="2" class="align-left">DESIGNATION</th><th rowspan="2">M. BASIC</th>
+        <th rowspan="2" class="total-attendance-col">ATT</th><th rowspan="2">ACT. BASIC</th>
+        <th rowspan="2">OT HRS</th><th rowspan="2">OT AMOUNT</th>
+        <th colspan="3" class="deduction-col">TOTAL DEDUCTION</th><th rowspan="2" class="highlight-col">NEED SALARY</th>
+      </tr>
+      <tr>
+        <th class="deduction-col">ADVANCE</th>
+        <th class="deduction-col">NPS</th>
+        <th class="deduction-col">CSG</th>
+      </tr>
+    `;
+
+    let bHtml = '';
+    let g_mBasic = 0, g_att = 0, g_actBasic = 0, g_otHrs = 0, g_otAmt = 0;
+    let g_adv = 0, g_nps = 0, g_csg = 0, g_need = 0;
+    
+    Object.values(summary).sort((a,b) => a.id.toString().localeCompare(b.id.toString(), undefined, {numeric:true})).forEach((emp, i) => {
+      const actualBasic = (emp.mBasic / DAYS_IN_MONTH) * emp.att;
+      const otAmt = emp.otHrs * emp.otRate;
+      const gros = actualBasic + otAmt + emp.hol + emp.sun + emp.ab + emp.pb;
+      const npsVal = gros * 0.01;
+      const csgVal = gros * 0.015;
+      const need = gros - (emp.adv + npsVal + csgVal);
+
+      g_mBasic += emp.mBasic; g_att += emp.att; g_actBasic += actualBasic;
+      g_otHrs += emp.otHrs; g_otAmt += otAmt;
+      g_adv += emp.adv; g_nps += npsVal; g_csg += csgVal; g_need += need;
+
+      bHtml += `<tr>
+        <td>${i+1}</td><td>${emp.id}</td><td class="align-left">${emp.name || '-'}</td><td class="align-left">${emp.des || '-'}</td>
+        <td>${emp.mBasic.toFixed(2)}</td><td class="total-attendance-col">${emp.att}</td>
+        <td>${actualBasic.toFixed(2)}</td><td>${emp.otHrs.toFixed(2)}</td><td>${otAmt.toFixed(2)}</td>
+        <td class="deduction-col">${emp.adv.toFixed(2)}</td><td class="deduction-col">${npsVal.toFixed(2)}</td><td class="deduction-col">${csgVal.toFixed(2)}</td>
+        <td class="highlight-col">${need.toFixed(2)}</td>
+      </tr>`;
+    });
+    tbody.innerHTML = bHtml;
+    
+    tfoot.innerHTML = `
+      <tr class="grand-total-row">
+        <td colspan="4" class="text-end">GRAND TOTAL:</td>
+        <td>${g_mBasic.toFixed(2)}</td>
+        <td class="total-attendance-col">${g_att}</td>
+        <td>${g_actBasic.toFixed(2)}</td>
+        <td>${g_otHrs.toFixed(2)}</td>
+        <td>${g_otAmt.toFixed(2)}</td>
+        <td class="deduction-col">${g_adv.toFixed(2)}</td>
+        <td class="deduction-col">${g_nps.toFixed(2)}</td>
+        <td class="deduction-col">${g_csg.toFixed(2)}</td>
+        <td class="highlight-col">${g_need.toFixed(2)}</td>
+      </tr>`;
+  }
+
+  function handleTypeChange() {
+    const selector = document.getElementById("columnSelector");
+    const valueGroup = document.getElementById("typeValueGroup");
+    const valueSelect = document.getElementById("typeValueSelect");
+    if (selector.value !== "") {
+      valueGroup.style.display = "block";
+      const colIdx = colIndexMap[selector.value];
+      const uniqueValues = new Set();
+      rawData.slice(1).forEach(row => {
+        const val = (row[colIdx] || "").toString().trim();
+        if (val && val !== "-") uniqueValues.add(val);
+      });
+      valueSelect.innerHTML = '<option value="">-- All Values --</option>';
+      Array.from(uniqueValues).sort().forEach(val => {
+        const opt = document.createElement('option');
+        opt.value = val; opt.innerText = val;
+        valueSelect.appendChild(opt);
+      });
+      document.getElementById("typeValueLabel").innerText = selector.options[selector.selectedIndex].text + ":";
+    } else {
+      valueGroup.style.display = "none";
+    }
+    processData();
+  }
+
+  function updateStats() {
+    const tbody = document.getElementById('tableBody');
+    const isSummary = document.getElementById('bodyRoot').classList.contains('summary-mode');
+    let uniqueIds = new Set();
+    let totalPresent = 0;
+    for (let i = 0; i < tbody.rows.length; i++) {
+      const row = tbody.rows[i];
+      const id = row.cells[1]?.innerText;
+      if (id && id !== '-') uniqueIds.add(id);
+      if (isSummary) totalPresent += parseInt(row.cells[5]?.innerText) || 0;
+      else totalPresent++;
+    }
+    document.getElementById("statEmp").innerText = uniqueIds.size;
+    document.getElementById("statPresent").innerText = totalPresent;
+  }
+
+  function populateStaticFilters(data) {
+    const empSelect = document.getElementById('empFilter');
+    const sideSelect = document.getElementById('sideFilter');
+    const empMap = new Map();
+    const sideSet = new Set();
+    data.slice(1).forEach(r => {
+      if(r[colIndexMap["EMPLOYEE ID"]]) empMap.set(r[colIndexMap["EMPLOYEE ID"]].toString().toUpperCase(), r[colIndexMap["EMPLOYEE NAME"]]);
+      if(r[colIndexMap["SIDE NAME"]]) sideSet.add(r[colIndexMap["SIDE NAME"]].toString().toUpperCase());
+    });
+    empSelect.innerHTML = '<option value="">All Employees</option>';
+    Array.from(empMap.keys()).sort((a,b)=>a.localeCompare(b, undefined, {numeric:true})).forEach(id => {
+      const opt = document.createElement('option');
+      opt.value = id; opt.innerText = `${id} | ${empMap.get(id)}`;
+      empSelect.appendChild(opt);
+    });
+    sideSelect.innerHTML = '<option value="">All Sides</option>';
+    Array.from(sideSet).sort().forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s; opt.innerText = s;
+      sideSelect.appendChild(opt);
+    });
+  }
+
+  function parseDate(s) {
+    if (!s) return new Date(0);
+    const p = s.toString().split(/[-/]/);
+    return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : new Date(s);
+  }
+
+  function refreshData() {
+    resetFilters();
+    document.getElementById('loader').style.display = 'block';
+    loadDataFromAPI();
+  }
+
+  function resetFilters() {
+    document.getElementById("searchInput").value = "";
+    document.getElementById("startDate").value = "";
+    document.getElementById("endDate").value = "";
+    document.getElementById("empFilter").value = "";
+    document.getElementById("sideFilter").value = "";
+    document.getElementById("columnSelector").value = "";
+    document.getElementById("typeValueGroup").style.display = "none";
+    processData();
+  }
+
+  function openPreview() {
+    const isSummary = document.getElementById('bodyRoot').classList.contains('summary-mode') || 
+                      document.getElementById('tableFoot').innerHTML !== "";
+    
+    if (!isSummary) { 
+      alert("Please apply a filter to generate the Summary Report before previewing."); 
+      return; 
+    }
+
+    const tableHeader = document.getElementById('tableHead').innerHTML;
+    const tableBody = document.getElementById('tableBody').innerHTML;
+    const tableFooter = document.getElementById('tableFoot').innerHTML;
+    
+    const startInput = document.getElementById('startDate').value;
+    let monthYearDisplay = "";
+    if (startInput) {
+      const dateObj = new Date(startInput);
+      const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+      monthYearDisplay = monthNames[dateObj.getMonth()] + "-" + dateObj.getFullYear();
+    } else {
+      monthYearDisplay = "All Data";
+    }
+
+    const mainTitle = "ALAMHOW CO LTD";
+    const subTitle = "Salary Sheet - " + monthYearDisplay;
+    const generatedDate = new Date().toLocaleDateString();
+
+    const previewWindow = window.open('', '_blank');
+    previewWindow.document.write(`
+      <html>
+        <head>
+          <title>${subTitle}</title>
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <style>
+            @page { size: landscape; margin: 15mm 10mm 15mm 10mm; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; background: #fff; color: #000; }
+            .report-container { padding: 5px; }
+            .report-header { border-bottom: 3px solid #1d3a6d; margin-bottom: 15px; display: flex; flex-direction: column; align-items: center; padding-bottom: 8px; text-align: center; }
+            .report-header h2 { color: #1d3a6d; margin: 0; font-weight: 800; font-size: 24px; }
+            .report-header p { margin: 2px 0 0; font-size: 16px; font-weight: 600; color: #000; }
+            .gen-date { position: absolute; top: 15px; right: 15px; font-size: 11px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 10px !important; }
+            th { background-color: #f0f2f5 !important; border: 1px solid #000 !important; padding: 6px 3px !important; text-align: center; font-weight: bold; }
+            td { border: 1px solid #000 !important; padding: 5px 3px !important; text-align: center; }
+            .align-left { text-align: left !important; padding-left: 6px !important; }
+            .grand-total-row { background-color: #f1f3f5 !important; font-weight: bold; }
+            .signature-section { display: flex; justify-content: space-between; margin-top: 60px; }
+            .sig-box { text-align: center; width: 22%; border-top: 1.5px solid #000; padding-top: 5px; font-size: 11px; }
+            .no-print-btn { position: fixed; top: 15px; left: 15px; padding: 8px 20px; background: #1d3a6d; color: white; border: none; cursor: pointer; font-weight: bold; }
+            @media print { .no-print-btn { display: none; } }
+          </style>
+        </head>
+        <body>
+          <button class="no-print-btn" onclick="window.print()">PRINT REPORT</button>
+          <div class="report-container">
+              <div class="gen-date">Generated: ${generatedDate}</div>
+              <div class="report-header">
+                <h2>${mainTitle}</h2>
+                <p>${subTitle}</p>
+              </div>
+              <table>
+                <thead>${tableHeader}</thead>
+                <tbody>${tableBody}<tr class="grand-total-row">${tableFooter}</tr></tbody>
+              </table>
+              <div class="signature-section">
+                  <div class="sig-box">PREPARED BY</div>
+                  <div class="sig-box">CHECKED BY</div>
+                  <div class="sig-box">AUTHORIZED BY</div>
+                  <div class="sig-box">APPROVED BY</div>
+              </div>
+          </div>
+        </body>
+      </html>
+    `);
+    previewWindow.document.close();
+  }
+</script>
+</body>
+</html>
