@@ -411,43 +411,64 @@
     }
 
     // ৩. সার্ভারে ডাটা সেভ করার জন্য আপডেট করা ফাংশন
-    async function saveAllToSheet() {
-        if (attendanceData.length === 0) return showCustomAlert("Empty List", "No Data Found!", "warning");
-        
-        const btn = document.getElementById('saveBtn');
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        const mainContent = document.getElementById('mainContent');
+   async function saveAllToSheet() {
+            // ১. ডেটা চেক
+            if (attendanceData.length === 0) return showCustomAlert("Empty List", "No Data Found!", "warning");
+            
+            const btn = document.getElementById('saveBtn');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const mainContent = document.getElementById('mainContent');
+            const loadingTask = document.getElementById('loadingTask');
 
-        btn.disabled = true; 
-        btn.innerText = "Saving...";
-        mainContent.classList.add('screen-lock-blur');
-        loadingOverlay.classList.remove('fade-out');
+            // ২. সেভ মোড শুরু: বাটন ডিজেবল এবং স্পিনার দেখানো
+            btn.disabled = true; 
+            btn.innerText = "Saving...";
+            
+            // মেইন স্ক্রিন ব্লার করা
+            mainContent.classList.add('screen-lock-blur');
+            
+            // লোডিং স্পিনার (Spinning) চালু করা
+            loadingOverlay.classList.add('processing-mode');
+            loadingOverlay.classList.remove('fade-out');
+            loadingTask.innerText = "Uploading to Server...";
 
-        try {
-            // fetch এর মাধ্যমে ডাটা পাঠানো
-            const response = await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors', // গিটহাব থেকে পাঠানোর জন্য গুরুত্বপূর্ণ
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(attendanceData)
-            });
+            // হেল্পার ফাংশন: UI আগের অবস্থায় ফিরিয়ে আনা
+            const unlockUI = () => {
+                btn.disabled = false; 
+                btn.innerText = "Save"; 
+                mainContent.classList.remove('screen-lock-blur');
+                loadingOverlay.classList.add('fade-out');
+                loadingOverlay.classList.remove('processing-mode'); 
+            };
 
-            showCustomAlert("Submitted Successfully", "Data saved to Google Sheet!", "success");
-            attendanceData = []; slCount = 1; renderTable();
-        } catch (error) {
-            showCustomAlert("Error", "Server Error: " + error, "error");
-        } finally {
-            btn.disabled = false; btn.innerText = "Save";
-            mainContent.classList.remove('screen-lock-blur');
-            loadingOverlay.classList.add('fade-out');
+            // ৩. সার্ভারে ডাটা পাঠানো (GitHub/External Fetch)
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // External request এর জন্য জরুরি
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(attendanceData)
+                });
+
+                // সাকসেসফুল মেসেজ দেখানো
+                showCustomAlert("Submitted Successfully", "Data has been saved to Google Sheet!", "success");
+                
+                // টেবিল এবং ডাটা ক্লিয়ার করা
+                attendanceData = []; 
+                slCount = 1; 
+                renderTable(); 
+
+            } catch (error) {
+                // এরর মেসেজ দেখানো
+                showCustomAlert("Server Error", "Data Save Problem: " + error, "error");
+            } finally {
+                // কাজ শেষ হলে স্পিনার বন্ধ করা
+                unlockUI();
+            }
         }
-    }
 
-    // অ্যালার্ট এবং অন্যান্য হেল্পার ফাংশন
-    function showCustomAlert(title, msg, type) {
-        alert(title + ": " + msg); // সহজ করার জন্য ডিফল্ট অ্যালার্ট, আপনি আপনার ডিজাইন ব্যবহার করতে পারেন
-    }
+    
 
     function resetAllInputs() {
         ['empId', 'empName', 'passport', 'designation', 'joiningDate', 'period', 'basicSalary', 'globalOtRate', 'dailyOt', 'holidayWork', 'sundayWork', 'attStatus', 'sideName'].forEach(id => {
