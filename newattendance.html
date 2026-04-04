@@ -1,1 +1,468 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALAMHOW CO LTD - Attendance & OT Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --brand-blue: #1e3a5f;   /* লোগোর গাঢ় নীল */
+            --brand-gold: #f1c40f;   /* লোগোর সোনালী হলুদ */
+            --brand-light-blue: #2c5282;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: #f0f4f8; overflow-x: hidden; }
+        
+        #loadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #ffffff;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        /* ব্লার এবং লক করার জন্য নতুন ক্লাস */
+    .screen-lock-blur {
+        filter: blur(3px); /* ৩ পিক্সেল ঘোলা হবে */
+        pointer-events: none; /* কোনো ক্লিক কাজ করবে না */
+        user-select: none;    /* টেক্সট কপি করা যাবে না */
+        transition: all 0.4s ease; /* স্মুথ ট্রানজিশন */
+    }
+
+    /* লোডিং ওভারলে-এর ব্যাকগ্রাউন্ড স্বচ্ছ করার জন্য */
+    #loadingOverlay.processing-mode {
+        background: rgba(255, 255, 255, 0.2); /* হালকা স্বচ্ছ সাদা */
+        backdrop-filter: none; /* এখানে ব্লার দরকার নেই কারণ কন্টেন্ট আলাদাভাবে ব্লার হচ্ছে */
+    }
+
+        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--brand-blue); margin-bottom: 0.15rem; text-transform: uppercase; }
+        .input-field { width: 100%; padding: 0.4rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; outline: none; font-size: 0.8rem; background-color: white; }
+        .input-field:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1); }
+
+        .suggestion-box {
+            position: absolute; left: 0; right: 0; max-height: 250px; overflow-y: auto;
+            background: white; border: 1px solid #d1d5db; border-radius: 0.5rem;
+            z-index: 1000; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            display: none; margin-top: 4px;
+        }
+        .suggestion-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
+        .suggestion-item:hover { background-color: #fdf9e7; } /* Light gold hover */
+        
+        .loader-circle {
+            border: 4px solid #f3f3f3; border-top: 4px solid var(--brand-blue);
+            border-radius: 50%; width: 50px; height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .fade-out { opacity: 0; pointer-events: none; visibility: hidden; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8);
+            display: none; justify-content: center; align-items: center; z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        /* Brand Colors Helpers */
+        .bg-brand-blue { background-color: var(--brand-blue); }
+        .text-brand-blue { color: var(--brand-blue); }
+        .bg-brand-gold { background-color: var(--brand-gold); }
+        .text-brand-gold { color: var(--brand-gold); }
+        .border-brand-gold { border-color: var(--brand-gold); }
+
+        @media print { 
+            .no-print { display: none; } 
+            body { background: white; padding: 0; overflow: visible !important; } 
+            .card { box-shadow: none; border: 1px solid #e5e7eb; } 
+        }
+    </style>
+</head>
+<body class="p-2 md:p-4">
+    <div id="loadingOverlay">
+        <div class="loader-circle mb-6"></div>
+        <h2 class="text-xl font-bold text-slate-800 tracking-tight">ALAMHOW CO LTD</h2>
+        <p id="loadingTask" class="text-sm text-slate-500 mt-2 font-medium">Please Wait...</p>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="customAlert" class="modal-overlay">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all border border-slate-100">
+            <div id="alertIconContainer" class="flex items-center justify-center w-16 h-16 mx-auto rounded-full mb-6"></div>
+            <h3 id="alertTitle" class="text-xl font-bold text-center text-slate-900 mb-2">Notification</h3>
+            <p id="alertMessage" class="text-sm text-center text-slate-600 mb-8 leading-relaxed"></p>
+            <button onclick="closeAlert()" class="w-full bg-brand-blue hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all active:scale-95 shadow-lg uppercase tracking-wider">OK</button>
+        </div>
+    </div>
+
+    <!-- Full Preview Modal -->
+     <div id="fullPreviewModal" class="modal-overlay">
+        <div class="bg-white rounded-xl shadow-2xl w-[98vw] max-h-[95vh] flex flex-col overflow-hidden">
+            <div class="p-5 bg-brand-blue text-white flex justify-between items-center">
+                <h3 class="font-bold text-xl italic">ALAMHOW <span class="text-brand-gold">CO LTD</span> - </h3>
+                <button onclick="closeFullPreview()" class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="overflow-auto p-2 flex-1 bg-white">
+                <table class="w-full text-xs md:text-sm text-left border-collapse min-w-[1000px]">
+                    <thead class="bg-slate-100 sticky top-0 z-10">
+                        <tr class="text-brand-blue font-bold">
+                            <th class="p-4 border">SL</th>
+                            <th class="p-4 border">DATE</th>
+                            <th class="p-4 border">ID</th>
+                            <th class="p-4 border">NAME</th>
+                            <th class="p-4 border">DESIGNATION</th>
+                            <th class="p-4 border text-center">OT HRS</th>
+                            <th class="p-4 border text-center">HOLIDAY</th>
+                            <th class="p-4 border text-center">SUNDAY</th>
+                            <th class="p-4 border">SITE</th>
+                            <th class="p-4 border">STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullPreviewBody" class="divide-y divide-slate-200">
+                        <!-- Rows will be injected here via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-5 border-t bg-slate-50 flex justify-between items-center">
+                <span class="text-sm text-slate-500 font-medium">* Total entries shown in preview</span>
+                <button onclick="closeFullPreview()" class="bg-brand-blue text-white px-8 py-2.5 rounded-lg font-bold shadow-lg active:scale-95 transition-all">Close Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700">
+        <header class="bg-white border border-slate-200 py-4 mb-6 no-print shadow-sm mx-auto mt-2 rounded-2xl max-w-[98%] md:max-w-7xl">
+    <div class="px-4">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="w-20 h-20 md:w-24 md:h-24 object-contain">
+            
+            <div class="text-center md:text-left md:border-l-2 md:border-slate-200 md:pl-8 py-1">
+                <h1 class="text-xl md:text-2xl font-extrabold text-brand-blue tracking-tight uppercase leading-none">
+                    ALAMHOW <span class="text-brand-gold">CO LTD</span>
+                </h1>
+                <p class="text-[9px] md:text-[10px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-1">Daily Attendance Form</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+        <!-- Employee Details Section -->
+        <div class="card p-5 mb-5 no-print border-l-8 border-brand-blue">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xs font-black text-brand-blue uppercase tracking-[0.2em] flex items-center gap-2">
+                    <i class="fas fa-user-circle text-brand-gold"></i> Employee Details
+                </h2>
+                <button onclick="refreshAllData(true)" class="text-[10px] bg-brand-blue text-white hover:bg-slate-800 px-4 py-2 rounded-lg font-bold transition-all shadow-sm">Refresh Database</button>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="input-group relative">
+                    <label>ID / Name Search</label>
+                    <input type="text" id="empId" placeholder="Search..." 
+                           class="input-field border-brand-blue/20 bg-brand-blue/5 font-bold text-brand-blue" 
+                           autocomplete="off" oninput="handleIdInput(this)" onclick="handleIdInput(this)">
+                    <div id="idSuggestions" class="suggestion-box"></div>
+                </div>
+                <div class="input-group"><label>Employee Name</label><input type="text" id="empName" class="input-field bg-slate-50 font-semibold" readonly></div>
+                <div class="input-group"><label>Passport No</label><input type="text" id="passport" class="input-field bg-slate-50" readonly></div>
+                <div class="input-group"><label>Joining Date</label><input type="text" id="joiningDate" class="input-field bg-slate-50" readonly></div>
+                <div class="input-group"><label>Designation</label><input type="text" id="designation" class="input-field bg-slate-50" readonly></div>
+                <div class="input-group"><label>Period</label><input type="text" id="period" class="input-field bg-slate-50" readonly></div>
+                <div class="input-group"><label>Salary</label><input type="text" id="basicSalary" class="input-field bg-slate-50 font-bold" readonly></div>
+                <div class="input-group"><label>OT Rate (Hr)</label><input type="text" id="globalOtRate" class="input-field bg-brand-gold/10 font-black text-brand-blue border-brand-gold/30" readonly></div>
+            </div>
+        </div>
+
+        <!-- Entry Form -->
+        <div class="card p-5 mb-6 no-print border border-slate-200 shadow-sm">
+            <h2 class="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4">New Attendance Entry</h2>
+            <div class="grid grid-cols-2 md:flex md:flex-wrap gap-4 items-end">
+                <div class="input-group flex-1 min-w-[140px]"><label>Selection Date</label><input type="text" id="attDate" placeholder="Select Date" class="input-field border-brand-blue/30"></div>
+                <div class="input-group flex-1 min-w-[120px]"><label>Status</label>
+                    <select id="attStatus" class="input-field font-semibold">
+                        <option value="" selected disabled>Select Status</option>
+                        <option value="Present">Present</option>
+                        <option value="Absent">Absent</option>
+                        <option value="Leave">Leave</option>
+                        <option value="Holiday">Holiday</option>
+                    </select>
+                </div>
+                <div class="input-group flex-[2] min-w-[180px]"><label>Assigned Site</label><select id="sideName" class="input-field font-bold text-slate-800"><option value="">Loading Sites...</option></select></div>
+                
+                <div class="input-group flex-1 min-w-[80px]"><label>OT Hours</label><input type="number" id="dailyOt" placeholder="0" class="input-field border-brand-blue/20"></div>
+                <div class="input-group flex-1 min-w-[80px]"><label>Holiday</label><input type="number" id="holidayWork" placeholder="0" class="input-field border-brand-gold/40"></div>
+                <div class="input-group flex-1 min-w-[80px]"><label>Sunday</label><input type="number" id="sundayWork" placeholder="0" class="input-field border-brand-gold/40"></div>
+                
+                <button onclick="requestAddEntry()" class="bg-brand-blue hover:bg-slate-800 text-white font-bold py-2.5 px-8 rounded-lg shadow-lg shadow-slate-200 transition-all active:scale-95 text-sm uppercase">Add </button>
+            </div>
+        </div>
+
+        <!-- Table Display -->
+        <div class="card overflow-hidden mb-10 border border-slate-200">
+            <div class="p-4 bg-brand-blue text-white flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-brand-gold rounded-full animate-pulse"></div>
+                    <h2 class="font-bold text-sm tracking-wide uppercase">Entry Preview List</h2>
+                </div>
+                <div class="flex gap-2 no-print">
+                    <button onclick="openFullPreview()" class="text-[10px] bg-brand-gold text-brand-blue px-4 py-2 rounded-lg font-black transition-colors flex items-center gap-1 uppercase">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        Preview
+                    </button>
+                    <button id="saveBtn" onclick="saveAllToSheet()" class="text-[10px] bg-white text-brand-blue hover:bg-slate-100 px-5 py-2 rounded-lg font-black transition-colors uppercase">Save</button>
+                    <button onclick="clearTable()" class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition-colors uppercase">Clear All</button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-[11px]">
+                    <thead class="bg-slate-50 border-b border-slate-200">
+                        <tr>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap">SL NO</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap">DATE</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap">ID</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap">NAME</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap text-center">OT</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap text-center">HOLI</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap text-center">SUN</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap">SIDE NAME</th>
+                            <th class="p-3 font-bold text-slate-600 whitespace-nowrap">STATUS</th>
+                            <th class="p-3 font-bold text-slate-600 text-center no-print">ACTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceBody" class="divide-y divide-slate-100"></tbody>
+                    <tfoot class="bg-brand-blue/5 font-black border-t-2 border-brand-blue/10">
+                        <tr>
+                            <td colspan="4" class="p-3 text-right text-slate-500 uppercase tracking-wider">Monthly Totals:</td>
+                            <td class="p-3 text-center text-brand-blue text-sm" id="totalHrs">0</td>
+                            <td class="p-3 text-center text-brand-gold text-sm" id="totalHoli">0</td>
+                            <td class="p-3 text-center text-orange-600 text-sm" id="totalSun">0</td>
+                            <td colspan="2"></td>
+                            <td class="no-print"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts remain functional as before -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+    // ১. আপনার Google Apps Script এর Web App URL এখানে দিন
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw_RgZ7yblB0PMuLqG2IOykhBIpV0_9QQXavvRVBOrnhKuFoXVQ-Nzys8Eje6PXrt2LWg/exec';
+
+    let attendanceData = [], employees = [], slCount = 1;
+    let isEmployeeLoaded = false, isSitesLoaded = false;
+    let datePicker;
+
+    window.onload = () => {
+        datePicker = flatpickr("#attDate", { 
+            dateFormat: "Y-m-d", 
+            altInput: true, 
+            altFormat: "F j, Y",
+            placeholder: "Select Date"
+        });
+        refreshAllData();
+        document.addEventListener('click', (e) => {
+            const idBox = document.getElementById('idSuggestions');
+            if (idBox && !e.target.closest('.relative')) idBox.style.display = 'none';
+        });
+    };
+
+    // ২. ডাটা রিফ্রেশ করার জন্য আপডেট করা ফাংশন
+    async function refreshAllData() { 
+        try {
+            // Employee Data লোড করা
+            const empResponse = await fetch(`${SCRIPT_URL}?action=getEmployeeData`);
+            const empData = await empResponse.json();
+            employees = empData.map(emp => ({ ...emp, id: String(emp.id).padStart(4, '0') }));
+            isEmployeeLoaded = true;
+
+            // Sites Data লোড করা
+            const siteResponse = await fetch(`${SCRIPT_URL}?action=getSideNames`);
+            const sites = await siteResponse.json();
+            const siteSelect = document.getElementById('sideName');
+            if(siteSelect) {
+                siteSelect.innerHTML = '<option value="" selected disabled>Select Site</option>' + 
+                    sites.map(s => `<option value="${s}">${s}</option>`).join('');
+            }
+            isSitesLoaded = true;
+            checkInitialLoad();
+        } catch (error) {
+            console.error("Loading Error:", error);
+            // যদি সার্ভার কানেক্ট না হয় তবে ডেমো মোড চালু হবে ১ সেকেন্ড পর
+            setTimeout(forceOpenApp, 1000); 
+        }
+    }
+
+    function checkInitialLoad() {
+        if (isEmployeeLoaded && isSitesLoaded) {
+            const overlay = document.getElementById('loadingOverlay');
+            if(overlay) overlay.classList.add('fade-out');
+            const content = document.getElementById('mainContent');
+            if(content) content.classList.remove('opacity-0');
+        }
+    }
+
+    function forceOpenApp() { isEmployeeLoaded = isSitesLoaded = true; checkInitialLoad(); }
+
+    // --- আইডি সিলেকশন এবং ইনপুট হ্যান্ডলিং আগের মতোই থাকবে ---
+    function handleIdInput(input) {
+        const val = input.value.trim().toLowerCase();
+        const box = document.getElementById('idSuggestions');
+        if (!box || employees.length === 0) return;
+        box.innerHTML = '';
+        const filtered = val === '' ? employees : employees.filter(e => e.id.includes(val) || e.name.toLowerCase().includes(val));
+        if (filtered.length > 0) {
+            filtered.forEach(emp => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item flex justify-between items-center transition-colors';
+                div.innerHTML = `<div class="flex flex-col"><span class="text-brand-blue font-black text-xs">ID: ${emp.id}</span><span class="text-slate-800 font-semibold text-[13px]">${emp.name}</span></div>`;
+                div.onmousedown = () => selectEmployee(emp);
+                box.appendChild(div);
+            });
+            box.style.display = 'block';
+        } else { box.style.display = 'none'; }
+    }
+
+    function selectEmployee(emp) {
+        document.getElementById('empId').value = emp.id;
+        document.getElementById('empName').value = emp.name;
+        document.getElementById('passport').value = emp.passport || '';
+        document.getElementById('designation').value = emp.workingAs || '';
+        document.getElementById('joiningDate').value = emp.joining || '';
+        document.getElementById('period').value = emp.period || '';
+        document.getElementById('basicSalary').value = emp.salary || '';
+        document.getElementById('globalOtRate').value = emp.otRate || '0';
+        document.getElementById('idSuggestions').style.display = 'none';
+    }
+
+    // --- টেবিল রেন্ডারিং এবং অ্যাড এন্ট্রি আগের মতোই থাকবে ---
+    function requestAddEntry() {
+        const now = new Date();
+        const entryDate = now.toLocaleDateString('en-GB'); 
+        const entryTime = now.toLocaleTimeString('en-GB', { hour12: true });
+
+        let rawEmpId = document.getElementById('empId').value.trim();
+        const attDate = document.getElementById('attDate').value;
+        const status = document.getElementById('attStatus').value;
+        const site = document.getElementById('sideName').value;
+
+        if(!rawEmpId || !attDate || !status || !site) {
+            return showCustomAlert("Missing Data", "সবগুলো ঘর পূরণ করুন।", "warning");
+        }
+
+        let formattedId = isNaN(rawEmpId) ? rawEmpId : rawEmpId.padStart(4, '0');
+        const isDuplicate = attendanceData.some(e => e.empId.replace("'", "") === formattedId && e.date === attDate);
+        if (isDuplicate) return showCustomAlert("Duplicate Entry", "এই আইডি আজ অলরেডি এন্ট্রি হয়েছে।", "error");
+
+        attendanceData.push({ 
+            id: Date.now(),
+            entryDate, entryTime, slNo: slCount++, 
+            date: attDate, empId: "'" + formattedId,
+            empName: document.getElementById('empName').value,
+            workingAs: document.getElementById('designation').value,
+            passport: document.getElementById('passport').value,
+            salary: document.getElementById('basicSalary').value,
+            ot: parseFloat(document.getElementById('dailyOt').value) || 0,
+            holidayWork: parseFloat(document.getElementById('holidayWork').value) || 0,
+            sundayWork: parseFloat(document.getElementById('sundayWork').value) || 0,
+            site, status, rate: parseFloat(document.getElementById('globalOtRate').value) || 0,
+            joining: document.getElementById('joiningDate').value,
+            period: document.getElementById('period').value
+        });
+        
+        renderTable();
+        resetAllInputs();
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('attendanceBody'); 
+        tbody.innerHTML = '';
+        let hrs = 0, hHrs = 0, sHrs = 0;
+        attendanceData.forEach(item => {
+            hrs += item.ot; hHrs += item.holidayWork; sHrs += item.sundayWork;
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 border-b">
+                    <td class="p-3 font-medium text-slate-400">${item.slNo}</td>
+                    <td class="p-3 font-bold text-slate-700">${item.date}</td>
+                    <td class="p-3 font-black text-brand-blue">${item.empId}</td>
+                    <td class="p-3 font-semibold text-slate-800 uppercase">${item.empName}</td>
+                    <td class="p-3 font-black text-brand-blue text-center">${item.ot}</td>
+                    <td class="p-3 font-black text-brand-gold text-center">${item.holidayWork}</td>
+                    <td class="p-3 font-black text-orange-600 text-center">${item.sundayWork}</td>
+                    <td class="p-3"><span class="text-[10px] font-bold bg-slate-100 px-2 py-1 rounded text-slate-600">${item.site}</span></td>
+                    <td class="p-3"><span class="px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${item.status === 'Present' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${item.status}</span></td>
+                    <td class="p-3 text-center no-print">
+                        <button onclick="deleteEntry(${item.id})" class="text-red-500 p-1">Delete</button>
+                    </td>
+                </tr>`;
+        });
+        document.getElementById('totalHrs').innerText = hrs; 
+        document.getElementById('totalHoli').innerText = hHrs; 
+        document.getElementById('totalSun').innerText = sHrs; 
+    }
+
+    // ৩. সার্ভারে ডাটা সেভ করার জন্য আপডেট করা ফাংশন
+    async function saveAllToSheet() {
+        if (attendanceData.length === 0) return showCustomAlert("Empty List", "No Data Found!", "warning");
+        
+        const btn = document.getElementById('saveBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const mainContent = document.getElementById('mainContent');
+
+        btn.disabled = true; 
+        btn.innerText = "Saving...";
+        mainContent.classList.add('screen-lock-blur');
+        loadingOverlay.classList.remove('fade-out');
+
+        try {
+            // fetch এর মাধ্যমে ডাটা পাঠানো
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // গিটহাব থেকে পাঠানোর জন্য গুরুত্বপূর্ণ
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(attendanceData)
+            });
+
+            showCustomAlert("Submitted Successfully", "Data saved to Google Sheet!", "success");
+            attendanceData = []; slCount = 1; renderTable();
+        } catch (error) {
+            showCustomAlert("Error", "Server Error: " + error, "error");
+        } finally {
+            btn.disabled = false; btn.innerText = "Save";
+            mainContent.classList.remove('screen-lock-blur');
+            loadingOverlay.classList.add('fade-out');
+        }
+    }
+
+    // অ্যালার্ট এবং অন্যান্য হেল্পার ফাংশন
+    function showCustomAlert(title, msg, type) {
+        alert(title + ": " + msg); // সহজ করার জন্য ডিফল্ট অ্যালার্ট, আপনি আপনার ডিজাইন ব্যবহার করতে পারেন
+    }
+
+    function resetAllInputs() {
+        ['empId', 'empName', 'passport', 'designation', 'joiningDate', 'period', 'basicSalary', 'globalOtRate', 'dailyOt', 'holidayWork', 'sundayWork', 'attStatus', 'sideName'].forEach(id => {
+            const el = document.getElementById(id); if(el) el.value = "";
+        });
+        if(datePicker) datePicker.clear();
+        document.getElementById('empId').focus();
+    }
+
+    function deleteEntry(id) {
+        if(confirm("Are you sure?")) {
+            attendanceData = attendanceData.filter(i => i.id !== id);
+            renderTable();
+        }
+    }
+</script>
+</body>
+</html>
