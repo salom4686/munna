@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +14,7 @@
             --primary-blue: #1b365d;      /* Logo Navy Blue */
             --accent-gold: #e1b12c;       /* Logo Golden Yellow */
             --sub-btn-bg: #25467d;        
-            --dark-bg: #10223d;           
+            --dark-bg: #10223d;            
             --text-white: #ffffff;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --sidebar-width: 300px;
@@ -196,7 +195,7 @@
 
         /* Header Logo */
         .header-logo {
-            height: 50px;
+            height: 45px;
             width: auto;
         }
 
@@ -279,6 +278,14 @@
             text-align: center;
             box-shadow: 0 5px 20px rgba(0,0,0,0.02);
             border-top: 4px solid var(--accent-gold);
+            text-decoration: none;
+            display: block;
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
         .stat-card i {
@@ -303,10 +310,23 @@
         
         <ul class="nav-links">
             <li>
-                <a href="#" class="icon-link close-menu-btn">
+                <a href="index.html" class="icon-link">
                     <i class="fa-solid fa-gauge-high"></i>
                     <span class="link_name">Dashboard</span>
                 </a>
+            </li>
+
+            <li class="menu-item">
+                <div class="icon-link">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="link_name">Employee Management</span>
+                    <i class="fa-solid fa-chevron-down arrow"></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="employeelist.html">Employee List</a></li>
+                    <li><a href="newattendance.html">New Attendance</a></li>
+                    <li><a href="attendance_summary.html">Attendance Summary</a></li>
+                </ul>
             </li>
 
             <li class="menu-item">
@@ -316,38 +336,14 @@
                     <i class="fa-solid fa-chevron-down arrow"></i>
                 </div>
                 <ul class="sub-menu">
-                    <li><a href="#" class="close-menu-btn">Civil Construction</a></li>
-                    <li><a href="#" class="close-menu-btn">Modern Interior</a></li>
-                    <li><a href="#" class="close-menu-btn">Architectural Plan</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item">
-                <div class="icon-link">
-                    <i class="fa-solid fa-briefcase"></i>
-                    <span class="link_name">Projects Archive</span>
-                    <i class="fa-solid fa-chevron-down arrow"></i>
-                </div>
-                <ul class="sub-menu">
-                    <li><a href="#" class="close-menu-btn">Ongoing Projects</a></li>
-                    <li><a href="#" class="close-menu-btn">Completed Projects</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item">
-                <div class="icon-link">
-                    <i class="fa-solid fa-file-shield"></i>
-                    <span class="link_name">Documentation</span>
-                    <i class="fa-solid fa-chevron-down arrow"></i>
-                </div>
-                <ul class="sub-menu">
-                    <li><a href="#" class="close-menu-btn">Company Profile</a></li>
-                    <li><a href="#" class="close-menu-btn">Legal Papers</a></li>
+                    <li><a href="#">Civil Construction</a></li>
+                    <li><a href="#">Modern Interior</a></li>
+                    <li><a href="#">Architectural Plan</a></li>
                 </ul>
             </li>
 
             <li>
-                <a href="#" class="icon-link close-menu-btn">
+                <a href="#" class="icon-link">
                     <i class="fa-solid fa-comments"></i>
                     <span class="link_name">Contact Us</span>
                 </a>
@@ -366,30 +362,31 @@
 
         <div class="welcome-box" style="margin-bottom: 25px; padding: 10px;">
             <h2 style="color: var(--primary-blue); font-weight: 600;">Welcome, Admin! 👋</h2>
-            <p style="color: #7f8c8d; font-size: 14px;">Current status of ALAMHOW CO LTD.</p>
+            <p style="color: #7f8c8d; font-size: 14px;">Quick access to your HR and Project tools.</p>
         </div>
 
+        <!-- Dashboard Shortcuts -->
         <div class="dashboard-grid">
-            <div class="stat-card">
-                <i class="fa-solid fa-building-circle-check"></i>
-                <h4>Total Projects</h4>
-                <p>15</p>
-            </div>
-            <div class="stat-card">
-                <i class="fa-solid fa-truck-ramp-box"></i>
-                <h4>Ongoing</h4>
-                <p>05</p>
-            </div>
-            <div class="stat-card">
-                <i class="fa-solid fa-certificate"></i>
-                <h4>Completed</h4>
-                <p>10</p>
-            </div>
+            <a href="employeelist.html" class="stat-card">
+                <i class="fa-solid fa-user-group"></i>
+                <h4>Employees</h4>
+                <p>View List</p>
+            </a>
+            <a href="newattendance.html" class="stat-card">
+                <i class="fa-solid fa-calendar-check"></i>
+                <h4>Attendance</h4>
+                <p>Mark New</p>
+            </a>
+            <a href="attendance_summary.html" class="stat-card">
+                <i class="fa-solid fa-chart-line"></i>
+                <h4>Reports</h4>
+                <p>Summary</p>
+            </a>
         </div>
     </section>
 
     <nav class="bottom-nav">
-        <a href="#" class="nav-item active close-menu-btn">
+        <a href="index.html" class="nav-item active">
             <i class="fa-solid fa-home-alt"></i>
             <span>Home</span>
         </a>
@@ -397,13 +394,13 @@
             <i class="fa-solid fa-layer-group"></i>
             <span>Menu</span>
         </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-bell-concierge"></i>
-            <span>Notice</span>
+        <a href="attendance_summary.html" class="nav-item">
+            <i class="fa-solid fa-file-invoice"></i>
+            <span>Reports</span>
         </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-user-shield"></i>
-            <span>Profile</span>
+        <a href="employeelist.html" class="nav-item">
+            <i class="fa-solid fa-users-gear"></i>
+            <span>Staff</span>
         </a>
     </nav>
 
@@ -413,7 +410,6 @@
         const menuBtn = document.querySelector("#menuBtn");
         const mobileMenuTrigger = document.querySelector("#mobileMenuTrigger");
         const menuItems = document.querySelectorAll(".menu-item");
-        const closeMenuBtns = document.querySelectorAll(".close-menu-btn");
 
         function toggleSidebar() {
             sidebar.classList.toggle("active");
@@ -429,17 +425,12 @@
         mobileMenuTrigger.onclick = toggleSidebar;
         overlay.onclick = closeSidebar;
 
-        closeMenuBtns.forEach(btn => {
-            btn.addEventListener("click", () => {
-                closeSidebar();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            });
-        });
-
+        // Submenu Toggle logic
         menuItems.forEach((item) => {
             const iconLink = item.querySelector(".icon-link");
             
-            iconLink.onclick = function() {
+            iconLink.onclick = function(e) {
+                // If clicking an icon-link that has a sub-menu, prevent navigation if it's just a toggle
                 const isOpen = item.classList.contains("showMenu");
                 menuItems.forEach(i => i.classList.remove("showMenu"));
                 if (!isOpen) {
