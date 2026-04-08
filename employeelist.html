@@ -160,25 +160,63 @@
             }
         }
 
-      function renderTable(data) {
-            const head = document.getElementById('table-head');
-            const body = document.getElementById('table-body');
-            if(!data || data.length === 0) return;
+     function renderTable(data) {
+    const head = document.getElementById('table-head');
+    const body = document.getElementById('table-body');
+    if (!data || data.length === 0) return;
 
-            const headers = data[0];
-            head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-            
-            // অপ্টিমাইজড রেন্ডারিং: একবারে পুরো স্ট্রিং তৈরি করা
-            const rowsHtml = data.slice(1).map(row => {
-                if (!row[1] || row[1].toString().trim() === "") return "";
-                return `<tr>${row.map(cell => `<td>${cell || '-'}</td>`).join('')}</tr>`;
-            }).join('');
+    const headers = data[0];
+    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
 
-            body.innerHTML = rowsHtml;
-            document.getElementById('loader').style.display = 'none';
-            document.getElementById('table-display').style.display = 'block';
+    const rowsHtml = data.slice(1).map(row => {
+        if (!row[1] || row[1].toString().trim() === "") return "";
+
+        let periodDisplay = "-";
+        const joinDateStr = row[5]; // আপনার শিটে F কলাম (Index 5) যদি JOINING DATE হয়
+
+        if (joinDateStr && joinDateStr !== "-") {
+            try {
+                const parts = joinDateStr.split('/');
+                const joinDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                const today = new Date();
+
+                if (!isNaN(joinDate)) {
+                    let years = today.getFullYear() - joinDate.getFullYear();
+                    let months = today.getMonth() - joinDate.getMonth();
+                    
+                    if (months < 0 || (months === 0 && today.getDate() < joinDate.getDate())) {
+                        years--;
+                        months += 12;
+                    }
+                    
+                    // মোট মাস ক্যালকুলেশন
+                    const totalMonths = (years * 12) + months;
+
+                    if (totalMonths > 0) {
+                        // প্রধান টেক্সট: 15 Month
+                        // ছোট টেক্সট: 1 Year 3 Month (যদি বছর থাকে)
+                        let subPeriod = (years > 0) ? `<br><small style="color: #666; font-size: 11px;">${years} Year ${months} Month</small>` : "";
+                        
+                        periodDisplay = `<strong>${totalMonths} Month</strong>${subPeriod}`;
+                    } else {
+                        periodDisplay = "New Join";
+                    }
+                }
+            } catch (e) {
+                periodDisplay = "-";
+            }
         }
 
+        return `<tr>${row.map((cell, index) => {
+            if (index === 3) return `<td>${periodDisplay}</td>`; // D Column (Period)
+            return `<td>${cell || '-'}</td>`;
+        }).join('')}</tr>`;
+    }).join('');
+
+    body.innerHTML = rowsHtml;
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('table-display').style.display = 'block';
+}
         function openModal() {
             const nextSL = cachedData.length;
             let nextID = "ACL-0027";
