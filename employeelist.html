@@ -100,6 +100,7 @@
         <div class="action-section">
             <button class="add-btn" onclick="openModal()">+ ADD NEW EMPLOYEE</button>
             <input type="text" id="searchInput" class="search-box" placeholder="Search ID, Name...">
+            <button class="add-btn" style="background-color: #28a745;" onclick="downloadExcel()">DOWNLOAD </button>
         </div>
     </div>
 
@@ -271,7 +272,17 @@
                 tr.style.display = tr.innerText.toUpperCase().includes(val) ? "" : "none";
             });
         });
+ function downloadExcel() {
+    const table = document.getElementById("employeeTable");
+    let html = table.outerHTML;
 
+    // এক্সেল ফাইলের ফরম্যাট ঠিক করার জন্য ব্লব (Blob) তৈরি
+    const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+    const link = document.createElement("a");
+    link.download = "Employee_List_ALAMHOW.xls"; // ফাইলের নাম
+    link.href = url;
+    link.click();
+}
         window.onload = loadData;
     </script>
 </body>
