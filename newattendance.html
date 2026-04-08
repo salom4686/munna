@@ -279,13 +279,28 @@ window.onload = () => {
 // গিটহাব থেকে ডেটা ফেচ করার জন্য ফাংশন আপডেট করা হয়েছে
 async function refreshAllData(isManual) { 
     try {
-        // Employee Data Fetch
+        // যদি রিফ্রেশ বাটনে ক্লিক করা হয় (isManual = true)
+        if (isManual) {
+            // ১. ফরমে থাকা সব ইনপুট বক্স খালি করা
+            resetAllInputs(); 
+            
+            // ২. নিচে টেবিলের তালিকায় থাকা ডাটা মুছে ফেলা
+            attendanceData = []; 
+            slCount = 1; 
+            renderTable(); 
+            
+            // ৩. লোডার স্ক্রিন দেখানো
+            document.getElementById('loadingOverlay').classList.remove('fade-out');
+            document.getElementById('loadingTask').innerText = "Refreshing Database...";
+        }
+
+        // ৪. সার্ভার থেকে নতুন এমপ্লয়ি ডাটা আনা
         const empRes = await fetch(`${SCRIPT_URL}?action=getEmployeeData`);
         const empData = await empRes.json();
         employees = empData.map(emp => ({ ...emp, id: String(emp.id).padStart(4, '0') }));
         isEmployeeLoaded = true;
 
-        // Site Names Fetch
+        // ৫. সাইটের নামগুলো নতুন করে লোড করা
         const siteRes = await fetch(`${SCRIPT_URL}?action=getSideNames`);
         const sites = await siteRes.json();
         const siteSelect = document.getElementById('sideName');
@@ -294,10 +309,16 @@ async function refreshAllData(isManual) {
                 sites.map(s => `<option value="${s}">${s}</option>`).join('');
         }
         isSitesLoaded = true;
+
+        // ৬. লোডিং স্ক্রিন বন্ধ করা
         checkInitialLoad();
+
+        // রিফ্রেশ সফল হলে অ্যালার্ট দেখানো
+        if (isManual) {
+            showCustomAlert("Database Updated", "Input fields and table cleared successfully!", "success");
+        }
     } catch (err) {
         console.error("Loading Error:", err);
-        // যদি গুগল স্ক্রিপ্ট সরাসরি এক্সেস না দেয় তবে ১ সেকেন্ড পর অ্যাপ ওপেন হবে
         setTimeout(forceOpenApp, 1000); 
     }
 }
