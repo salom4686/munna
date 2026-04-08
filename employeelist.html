@@ -160,67 +160,24 @@
             }
         }
 
-       function renderTable(data) {
-    const head = document.getElementById('table-head');
-    const body = document.getElementById('table-body');
-    const headers = data[0]; 
+      function renderTable(data) {
+            const head = document.getElementById('table-head');
+            const body = document.getElementById('table-body');
+            if(!data || data.length === 0) return;
 
-    // হেডার তৈরি
-    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-    
-    let rows = "";
-    
-    // ১ নম্বর ইন্ডেক্স থেকে লুপ শুরু (ডাটা রো)
-    for(let i = 1; i < data.length; i++) {
-        let row = data[i];
+            const headers = data[0];
+            head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+            
+            // অপ্টিমাইজড রেন্ডারিং: একবারে পুরো স্ট্রিং তৈরি করা
+            const rowsHtml = data.slice(1).map(row => {
+                if (!row[1] || row[1].toString().trim() === "") return "";
+                return `<tr>${row.map(cell => `<td>${cell || '-'}</td>`).join('')}</tr>`;
+            }).join('');
 
-        // চেক করা হচ্ছে B কলাম (index 1) খালি কি না
-        // যদি B কলামে কোনো ডাটা না থাকে, তবে সেই রো এবং তার পরের সব বাদ যাবে
-        if (!row[1] || row[1].toString().trim() === "") {
-            continue; 
+            body.innerHTML = rowsHtml;
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('table-display').style.display = 'block';
         }
-
-        rows += "<tr>";
-        row.forEach((cell) => {
-            rows += `<td>${cell || '-'}</td>`;
-        });
-        rows += "</tr>";
-    }
-    
-    body.innerHTML = rows;
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('table-display').style.display = 'block';
-}function renderTable(data) {
-    const head = document.getElementById('table-head');
-    const body = document.getElementById('table-body');
-    const headers = data[0]; 
-
-    // হেডার তৈরি
-    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-    
-    let rows = "";
-    
-    // ১ নম্বর ইন্ডেক্স থেকে লুপ শুরু (ডাটা রো)
-    for(let i = 1; i < data.length; i++) {
-        let row = data[i];
-
-        // চেক করা হচ্ছে B কলাম (index 1) খালি কি না
-        // যদি B কলামে কোনো ডাটা না থাকে, তবে সেই রো এবং তার পরের সব বাদ যাবে
-        if (!row[1] || row[1].toString().trim() === "") {
-            continue; 
-        }
-
-        rows += "<tr>";
-        row.forEach((cell) => {
-            rows += `<td>${cell || '-'}</td>`;
-        });
-        rows += "</tr>";
-    }
-    
-    body.innerHTML = rows;
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('table-display').style.display = 'block';
-}
 
         function openModal() {
             const nextSL = cachedData.length;
