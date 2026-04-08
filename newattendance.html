@@ -60,6 +60,23 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* বাটনের ভেতরের স্পিনার স্টাইল */
+.spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #ffffff;
+    border-bottom-color: transparent;
+    border-radius: 50%;
+    display: inline-block;
+    animation: rotation 1s linear infinite;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+@keyframes rotation {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
         
         .fade-out { opacity: 0; pointer-events: none; visibility: hidden; }
 
@@ -159,7 +176,9 @@
                 <h2 class="text-xs font-black text-brand-blue uppercase tracking-[0.2em] flex items-center gap-2">
                     <i class="fas fa-user-circle text-brand-gold"></i> Employee Details
                 </h2>
-                <button onclick="refreshAllData(true)" class="text-[10px] bg-brand-blue text-white hover:bg-slate-800 px-4 py-2 rounded-lg font-bold transition-all shadow-sm">Refresh Database</button>
+                <button id="refreshBtn" onclick="refreshAllData(true)" class="text-[10px] bg-brand-blue text-white hover:bg-slate-800 px-4 py-2 rounded-lg font-bold transition-all shadow-sm flex items-center justify-center">
+    Refresh Database
+</button>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -278,29 +297,27 @@ window.onload = () => {
 
 // গিটহাব থেকে ডেটা ফেচ করার জন্য ফাংশন আপডেট করা হয়েছে
 async function refreshAllData(isManual) { 
+    const btn = document.getElementById('refreshBtn');
+    
     try {
-        // যদি রিফ্রেশ বাটনে ক্লিক করা হয় (isManual = true)
         if (isManual) {
-            // ১. ফরমে থাকা সব ইনপুট বক্স খালি করা
-            resetAllInputs(); 
+            // ১. বাটনের ভেতর লোডিং স্পিনার দেখানো
+            btn.innerHTML = `<span class="spinner"></span> Updating...`;
+            btn.disabled = true;
             
-            // ২. নিচে টেবিলের তালিকায় থাকা ডাটা মুছে ফেলা
-            attendanceData = []; 
-            slCount = 1; 
-            renderTable(); 
-            
-            // ৩. লোডার স্ক্রিন দেখানো
-            document.getElementById('loadingOverlay').classList.remove('fade-out');
-            document.getElementById('loadingTask').innerText = "Refreshing Database...";
+            // ২. ইনপুট এবং টেবিল ক্লিয়ার করা
+            resetAllInputs();
+            attendanceData = [];
+            slCount = 1;
+            renderTable();
         }
 
-        // ৪. সার্ভার থেকে নতুন এমপ্লয়ি ডাটা আনা
+        // ৩. ব্যাকগ্রাউন্ডে ডাটা ফেচ করা (পেজ ওপেন রেখেই)
         const empRes = await fetch(`${SCRIPT_URL}?action=getEmployeeData`);
         const empData = await empRes.json();
         employees = empData.map(emp => ({ ...emp, id: String(emp.id).padStart(4, '0') }));
         isEmployeeLoaded = true;
 
-        // ৫. সাইটের নামগুলো নতুন করে লোড করা
         const siteRes = await fetch(`${SCRIPT_URL}?action=getSideNames`);
         const sites = await siteRes.json();
         const siteSelect = document.getElementById('sideName');
@@ -310,19 +327,20 @@ async function refreshAllData(isManual) {
         }
         isSitesLoaded = true;
 
-        // ৬. লোডিং স্ক্রিন বন্ধ করা
-        checkInitialLoad();
-
-        // রিফ্রেশ সফল হলে অ্যালার্ট দেখানো
+        // ৪. কাজ শেষ হলে বাটন আগের অবস্থায় আনা
         if (isManual) {
-            showCustomAlert("Database Updated", "Input fields and table cleared successfully!", "success");
+            btn.innerHTML = `Refresh Database`;
+            btn.disabled = false;
+            showCustomAlert("Success", "Database updated & form cleared!", "success");
         }
     } catch (err) {
         console.error("Loading Error:", err);
-        setTimeout(forceOpenApp, 1000); 
+        if(btn) {
+            btn.innerHTML = `Refresh Database`;
+            btn.disabled = false;
+        }
     }
 }
-
 function checkInitialLoad() {
     if (isEmployeeLoaded && isSitesLoaded) {
         document.getElementById('loadingOverlay').classList.add('fade-out');
