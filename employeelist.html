@@ -147,15 +147,24 @@
 
         flatpickr("#regJoinDate", { dateFormat: "d/m/Y", theme: "material_blue" });
 
-        async function loadData() {
-            try {
-                const response = await fetch(`${scriptUrl}?type=json&sheet=EMPLOYEE%20LIST`);
-                cachedData = await response.json();
-                renderTable(cachedData);
-            } catch (e) { 
-                document.getElementById('loader').innerText = "ডাটা লোড করতে সমস্যা হচ্ছে!"; 
-            }
+       async function loadData() {
+    try {
+        const response = await fetch(`${scriptUrl}?type=json`);
+        const result = await response.json();
+        
+        // এখানে result.employees ব্যবহার করতে হবে কারণ Apps Script অবজেক্ট পাঠাচ্ছে
+        cachedData = result.employees; 
+        
+        if (cachedData && cachedData.length > 0) {
+            renderTable(cachedData);
+        } else {
+            document.getElementById('loader').innerText = "কোনো ডাটা পাওয়া যায়নি!";
         }
+    } catch (e) { 
+        console.error("Error loading data:", e);
+        document.getElementById('loader').innerText = "ডাটা লোড করতে সমস্যা হচ্ছে!"; 
+    }
+}
 
         function renderTable(data) {
     const head = document.getElementById('table-head');
