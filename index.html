@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>HOME</title>
+    <title>ALAMHOW CO LTD - Construction & Interior</title>
     <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
@@ -74,7 +75,7 @@
             }
         }
 
-        /* Logo Details - ব্যাকগ্রাউন্ড কালার সরিয়ে ফেলা হয়েছে */
+        /* সাইডবার লোগো সেকশন */
         .logo-details {
             height: 110px; 
             display: flex;
@@ -83,12 +84,12 @@
             padding: 15px;
             flex-shrink: 0;
             margin-bottom: 10px;
-            background-color: transparent; /* নেভি ব্লু বাদ দেওয়া হয়েছে */
+            background-color: transparent;
         }
 
         .logo-img-sidebar {
             width: 100%;
-            max-height: 70px;
+            max-height: 80px;
             object-fit: contain;
         }
 
@@ -117,11 +118,6 @@
             position: relative;
             width: 100%;
             min-height: 54px;
-        }
-
-        .icon-link:hover {
-            transform: translateY(-2px);
-            background: #25467d;
         }
 
         /* Home আইকন গোল্ডেন কালার */
@@ -202,7 +198,7 @@
             transform: translateX(5px);
         }
 
-        /* --- Interactive Sidebar Profile --- */
+        /* --- Interactive Sidebar Profile with Screen Center Zoom --- */
         .sidebar-profile {
             padding: 15px;
             margin: 15px;
@@ -216,28 +212,25 @@
             transition: var(--transition);
         }
 
-      /* প্রোফাইল ইমেজের মেইন স্টাইল */
-.sidebar-profile img {
-    width: 50px;
-    height: 50px;
-    border-radius: 10px;
-    border: 2px solid var(--accent-gold);
-    object-fit: cover;
-    background: white;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* স্মুথ ট্রানজিশন */
-    cursor: pointer;
-}
+        .sidebar-profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-gold);
+            object-fit: cover;
+            background: white;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
 
-/* মাউস নিলে ছবি স্ক্রিনের মাঝখানে আসার জাদু */
-.sidebar-profile:hover img {
-    position: fixed; /* স্ক্রিনের সাপেক্ষে পজিশন */
-    top: 50%;       /* উপর থেকে ৫০% */
-    left: 50%;      /* বাম থেকে ৫০% */
-    transform: translate(-50%, -50%) scale(5); /* মাঝখানে এনে ৫ গুণ বড় করা */
-    z-index: 9999;  /* সবকিছুর উপরে দেখাবে */
-    border-radius: 15px; /* বড় অবস্থায় কোণাগুলো একটু সুন্দর দেখাবে */
-    box-shadow: 0 0 100px rgba(0,0,0,0.5); /* চারপাশটা একটু অন্ধকার বা শ্যাডো দেখাবে */
-}
+        .sidebar-profile:hover img {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(5);
+            z-index: 9999;
+            border-radius: 15px;
+            box-shadow: 0 0 100px rgba(0,0,0,0.4);
+        }
 
         .profile-info {
             flex-grow: 1;
@@ -354,6 +347,29 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
         }
 
+        /* --- Footer Credit --- */
+        .dev-credit {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            font-size: 11px;
+            color: #7f8c8d;
+            z-index: 500;
+            pointer-events: none;
+            font-weight: 400;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
+            transition: var(--transition);
+        }
+
+        /* মোবাইলে বটম ন্যাভিগেশনের উপরে রাখার জন্য অ্যাডজাস্টমেন্ট */
+        @media (max-width: 1023px) {
+            .dev-credit {
+                bottom: 95px; /* বটম ন্যাভ বার এর উপরে */
+                right: 20px;
+            }
+        }
+
         /* --- Mobile Navigation --- */
         .bottom-nav {
             position: fixed;
@@ -399,9 +415,8 @@
     <div class="overlay" id="overlay"></div>
 
     <div class="sidebar" id="sidebar">
-        <!-- Logo Details -->
         <div class="logo-details">
-            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW LOGO" class="logo-img-sidebar">
+            <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" alt="ALAMHOW LOGO" class="logo-img-sidebar">
         </div>
         
         <ul class="nav-links">
@@ -419,9 +434,9 @@
                     <i class="fa-solid fa-chevron-down arrow"></i>
                 </div>
                 <ul class="sub-menu">
-                     <li><a href="newattendance.html" target="_blank">New Attendance</a></li>
-                     <li><a href="attendance_summary_update.html" target="_blank">Attendance Summary</a></li>
-                     <li><a href="employeelist.html" target="_blank">Employee List & New Add</a></li>
+                    <li><a href="employeelist.html" target="_blank">Employee List</a></li>
+                    <li><a href="newattendance.html" target="_blank">New Attendance</a></li>
+                    <li><a href="attendance_summary.html" target="_blank">Attendance Summary</a></li>
                 </ul>
             </li>
 
@@ -444,13 +459,11 @@
     </div>
 
     <section class="home-section">
-        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Watermark" class="watermark-bg">
+        <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" alt="Watermark" class="watermark-bg">
 
         <div class="top-bar">
             <i class="fa-solid fa-bars-staggered menu-btn" id="menuBtn"></i>
-            <div class="top-logo">
-                
-            </div>
+            <div class="top-logo"></div>
             <div class="user-profile">
                 <img src="https://lh3.googleusercontent.com/d/1BwgYqBZhoDA06poOi_cbByJEfmrTmN0u" alt="User" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--accent-gold); object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=Omar+Faruk&background=1b365d&color=fff'">
             </div>
@@ -462,6 +475,11 @@
                 <h2>ALAMHOW CO LTD</h2>
                 <div class="user-name">OMAR FARUK MUNNA</div>
             </div>
+        </div>
+
+        <!-- Footer Credit Added Here -->
+        <div class="dev-credit">
+            Developed by <b>SHOFIUL ALOM</b>
         </div>
     </section>
 
