@@ -215,20 +215,28 @@
             transition: var(--transition);
         }
 
-        .sidebar-profile img {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            border: 2px solid var(--accent-gold);
-            object-fit: cover;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: white;
-        }
+      /* প্রোফাইল ইমেজের মেইন স্টাইল */
+.sidebar-profile img {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    border: 2px solid var(--accent-gold);
+    object-fit: cover;
+    background: white;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* স্মুথ ট্রানজিশন */
+    cursor: pointer;
+}
 
-        .sidebar-profile:hover img {
-            transform: translateY(-15px) scale(1.1);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
+/* মাউস নিলে ছবি স্ক্রিনের মাঝখানে আসার জাদু */
+.sidebar-profile:hover img {
+    position: fixed; /* স্ক্রিনের সাপেক্ষে পজিশন */
+    top: 50%;       /* উপর থেকে ৫০% */
+    left: 50%;      /* বাম থেকে ৫০% */
+    transform: translate(-50%, -50%) scale(5); /* মাঝখানে এনে ৫ গুণ বড় করা */
+    z-index: 9999;  /* সবকিছুর উপরে দেখাবে */
+    border-radius: 15px; /* বড় অবস্থায় কোণাগুলো একটু সুন্দর দেখাবে */
+    box-shadow: 0 0 100px rgba(0,0,0,0.5); /* চারপাশটা একটু অন্ধকার বা শ্যাডো দেখাবে */
+}
 
         .profile-info {
             flex-grow: 1;
