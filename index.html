@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOME</title>
-    <link rel="icon" type="image/png" href="Logo.png">
-    <!-- FontAwesome Icon Set -->
+    <title>ALAMHOW CO LTD - Construction & Interior</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
 
         :root {
-            --primary-blue: #1b365d;      /* Logo Navy Blue */
-            --accent-gold: #e1b12c;       /* Logo Golden Yellow */
-            --sub-btn-bg: #25467d;        
-            --dark-bg: #10223d;            
+            --primary-blue: #1b365d;      
+            --accent-gold: #e1b12c;       
+            --unified-bg: #f4f7f6;
+            --submenu-bg: rgba(27, 54, 93, 0.08);        
+            --text-dark: #2d3436;
             --text-white: #ffffff;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            --sidebar-width: 300px;
+            --sidebar-width: 310px; 
         }
 
         * {
@@ -30,9 +29,11 @@
         }
 
         body {
-            background-color: #f0f2f5;
-            overflow-x: hidden;
-            padding-bottom: 70px; 
+            background-color: var(--unified-bg);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            color: var(--text-dark);
         }
 
         /* --- Sidebar Design --- */
@@ -42,97 +43,124 @@
             left: calc(-1 * var(--sidebar-width)); 
             height: 100%;
             width: var(--sidebar-width);
-            background: var(--primary-blue);
+            background-color: var(--unified-bg);
             z-index: 2000;
             transition: var(--transition);
-            box-shadow: 5px 0 25px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            border-right: none; 
         }
 
         .sidebar.active {
             left: 0;
+            box-shadow: 15px 0 30px rgba(0,0,0,0.02); 
         }
 
+        /* Desktop specific adjustments */
         @media (min-width: 1024px) {
             .sidebar {
                 left: 0;
-            }
-            .sidebar.close {
-                left: -300px;
             }
             .home-section {
                 margin-left: var(--sidebar-width);
                 width: calc(100% - var(--sidebar-width));
             }
-            .sidebar.close ~ .home-section {
-                margin-left: 0;
-                width: 100%;
-            }
             .bottom-nav {
                 display: none !important; 
             }
+            .menu-btn {
+                display: none !important;
+            }
         }
 
-        /* Logo Container */
+        /* Logo Details - ব্যাকগ্রাউন্ড কালার সরিয়ে ফেলা হয়েছে */
         .logo-details {
             height: 110px; 
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 10px 20px;
-            background: #fff; 
-            border-bottom: 3px solid var(--accent-gold);
+            padding: 15px;
+            flex-shrink: 0;
+            margin-bottom: 10px;
+            background-color: transparent; /* নেভি ব্লু বাদ দেওয়া হয়েছে */
         }
 
-        .logo-img {
+        .logo-img-sidebar {
             width: 100%;
-            max-width: 180px;
-            height: auto;
+            max-height: 70px;
             object-fit: contain;
         }
 
         .nav-links {
-            padding: 15px 0;
-            height: calc(100% - 110px);
+            padding: 5px 0;
+            flex-grow: 1;
             overflow-y: auto;
         }
 
         .nav-links li {
             list-style: none;
-            margin: 5px 15px;
+            margin: 8px 15px;
         }
 
         .icon-link {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            border-radius: 10px;
+            padding: 14px 15px;
+            border-radius: 14px;
+            background: var(--primary-blue);
             color: var(--text-white);
             text-decoration: none;
             transition: var(--transition);
             cursor: pointer;
+            box-shadow: 0 4px 12px rgba(27, 54, 93, 0.1);
+            position: relative;
+            width: 100%;
+            min-height: 54px;
         }
 
-        .icon-link:hover, .menu-item.showMenu .icon-link {
-            background: rgba(255,255,255,0.1);
-            color: var(--accent-gold);
+        .icon-link:hover {
+            transform: translateY(-2px);
+            background: #25467d;
         }
 
-        .icon-link i {
+        /* Home আইকন গোল্ডেন কালার */
+        .home-link i {
+            color: var(--accent-gold) !important;
+        }
+
+        .showMenu > .icon-link {
+            background: var(--accent-gold) !important;
+            color: var(--primary-blue) !important;
+        }
+
+        .showMenu > .icon-link i {
+            color: var(--primary-blue) !important;
+        }
+
+        .icon-link i:first-child {
             font-size: 18px;
-            min-width: 35px;
+            min-width: 25px;
+            margin-right: 10px;
+            flex-shrink: 0;
         }
 
         .link_name {
-            font-size: 15px;
+            font-size: 14px;
+            font-weight: 500;
             flex-grow: 1;
-            white-space: nowrap;
+            white-space: normal;
+            line-height: 1.3;
+            padding-right: 20px;
+            display: flex;
+            align-items: center;
         }
 
         .arrow {
             font-size: 12px;
             transition: transform 0.3s ease;
+            position: absolute;
+            right: 15px;
+            flex-shrink: 0;
         }
 
         .showMenu .arrow {
@@ -144,24 +172,27 @@
             overflow: hidden;
             transition: max-height 0.4s ease-out;
             list-style: none;
-            padding-left: 10px;
+            margin-top: 5px;
         }
 
         .showMenu .sub-menu {
             max-height: 400px;
-            margin-top: 5px;
+        }
+
+        .sub-menu li {
+            margin: 5px 0 5px 12px;
         }
 
         .sub-menu li a {
             display: block;
-            padding: 10px 15px;
-            color: #bdc3c7;
+            padding: 12px 15px;
+            color: var(--primary-blue);
             text-decoration: none;
-            font-size: 13px;
-            background: var(--sub-btn-bg);
-            margin: 4px 0;
-            border-radius: 8px;
+            font-size: 13.5px;
+            background: var(--submenu-bg);
+            border-radius: 10px;
             transition: var(--transition);
+            font-weight: 500;
         }
 
         .sub-menu li a:hover {
@@ -170,64 +201,165 @@
             transform: translateX(5px);
         }
 
-        /* --- Content Area --- */
-        .home-section {
-            min-height: 100vh;
+        /* --- Interactive Sidebar Profile --- */
+        .sidebar-profile {
+            padding: 15px;
+            margin: 15px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            cursor: pointer;
             transition: var(--transition);
-            padding: 20px;
+        }
+
+        .sidebar-profile img {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            border: 2px solid var(--accent-gold);
+            object-fit: cover;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: white;
+        }
+
+        .sidebar-profile:hover img {
+            transform: translateY(-15px) scale(1.1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .profile-info {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .profile-name {
+            display: block;
+            color: var(--text-dark);
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-role {
+            font-size: 11px;
+            color: #7f8c8d;
+            display: block;
+        }
+
+        .logout-btn {
+            color: #e74c3c;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        /* --- Main Content Section --- */
+        .home-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--unified-bg);
+        }
+
+        .watermark-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 500px;
+            opacity: 0.08; 
+            z-index: 0;
+            pointer-events: none;
         }
 
         .top-bar {
-            background: #fff;
-            padding: 10px 20px;
+            height: 70px;
+            padding: 0 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
+            z-index: 100;
         }
 
-        .top-bar .menu-btn {
-            font-size: 24px;
+        .menu-btn {
+            font-size: 22px;
             cursor: pointer;
             color: var(--primary-blue);
+            display: block;
         }
 
-        /* Header Logo */
-        .header-logo {
-            height: 45px;
-            width: auto;
-        }
-
-        .user-profile {
+        .main-content {
+            flex-grow: 1;
+            padding: 20px;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 10px;
+            z-index: 1;
         }
 
-        .user-profile img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 2px solid var(--accent-gold);
+        /* --- Welcome Layout --- */
+        .hero-banner {
+            padding: 30px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
         }
 
-        /* --- Mobile Bottom Navigation --- */
+        .hero-banner h1 {
+            color: var(--primary-blue);
+            font-size: clamp(24px, 7vw, 34px); 
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: 1.5px;
+        }
+
+        .hero-banner h2 {
+            color: var(--accent-gold);
+            font-size: clamp(16px, 5vw, 22px); 
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .hero-banner .user-name {
+            color: var(--text-dark);
+            font-size: clamp(13px, 4vw, 17px);
+            font-weight: 500;
+            background: #fff;
+            padding: 10px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+
+        /* --- Mobile Navigation --- */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            bottom: 20px;
+            left: 15px;
+            right: 15px;
             height: 65px;
-            background: #fff;
+            background-color: var(--unified-bg);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
             z-index: 1500;
-            border-top-left-radius: 25px;
-            border-top-right-radius: 25px;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .nav-item {
@@ -236,68 +368,21 @@
             align-items: center;
             text-decoration: none;
             color: #7f8c8d;
-            font-size: 11px;
-            transition: 0.3s;
+            font-size: 10px;
         }
 
-        .nav-item i {
-            font-size: 22px;
-            margin-bottom: 3px;
-        }
-
-        .nav-item.active {
-            color: var(--primary-blue);
-        }
+        .nav-item i { font-size: 20px; margin-bottom: 3px; }
 
         .overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(27, 54, 93, 0.4);
-            backdrop-filter: blur(4px);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(2px);
             z-index: 1800;
             display: none;
         }
 
-        .overlay.active {
-            display: block;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 15px;
-            margin-top: 10px;
-        }
-
-        .stat-card {
-            background: #fff;
-            padding: 20px;
-            border-radius: 18px;
-            text-align: center;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.02);
-            border-top: 4px solid var(--accent-gold);
-            text-decoration: none;
-            display: block;
-            transition: var(--transition);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-        }
-
-        .stat-card i {
-            font-size: 25px;
-            color: var(--primary-blue);
-            margin-bottom: 12px;
-        }
-
-        .stat-card h4 { font-size: 13px; color: #7f8c8d; margin-bottom: 5px; }
-        .stat-card p { font-size: 20px; font-weight: 700; color: var(--primary-blue); }
-
+        .overlay.active { display: block; }
     </style>
 </head>
 <body>
@@ -305,15 +390,16 @@
     <div class="overlay" id="overlay"></div>
 
     <div class="sidebar" id="sidebar">
+        <!-- Logo Details -->
         <div class="logo-details">
-            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW LOGO" class="logo-img">
+            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW LOGO" class="logo-img-sidebar">
         </div>
         
         <ul class="nav-links">
             <li>
-                <a href="index.html" class="icon-link">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    <span class="link_name">HOME</span>
+                <a href="javascript:void(0)" onclick="closeSidebar()" class="icon-link home-link">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="link_name">Home</span>
                 </a>
             </li>
 
@@ -324,84 +410,67 @@
                     <i class="fa-solid fa-chevron-down arrow"></i>
                 </div>
                 <ul class="sub-menu">
-                
-                    <li><a href="newattendance.html" target="_blank">New Attendance</a></li>
-                    <li><a href="attendance_summary_update.html" target="_blank">Attendance Summary</a></li>
                     <li><a href="employeelist.html" target="_blank">Employee List</a></li>
-                </ul>
-            </li>
-
-            <li class="menu-item">
-                <div class="icon-link">
-                    <i class="fa-solid fa-helmet-safety"></i>
-                    <span class="link_name">Services</span>
-                    <i class="fa-solid fa-chevron-down arrow"></i>
-                </div>
-                <ul class="sub-menu">
-                    <li><a href="#">Civil Construction</a></li>
-                    <li><a href="#">Modern Interior</a></li>
-                    <li><a href="#">Architectural Plan</a></li>
+                    <li><a href="newattendance.html" target="_blank">New Attendance</a></li>
+                    <li><a href="attendance_summary.html" target="_blank">Attendance Summary</a></li>
                 </ul>
             </li>
 
             <li>
-                <a href="#" class="icon-link">
-                    <i class="fa-solid fa-comments"></i>
-                    <span class="link_name">Contact Us</span>
+                <a href="attendance_summary.html" class="icon-link" target="_blank">
+                    <i class="fa-solid fa-file-invoice"></i>
+                    <span class="link_name">Reports</span>
                 </a>
             </li>
         </ul>
+
+        <div class="sidebar-profile">
+            <img src="https://lh3.googleusercontent.com/d/1BwgYqBZhoDA06poOi_cbByJEfmrTmN0u" alt="Admin Profile" onerror="this.src='https://ui-avatars.com/api/?name=Omar+Faruk&background=e1b12c&color=1b365d'">
+            <div class="profile-info">
+                <span class="profile-name">Md. Omar Faruk</span>
+                <span class="profile-role">Super Admin</span>
+            </div>
+            <i class="fa-solid fa-right-from-bracket logout-btn"></i>
+        </div>
     </div>
 
-    <section class="home-section" id="homeContent">
+    <section class="home-section">
+        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Watermark" class="watermark-bg">
+
         <div class="top-bar">
             <i class="fa-solid fa-bars-staggered menu-btn" id="menuBtn"></i>
-            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Logo" class="header-logo">
+            <div class="top-logo">
+                
+            </div>
             <div class="user-profile">
-                <img src="https://ui-avatars.com/api/?name=Admin&background=1b365d&color=fff" alt="User">
+                <img src="https://lh3.googleusercontent.com/d/1BwgYqBZhoDA06poOi_cbByJEfmrTmN0u" alt="User" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--accent-gold); object-fit: cover;" onerror="this.src='https://ui-avatars.com/api/?name=Omar+Faruk&background=1b365d&color=fff'">
             </div>
         </div>
 
-        <div class="welcome-box" style="margin-bottom: 25px; padding: 10px;">
-            <h2 style="color: var(--primary-blue); font-weight: 600;">Welcome, Admin! 👋</h2>
-            <p style="color: #7f8c8d; font-size: 14px;">Quick access to your HR and Project tools.</p>
-        </div>
-
-        <!-- Dashboard Shortcuts -->
-        <div class="dashboard-grid">
-            <a href="employeelist.html" class="stat-card">
-                <i class="fa-solid fa-user-group"></i>
-                <h4>Employees</h4>
-                <p>View List</p>
-            </a>
-            <a href="newattendance.html" class="stat-card">
-                <i class="fa-solid fa-calendar-check"></i>
-                <h4>Attendance</h4>
-                <p>Mark New</p>
-            </a>
-            <a href="attendance_summary_update.html" class="stat-card">
-                <i class="fa-solid fa-chart-line"></i>
-                <h4>Reports</h4>
-                <p>Summary</p>
-            </a>
+        <div class="main-content">
+            <div class="hero-banner">
+                <h1>WELCOME</h1>
+                <h2>ALAMHOW CO LTD</h2>
+                <div class="user-name">MD. OMAR FARUK MUNNA</div>
+            </div>
         </div>
     </section>
 
     <nav class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <i class="fa-solid fa-home-alt"></i>
+        <a href="javascript:void(0)" onclick="closeSidebar()" class="nav-item">
+            <i class="fa-solid fa-house"></i>
             <span>Home</span>
         </a>
-        <a href="#" class="nav-item" id="mobileMenuTrigger">
-            <i class="fa-solid fa-layer-group"></i>
+        <a href="javascript:void(0)" id="mobileMenuTrigger" class="nav-item">
+            <i class="fa-solid fa-bars"></i>
             <span>Menu</span>
         </a>
-        <a href="attendance_summary.html" class="nav-item">
-            <i class="fa-solid fa-file-invoice"></i>
+        <a href="attendance_summary.html" class="nav-item" target="_blank">
+            <i class="fa-solid fa-chart-pie"></i>
             <span>Reports</span>
         </a>
-        <a href="employeelist.html" class="nav-item">
-            <i class="fa-solid fa-users-gear"></i>
+        <a href="employeelist.html" class="nav-item" target="_blank">
+            <i class="fa-solid fa-user-tie"></i>
             <span>Staff</span>
         </a>
     </nav>
@@ -421,23 +490,19 @@
         function closeSidebar() {
             sidebar.classList.remove("active");
             overlay.classList.remove("active");
+            menuItems.forEach(i => i.classList.remove("showMenu"));
         }
 
         menuBtn.onclick = toggleSidebar;
         mobileMenuTrigger.onclick = toggleSidebar;
         overlay.onclick = closeSidebar;
 
-        // Submenu Toggle logic
         menuItems.forEach((item) => {
             const iconLink = item.querySelector(".icon-link");
-            
-            iconLink.onclick = function(e) {
-                // If clicking an icon-link that has a sub-menu, prevent navigation if it's just a toggle
+            iconLink.onclick = function() {
                 const isOpen = item.classList.contains("showMenu");
                 menuItems.forEach(i => i.classList.remove("showMenu"));
-                if (!isOpen) {
-                    item.classList.add("showMenu");
-                }
+                if (!isOpen) item.classList.add("showMenu");
             }
         });
     </script>
