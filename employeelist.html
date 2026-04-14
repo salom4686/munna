@@ -3,93 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee List</title>
+    <title>ALAMHOW Employee List</title>
     <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-   <style>
-    * { box-sizing: border-box; }
-    body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px 0; background-color: #f4f6f9; color: #333; }
-    
-    .search-container { max-width: 1600px; margin: 0 auto 20px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
-    .brand-section { display: flex; align-items: center; gap: 15px; flex: 1; }
-    .logo-img { height: 70px; width: auto; object-fit: contain; }
-    .list-title { font-size: 22px; font-weight: 700; color: #002147; text-transform: uppercase; border-bottom: 3px solid #FFD700; margin: 0; padding-bottom: 5px; white-space: nowrap; }
+    <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Roboto', sans-serif; margin: 0; padding: 20px 0; background-color: #f4f6f9; color: #333; }
+        
+        /* UI Styles */
+        .search-container { max-width: 1600px; margin: 0 auto 20px; padding: 0 30px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; }
+        .brand-section { display: flex; align-items: center; gap: 15px; flex: 1; }
+        .logo-img { height: 70px; width: auto; object-fit: contain; }
+        .list-title { font-size: 22px; font-weight: 700; color: #002147; text-transform: uppercase; border-bottom: 3px solid #FFD700; margin: 0; padding-bottom: 5px; white-space: nowrap; }
 
-    .action-section { display: flex; align-items: center; gap: 15px; justify-content: flex-end; flex: 1; }
-    .add-btn { background-color: #002147; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; white-space: nowrap; }
-    .add-btn:hover { background-color: #28a745; }
-    .search-box { width: 300px; padding: 10px 15px; border: 2px solid #002147; border-radius: 8px; outline: none; }
+        .action-section { display: flex; align-items: center; gap: 15px; justify-content: flex-end; flex: 1; }
+        .add-btn { background-color: #002147; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.3s; white-space: nowrap; }
+        .add-btn:hover { background-color: #28a745; }
+        .search-box { width: 300px; padding: 10px 15px; border: 2px solid #002147; border-radius: 8px; outline: none; }
 
-    .container { padding: 0 30px 40px; max-width: 1600px; margin: auto; }
-    .table-card { background: white; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.08); overflow: auto; max-height: 70vh; border: 1px solid #eee; }
-    
-    /* টেবিল লেআউট আপডেট */
-    table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: auto; }
-    
-    /* হেডার র‍্যাপ লজিক */
-    thead th { 
-        position: sticky; 
-        top: 0; 
-        background-color: #002147; 
-        color: white; 
-        padding: 12px 10px; 
-        text-align: left; 
-        z-index: 10; 
-        border-bottom: 2px solid #FFD700; 
-        white-space: normal;       /* লেখা নিচের লাইনে আসবে */
-        word-wrap: break-word;     /* বড় শব্দ ভেঙে দেবে */
-        line-height: 1.2;          /* লাইনের দূরত্ব */
-        vertical-align: middle; 
-        font-size: 13px;
-        min-width: 90px;           /* কলামের নূন্যতম চওড়া */
-    }
+        .container { padding: 0 30px 40px; max-width: 1600px; margin: auto; }
+        .table-card { background: white; border-radius: 12px; box-shadow: 0 5px 25px rgba(0,0,0,0.08); overflow: auto; max-height: 70vh; border: 1px solid #eee; }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: auto; }
+        
+        thead th { 
+            position: sticky; top: 0; background-color: #002147; color: white; padding: 12px 10px; 
+            text-align: left; z-index: 10; border-bottom: 2px solid #FFD700; font-size: 13px;
+        }
 
-    /* ডাটা সেল র‍্যাপ লজিক */
-    td { 
-        padding: 10px 12px; 
-        border-bottom: 1px solid #f0f0f0; 
-        font-size: 14px; 
-        white-space: normal;       /* ডাটাও প্রয়োজনে র‍্যাপ হবে */
-        word-wrap: break-word;
-        vertical-align: middle;
-    }
-    
-    tr:hover { background-color: #f8fbff; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: middle; }
+        tr:hover { background-color: #f8fbff; }
 
-    /* নির্দিষ্ট কিছু কলামের সাইজ কন্ট্রোল */
-    th:nth-child(1), td:nth-child(1) { min-width: 50px; text-align: center; } /* SL NO */
-    th:nth-child(3), td:nth-child(3) { min-width: 150px; font-weight: 500; } /* Name */
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
+        .modal-content { background: white; margin: 2% auto; padding: 30px; border-radius: 15px; width: 550px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+        .close-modal { position: absolute; right: 25px; top: 20px; font-size: 28px; cursor: pointer; color: #999; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        .form-group { display: flex; flex-direction: column; }
+        .form-group label { font-size: 11px; font-weight: 700; color: #555; margin-bottom: 4px; }
+        .required::after { content: " *"; color: red; }
+        .form-group input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
+        .full-width { grid-column: span 2; }
+        .submit-btn { grid-column: span 2; background: #002147; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 10px; }
+        
+        #loader { text-align: center; padding: 100px; font-weight: bold; font-size: 18px; color: #002147; }
 
-    /* Modal */
-    .modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-    .modal-content { background: white; margin: 2% auto; padding: 30px; border-radius: 15px; width: 550px; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
-    .close-modal { position: absolute; right: 25px; top: 20px; font-size: 28px; cursor: pointer; color: #999; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
-    .form-group { display: flex; flex-direction: column; }
-    .form-group label { font-size: 11px; font-weight: 700; color: #555; margin-bottom: 4px; }
-    .required::after { content: " *"; color: red; }
-    .form-group input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; outline: none; }
-    .full-width { grid-column: span 2; }
-    .submit-btn { grid-column: span 2; background: #002147; color: white; padding: 14px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; margin-top: 10px; }
-    
-    #loader { text-align: center; padding: 100px; font-weight: bold; font-size: 18px; color: #002147; }
-   /* পিডিএফ এর জন্য বিশেষ স্টাইল */
-.pdf-mode {
-    width: 100% !important;
-    font-size: 9px !important; /* লেখা ছোট হবে যেন কলাম না কাটে */
-}
-.pdf-mode th, .pdf-mode td {
-    padding: 6px 4px !important; /* প্যাডিং কমিয়ে জায়গা বাড়ানো হয়েছে */
-    border: 1px solid #ccc !important;
-    white-space: normal !important;
-    word-wrap: break-word !important;
-}
-</style>
+        /* PDF Specific Styles */
+        .pdf-mode-active { background-color: white !important; padding: 0 !important; }
+        
+        .pdf-header-print { display: none; text-align: center; padding-bottom: 15px; }
+        .pdf-mode-active .pdf-header-print { display: block !important; }
+        .pdf-header-print h1 { font-size: 24px; color: black; margin: 0; text-transform: uppercase; }
+        .pdf-header-print .pdf-timestamp { font-size: 10px; color: #333; margin-top: 5px; font-weight: 500; }
+
+        .pdf-mode-active .table-card { overflow: visible !important; max-height: none !important; box-shadow: none !important; border: none !important; }
+        .pdf-mode-active table { width: 100% !important; border-collapse: collapse !important; table-layout: auto !important; }
+        
+        .pdf-mode-active thead { display: table-header-group !important; }
+        
+        .pdf-mode-active th { 
+            background-color: #f2f2f2 !important; 
+            color: black !important; 
+            border: 0.2pt solid black !important; 
+            font-size: 10px !important; 
+            padding: 8px 4px !important; 
+            white-space: nowrap !important;
+            text-align: left !important;
+        }
+
+        .pdf-mode-active td { 
+            border: 0.2pt solid black !important; 
+            color: black !important; 
+            font-size: 9px !important; 
+            padding: 5px 6px !important; 
+            white-space: nowrap !important;
+            text-align: left !important;
+        }
+
+        .pdf-mode-active .action-section, 
+        .pdf-mode-active .add-btn, 
+        .pdf-mode-active .search-box, 
+        .pdf-mode-active .logo-img { display: none !important; }
+
+        .pdf-mode-active tr { page-break-inside: avoid !important; }
+    </style>
 </head>
 <body>
 
@@ -99,16 +101,14 @@
             <h2 class="list-title">EMPLOYEE LIST</h2>
         </div>
         <div class="action-section">
-   
-    <button class="add-btn" onclick="openModal()">+ ADD NEW EMPLOYEE</button>
-    <input type="text" id="searchInput" class="search-box" placeholder="Search ID, Name...">
-     <button class="add-btn" style="background-color: #28a745;" onclick="downloadExcel()">DOWNLOAD EXCELL</button>
-     <button class="add-btn" style="background-color: #d9534f;" onclick="downloadPDF()">DOWNLOAD PDF</button>
-    
-</div>
-        
+            <button class="add-btn" onclick="openModal()">+ ADD NEW EMPLOYEE</button>
+            <input type="text" id="searchInput" class="search-box" placeholder="Search ID, Name...">
+            <button class="add-btn" style="background-color: #28a745;" onclick="downloadExcel()">DOWNLOAD EXCEL</button>
+            <button class="add-btn" style="background-color: #d9534f;" onclick="downloadPDF()">DOWNLOAD PDF</button>
+        </div>
     </div>
 
+    <!-- Modal -->
     <div id="entryModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal()">×</span>
@@ -130,8 +130,15 @@
         </div>
     </div>
 
-    <div class="container">
+    <div class="container" id="printableContent">
         <div id="loader">Data Loading, Please Wait...</div>
+        
+        <!-- Header for PDF only -->
+        <div class="pdf-header-print">
+            <h1>EMPLOYEE LIST</h1>
+            <div id="pdf-date-time" class="pdf-timestamp"></div>
+        </div>
+
         <div class="table-card" id="table-display" style="display: none;">
             <table id="employeeTable">
                 <thead id="table-head"></thead>
@@ -147,82 +154,71 @@
 
         flatpickr("#regJoinDate", { dateFormat: "d/m/Y", theme: "material_blue" });
 
-       async function loadData() {
-    try {
-        const response = await fetch(`${scriptUrl}?type=json`);
-        const result = await response.json();
-        
-        // এখানে result.employees ব্যবহার করতে হবে কারণ Apps Script অবজেক্ট পাঠাচ্ছে
-        cachedData = result.employees; 
-        
-        if (cachedData && cachedData.length > 0) {
-            renderTable(cachedData);
-        } else {
-            document.getElementById('loader').innerText = "কোনো ডাটা পাওয়া যায়নি!";
-        }
-    } catch (e) { 
-        console.error("Error loading data:", e);
-        document.getElementById('loader').innerText = "ডাটা লোড করতে সমস্যা হচ্ছে!"; 
-    }
-}
-
-        function renderTable(data) {
-    const head = document.getElementById('table-head');
-    const body = document.getElementById('table-body');
-    if (!data || data.length === 0) return;
-
-    const headers = data[0];
-    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
-
-    const rowsHtml = data.slice(1).map(row => {
-        if (!row[1] || row[1].toString().trim() === "") return "";
-
-        let periodDisplay = "-";
-        const joinDateStr = row[5]; // আপনার শিটে F কলাম (Index 5) যদি JOINING DATE হয়
-
-        if (joinDateStr && joinDateStr !== "-") {
+        async function loadData() {
             try {
-                const parts = joinDateStr.split('/');
-                const joinDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                const today = new Date();
-
-                if (!isNaN(joinDate)) {
-                    let years = today.getFullYear() - joinDate.getFullYear();
-                    let months = today.getMonth() - joinDate.getMonth();
-                    
-                    if (months < 0 || (months === 0 && today.getDate() < joinDate.getDate())) {
-                        years--;
-                        months += 12;
-                    }
-                    
-                    // মোট মাস ক্যালকুলেশন
-                    const totalMonths = (years * 12) + months;
-
-                    if (totalMonths > 0) {
-                        // প্রধান টেক্সট: 15 Month
-                        // ছোট টেক্সট: 1 Year 3 Month (যদি বছর থাকে)
-                        let subPeriod = (years > 0) ? `<br><small style="color: #666; font-size: 11px;">${years} Year ${months} Month</small>` : "";
-                        
-                        periodDisplay = `<strong>${totalMonths} Month</strong>${subPeriod}`;
-                    } else {
-                        periodDisplay = "New Join";
-                    }
+                const response = await fetch(`${scriptUrl}?type=json`);
+                const result = await response.json();
+                cachedData = result.employees; 
+                if (cachedData && cachedData.length > 0) {
+                    renderTable(cachedData);
+                } else {
+                    document.getElementById('loader').innerText = "কোনো ডাটা পাওয়া যায়নি!";
                 }
-            } catch (e) {
-                periodDisplay = "-";
+            } catch (e) { 
+                console.error("Error loading data:", e);
+                document.getElementById('loader').innerText = "ডাটা লোড করতে সমস্যা হচ্ছে!"; 
             }
         }
 
-        return `<tr>${row.map((cell, index) => {
-            if (index === 3) return `<td>${periodDisplay}</td>`; // D Column (Period)
-            return `<td>${cell || '-'}</td>`;
-        }).join('')}</tr>`;
-    }).join('');
+        function renderTable(data) {
+            const head = document.getElementById('table-head');
+            const body = document.getElementById('table-body');
+            if (!data || data.length === 0) return;
 
-    body.innerHTML = rowsHtml;
-    document.getElementById('loader').style.display = 'none';
-    document.getElementById('table-display').style.display = 'block';
-}
+            const headers = data[0];
+            head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>`;
+
+            const rowsHtml = data.slice(1).map(row => {
+                if (!row[1] || row[1].toString().trim() === "") return "";
+
+                let periodDisplay = "-";
+                const joinDateStr = row[5]; 
+
+                if (joinDateStr && joinDateStr !== "-") {
+                    try {
+                        const parts = joinDateStr.split('/');
+                        const joinDate = new Date(parts[2], parts[1] - 1, parts[0]);
+                        const today = new Date();
+
+                        if (!isNaN(joinDate)) {
+                            let years = today.getFullYear() - joinDate.getFullYear();
+                            let months = today.getMonth() - joinDate.getMonth();
+                            if (months < 0 || (months === 0 && today.getDate() < joinDate.getDate())) {
+                                years--;
+                                months += 12;
+                            }
+                            const totalMonths = (years * 12) + months;
+                            if (totalMonths > 0) {
+                                let yearPart = (years > 0) ? `${years} Year ` : "";
+                                let monthPart = `${months} Month`;
+                                periodDisplay = `${totalMonths} Month - ( ${yearPart}${monthPart} )`;
+                            } else {
+                                periodDisplay = "New Join";
+                            }
+                        }
+                    } catch (e) { periodDisplay = "-"; }
+                }
+
+                return `<tr>${row.map((cell, index) => {
+                    if (index === 3) return `<td>${periodDisplay}</td>`; 
+                    return `<td>${cell || '-'}</td>`;
+                }).join('')}</tr>`;
+            }).join('');
+
+            body.innerHTML = rowsHtml;
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('table-display').style.display = 'block';
+        }
 
         function openModal() {
             const nextSL = cachedData.length;
@@ -243,7 +239,6 @@
             e.preventDefault();
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Saving..."; btn.disabled = true;
-
             const payload = {
                 sl: document.getElementById('regSL').value,
                 id: document.getElementById('regID').value,
@@ -255,13 +250,8 @@
                 salary: document.getElementById('regSalary').value,
                 otRate: document.getElementById('regOT').value
             };
-
             try {
-                await fetch(scriptUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                });
+                await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                 alert("Employee Added Successfully!");
                 location.reload();
             } catch (err) {
@@ -277,45 +267,57 @@
                 row.style.display = row.innerText.toUpperCase().includes(val) ? "" : "none";
             }
         });
+
         function downloadExcel() {
-    const table = document.getElementById("employeeTable");
-    let html = table.outerHTML;
-
-    // এক্সেল ফাইলের ফরম্যাট ঠিক করার জন্য ব্লব (Blob) তৈরি
-    const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
-    const link = document.createElement("a");
-    link.download = "Employee_List_ALAMHOW.xls"; // ফাইলের নাম
-    link.href = url;
-    link.click();
-}
-function downloadPDF() {
-    const element = document.getElementById('employeeTable');
-    
-    // পিডিএফ অপশন কনফিগারেশন
-    const opt = {
-        margin:       [10, 5, 10, 5], // [top, left, bottom, right]
-        filename:     'Employee_List_ALAMHOW.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { 
-            scale: 3, // রেজোলিউশন বাড়াবে যাতে লেখা ঝাপসা না হয়
-            useCORS: true, 
-            letterRendering: true 
-        },
-        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' } // আড়াআড়ি পেজ
-    };
-
-    // ডাউনলোড শুরু
-    html2pdf().set(opt).from(element).toPdf().get('pdf').then(function (pdf) {
-        var totalPages = pdf.internal.getNumberOfPages();
-        for (var i = 1; i <= totalPages; i++) {
-            pdf.setPage(i);
-            pdf.setFontSize(10);
-            pdf.setTextColor(150);
-            // পেজের নিচে ফুটার যোগ করা (ঐচ্ছিক)
-            pdf.text('ALAMHOW Employee Management System - Page ' + i, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 5, { align: 'center' });
+            const table = document.getElementById("employeeTable");
+            let html = table.outerHTML;
+            const url = 'data:application/vnd.ms-excel,' + encodeURIComponent(html);
+            const link = document.createElement("a");
+            link.download = "Employee_List_ALAMHOW.xls";
+            link.href = url;
+            link.click();
         }
-    }).save();
-}
+
+        function downloadPDF() {
+            const element = document.getElementById('printableContent');
+            const body = document.body;
+            
+            // Generate Date and Time for header
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-GB'); 
+            const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+            document.getElementById('pdf-date-time').innerText = `Report Generated Date: ${dateStr} | Time: ${timeStr}`;
+
+            body.classList.add('pdf-mode-active');
+
+            const opt = {
+                margin: [10, 5, 15, 5], // Bottom margin increased for footer
+                filename: 'Employee_List_ALAMHOW.pdf',
+                image: { type: 'jpeg', quality: 1 },
+                html2canvas: { 
+                    scale: 3, 
+                    useCORS: true,
+                    letterRendering: true,
+                    backgroundColor: '#ffffff'
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape', compress: true }
+            };
+
+            // Custom function for page numbering
+            html2pdf().from(element).set(opt).toPdf().get('pdf').then(function (pdf) {
+                const totalPages = pdf.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    pdf.setPage(i);
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(50);
+                    // Position at bottom center
+                    pdf.text('Page ' + i + ' of ' + totalPages, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+                }
+            }).save().then(() => {
+                body.classList.remove('pdf-mode-active');
+            });
+        }
+
         window.onload = loadData;
     </script>
 </body>
