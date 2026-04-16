@@ -191,20 +191,39 @@
     </div>
 
     <div id="mainContent" class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700 no-print">
-        <header class="bg-white border border-slate-200 py-4 mb-6 shadow-sm mx-auto mt-2 rounded-2xl max-w-[98%] md:max-w-7xl">
-            <div class="px-4">
-                <div class="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
-                    <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="w-20 h-20 md:w-24 md:h-24 object-contain">
-                    <div class="text-center md:text-left md:border-l-2 md:border-slate-200 md:pl-8 py-1">
-                        <h1 class="text-xl md:text-2xl font-extrabold text-[#1e3a5f] tracking-tight uppercase leading-none">
-                            ALAMHOW <span class="text-[#f1c40f]">CO LTD</span>
-                        </h1>
-                        <p class="text-[9px] md:text-[10px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-1">Daily Attendance Form</p>
-                    </div>
+      <header class="bg-white border border-slate-200 py-4 mb-6 shadow-sm mx-auto mt-2 rounded-2xl max-w-[98%] md:max-w-7xl">
+    <div class="px-4">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+                <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="w-20 h-20 md:w-24 md:h-24 object-contain">
+                <div class="text-center md:text-left md:border-l-2 md:border-slate-200 md:pl-8 py-1">
+                    <h1 class="text-xl md:text-2xl font-extrabold text-[#1e3a5f] tracking-tight uppercase leading-none">
+                        ALAMHOW <span class="text-[#f1c40f]">CO LTD</span>
+                    </h1>
+                    <p class="text-[9px] md:text-[10px] font-bold text-slate-500 tracking-[0.3em] uppercase mt-1">Daily Attendance Form</p>
                 </div>
             </div>
-        </header>
 
+            <div class="flex flex-col items-center md:items-end gap-2">
+                <div class="flex items-center gap-2 font-mono">
+                    <div id="clockHH" class="bg-white text-[#1e3a5f] font-black text-2xl md:text-3xl px-3 py-2 rounded-xl border border-slate-200 shadow-[0_5px_0_#cbd5e1,inset_0_1px_1px_white] min-w-[55px] text-center">00</div>
+                    
+                    <div class="text-[#1e3a5f] font-bold text-2xl animate-pulse">:</div>
+
+                    <div id="clockMM" class="bg-white text-[#1e3a5f] font-black text-2xl md:text-3xl px-3 py-2 rounded-xl border border-slate-200 shadow-[0_5px_0_#cbd5e1,inset_0_1px_1px_white] min-w-[55px] text-center">00</div>
+
+                    <div class="text-[#1e3a5f] font-bold text-2xl animate-pulse">:</div>
+
+                    <div id="clockSS" class="bg-white text-[#1e3a5f] font-black text-2xl md:text-3xl px-3 py-2 rounded-xl border border-slate-200 shadow-[0_5px_0_#cbd5e1,inset_0_1px_1px_white] min-w-[55px] text-center">00</div>
+
+                    <div id="clockAP" class="ml-1 bg-[#1e3a5f] text-white font-black text-xs px-2 py-1 rounded-lg shadow-[0_3px_0_#0f172a] border border-slate-800 self-start mt-1">AM</div>
+                </div>
+
+                <div id="digitalDate" class="text-[10px] font-extrabold text-[#1e3a5f] uppercase tracking-widest px-2">LOADING...</div>
+            </div>
+        </div>
+    </div>
+</header>
         <!-- Employee Details -->
         <div class="card p-5 mb-5 border-l-8 border-[#1e3a5f]">
             <div class="flex justify-between items-center mb-4">
@@ -357,10 +376,36 @@
                 document.getElementById('mainContent').classList.remove('opacity-0');
             }
         }
+        
+        // ডিজিটাল ঘড়ি ফাংশন
+function updateClock() {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
 
-        // --- Server Edit Functions ---
-        function openEditModal() { document.getElementById('editSheetModal').style.display = 'flex'; }
-        function closeEditModal() { document.getElementById('editSheetModal').style.display = 'none'; }
+    // ১২ ঘণ্টার ফরম্যাট
+    hours = hours % 12;
+    hours = hours ? hours : 12; // ০ হলে ১২ দেখাবে
+    const hStr = String(hours).padStart(2, '0');
+
+    // ডাটা বসানো
+    if(document.getElementById('clockHH')) document.getElementById('clockHH').innerText = hStr;
+    if(document.getElementById('clockMM')) document.getElementById('clockMM').innerText = minutes;
+    if(document.getElementById('clockSS')) document.getElementById('clockSS').innerText = seconds;
+    if(document.getElementById('clockAP')) document.getElementById('clockAP').innerText = ampm;
+
+    // তারিখ (Day, Month Date)
+    const options = { weekday: 'short', month: 'short', day: 'numeric' };
+    if(document.getElementById('digitalDate')) {
+        document.getElementById('digitalDate').innerText = now.toLocaleDateString('en-US', options);
+    }
+}
+
+setInterval(updateClock, 1000);
+updateClock();
+
 
         async function fetchDataForEdit() {
             const date = document.getElementById('editQueryDate').value;
@@ -480,18 +525,28 @@
             } else box.style.display = 'none';
         }
 
-       function selectEmployee(emp) {
+      function selectEmployee(emp) {
     document.getElementById('empId').value = emp.id;
     document.getElementById('empName').value = emp.name;
     document.getElementById('passport').value = emp.passport || '';
     
-    // ১. ইনপুটে শুধুমাত্র M কলামের ডাটা (Designation) দেখাবে
-    document.getElementById('designation').value = emp.designation || '';
+    const desig = (emp.designation || '').trim();
+    document.getElementById('designation').value = desig;
     
-    // ২. J কলামের ডাটা (WorkingAs) আমরা একটি টেম্পোরারি প্রপার্টিতে রাখছি যা পরে সেভ হবে
-    // ইনপুটে এটি দেখাবে না
+    const siteSelect = document.getElementById('sideName');
+
+    // লজিক: Cook হলে KITCHEN সিলেক্ট হবে এবং লক (Disabled) হয়ে যাবে
+    if (desig.toLowerCase() === 'cook') {
+        siteSelect.value = 'KITCHEN';
+        siteSelect.disabled = true; // রিডঅনলী করার জন্য
+        siteSelect.classList.add('bg-gray-100', 'cursor-not-allowed'); // স্টাইল পরিবর্তন
+    } else {
+        siteSelect.value = ''; 
+        siteSelect.disabled = false; // অন্যদের জন্য আনলক
+        siteSelect.classList.remove('bg-gray-100', 'cursor-not-allowed');
+    }
+    
     window.currentWorkingAs = emp.workingAs || ''; 
-    
     document.getElementById('joiningDate').value = emp.joining || '';
     document.getElementById('period').value = emp.period || '';
     document.getElementById('basicSalary').value = emp.salary || '0';
@@ -506,7 +561,7 @@ function requestAddEntry() {
     const attDate = document.getElementById('attDate').value;
     const site = document.getElementById('sideName').value;
     
-    // ভ্যালিডেশন: ডাটা না থাকলে ফোকাস ফিরিয়ে নিয়ে যাবে এবং সতর্ক করবে
+    // ভ্যালিডেশন
     if(!rawEmpId) {
         document.getElementById('empId').focus();
         return showCustomAlert("Missing ID", "Please search and select an Employee first!", "warning");
@@ -527,11 +582,8 @@ function requestAddEntry() {
         empId: "'" + formattedId,
         empName: document.getElementById('empName').value,
         period: document.getElementById('period').value || '',
-        
-        // ৩. শিটে সেভ করার জন্য ম্যাপিং
-        designation: document.getElementById('designation').value, // এটি শিটের H কলামে যাবে
-        workingAs: window.currentWorkingAs || document.getElementById('designation').value, // এটি শিটের J কলামে যাবে
-        
+        designation: document.getElementById('designation').value,
+        workingAs: window.currentWorkingAs || document.getElementById('designation').value,
         joiningDate: document.getElementById('joiningDate').value || '',
         passport: document.getElementById('passport').value || '',
         salary: document.getElementById('basicSalary').value || 0,
@@ -559,13 +611,46 @@ function requestAddEntry() {
     }
     
     renderTable(); 
-    resetAllInputs(); // এই ফাংশনের ভেতরেই ID ইনপুটে ফোকাস করার লজিক দেওয়া আছে
-    
-    // সেভ হওয়ার পর টেম্পোরারি ডাটা ক্লিয়ার করা
-    window.currentWorkingAs = "";
+    resetAllInputs(); // ইনপুট ক্লিয়ার করার ফাংশন কল
+    window.currentWorkingAs = ""; 
 }
 
+function resetAllInputs() {
+    const inputsToClear = [
+        'attDate', 'sideName', 'dailyOt', 'holidayWork', 'sundayWork', 
+        'empId', 'empName', 'passport', 'designation', 'joiningDate', 
+        'period', 'basicSalary', 'globalOtRate'
+    ];
 
+    inputsToClear.forEach(id => { 
+        let el = document.getElementById(id);
+        if(el) {
+            el.value = ""; 
+            // সাইট সিলেকশন ফিল্ডটিকে আবার সচল করা
+            if(id === 'sideName') {
+                el.disabled = false;
+                el.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
+        }
+    });
+
+    if(datePicker) datePicker.clear(); 
+    if(document.getElementById('attStatus')) document.getElementById('attStatus').value = "Present"; 
+    if(document.getElementById('attRemark')) document.getElementById('attRemark').value = "NORMAL WORK";
+    
+    editModeId = null;
+    let addBtn = document.getElementById('addBtn');
+    if(addBtn) {
+        addBtn.innerText = "Add"; 
+        addBtn.classList.remove('bg-orange-500');
+        addBtn.classList.add('bg-[#1e3a5f]');
+    }
+
+    setTimeout(() => {
+        const searchInput = document.getElementById('empId');
+        if(searchInput) searchInput.focus();
+    }, 100);
+}
         function renderTable() {
             const tbody = document.getElementById('attendanceBody');
             tbody.innerHTML = ''; let tOt = 0, tHol = 0, tSun = 0;
@@ -641,34 +726,7 @@ function requestAddEntry() {
         }
 
         function clearTable() { attendanceData = []; slCount = 1; renderTable(); }
-       function resetAllInputs() {
-    // সব ইনপুট ক্লিয়ার করা
-    const inputs = ['empId', 'empName', 'passport', 'designation', 'joiningDate', 'period', 'basicSalary', 'globalOtRate', 'dailyOt', 'holidayWork', 'sundayWork'];
-    inputs.forEach(id => { 
-        if(document.getElementById(id)) document.getElementById(id).value = ""; 
-    });
-    
-    // ড্রপডাউন এবং ডিফল্ট ভ্যালু রিসেট
-    document.getElementById('attStatus').value = "Present"; 
-    document.getElementById('attRemark').value = "NORMAL WORK";
-    
-    // তারিখ এবং এডিট মোড রিসেট
-    if(datePicker) datePicker.clear(); 
-    editModeId = null;
-    
-    // বাটন টেক্সট রিসেট
-    document.getElementById('addBtn').innerText = "Add"; 
-    document.getElementById('addBtn').classList.replace('bg-orange-500', 'bg-[#1e3a5f]');
-
-    // গুরুত্বপূর্ণ: কার্সরকে ID / Name Search ইনপুটে নিয়ে যাওয়া
-    setTimeout(() => {
-        const searchInput = document.getElementById('empId');
-        if(searchInput) {
-            searchInput.focus();
-        }
-    }, 100);
-}
-
+       
         function closeAlert() { document.getElementById('customAlert').style.display = 'none'; document.getElementById('alertCancelBtn').classList.add('hidden'); document.getElementById('alertOkBtn').onclick = closeAlert; }
         function showCustomAlert(title, msg, type = 'error') {
             const container = document.getElementById('alertIconContainer');
