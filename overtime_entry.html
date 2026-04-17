@@ -1,1 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OVER TIME POSTING</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        .worker-row.selected { background-color: #f0f7ff; border-left: 4px solid #1e3a5f; }
+        .ot-input { width: 70px; text-align: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 4px; font-weight: bold; transition: opacity 0.2s; }
+        
+        .input-hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+        .input-visible { opacity: 1; pointer-events: auto; visibility: visible; }
+        
+        .checkbox-custom { width: 20px; height: 20px; cursor: pointer; accent-color: #1e3a5f; }
 
+        .loader {
+            border: 3px solid #f3f3f3; border-top: 3px solid #1e3a5f;
+            border-radius: 50%; width: 20px; height: 20px;
+            animation: spin 1s linear infinite; display: inline-block;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .suggestion-box {
+            position: absolute; top: 100%; left: 0; right: 0;
+            background: white; border: 1px solid #e2e8f0;
+            border-radius: 0 0 12px 12px; max-height: 300px;
+            overflow-y: auto; z-index: 100; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        .suggestion-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+        .suggestion-item:hover { background-color: #f0f7ff; }
+
+        #previewModal, #messageModal {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
+            display: none; align-items: center; justify-content: center; z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        #loadingOverlay {
+            position: fixed; inset: 0; background: rgba(255,255,255,0.95);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 1100; transition: opacity 0.5s;
+        }
+        .fade-out { opacity: 0; pointer-events: none; }
+
+        .section-hidden { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
+        .section-visible { display: flex; opacity: 1; transform: translateY(0); }
+        .table-visible { display: table; }
+
+        @media print {
+            @page { size: A4 landscape; margin: 10mm; }
+            body { background: white !important; padding: 0 !important; }
+            .no-print { display: none !important; }
+            #previewModal { position: static; display: block; background: white; backdrop-filter: none; z-index: auto; }
+            .bg-white { box-shadow: none !important; border: none !important; width: 100% !important; max-width: none !important; margin: 0 !important; }
+            .print-header { display: block !important; margin-bottom: 20px; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
+            .print-title { font-size: 18pt; font-weight: bold; text-transform: uppercase; }
+            table { width: 100%; border-collapse: collapse !important; margin-top: 10px; table-layout: fixed; }
+            th { background-color: #f2f2f2 !important; color: black !important; border: 1pt solid #000 !important; font-weight: bold !important; padding: 8px !important; text-transform: uppercase; font-size: 9pt; }
+            td { border: 1pt solid #000 !important; padding: 8px !important; font-size: 9pt; color: black !important; word-wrap: break-word; vertical-align: middle; }
+            .signature-section { display: flex !important; justify-content: space-between; margin-top: 70px; padding: 0 20px; }
+            .sig-box { border-top: 1.5pt solid #000; width: 200px; text-align: center; font-size: 9pt; padding-top: 5px; font-weight: bold; }
+            .overflow-y-auto { overflow: visible !important; max-height: none !important; }
+        }
+    </style>
+</head>
+<body class="p-2 md:p-6">
+
+    <!-- লোডিং স্ক্রিন -->
+    <div id="loadingOverlay">
+        <div class="loader mb-4" style="width: 50px; height: 50px; border-width: 5px;"></div>
+        <p class="font-bold text-[#1e3a5f]">LOADING PLEASE WAIT...</p>
+    </div>
+
+    <!-- কাস্টম মেসেজ বক্স (অ্যালার্টের বিকল্প) -->
+    <div id="messageModal">
+        <div class="bg-white rounded-2xl w-full max-w-sm mx-4 overflow-hidden shadow-2xl p-6 text-center transform transition-all scale-95">
+            <div id="msgIcon" class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"></div>
+            <h3 id="msgTitle" class="text-xl font-bold text-slate-800 mb-2">Notice</h3>
+            <p id="msgBody" class="text-slate-500 text-sm mb-6 leading-relaxed"></p>
+            <button onclick="closeMessage()" class="w-full py-3 rounded-xl bg-[#1e3a5f] text-white font-bold text-sm uppercase shadow-lg hover:bg-slate-800 transition-all">
+                Dismiss
+            </button>
+        </div>
+    </div>
+
+    <!-- প্রিভিউ এবং প্রিন্ট মোডাল -->
+    <div id="previewModal">
+        <div class="bg-white rounded-2xl w-full max-w-6xl mx-4 overflow-hidden shadow-2xl transition-all">
+            <div class="bg-[#1e3a5f] p-4 text-white flex justify-between items-center no-print">
+                <h2 class="font-bold uppercase text-sm tracking-wider">PREVIEW REPORT</h2>
+                <div class="flex gap-2">
+                    <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 text-xs font-bold uppercase">
+                        Print 
+                    </button>
+                    <button onclick="closePreview()" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-6 md:p-10" id="printArea">
+                <div class="hidden print-header">
+                    <div class="print-title">DAILY OVERTIME REPORT</div>
+                </div>
+
+                <div class="flex flex-col md:flex-row justify-between mb-6 gap-4  print:flex-row print:justify-between print:mb-4  print:text-black">
+                    <div class="flex flex-row gap-2 items-baseline">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 print:text-[10pt] print:text-black">PROJECT NAME:</span>
+                        <span id="printSite" class="text-xl font-bold text-[#1e3a5f] print:text-[11pt] print:text-black uppercase">-</span>
+                    </div>
+                    <div class="flex flex-row gap-2 items-baseline md:justify-end">
+                        <span class="text-[10px] uppercase font-bold text-slate-400 print:text-[10pt] print:text-black">DATE:</span>
+                        <span id="printDate" class="text-xl font-bold text-slate-700 print:text-[11pt] print:text-black uppercase">-</span>
+                    </div>
+                </div>
+
+                <div class="max-h-[55vh] overflow-y-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-[#1e3a5f] text-white print:bg-[#1e3a5f] print:text-white">
+                                <th class="w-12 text-center p-4 text-[11px] font-bold uppercase border border-slate-700">SL</th>
+                                <th class="w-28 p-4 text-[11px] font-bold uppercase border border-slate-700">EMPLOYEE ID</th>
+                                <th class="w-60 p-4 text-[11px] font-bold uppercase border border-slate-700">EMPLOYEE NAME</th>
+                                <th class="w-48 p-4 text-[11px] font-bold uppercase border border-slate-700">DESIGNATION</th>
+                                <th class="w-24 text-center p-4 text-[11px] font-bold uppercase border border-slate-700">TOTAL HR</th>
+                                <th class="p-4 text-[11px] font-bold uppercase border border-slate-700">Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewBody" class="divide-y divide-slate-100 print:divide-black"></tbody>
+                        <tfoot>
+                            <tr class="bg-slate-50 font-bold print:bg-white">
+                                <td colspan="4" class="p-4 text-right">Total Summary:</td>
+                                <td id="totalOTCell" class="p-4 text-center text-blue-600 print:text-black">0</td>
+                                <td class="p-4">TOTAL EMPLOYEES: <span id="previewCount">0</span></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <div class="hidden signature-section">
+                    <div class="sig-box">Prepared By </div>
+                    <div class="sig-box">Verified By </div>
+                    <div class="sig-box">Authorized Signature</div>
+                </div>
+            </div>
+
+            <div class="p-6 bg-slate-50 border-t flex justify-end gap-3 no-print">
+                <button onclick="closePreview()" class="px-6 py-2 rounded-lg font-bold text-slate-500 hover:bg-slate-200 text-xs uppercase transition-all"> ←↲ Back</button>
+                <button onclick="confirmAndSave()" id="finalSaveBtn" class="bg-green-600 text-white px-8 py-2 rounded-lg font-bold text-sm uppercase shadow-lg hover:bg-green-700 transition-all">Confirm Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- মেইন ইন্টারফেস -->
+    <div class="max-w-6xl mx-auto no-print">
+        <header class="bg-[#1e3a5f] rounded-2xl p-6 mb-6 shadow-xl text-white">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <h1 class="text-3xl font-black tracking-tight uppercase">OVERTIME MANAGEMENT SYSTEM</h1>
+                    <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mt-1 opacity-80">Efficiency in employee management</p>
+                </div>
+                
+                <div class="flex flex-wrap gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold uppercase mb-1 text-white/50">Overtime Date</label>
+                        <input type="text" id="targetDate" placeholder="Select Date" class="bg-white text-slate-900 px-3 py-2 rounded-lg font-bold text-sm w-40 outline-none focus:ring-2 ring-yellow-400">
+                    </div>
+                    <div class="flex flex-col">
+                        <label class="text-[10px] font-bold uppercase mb-1 text-white/50">Select Project</label>
+                        <select id="targetSite" class="bg-white text-slate-900 px-3 py-2 rounded-lg font-bold text-sm w-48 outline-none focus:ring-2 ring-yellow-400">
+                            <option value="">Choose Project</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="fetchWorkersFromDatabase()" id="loadBtn" class="bg-yellow-400 text-[#1e3a5f] px-6 py-2 rounded-lg font-black text-sm uppercase hover:bg-yellow-300 transition-all shadow-lg">
+                            Load List
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <div id="mainContentSection" class="section-hidden grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            <div class="md:col-span-12 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="relative w-full md:w-96">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2"></path></svg>
+                    </span>
+                    <input type="text" id="searchInput" 
+                        onfocus="handleSearchInput(this)" 
+                        onclick="handleSearchInput(this)"
+                        onkeyup="handleSearchInput(this)" 
+                        placeholder="Search ID or Name..." 
+                        class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl w-full text-sm outline-none focus:border-blue-500 transition-all" 
+                        autocomplete="off">
+                    <div id="suggestionBox" class="suggestion-box"></div>
+                </div>
+                
+                <div id="actionBar" class="opacity-0 pointer-events-none transition-all flex items-center gap-6">
+                    <div class="text-right">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase">Selected Employees</p>
+                        <p id="selectedCount" class="text-2xl font-black text-blue-600 leading-none">0</p>
+                    </div>
+                    <button onclick="openPreview()" id="saveBtn" class="bg-[#1e3a5f] text-white px-10 py-3 rounded-xl font-bold text-sm uppercase shadow-xl hover:bg-blue-900 transition-all flex items-center gap-2">
+                        PREVIEW
+                </div>
+            </div>
+
+            <div class="md:col-span-12 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table id="workerTable" class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50/80 border-b border-slate-200">
+                            <tr>
+                                <th class="p-4 w-16 text-center">
+                                    <input type="checkbox" id="selectAll" onclick="toggleAll(this)" class="checkbox-custom">
+                                </th>
+                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Employee ID</th>
+                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Designation</th>
+                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Total Hours</th>
+                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody id="workerTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="initialPlaceholder" class="bg-white rounded-2xl p-20 border border-dashed border-slate-300 flex flex-col items-center justify-center gap-4 text-center">
+            <div class="p-4 bg-slate-50 rounded-full">
+                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="1.5"></path></svg>
+            </div>
+            <div>
+                <p class="text-slate-400 font-medium">Please select Date and Project first, then click "Load List"</p>
+                <p id="lastUpdateDisplay" class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mt-2">Checking server Connection...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl opacity-0 transition-all transform translate-y-4 pointer-events-none z-[2000]"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3tnMiKNH9Vap8WD0oj0Y_Ywu_Gr4jLtQpaxx9trB3SI6OXCzucYoDgeJnM3EALYn2/exec";
+        let employees = [], currentSites = [], preparedData = [];
+
+        // --- কাস্টম মেসেজ বক্স হ্যান্ডলার ---
+        function showMessage(title, body, type = 'info') {
+            const modal = document.getElementById('messageModal');
+            const iconBox = document.getElementById('msgIcon');
+            const titleEl = document.getElementById('msgTitle');
+            const bodyEl = document.getElementById('msgBody');
+
+            titleEl.innerText = title;
+            bodyEl.innerText = body;
+
+            // টাইপ অনুযায়ী স্টাইলিং
+            if(type === 'error') {
+                iconBox.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-100 text-red-600";
+                iconBox.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"></path></svg>`;
+            } else if(type === 'success') {
+                iconBox.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-100 text-green-600";
+                iconBox.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="2"></path></svg>`;
+            } else {
+                iconBox.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-blue-100 text-blue-600";
+                iconBox.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"></path></svg>`;
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeMessage() {
+            document.getElementById('messageModal').style.display = 'none';
+        }
+
+        // উইন্ডো লোড হওয়ার পর ডাটাবেজ থেকে সাইট এবং এমপ্লয়ি লিস্ট আনা
+        window.onload = async () => {
+            flatpickr("#targetDate", { dateFormat: "Y-m-d", placeholder: "Select Date" });
+            fetchLastUpdate(); 
+            try {
+                const [empRes, siteRes] = await Promise.all([
+                    fetch(`${SCRIPT_URL}?action=getEmployeeData`),
+                    fetch(`${SCRIPT_URL}?action=getSideNames`)
+                ]);
+                employees = await empRes.json();
+                currentSites = await siteRes.json();
+                const siteSelect = document.getElementById('targetSite');
+                siteSelect.innerHTML = '<option value="">Choose Site</option>' + 
+                    currentSites.map(s => `<option value="${s}">${s}</option>`).join('');
+                document.getElementById('loadingOverlay').classList.add('fade-out');
+            } catch (err) {
+                console.error("Load Error:", err);
+                document.getElementById('loadingOverlay').innerHTML = `<p class='text-red-500 font-bold'>Database connection failed.</p>`;
+            }
+        };
+
+        // শেষবার কখন আপডেট করা হয়েছে তা দেখানো
+        async function fetchLastUpdate() {
+            const display = document.getElementById('lastUpdateDisplay');
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getLastUpdate`);
+                const text = await response.text();
+                try {
+                    const data = JSON.parse(text);
+                    if (data.date && data.date !== "-") {
+                        display.innerHTML = `LAST OVERTIME UPDATE: <span class="text-[#1e3a5f]">${data.date}</span> AT <span class="text-[#1e3a5f]">${data.time}</span>`;
+                    } else {
+                        display.innerText = "NO PREVIOUS OVERTIME RECORDS FOUND";
+                    }
+                } catch (jsonErr) {
+                    if (text.includes("Active")) {
+                        display.innerText = "DATABASE CONNECTED: READY TO LOAD";
+                    } else {
+                        display.innerText = "UPDATE INFO: " + text.substring(0, 50);
+                    }
+                }
+            } catch (err) {
+                display.innerText = "COULD NOT FETCH UPDATE INFO";
+            }
+        }
+
+        // সার্চ ইনপুট এবং সাজেশনের কাজ
+        function handleSearchInput(input) {
+            const query = input.value.trim().toLowerCase();
+            const box = document.getElementById('suggestionBox');
+            if (employees.length === 0) return;
+
+            const filtered = query === "" 
+                ? employees.slice(0, 15) 
+                : employees.filter(e => String(e.id).includes(query) || e.name.toLowerCase().includes(query)).slice(0, 10);
+
+            if (filtered.length > 0) {
+                box.innerHTML = filtered.map(e => `
+                    <div class="suggestion-item" onclick="selectFromSuggestion('${e.id}')">
+                        <div>
+                            <div class="font-bold text-slate-800">ID: ${e.id}</div>
+                            <div class="text-[10px] text-slate-500 uppercase font-bold">${e.name}</div>
+                        </div>
+                        <div class="text-[10px] text-blue-500 font-black">SELECT</div>
+                    </div>`).join('');
+                box.style.display = 'block';
+            } else { 
+                box.style.display = 'none'; 
+            }
+            if (query !== "") filterTable(query);
+        }
+
+        // সাজেশন থেকে কর্মী সিলেক্ট করলে টেবিলের ওই রো-তে নিয়ে যাওয়া
+        function selectFromSuggestion(id) {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('suggestionBox').style.display = 'none';
+            const row = document.getElementById(`row-${id}`);
+            if (row) {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const checkbox = row.querySelector('.worker-check');
+                if(!checkbox.checked) { checkbox.checked = true; toggleRow(id, true); }
+                else { document.getElementById(`ot-${id}`).focus(); }
+            }
+        }
+
+        // টেবিল ফিল্টার করা
+        function filterTable(q) {
+            document.querySelectorAll('.worker-row').forEach(r => { r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none"; });
+        }
+
+        // ডাটাবেজ থেকে কর্মী তালিকা লোড করে টেবিল তৈরি করা
+        function fetchWorkersFromDatabase() {
+            const date = document.getElementById('targetDate').value;
+            const site = document.getElementById('targetSite').value;
+            
+            if(!date || !site) {
+                return showMessage("Missing Information", "Please select both Date and Site before loading the list.", "error");
+            }
+            
+            document.getElementById('initialPlaceholder').style.display = 'none';
+            const mainContent = document.getElementById('mainContentSection');
+            mainContent.classList.remove('section-hidden');
+            mainContent.classList.add('section-visible');
+
+            const tbody = document.getElementById('workerTableBody');
+            tbody.innerHTML = '';
+            employees.forEach(w => {
+                const row = document.createElement('tr');
+                row.className = 'worker-row transition-all hover:bg-slate-50';
+                row.id = `row-${w.id}`;
+                row.innerHTML = `
+                    <td class="p-4 text-center"><input type="checkbox" class="checkbox-custom worker-check" onchange="toggleRow('${w.id}', true)"></td>
+                    <td class="p-4"><div class="font-bold text-sm">${w.name}</div><div class="text-[10px] text-slate-400 font-bold">ID: ${w.id}</div></td>
+                    <td class="p-4 text-slate-500 text-xs uppercase">${w.designation || 'Worker'}</td>
+                    <td class="p-4 text-center">
+                        <input type="number" step="0.5" id="ot-${w.id}" class="ot-input text-sm input-hidden" placeholder="0.0">
+                    </td>
+                    <td class="p-4">
+                        <input type="text" id="remark-${w.id}" placeholder="Note..." class="bg-transparent border-b border-slate-100 text-xs w-full input-hidden">
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+            updateSelectedCount();
+        }
+
+        // কোনো রো সিলেক্ট করলে ইনপুট ফিল্ড দেখানো
+        function toggleRow(id, shouldFocus = false) {
+            const row = document.getElementById(`row-${id}`);
+            const checkbox = row.querySelector('.worker-check');
+            const otInput = document.getElementById(`ot-${id}`);
+            const remInput = document.getElementById(`remark-${id}`);
+            
+            if(checkbox.checked) {
+                row.classList.add('selected'); 
+                otInput.classList.remove('input-hidden');
+                otInput.classList.add('input-visible');
+                remInput.classList.remove('input-hidden');
+                remInput.classList.add('input-visible');
+                if(shouldFocus) setTimeout(() => otInput.focus(), 50);
+            } else {
+                row.classList.remove('selected'); 
+                otInput.classList.remove('input-visible');
+                otInput.classList.add('input-hidden');
+                remInput.classList.remove('input-visible');
+                remInput.classList.add('input-hidden');
+                otInput.value = ''; remInput.value = '';
+            }
+            updateSelectedCount();
+        }
+
+        // সব রো একবারে সিলেক্ট বা আনসিলেক্ট করা
+        function toggleAll(master) {
+            document.querySelectorAll('.worker-check').forEach(c => { 
+                c.checked = master.checked; 
+                toggleRow(c.closest('tr').id.replace('row-', ''), false);
+            });
+        }
+
+        // সিলেক্ট করা কর্মীর সংখ্যা আপডেট করা
+        function updateSelectedCount() {
+            const count = document.querySelectorAll('.worker-check:checked').length;
+            document.getElementById('selectedCount').innerText = count;
+            
+            const actionBar = document.getElementById('actionBar');
+            if (count > 0) {
+                actionBar.classList.remove('opacity-0', 'pointer-events-none');
+                actionBar.classList.add('opacity-100');
+            } else {
+                actionBar.classList.add('opacity-0', 'pointer-events-none');
+                actionBar.classList.remove('opacity-100');
+            }
+        }
+
+        // প্রিন্ট এবং সেভ করার আগে রিভিউ দেখানো
+        function openPreview() {
+            const selectedChecks = document.querySelectorAll('.worker-check:checked');
+            if(selectedChecks.length === 0) {
+                return showMessage("Selection Empty", "Please select at least one worker.", "error");
+            }
+            
+            const date = document.getElementById('targetDate').value;
+            const site = document.getElementById('targetSite').value;
+            const previewBody = document.getElementById('previewBody');
+            previewBody.innerHTML = '';
+            preparedData = [];
+            let totalOT = 0;
+            let count = 0;
+
+            selectedChecks.forEach((check) => {
+                const id = check.closest('tr').id.replace('row-', '');
+                const otRaw = document.getElementById(`ot-${id}`).value;
+                if(otRaw === "" || parseFloat(otRaw) <= 0) return;
+                
+                const emp = employees.find(e => String(e.id) === String(id));
+                const ot = parseFloat(otRaw);
+                const remark = document.getElementById(`remark-${id}`).value || "-";
+                totalOT += ot;
+                count++;
+                preparedData.push({
+                    date: date, empId: id, empName: emp.name, site: site, ot: ot, remark: remark
+                });
+                previewBody.innerHTML += `<tr><td class="text-center">${count}</td><td>${id}</td><td class="font-bold">${emp.name}</td><td>${emp.designation || '-'}</td><td class="text-center font-bold">${ot}</td><td>${remark}</td></tr>`;
+            });
+
+            if(preparedData.length === 0) {
+                return showMessage("Invalid Data", "Please provide valid 'OT Hours' for selected workers.", "error");
+            }
+            
+            document.getElementById('printDate').innerText = date;
+            document.getElementById('printSite').innerText = site;
+            document.getElementById('previewCount').innerText = preparedData.length;
+            document.getElementById('totalOTCell').innerText = totalOT.toFixed(1);
+            document.getElementById('previewModal').style.display = 'flex';
+        }
+
+        function closePreview() { document.getElementById('previewModal').style.display = 'none'; }
+
+        // ডাটাবেজে কনফার্ম করে আপলোড করা
+        async function confirmAndSave() {
+            const saveBtn = document.getElementById('finalSaveBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = `<span class="loader"></span> SAVING...`;
+            try {
+                const response = await fetch(SCRIPT_URL, { 
+                    method: 'POST', 
+                    mode: 'no-cors', 
+                    body: JSON.stringify({ action: "dualUpdate", data: preparedData }) 
+                });
+                
+                showToast(`Success: ${preparedData.length} records saved!`, "success");
+                fetchLastUpdate();
+
+                document.querySelectorAll('.worker-check:checked').forEach(c => {
+                    c.checked = false; toggleRow(c.closest('tr').id.replace('row-', ''), false);
+                });
+                closePreview();
+                
+                // সফল আপলোড মেসেজ
+                showMessage("Success", "Overtime records have been uploaded successfully.", "success");
+                
+            } catch (err) { 
+                showMessage("Upload Failed", "An error occurred while uploading data. Please try again.", "error");
+            } 
+            finally { saveBtn.disabled = false; saveBtn.innerText = "Confirm & Upload"; }
+        }
+
+        // ছোট টোস্ট মেসেজ দেখানো
+        function showToast(msg, type) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl transition-all z-[2000] ${type === 'success' ? 'bg-green-600' : 'bg-slate-900'} text-white opacity-100`;
+            setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+        }
+    </script>
+</body>
+</html>
