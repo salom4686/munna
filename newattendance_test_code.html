@@ -37,6 +37,27 @@
             transition: all 0.4s ease;
         }
 
+        /* কাস্টম অ্যালার্টের উন্নত স্টাইল */
+.modern-alert {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* স্মুথ বাউন্স ইফেক্ট */
+    transform: scale(0.7); /* শুরুতে ছোট থাকবে */
+    opacity: 0;
+}
+
+.modern-alert.show {
+    transform: scale(1); /* আসার সময় বড় হয়ে আসবে */
+    opacity: 1;
+}
+
+/* ট্রান্সপারেন্ট গ্লাস ইফেক্ট */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.6) !important;
+    backdrop-filter: blur(15px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+}
+
         .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .input-group label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--brand-blue); margin-bottom: 0.15rem; text-transform: uppercase; }
         .input-field { width: 100%; padding: 0.4rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; outline: none; font-size: 0.8rem; background-color: white; }
@@ -56,6 +77,34 @@
             border-radius: 50%; width: 50px; height: 50px;
             animation: spin 1s linear infinite;
         }
+
+        /* ১. ফুল স্ক্রিন স্পিনারের জন্য (মাঝখানে বড় হয়ে ঘুরবে) */
+#loadingOverlay.processing-mode {
+    background: rgba(255, 255, 255, 0.4); /* স্বচ্ছ ব্যাকগ্রাউন্ড */
+    backdrop-filter: blur(8px) saturate(150%); /* প্রিমিয়াম ব্লার ইফেক্ট */
+    display: flex !important;
+}
+
+/* ২. মডার্ন অ্যালার্ট অ্যানিমেশন */
+.modern-alert {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: scale(0.8);
+    opacity: 0;
+}
+
+.modern-alert.show {
+    transform: scale(1);
+    opacity: 1;
+}
+
+/* ৩. ট্রান্সপারেন্ট গ্লাস ইফেক্ট (আইফোনের মতো স্টাইল) */
+.glass-effect {
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .spinner {
@@ -322,7 +371,7 @@
             "2026-09-23", "2026-11-02", "2026-11-08", "2026-12-22", "2026-12-25"
         ];
 
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw0EmLttIPFImHkDNnOMZT2__bHzfs8Rq97myl-RfYWZiwDUm4f6G0ngjvPjp_J8IuJ/exec";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXvgqHyhnZK1tM2fa_xWpdhvP-Xc3js1Iln_NlJazcuScoe6lZg5qAmBnnBz_5Vw_W/exec";
 
         window.onload = () => {
             datePicker = flatpickr("#attDate", { 
@@ -339,36 +388,74 @@
             });
         };
 
-        async function refreshAllData(isManual) { 
-            const btn = document.getElementById('refreshBtn');
-            const mainContent = document.getElementById('mainContent');
-            try {
-                if (isManual) {
-                    btn.innerHTML = `<span class="spinner"></span> Updating...`;
-                    btn.disabled = true;
-                    mainContent.classList.add('screen-lock-blur');
-                }
-                const [empRes, siteRes] = await Promise.all([
-                    fetch(`${SCRIPT_URL}?action=getEmployeeData`),
-                    fetch(`${SCRIPT_URL}?action=getSideNames`)
-                ]);
-                const empData = await empRes.json();
-                employees = empData.map(emp => ({ ...emp, id: String(emp.id).padStart(4, '0') }));
-                currentSites = await siteRes.json();
-                const siteSelect = document.getElementById('sideName');
-                if(siteSelect) {
-                    siteSelect.innerHTML = '<option value="" selected disabled>Select Site</option>' + 
-                        currentSites.map(s => `<option value="${s}">${s}</option>`).join('');
-                }
-                isEmployeeLoaded = true; isSitesLoaded = true;
-                if (isManual) {
-                    btn.innerHTML = `Refresh Database`; btn.disabled = false;
-                    mainContent.classList.remove('screen-lock-blur');
-                    showCustomAlert("Success", "Database updated successfully!", "success");
-                }
-                checkInitialLoad();
-            } catch (err) { console.error(err); if(btn) { btn.innerHTML = `Refresh Database`; btn.disabled = false; } }
+       // শুরুতে নতুন ভেরিয়েবলগুলো ডিক্লেয়ার করে নিন (যদি আগে না থাকে)
+let holidaySheetData = []; 
+let currentMonthAttendance = [];
+
+async function refreshAllData(isManual) { 
+    const btn = document.getElementById('refreshBtn');
+    const mainContent = document.getElementById('mainContent');
+    
+    try {
+        if (isManual) {
+            btn.innerHTML = `<span class="spinner"></span> Updating...`;
+            btn.disabled = true;
+            mainContent.classList.add('screen-lock-blur');
         }
+
+        // ১. বর্তমান মাসের নাম তৈরি করা (যেমন: April-2026)
+        const now = new Date();
+        const currentMonthName = now.toLocaleString('en-US', { month: 'long' }) + "-" + now.getFullYear();
+
+        // ২. একসাথে ৪টি শিট থেকে ডাটা কল করা
+        const [empRes, siteRes, holiRes, attRes] = await Promise.all([
+            fetch(`${SCRIPT_URL}?action=getEmployeeData`),
+            fetch(`${SCRIPT_URL}?action=getSideNames`),
+            fetch(`${SCRIPT_URL}?action=getHolidayData`),
+            fetch(`${SCRIPT_URL}?action=getAttendanceSheetData&month=${currentMonthName}`)
+        ]);
+
+        // ৩. রেসপন্সগুলোকে JSON এ রূপান্তর
+        const empData = await empRes.json();
+        const siteData = await siteRes.json();
+        const holiData = await holiRes.json();
+        const monthlyAttData = await attRes.json();
+
+        // ৪. ডাটাগুলো ভেরিয়েবলে সেট করা
+        employees = empData.map(emp => ({ ...emp, id: String(emp.id).padStart(4, '0') }));
+        currentSites = siteData;
+        holidaySheetData = holiData; // সার্ভার থেকে আসা হলিডে লিস্ট
+        currentMonthAttendance = monthlyAttData; // কারেন্ট মাসের সকল এন্ট্রি
+
+        // ৫. সাইট ড্রপডাউন (Select Box) আপডেট করা
+        const siteSelect = document.getElementById('sideName');
+        if(siteSelect) {
+            siteSelect.innerHTML = '<option value="" selected disabled>Select Site</option>' + 
+                currentSites.map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+
+        isEmployeeLoaded = true; 
+        isSitesLoaded = true;
+
+        if (isManual) {
+            btn.innerHTML = `Refresh Database`; 
+            btn.disabled = false;
+            mainContent.classList.remove('screen-lock-blur');
+            showCustomAlert("Success", `Database updated! Loaded ${currentMonthAttendance.length} entries for ${currentMonthName}`, "success");
+        }
+        
+        checkInitialLoad();
+        console.log("System Synced for:", currentMonthName);
+
+    } catch (err) { 
+        console.error("Refresh Error:", err); 
+        if(btn) { 
+            btn.innerHTML = `Refresh Database`; 
+            btn.disabled = false; 
+        }
+        showCustomAlert("Sync Failed", "Could not connect to Google Sheets", "error");
+    }
+}
 
         function checkInitialLoad() {
             if (isEmployeeLoaded && isSitesLoaded) {
@@ -561,25 +648,34 @@ function requestAddEntry() {
     const attDate = document.getElementById('attDate').value;
     const site = document.getElementById('sideName').value;
     
-    // ভ্যালিডেশন
+    // ১. বেসিক ভ্যালিডেশন
     if(!rawEmpId) {
         document.getElementById('empId').focus();
         return showCustomAlert("Missing ID", "Please search and select an Employee first!", "warning");
     }
-    
     if(!attDate || !site) return showCustomAlert("Missing Data", "Fill Date and Site!", "warning");
     
     let formattedId = isNaN(rawEmpId) ? rawEmpId : rawEmpId.padStart(4, '0');
     
-    // ডুপ্লিকেট চেক
-    const isDuplicate = attendanceData.some(e => e.id !== editModeId && e.empId.replace("'", "") === formattedId && e.date === attDate);
-    if (isDuplicate) return showCustomAlert("Duplicate", "Entry exists for this date!", "error");
+    // ২. লোকাল টেবিল (বর্তমানে যা এন্ট্রি করছেন) ডুপ্লিকেট চেক
+    const isLocalDuplicate = attendanceData.some(e => e.id !== editModeId && e.empId.replace("'", "") === formattedId && e.date === attDate);
+    if (isLocalDuplicate) return showCustomAlert("Duplicate", "This entry is already in your current list!", "error");
 
+    // ৩. সার্ভার ডাটা (Google Sheet থেকে যা লোড হয়েছে) ডুপ্লিকেট চেক
+    // currentMonthAttendance ভেরিয়েবলটি refreshAllData থেকে ডাটা পায়
+    const isServerDuplicate = currentMonthAttendance.some(s => String(s.empId).padStart(4, '0') === formattedId && s.date === attDate);
+    
+    if (isServerDuplicate) {
+        return showCustomAlert("Already Exists", `ID: ${formattedId} is already saved in Google Sheet for ${attDate}!`, "error");
+    }
+
+    // ৪. সব ঠিক থাকলে ডাটা অবজেক্ট তৈরি
     const newEntry = { 
         id: editModeId || Date.now(),
         slNo: editModeId ? attendanceData.find(i=>i.id === editModeId).slNo : slCount++,
         date: attDate,
-        empId: "'" + formattedId,
+        // এই লাইনটি পরিবর্তন করুন
+empId: formattedId,
         empName: document.getElementById('empName').value,
         period: document.getElementById('period').value || '',
         designation: document.getElementById('designation').value,
@@ -611,7 +707,7 @@ function requestAddEntry() {
     }
     
     renderTable(); 
-    resetAllInputs(); // ইনপুট ক্লিয়ার করার ফাংশন কল
+    resetAllInputs(); 
     window.currentWorkingAs = ""; 
 }
 
@@ -713,25 +809,99 @@ function resetAllInputs() {
         }
 
         function closeFullPreview() { document.getElementById('fullPreviewModal').style.display = 'none'; }
+async function saveAllToSheet() {
+    if (attendanceData.length === 0) return;
 
-        async function saveAllToSheet() {
-            if (attendanceData.length === 0) return showCustomAlert("Empty", "No entries!", "warning");
-            const btn = document.getElementById('saveBtn'), overlay = document.getElementById('loadingOverlay');
-            btn.disabled = true; btn.innerText = "Saving..."; overlay.classList.remove('fade-out'); overlay.classList.add('processing-mode');
-            try {
-                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(attendanceData) });
-                showCustomAlert("Success", "Saved to Server!", "success"); attendanceData = []; slCount = 1; renderTable(); 
-            } catch (err) { showCustomAlert("Error", "Save failed!", "error"); }
-            finally { btn.disabled = false; btn.innerText = "Save to Server"; overlay.classList.add('fade-out'); overlay.classList.remove('processing-mode'); }
-        }
+    // ১. ডুপ্লিকেট চেকিং (আগের মতোই থাকবে)
+    let duplicates = [];
+    attendanceData.forEach(entry => {
+        let cleanId = String(entry.empId).replace(/'/g, "").trim();
+        let checkDate = entry.date;
+        let alreadySaved = currentMonthAttendance.some(saved => {
+            let savedId = String(saved.empId || saved.ID).replace(/'/g, "").trim();
+            return savedId === cleanId && saved.date === checkDate;
+        });
+        if (alreadySaved) duplicates.push(`ID: ${cleanId}`);
+    });
 
+    if (duplicates.length > 0) {
+        return showCustomAlert("Duplicate Found", "Already saved in sheet: " + duplicates.join(", "), "error");
+    }
+
+    // ২. মাঝখানে স্পিনার এবং ব্লার অ্যাক্টিভেট করা
+    const overlay = document.getElementById('loadingOverlay');
+    const loadingTaskText = document.getElementById('loadingTask'); // যদি এই আইডি থাকে
+    
+    overlay.classList.add('processing-mode'); 
+    overlay.classList.remove('fade-out');
+    if(loadingTaskText) loadingTaskText.innerText = "Saving to Google Sheets...";
+
+    try {
+        await fetch(SCRIPT_URL, { 
+            method: 'POST', 
+            mode: 'no-cors', 
+            body: JSON.stringify(attendanceData) 
+        });
+
+        // ৩. সাকসেস মেসেজ (ট্রান্সপারেন্ট)
+        showTransparentAlert("Success", "Saved successfully!", "success");
+        
+        attendanceData = [];
+        renderTable();
+        
+        // ব্যাকগ্রাউন্ডে ডাটা আপডেট
+        await refreshAllData(false); 
+
+    } catch (err) {
+        showCustomAlert("Error", "Check Connection!", "error");
+    } finally {
+        // ৪. কাজ শেষ হলে ওভারলে বন্ধ করা
+        overlay.classList.add('fade-out');
+        overlay.classList.remove('processing-mode');
+    }
+}
+
+// ট্রান্সপারেন্ট অ্যালার্টের জন্য নতুন ফাংশন
+function showTransparentAlert(title, msg, type) {
+    const alertBox = document.getElementById('customAlert');
+    const alertContent = alertBox.querySelector('.bg-white') || alertBox.firstElementChild;
+    
+    // ১. শুরুতে স্টাইল সেট করা
+    alertContent.classList.add('modern-alert', 'glass-effect');
+    alertBox.style.display = 'flex'; // আগে বক্সটি দেখান
+
+    // ২. সামান্য সময় পর 'show' ক্লাস যোগ করা (অ্যানিমেশন ট্রিগার করার জন্য)
+    setTimeout(() => {
+        alertContent.classList.add('show');
+    }, 10);
+    
+    // ৩. মূল কন্টেন্ট বসানো
+    showCustomAlert(title, msg, type);
+
+    // ৪. সাকসেস হলে অটোমেটিক এবং স্মুথলি বন্ধ হওয়া
+    if(type === 'success') {
+        setTimeout(() => {
+            // যাওয়ার সময় অ্যানিমেশন (আগে ক্লাস সরানো)
+            alertContent.classList.remove('show');
+            
+            // অ্যানিমেশন শেষ হলে পুরোপুরি বন্ধ করা
+            setTimeout(() => {
+                closeAlert();
+                // স্টাইল ক্লিয়ার করা যাতে অন্য অ্যালার্টে সমস্যা না হয়
+                alertContent.classList.remove('modern-alert', 'glass-effect');
+                alertContent.style.backgroundColor = ""; 
+                alertContent.style.backdropFilter = "";
+            }, 400); // CSS transition সময়ের সাথে মিল রেখে
+        }, 2500);
+    }
+}
         function clearTable() { attendanceData = []; slCount = 1; renderTable(); }
        
         function closeAlert() { document.getElementById('customAlert').style.display = 'none'; document.getElementById('alertCancelBtn').classList.add('hidden'); document.getElementById('alertOkBtn').onclick = closeAlert; }
         function showCustomAlert(title, msg, type = 'error') {
             const container = document.getElementById('alertIconContainer');
             document.getElementById('alertTitle').innerText = title; document.getElementById('alertMessage').innerText = msg;
-            container.innerHTML = type === 'success' ? '✅' : type === 'warning' ? '🔔' : '⚠️';
+            container.innerHTML = type === 'success' ? '' : type === 'warning' ? '🔔' : '⚠️';
             container.className = `w-16 h-16 mx-auto rounded-full mb-6 flex items-center justify-center text-2xl ${type==='success'?'bg-green-100':type==='warning'?'bg-amber-100':'bg-red-100'}`;
             document.getElementById('customAlert').style.display = 'flex';
         }
