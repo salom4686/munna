@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance & Salary</title>
-  <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
+  <title>ALAMHOW - Attendance & Salary</title>
+  
   <link rel="icon" type="image/png" href="Logo.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -262,15 +262,20 @@
             <label class="form-label small fw-bold">Select Month & Year</label>
             <input type="text" id="matrixMonth" class="form-control form-control-sm custom-date-input" placeholder="Select Month">
           </div>
+          
+          <div class="col-12">
+            <label class="form-label small fw-bold">Select Employee ID (Optional)</label>
+            <input list="employeeIdList" id="matrixIdFilter" class="form-control form-control-sm" placeholder="Type or click to select ID">
+            <datalist id="employeeIdList">
+              </datalist>
+          </div>
+
           <div class="col-12">
             <label class="form-label small fw-bold">Filter by Side (Optional)</label>
             <select id="matrixSideFilter" class="form-select form-select-sm">
               <option value="">All Sides</option>
             </select>
           </div>
-        </div>
-        <div class="mt-3 p-2 bg-light rounded border">
-          <p class="mb-0 small text-muted">THIS OPTION WILL GENERATE A COMPLETE PRINT-READY ATTENDANCE GRID FOR THE SELECTED MONTH AND SIDE.</p>
         </div>
       </div>
       <div class="modal-footer p-2">
@@ -346,9 +351,17 @@
     return s === 'P' || s === 'PRESENT' || s === ''; 
   }
 
- function processData() {
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
+// --- ২. সংশোধিত ফিল্টারিং এবং প্রসেস লজিক ---
+  function processData() {
+    const startStr = document.getElementById("startDate").value;
+    const endStr = document.getElementById("endDate").value;
+    
+    let startDate = startStr ? new Date(startStr) : null;
+    if(startDate) startDate.setHours(0, 0, 0, 0);
+
+    let endDate = endStr ? new Date(endStr) : null;
+    if(endDate) endDate.setHours(23, 59, 59, 999);
+
     const search = document.getElementById("searchInput").value.toLowerCase();
     const searchType = document.getElementById("searchType").value;
     const fEmp = document.getElementById("empFilter").value;
@@ -357,8 +370,8 @@
     const fTypeVal = document.getElementById("typeValueSelect").value.toLowerCase();
 
     const titleSpan = document.getElementById("salarySheetTitle");
-    if (start && end) {
-        titleSpan.innerText = `Records: ${start} to ${end}`;
+    if (startStr && endStr) {
+        titleSpan.innerText = `Records: ${startStr} to ${endStr}`;
         titleSpan.style.display = "inline";
     } else { titleSpan.style.display = "none"; }
 
@@ -369,18 +382,21 @@
     let filteredRows = rawData.slice(1).filter(row => {
       const rId = row[eIdx]?.toString().toUpperCase() || "";
       const rSide = row[sIdx]?.toString().toUpperCase() || "";
+      
       const rDate = parseDate(row[dIdx]);
+      const compareDate = new Date(rDate.getTime());
+      compareDate.setHours(0, 0, 0, 0); 
       
       let match = true;
-      if (search) {
+      if (startDate && compareDate < startDate) match = false;
+      if (match && endDate && compareDate > endDate) match = false;
+      
+      if (match && search) {
         if (searchType === "ALL") match = row.join(" ").toLowerCase().includes(search);
         else match = (row[colIndexMap[searchType]] || "").toString().toLowerCase().includes(search);
       }
-      if (match && start && rDate < new Date(start + "T00:00:00")) match = false;
-      if (match && end && rDate > new Date(end + "T23:59:59")) match = false;
       if (match && fEmp && rId !== fEmp) match = false;
       if (match && fSide && rSide !== fSide) match = false;
-      
       if (match && fType && fTypeVal) {
         const cellVal = (row[colIndexMap[fType]] || "").toString().toLowerCase();
         if (cellVal !== fTypeVal) match = false;
@@ -388,19 +404,13 @@
       return match;
     });
 
-    // --- নতুন সর্টিং লজিক (Descending Date) ---
-    filteredRows.sort((a, b) => {
-      const dateA = parseDate(a[dIdx]);
-      const dateB = parseDate(b[dIdx]);
-      return dateB - dateA; // নতুন তারিখ সবার আগে দেখাবে
-    });
+    // সর্টিং (নতুন ডেটা উপরে)
+    filteredRows.sort((a, b) => parseDate(b[dIdx]) - parseDate(a[dIdx]));
 
-    const isSummary = (start || end || fEmp || fSide || (fType && fTypeVal));
-    if (isSummary) {
-      renderSummaryView(filteredRows);
-    } else {
-      renderDetailedView(filteredRows);
-    }
+    const isSummary = (startStr || endStr || fEmp || fSide || (fType && fTypeVal));
+    if (isSummary) renderSummaryView(filteredRows);
+    else renderDetailedView(filteredRows);
+    
     updateStats(filteredRows);
   }
  function renderDetailedView(rows) {
@@ -541,10 +551,19 @@
     mSide.innerHTML = '<option value="">All Sides</option>' + sideOptions;
   }
 
-  function parseDate(s) { 
-    if (!s) return new Date(0); 
-    const p = s.toString().split(/[-/]/); 
-    return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : new Date(s); 
+ function parseDate(s) {
+    if (!s || s.toString().trim() === "" || s === "-") return new Date(0);
+    if (s instanceof Date) return s;
+
+    let dateString = s.toString().trim().replace(/\//g, '-');
+    const parts = dateString.split('-');
+
+    if (parts.length === 3) {
+      if (parts[0].length === 4) return new Date(parts[0], parts[1] - 1, parts[2]); // YYYY-MM-DD
+      if (parts[2].length === 4) return new Date(parts[2], parts[1] - 1, parts[0]); // DD-MM-YYYY
+    }
+    const finalDate = new Date(dateString);
+    return isNaN(finalDate.getTime()) ? new Date(0) : finalDate;
   }
   
   function refreshData() { loadDataFromAPI(); }
@@ -694,73 +713,194 @@
 
           <div class="signature-section">
             <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Prepared By</div>
-            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Checked By</div>
-            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Approved By</div>
+            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Manager Signature</div>
+            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Authorized Signature</div>
           </div>
         </body>
       </html>
     `);
     previewWindow.document.close();
   }
+  
 
   function showAttendanceFilter() { matrixModal.show(); }
-
-  function generateFilteredAttendanceSheet() {
+  
+function generateFilteredAttendanceSheet() {
     const monthInput = document.getElementById('matrixMonth').value;
     const sideFilter = document.getElementById('matrixSideFilter').value;
     if (!monthInput) { alert("Please select a month."); return; }
+
     const [year, month0] = monthInput.split('-').map(Number);
     const month = month0 - 1;
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
     const dateRange = [];
     for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) dateRange.push(new Date(d));
+
+    // প্রিন্ট ডেট ও টাইম
+    const now = new Date();
+    const printDateTime = now.toLocaleString('en-GB', { 
+        day: '2-digit', month: 'short', year: 'numeric', 
+        hour: '2-digit', minute: '2-digit', hour12: true 
+    });
+
     const attendanceMap = {}, employees = {};
     rawData.slice(1).forEach(row => {
-      const id = row[colIndexMap["EMPLOYEE ID"]], dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-      const rSide = (row[colIndexMap["SIDE NAME"]] || "").toString().toUpperCase();
-      if (!id || !dRaw) return;
-      if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
-          if (sideFilter && rSide !== sideFilter.toUpperCase()) return;
-          const dateStr = dRaw.toISOString().split('T')[0];
-          if (!employees[id]) employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
-          if (!attendanceMap[id]) attendanceMap[id] = {};
-          let st = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
-          let shortStat = '-';
-          if (isPresent(st)) shortStat = 'P';
-          else if (st.startsWith('L')) shortStat = 'L';
-          else if (st.startsWith('O')) shortStat = 'O';
-          else if (st.startsWith('A')) shortStat = 'A';
-          attendanceMap[id][dateStr] = shortStat;
-      }
+        const id = row[colIndexMap["EMPLOYEE ID"]], dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+        const rSide = (row[colIndexMap["SIDE NAME"]] || "").toString().toUpperCase();
+        if (!id || !dRaw) return;
+        if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
+            if (sideFilter && rSide !== sideFilter.toUpperCase()) return;
+            const dateStr = dRaw.toISOString().split('T')[0];
+            if (!employees[id]) employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
+            if (!attendanceMap[id]) attendanceMap[id] = {};
+            let st = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
+            let shortStat = '-';
+            if (isPresent(st)) shortStat = 'P';
+            else if (st.startsWith('A')) shortStat = 'A';
+            else if (st.startsWith('L')) shortStat = 'L';
+            else if (st.startsWith('H')) shortStat = 'H';
+            attendanceMap[id][dateStr] = shortStat;
+        }
     });
+
     const monthName = firstDay.toLocaleString('default', { month: 'long' });
-    const sortedIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+    const sortedIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     if (sortedIds.length === 0) { alert("No data found for the selected criteria."); return; }
+
     matrixModal.hide();
-    const tableHeader = `<thead><tr><th rowspan="2" style="width:35px">SL</th><th rowspan="2" style="width:180px">EMPLOYEE ID & Name</th><th colspan="${dateRange.length}">Attendance Summary: ${monthName} ${year} ${sideFilter ? `(${sideFilter})` : ''}</th><th colspan="4" style="background:#0d685b">SUMMMARY</th></tr><tr>${dateRange.map(d => `<th style="width:22px">${d.getDate()}</th>`).join('')}<th style="width:25px; background:#198754">P</th><th style="width:25px; background:#dc3545">A</th><th style="width:25px; background:#0d6efd">L</th><th style="width:25px; background:#6c757d">O</th></tr></thead>`;
+
+    // টেবিল হেডার
+    const tableHeader = `<thead>
+      <tr>
+        <th rowspan="2" style="width:35px">SL</th>
+        <th rowspan="2" style="width:180px">EMPLOYEE ID & Name</th>
+        <th colspan="${dateRange.length}">Attendance Summary: ${monthName} ${year}</th>
+        <th colspan="4" style="background:#0d685b">SUMMARY</th>
+      </tr>
+      <tr>
+        ${dateRange.map(d => {
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 2);
+            const isSun = d.getDay() === 0;
+            return `<th style="width:22px; ${isSun ? 'background:#ffcccc; color:red;' : ''}">${d.getDate()}<br><span style="font-size:8px">${dayName}</span></th>`;
+        }).join('')}
+        <th style="width:25px; background:#198754">P</th>
+        <th style="width:25px; background:#dc3545">A</th>
+        <th style="width:25px; background:#ffc107; color:#000">SUN</th>
+        <th style="width:25px; background:#6c757d">HOL</th>
+      </tr>
+    </thead>`;
+
     let dayTotals = Array(dateRange.length).fill(0);
-    let totalP = 0, totalA = 0, totalL = 0, totalO = 0;
+    let totalP = 0, totalA = 0, totalSun = 0, totalHol = 0;
+
     const tableBody = sortedIds.map((id, idx) => {
-      let countP = 0, countA = 0, countL = 0, countO = 0;
-      const days = dateRange.map((d, dIdx) => {
-        const ds = d.toISOString().split('T')[0];
-        const stat = attendanceMap[id] && attendanceMap[id][ds] ? attendanceMap[id][ds] : '-';
-        if(stat === 'P') { countP++; dayTotals[dIdx]++; }
-        else if(stat === 'A') countA++;
-        else if(stat === 'L') countL++;
-        else if(stat === 'O') countO++;
-        let color = stat === 'A' ? 'red' : stat === 'L' ? 'blue' : stat === 'O' ? 'green' : 'black';
-        return `<td style="color:${color}">${stat}</td>`;
-      }).join('');
-      totalP += countP; totalA += countA; totalL += countL; totalO += countO;
-      return `<tr><td>${idx+1}</td><td class="text-start">${id} - ${employees[id]}</td>${days}<td style="font-weight:bold; background:#e6fffa">${countP}</td><td style="font-weight:bold; background:#fff0f0">${countA}</td><td style="font-weight:bold; background:#f0f7ff">${countL}</td><td style="font-weight:bold; background:#f8f9fa">${countO}</td></tr>`;
+        let countP = 0, countA = 0, countSun = 0, countHol = 0;
+        const days = dateRange.map((d, dIdx) => {
+            const ds = d.toISOString().split('T')[0];
+            const isSunday = d.getDay() === 0;
+            let stat = attendanceMap[id] && attendanceMap[id][ds] ? attendanceMap[id][ds] : '-';
+
+            if (isSunday) {
+                countSun++;
+                return stat !== '-' ? `<td style="color:red; font-weight:bold;">${stat}</td>` : `<td></td>`;
+            }
+            if (stat === 'P') { countP++; dayTotals[dIdx]++; return `<td>P</td>`; }
+            if (stat === 'A') { countA++; return `<td style="color:red">A</td>`; }
+            if (stat === 'H' || stat === 'L') { countHol++; return `<td style="color:green">${stat}</td>`; }
+            return `<td></td>`;
+        }).join('');
+
+        totalP += countP; totalA += countA; totalSun += countSun; totalHol += countHol;
+        return `<tr>
+          <td>${idx + 1}</td>
+          <td class="text-start">${id} - ${employees[id]}</td>
+          ${days}
+          <td style="font-weight:bold; background:#e6fffa">${countP}</td>
+          <td style="font-weight:bold; background:#fff0f0">${countA}</td>
+          <td style="font-weight:bold; background:#fff9e6">${countSun}</td>
+          <td style="font-weight:bold; background:#f8f9fa">${countHol}</td>
+        </tr>`;
     }).join('');
-    const tableFooter = `<tfoot><tr style="background:#f0f4f8; font-weight:bold;"><td colspan="2" class="text-end">TOTAL PRESENT:</td>${dayTotals.map(t => `<td>${t || '-'}</td>`).join('')}<td style="background:#e6fffa">${totalP}</td><td style="background:#fff0f0">${totalA}</td><td style="background:#f0f7ff">${totalL}</td><td style="background:#f8f9fa">${totalO}</td></tr></tfoot>`;
+
+    const tableFooter = `<tfoot>
+      <tr style="background:#f0f4f8; font-weight:bold;">
+        <td colspan="2" class="text-end">DAILY TOTAL (P):</td>
+        ${dayTotals.map(t => `<td>${t || ''}</td>`).join('')}
+        <td style="background:#e6fffa">${totalP}</td>
+        <td style="background:#fff0f0">${totalA}</td>
+        <td style="background:#fff9e6">${totalSun}</td>
+        <td style="background:#f8f9fa">${totalHol}</td>
+      </tr>
+    </tfoot>`;
+
     const preview = window.open('', '_blank');
-    preview.document.write(`<html><head><title>Attendance Summary - ${monthName}</title><style>body { font-family: sans-serif; padding: 10px; } h2 { text-align: center; color: #1d3a6d; margin: 5px 0; font-size: 20px; } table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; } th, td { border: 1px solid #000; text-align: center; font-size: 10px; padding: 4px 2px; overflow: hidden; } th { background: #1d3a6d; color: #fff; font-size: 11px; } tfoot td { background: #f0f4f8; font-weight: bold; border-top: 2px solid #000; font-size: 10px; } .text-start { text-align: left; padding-left: 5px; white-space: nowrap; } .no-print { position: fixed; top: 10px; right: 10px; padding: 10px; background: #000; color: #fff; border: none; cursor: pointer; border-radius: 5px; } @media print { .no-print { display: none; } body { padding: 0; } table { font-size: 9px; } }</style></head><body><button class="no-print" onclick="window.print()">Print </button><h2>ALAMHOW CO LTD - Monthly Attendance Summary</h2><p style="text-align:center; font-weight:bold; margin-bottom:15px; font-size:14px;">Month: ${monthName} ${year} ${sideFilter ? `| Side: ${sideFilter}` : ''}</p><table>${tableHeader}<tbody>${tableBody}</tbody>${tableFooter}</table><div style="margin-top:15px; font-size:11px; display: flex; gap: 30px; font-weight:bold;"><span>P: Present</span><span>A: Absent</span><span>L: Leave</span><span>O: Off Day</span></div></body></html>`);
+    preview.document.write(`
+      <html>
+        <head>
+          <title>Attendance Summary</title>
+          <style>
+            @page { size: A4 landscape; margin: 10mm; }
+            body { font-family: sans-serif; padding: 10px; margin: 0; position: relative; min-height: 100vh; }
+            .company-name { text-align: center; color: #1d3a6d; margin: 0; font-size: 26px; font-weight: bold; text-transform: uppercase; }
+            
+            /* হেডার লাইন - যেখানে Printed On বামে এবং Month ডানে থাকবে */
+            .header-line { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; border-bottom: 2px solid #1d3a6d; padding-bottom: 5px; margin-bottom: 10px; }
+            .print-time { font-size: 10px; font-weight: normal; font-style: italic; }
+            .month-display { font-size: 14px; font-weight: bold; }
+
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; }
+            th, td { border: 1px solid #000; text-align: center; font-size: 9px; padding: 3px 1px; overflow: hidden; }
+            th { background: #1d3a6d; color: #fff; }
+            .text-start { text-align: left; padding-left: 5px; white-space: nowrap; }
+            
+            /* ফুটার এবং পেজ নাম্বার স্টাইল */
+            .footer-container { position: fixed; bottom: 0; width: 100%; font-size: 10px; display: none; }
+            
+            .no-print { position: fixed; top: 10px; right: 10px; padding: 10px; background: #000; color: #fff; border: none; cursor: pointer; border-radius: 5px; z-index: 1000; }
+            
+            @media print { 
+              .no-print { display: none; } 
+              body { padding: 0; }
+              .footer-container { display: block; }
+            }
+          </style>
+        </head>
+        <body>
+          <button class="no-print" onclick="window.print()">Print Report</button>
+          
+          <h1 class="company-name">ALAMHOW CO LTD</h1>
+          
+          <div class="header-line">
+            <div class="print-time">Printed on: ${printDateTime}</div>
+            <div style="font-size:16px; font-weight:bold; position:absolute; left:50%; transform:translateX(-50%);">Attendance Summary</div>
+            <div class="month-display">Month: ${monthName} ${year} ${sideFilter ? `| Side: ${sideFilter}` : ''}</div>
+          </div>
+
+          <table>${tableHeader}<tbody>${tableBody}</tbody>${tableFooter}</table>
+
+          <div style="margin-top: 20px;">
+            <table style="width: auto; min-width: 220px; border: 1.5px solid #000;">
+              <thead><tr><th colspan="2" style="padding: 4px;">OVERALL SUMMARY</th></tr></thead>
+              <tbody>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold;">Total Present (P)</td><td style="font-weight:bold; width:60px;">${totalP}</td></tr>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold; color:red;">Total Absent (A)</td><td style="font-weight:bold; color:red;">${totalA}</td></tr>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold; color:#b58900;">Total Sundays (S)</td><td style="font-weight:bold; color:#b58900;">${totalSun}</td></tr>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold;">Total Holidays (HOL)</td><td style="font-weight:bold;">${totalHol}</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 60px; display: flex; justify-content: space-between; padding: 0 40px;">
+            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Prepared By</div>
+            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Authorized Signature</div>
+          </div>
+
+        </body>
+      </html>
+    `);
     preview.document.close();
-  }
+}
 </script>
 </body>
 </html>
