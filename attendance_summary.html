@@ -1,21 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attendance & Salary</title>
-  
-  <!-- Favicon/Logo in Tab Bar -->
-  <link rel="icon" type="image/png" href="Logo.png">
-
-  <!-- Bootstrap CSS -->
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo">
+    <link rel="icon" type="image/png" href="Logo.png">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Flatpickr CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
-  
   <style>
     :root {
       --brand-blue: #1d3a6d; 
@@ -28,7 +23,7 @@
 
     body {
       background-color: var(--bg-light);
-      padding: 15px;
+      padding: 10px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
     
@@ -41,7 +36,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      max-height: 94vh;
+      max-height: 96vh;
     }
 
     .page-header {
@@ -61,17 +56,17 @@
       background: #f8f9fc;
       border-bottom: 1px solid #eee;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
       align-items: end;
       flex-shrink: 0;
     }
 
-    .filter-group label { font-size: 10px; font-weight: 700; color: var(--brand-blue); margin-bottom: 3px; display: block; text-transform: uppercase; }
+    .filter-group label { font-size: 9px; font-weight: 700; color: var(--brand-blue); margin-bottom: 2px; display: block; text-transform: uppercase; }
 
-    .custom-date-input { background-color: #ffffff !important; cursor: pointer !important; font-weight: 600; font-size: 12px; }
+    .custom-date-input { background-color: #ffffff !important; cursor: pointer !important; font-weight: 600; font-size: 11px; }
 
-    .btn-action { font-size: 11px; padding: 5px 12px; font-weight: 600; }
+    .btn-action { font-size: 10px; padding: 4px 10px; font-weight: 600; }
     .btn-reset { background-color: var(--btn-reset); color: white; border: none; }
 
     .summary-bar {
@@ -83,7 +78,10 @@
       font-weight: bold;
       color: var(--brand-blue);
       font-size: 13px;
+      align-items: center;
     }
+
+    .stat-box { background: #fff; padding: 2px 10px; border-radius: 4px; border: 1px solid #cbd5e0; }
 
     .table-responsive { overflow: auto; flex-grow: 1; position: relative; }
 
@@ -92,7 +90,7 @@
     .attendance-table thead th {
       background-color: var(--brand-blue) !important;
       color: var(--header-text) !important;
-      padding: 8px 6px;
+      padding: 6px 4px;
       text-align: center;
       font-size: 9px;
       position: sticky;
@@ -104,31 +102,24 @@
     }
 
     .attendance-table tbody td {
-      padding: 6px 4px;
+      padding: 4px 3px;
       text-align: center;
-      font-size: 11px;
+      font-size: 10px;
       border: 1px solid #e0e0e0;
       white-space: nowrap;
     }
 
     .total-attendance-col { background-color: var(--accent-yellow); font-weight: 700; color: var(--brand-blue); }
     .highlight-col { background-color: var(--highlight-green); font-weight: 700; color: #0d685b; }
-    .deduction-col { background-color: #fff1f1; color: #a94442; }
-    .grand-total-row { background-color: #f1f3f5; font-weight: 800; color: #000; position: sticky; bottom: 0; z-index: 5; }
-
-    #typeValueGroup { display: none; }
-    .align-left { text-align: left !important; padding-left: 8px !important; }
-    #loader { padding: 40px; text-align: center; color: var(--brand-blue); }
+    .deduction-col { background-color: #fff0f0; }
+    
+    #loader { padding: 40px; text-align: center; color: var(--brand-blue); display: none; }
 
     .search-input-group { display: flex; }
-    .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 100px; font-size: 11px; }
-    .search-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 11px; }
-
-    @media print {
-      .filter-section, .btn-action, .summary-bar, .no-print, #loader, .page-header { display: none !important; }
-      body { padding: 0; background-color: white; }
-      .main-card { border: none; box-shadow: none; max-height: none; overflow: visible; }
-    }
+    .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 80px; font-size: 10px; }
+    .search-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 10px; }
+    
+    .grand-total-row td { background-color: #f0f4f8 !important; font-weight: 900 !important; color: var(--brand-blue); }
   </style>
 </head>
 <body id="bodyRoot">
@@ -138,17 +129,19 @@
     <div class="page-header">
       <div class="brand-title">
         <h2>ALAMHOW CO LTD</h2>
-        <span style="font-size: 0.8rem; color: #666;">Monthly Attendance & Salary Summary</span>
+        <span style="font-size: 0.75rem; color: #666;">Attendance & Salary Repoprt</span>
       </div>
       <div class="d-flex gap-2">
-        <button class="btn btn-action btn-outline-secondary" onclick="openPreview()">Preview Report</button>
-        <button class="btn btn-action btn-primary" onclick="refreshData()">Refresh Data</button>
+        <button class="btn btn-action btn-outline-success" onclick="showAttendanceFilter()">Attendance Sheet</button>
+        <button class="btn btn-action btn-outline-primary" onclick="openPreview()">Salary Report</button>
+        <button class="btn btn-action btn-primary" onclick="refreshData()">Refresh</button>
       </div>
     </div>
 
+    <!-- Filters -->
     <div class="filter-section">
       <div class="filter-group" style="grid-column: span 2;">
-        <label>Search Information:</label>
+        <label>Search:</label>
         <div class="search-input-group">
           <select id="searchType" class="form-select form-select-sm" onchange="processData()">
             <option value="ALL">ALL</option>
@@ -156,35 +149,35 @@
             <option value="EMPLOYEE NAME">NAME</option>
             <option value="PASSPORT NO">PASSPORT</option>
           </select>
-          <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Type here..." onkeyup="processData()">
+          <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Type info..." onkeyup="processData()">
         </div>
       </div>
       <div class="filter-group">
         <label>Start Date:</label>
-        <input type="text" id="startDate" class="form-control form-control-sm custom-date-input" placeholder="Start Date">
+        <input type="text" id="startDate" class="form-control form-control-sm custom-date-input">
       </div>
       <div class="filter-group">
         <label>End Date:</label>
-        <input type="text" id="endDate" class="form-control form-control-sm custom-date-input" placeholder="End Date">
+        <input type="text" id="endDate" class="form-control form-control-sm custom-date-input">
       </div>
       <div class="filter-group">
         <label>Employee:</label>
         <select id="empFilter" class="form-select form-select-sm" onchange="processData()"></select>
       </div>
       <div class="filter-group">
-        <label>Side Name:</label>
+        <label>Side:</label>
         <select id="sideFilter" class="form-select form-select-sm" onchange="processData()"></select>
       </div>
       <div class="filter-group">
-        <label>Filter Type:</label>
+        <label>Column Filter:</label>
         <select id="columnSelector" class="form-select form-select-sm" onchange="handleTypeChange()">
-          <option value="">-- Select Type --</option>
+          <option value="">Select</option>
           <option value="STATUS">STATUS</option>
           <option value="HOLIDAY">HOLIDAY</option>
           <option value="SUNDAY WORK">SUNDAY WORK</option>
         </select>
       </div>
-      <div class="filter-group" id="typeValueGroup">
+      <div class="filter-group" id="typeValueGroup" style="display:none;">
         <label id="typeValueLabel">Value:</label>
         <select id="typeValueSelect" class="form-select form-select-sm" onchange="processData()"></select>
       </div>
@@ -194,12 +187,14 @@
     </div>
 
     <div class="summary-bar" id="summaryBar">
-      <span>Employees: <span id="statEmp">0</span></span>
-      <span>Present: <span id="statPresent">0</span></span>
+      <span>Employees: <span id="statEmp" class="stat-box">0</span></span>
+      <span>Total Presen: <span id="statPresent" class="stat-box">0</span></span>
+      <span id="salarySheetTitle" class="ms-auto" style="display: none; font-weight: 800; color: #1d3a6d;"></span>
     </div>
 
     <div id="loader">
       <div class="spinner-border spinner-border-sm" role="status"></div>
+      <p class="mt-2" style="font-size: 11px;">Data Loading...</p>
     </div>
 
     <div class="table-responsive">
@@ -212,23 +207,108 @@
   </div>
 </div>
 
+<!-- Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-dark text-white">
+        <h6 class="modal-title">Quick Edit Record</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editForm">
+          <input type="hidden" id="editRowIndex">
+          <p class="mb-3 text-primary fw-bold" id="displayEmpName"></p>
+          <div class="row g-2">
+            <div class="col-6">
+              <label class="form-label small fw-bold">STATUS</label>
+              <select id="editStatus" class="form-select form-select-sm">
+                <option value="PRESENT">PRESENT</option>
+                <option value="ABSENT">ABSENT</option>
+                <option value="OFF">OFF</option>
+                <option value="LEAVE">LEAVE</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-bold">OT HOURS</label>
+              <input type="number" id="editOT" class="form-control form-control-sm" step="0.5">
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-bold">HOLIDAY WORK</label>
+              <input type="number" id="editHoliday" class="form-control form-control-sm" step="0.5">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer p-2">
+        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" onclick="saveEdit()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Attendance Matrix Filter Modal -->
+<div class="modal fade" id="matrixFilterModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h6 class="modal-title">Generate Attendance Report</h6>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-3">
+          <div class="col-12">
+            <label class="form-label small fw-bold">Select Month & Year</label>
+            <input type="text" id="matrixMonth" class="form-control form-control-sm custom-date-input" placeholder="Select Month">
+          </div>
+          
+          <div class="col-12">
+            <label class="form-label small fw-bold">Select Employee ID (Optional)</label>
+            <input list="employeeIdList" id="matrixIdFilter" class="form-control form-control-sm" placeholder="Type or click to select ID">
+            <datalist id="employeeIdList">
+              </datalist>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small fw-bold">Filter by Side (Optional)</label>
+            <select id="matrixSideFilter" class="form-select form-select-sm">
+              <option value="">All Sides</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer p-2">
+        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-success btn-sm" onclick="generateFilteredAttendanceSheet()">Generate Matrix</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
 <script>
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUTUqS8NS7nARLXSr_tbkoBnsmcxeGnOCSSmL4d1ZHxvg4PwlYiFpwMxGoy9XwJRuF1g/exec";
   let rawData = [];
   let colIndexMap = {}; 
   const DAYS_IN_MONTH = 30;
-  let startPicker, endPicker;
+  let startPicker, endPicker, matrixPicker, bootstrapModal, matrixModal;
+
+  const leftAlignCols = ["EMPLOYEE NAME", "DESIGNATION", "SIDE NAME"];
 
   const displayHeaders = [
-    "ISSUE DATE", "SL NO", "ATTENDANCE DATE", "EMPLOYEE ID", "EMPLOYEE NAME", 
-    "DESIGNATION", "JOINING DATE", "PASSPORT NO", "BASIC SALARY", "TOTAL OT HOURS", 
-    "OT RATE", "OT AMOUNT", "GROS SALARY", "NEED SALARY", "STATUS", "HOLIDAY", "SIDE NAME"
+    "ISSUE DATE", "ISSUE TIME", "ATTENDANCE DATE", "EMPLOYEE ID", "EMPLOYEE NAME", 
+    "DESIGNATION", "PASSPORT NO", "STATUS", "JOINING DATE", "BASIC SALARY", "TOTAL OT HOURS", 
+    "OT RATE", "OT AMOUNT", "GROS SALARY", "HOLIDAY", "SIDE NAME"
   ];
 
   window.onload = function() { 
     initCustomDatePickers();
+    bootstrapModal = new bootstrap.Modal(document.getElementById('editModal'));
+    matrixModal = new bootstrap.Modal(document.getElementById('matrixFilterModal'));
     loadDataFromAPI(); 
   };
 
@@ -236,10 +316,20 @@
     const config = { dateFormat: "Y-m-d", altInput: true, altFormat: "d-m-Y", onChange: () => processData() };
     startPicker = flatpickr("#startDate", config);
     endPicker = flatpickr("#endDate", config);
+
+    matrixPicker = flatpickr("#matrixMonth", {
+      plugins: [
+        new monthSelectPlugin({ shorthand: true, dateFormat: "Y-m", altFormat: "F Y", theme: "material_blue" })
+      ]
+    });
+
+    const now = new Date();
+    matrixPicker.setDate(`${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}`);
   }
 
   async function loadDataFromAPI() {
     try {
+      document.getElementById('loader').style.display = 'block';
       const response = await fetch(WEB_APP_URL);
       const data = await response.json();
       if (!data || data.length === 0) return;
@@ -255,96 +345,164 @@
     headers.forEach((h, i) => { colIndexMap[h.toString().trim().toUpperCase()] = i; });
   }
 
+  function isPresent(statusValue) {
+    if (!statusValue) return false;
+    const s = statusValue.toString().trim().toUpperCase();
+    return s === 'P' || s === 'PRESENT' || s === ''; 
+  }
+
+// --- ২. সংশোধিত ফিল্টারিং এবং প্রসেস লজিক ---
   function processData() {
+    const startStr = document.getElementById("startDate").value;
+    const endStr = document.getElementById("endDate").value;
+    
+    let startDate = startStr ? new Date(startStr) : null;
+    if(startDate) startDate.setHours(0, 0, 0, 0);
+
+    let endDate = endStr ? new Date(endStr) : null;
+    if(endDate) endDate.setHours(23, 59, 59, 999);
+
     const search = document.getElementById("searchInput").value.toLowerCase();
     const searchType = document.getElementById("searchType").value;
-    const start = document.getElementById("startDate").value;
-    const end = document.getElementById("endDate").value;
     const fEmp = document.getElementById("empFilter").value;
     const fSide = document.getElementById("sideFilter").value;
     const fType = document.getElementById("columnSelector").value;
     const fTypeVal = document.getElementById("typeValueSelect").value.toLowerCase();
 
+    const titleSpan = document.getElementById("salarySheetTitle");
+    if (startStr && endStr) {
+        titleSpan.innerText = `Records: ${startStr} to ${endStr}`;
+        titleSpan.style.display = "inline";
+    } else { titleSpan.style.display = "none"; }
+
     const dIdx = colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
     const eIdx = colIndexMap["EMPLOYEE ID"];
     const sIdx = colIndexMap["SIDE NAME"];
 
-    const filteredRows = rawData.slice(1).filter(row => {
+    let filteredRows = rawData.slice(1).filter(row => {
       const rId = row[eIdx]?.toString().toUpperCase() || "";
       const rSide = row[sIdx]?.toString().toUpperCase() || "";
+      
       const rDate = parseDate(row[dIdx]);
+      const compareDate = new Date(rDate.getTime());
+      compareDate.setHours(0, 0, 0, 0); 
       
       let match = true;
-      if (search) {
+      if (startDate && compareDate < startDate) match = false;
+      if (match && endDate && compareDate > endDate) match = false;
+      
+      if (match && search) {
         if (searchType === "ALL") match = row.join(" ").toLowerCase().includes(search);
         else match = (row[colIndexMap[searchType]] || "").toString().toLowerCase().includes(search);
       }
-      if (match && start && rDate < new Date(start + "T00:00:00")) match = false;
-      if (match && end && rDate > new Date(end + "T23:59:59")) match = false;
       if (match && fEmp && rId !== fEmp) match = false;
       if (match && fSide && rSide !== fSide) match = false;
       if (match && fType && fTypeVal) {
-        const actualVal = (row[colIndexMap[fType]] || "").toString().toLowerCase().trim();
-        if (actualVal !== fTypeVal) match = false;
+        const cellVal = (row[colIndexMap[fType]] || "").toString().toLowerCase();
+        if (cellVal !== fTypeVal) match = false;
       }
       return match;
     });
 
-    const isSummary = (start || end || fEmp || fSide || (fType && fTypeVal));
-    if (isSummary) {
-      document.getElementById('bodyRoot').classList.add('summary-mode');
-      renderSummaryView(filteredRows);
-    } else {
-      document.getElementById('bodyRoot').classList.remove('summary-mode');
-      renderDetailedView(filteredRows);
-    }
-    updateStats();
-  }
+    // সর্টিং (নতুন ডেটা উপরে)
+    filteredRows.sort((a, b) => parseDate(b[dIdx]) - parseDate(a[dIdx]));
 
-  function renderDetailedView(rows) {
+    const isSummary = (startStr || endStr || fEmp || fSide || (fType && fTypeVal));
+    if (isSummary) renderSummaryView(filteredRows);
+    else renderDetailedView(filteredRows);
+    
+    updateStats(filteredRows);
+  }
+ function renderDetailedView(rows) {
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
     document.getElementById('tableFoot').innerHTML = "";
-    thead.innerHTML = '<tr><th>SL</th>' + displayHeaders.map(h => `<th class="${["EMPLOYEE NAME", "SIDE NAME"].includes(h) ? 'align-left' : ''}">${h}</th>`).join('') + '</tr>';
-    tbody.innerHTML = rows.map((row, idx) => `<tr><td>${idx+1}</td>` + displayHeaders.map(h => `<td>${(colIndexMap[h] !== undefined && row[colIndexMap[h]] !== "") ? row[colIndexMap[h]] : "-"}</td>`).join('') + '</tr>').join('');
+    document.getElementById('bodyRoot').classList.remove('summary-mode');
+
+    thead.innerHTML = `<tr><th>SL</th>${displayHeaders.map(h => `<th class="${leftAlignCols.includes(h)?'text-start':'text-center'}">${h}</th>`).join('')}<th>ACTION</th></tr>`;
+    
+    tbody.innerHTML = rows.map((row, idx) => {
+      const originalIndex = rawData.indexOf(row);
+      // এখানে rows.length - idx ব্যবহার করা হয়েছে যাতে সিরিয়াল বড় থেকে ছোট হয়
+      const reverseSerial = rows.length - idx; 
+      
+      return `<tr>
+        <td>${reverseSerial}</td>
+        ${displayHeaders.map(h => `<td class="${leftAlignCols.includes(h)?'text-start':'text-center'}">${row[colIndexMap[h]] || "-"}</td>`).join('')}
+        <td><button class="btn btn-warning btn-sm p-0 px-2" style="font-size:9px" onclick="openEditModal(${originalIndex})">EDIT</button></td>
+      </tr>`;
+    }).join('');
   }
 
   function renderSummaryView(rows) {
     const thead = document.getElementById('tableHead');
     const tbody = document.getElementById('tableBody');
     const tfoot = document.getElementById('tableFoot');
+    document.getElementById('bodyRoot').classList.add('summary-mode');
+
     const summary = {};
     rows.forEach(row => {
       const id = row[colIndexMap["EMPLOYEE ID"]];
       if (!id) return;
       if (!summary[id]) {
-        summary[id] = { id, name: row[colIndexMap["EMPLOYEE NAME"]], des: row[colIndexMap["DESIGNATION"]], mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0, att: 0, otHrs: 0, otRate: parseFloat(row[colIndexMap["OT RATE (PER HOUR)"]]) || 0, hol: 0, sun: 0, ab: 0, pb: 0, adv: 0 };
+        summary[id] = { 
+          id, 
+          name: row[colIndexMap["EMPLOYEE NAME"]], 
+          des: row[colIndexMap["DESIGNATION"]], 
+          mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0, 
+          att: 0, 
+          otHrs: 0, 
+          otRate: parseFloat(row[colIndexMap["OT RATE"]]) || 0, 
+          hol: 0, 
+          adv: parseFloat(row[colIndexMap["ADVANCE"]]) || 0,
+          nps: parseFloat(row[colIndexMap["NPS"]]) || 0,
+          csg: parseFloat(row[colIndexMap["CSG"]]) || 0
+        };
       }
-      const st = (row[colIndexMap["STATUS"]] || "").toString().toUpperCase();
-      if (st.startsWith('P') || st === "" || st === "PRESENT") summary[id].att++;
+      if (isPresent(row[colIndexMap["STATUS"]])) summary[id].att += 1;
       summary[id].otHrs += parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
       summary[id].hol += parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
-      summary[id].sun += parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
-      summary[id].ab += parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0;
-      summary[id].pb += parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0;
-      summary[id].adv += parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
     });
 
-    thead.innerHTML = `<tr><th rowspan="2">SL</th><th rowspan="2">ID</th><th rowspan="2" class="align-left">NAME</th><th rowspan="2" class="align-left">DESIGNATION</th><th rowspan="2">M.BASIC</th><th rowspan="2" class="total-attendance-col">ATT</th><th rowspan="2">ACT.BASIC</th><th rowspan="2">OT HRS</th><th rowspan="2">OT AMT</th><th colspan="3" class="deduction-col">DEDUCTION</th><th rowspan="2" class="highlight-col">NEED SALARY</th><th rowspan="2">SIGNATURE</th></tr><tr><th class="deduction-col">ADV</th><th class="deduction-col">NPS</th><th class="deduction-col">CSG</th></tr>`;
+    thead.innerHTML = `<tr><th rowspan="2">SL</th><th rowspan="2">ID</th><th rowspan="2" class="text-start">NAME</th><th rowspan="2" class="text-start">DESIGNATION</th><th rowspan="2">M.BASIC</th><th rowspan="2" class="total-attendance-col">ATT</th><th rowspan="2">ACT.BASIC</th><th rowspan="2">OT AMT</th><th colspan="3" class="deduction-col">DEDUCTION</th><th rowspan="2" class="highlight-col">NEED SALARY</th><th rowspan="2">SIGNATURE</th></tr><tr><th class="deduction-col">ADV</th><th class="deduction-col">NPS</th><th class="deduction-col">CSG</th></tr>`;
     
-    let g_mBasic=0, g_att=0, g_actBasic=0, g_otHrs=0, g_otAmt=0, g_adv=0, g_nps=0, g_csg=0, g_need=0;
-    tbody.innerHTML = Object.values(summary).sort((a,b) => a.id.toString().localeCompare(b.id.toString(), undefined, {numeric:true})).map((emp, i) => {
+    let g_mBasic=0, g_att=0, g_actBasic=0, g_otAmt=0, g_adv=0, g_nps=0, g_csg=0, g_need=0;
+    const sortedSummary = Object.values(summary).sort((a,b) => a.id.toString().localeCompare(b.id.toString(), undefined, {numeric:true}));
+
+    tbody.innerHTML = sortedSummary.map((emp, i) => {
       const actB = (emp.mBasic / DAYS_IN_MONTH) * emp.att;
       const otA = emp.otHrs * emp.otRate;
-      const totalPlus = actB + otA + emp.hol + emp.sun + emp.ab + emp.pb;
-      const nps = totalPlus * 0.01;
-      const csg = totalPlus * 0.015;
-      const need = totalPlus - (emp.adv + nps + csg);
-      g_mBasic+=emp.mBasic; g_att+=emp.att; g_actBasic+=actB; g_otHrs+=emp.otHrs; g_otAmt+=otA; g_adv+=emp.adv; g_nps+=nps; g_csg+=csg; g_need+=need;
-      return `<tr><td>${i+1}</td><td>${emp.id}</td><td class="align-left">${emp.name}</td><td class="align-left">${emp.des}</td><td>${emp.mBasic.toFixed(2)}</td><td class="total-attendance-col">${emp.att}</td><td>${actB.toFixed(2)}</td><td>${emp.otHrs.toFixed(2)}</td><td>${otA.toFixed(2)}</td><td class="deduction-col">${emp.adv.toFixed(2)}</td><td class="deduction-col">${nps.toFixed(2)}</td><td class="deduction-col">${csg.toFixed(2)}</td><td class="highlight-col">${need.toFixed(2)}</td><td></td></tr>`;
+      const need = (actB + otA + emp.hol) - (emp.adv + emp.nps + emp.csg);
+      g_mBasic+=emp.mBasic; g_att+=emp.att; g_actBasic+=actB; g_otAmt+=otA; g_adv+=emp.adv; g_nps+=emp.nps; g_csg+=emp.csg; g_need+=need;
+      return `<tr><td>${i+1}</td><td>${emp.id}</td><td class="text-start">${emp.name}</td><td class="text-start">${emp.des}</td><td>${emp.mBasic.toFixed(0)}</td><td class="total-attendance-col">${emp.att}</td><td>${actB.toFixed(0)}</td><td>${otA.toFixed(0)}</td><td class="deduction-col">${emp.adv.toFixed(0)}</td><td class="deduction-col">${emp.nps.toFixed(0)}</td><td class="deduction-col">${emp.csg.toFixed(0)}</td><td class="highlight-col">${need.toFixed(0)}</td><td></td></tr>`;
     }).join('');
     
-    tfoot.innerHTML = `<tr class="grand-total-row"><td colspan="4" class="text-end">GRAND TOTAL:</td><td>${g_mBasic.toFixed(2)}</td><td class="total-attendance-col">${g_att}</td><td>${g_actBasic.toFixed(2)}</td><td>${g_otHrs.toFixed(2)}</td><td>${g_otAmt.toFixed(2)}</td><td class="deduction-col">${g_adv.toFixed(2)}</td><td class="deduction-col">${g_nps.toFixed(2)}</td><td class="deduction-col">${g_csg.toFixed(2)}</td><td class="highlight-col">${g_need.toFixed(2)}</td><td></td></tr>`;
+    tfoot.innerHTML = `<tr class="grand-total-row"><td colspan="4" class="text-end">GRAND TOTAL:</td><td>${g_mBasic.toFixed(0)}</td><td class="total-attendance-col">${g_att}</td><td>${g_actBasic.toFixed(0)}</td><td>${g_otAmt.toFixed(0)}</td><td class="deduction-col">${g_adv.toFixed(0)}</td><td class="deduction-col">${g_nps.toFixed(0)}</td><td class="deduction-col">${g_csg.toFixed(0)}</td><td class="highlight-col">${g_need.toFixed(0)}</td><td></td></tr>`;
+  }
+
+  function openEditModal(rowIndex) {
+    const row = rawData[rowIndex];
+    document.getElementById('editRowIndex').value = rowIndex;
+    document.getElementById('displayEmpName').innerText = row[colIndexMap["EMPLOYEE NAME"]];
+    document.getElementById('editStatus').value = (row[colIndexMap["STATUS"]] || "PRESENT").toUpperCase();
+    document.getElementById('editOT').value = row[colIndexMap["TOTAL OT HOURS"]] || 0;
+    document.getElementById('editHoliday').value = row[colIndexMap["HOLIDAY"]] || 0;
+    bootstrapModal.show();
+  }
+
+  async function saveEdit() {
+    const idx = document.getElementById('editRowIndex').value;
+    const payload = {
+        action: "updateRow",
+        row: parseInt(idx) + 1,
+        updates: { "STATUS": document.getElementById('editStatus').value, "TOTAL OT HOURS": document.getElementById('editOT').value, "HOLIDAY": document.getElementById('editHoliday').value }
+    };
+    bootstrapModal.hide();
+    document.getElementById('loader').style.display = 'block';
+    try {
+      await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
+      loadDataFromAPI();
+    } catch (e) { console.error(e); }
   }
 
   function handleTypeChange() {
@@ -358,147 +516,391 @@
     processData();
   }
 
-  function updateStats() {
-    const tbody = document.getElementById('tableBody'), isSum = document.getElementById('bodyRoot').classList.contains('summary-mode');
-    let ids = new Set(), pres = 0;
-    for (let r of tbody.rows) {
-      if (r.cells[1]?.innerText !== '-') ids.add(r.cells[1]?.innerText);
-      pres += isSum ? (parseInt(r.cells[5]?.innerText) || 0) : 1;
+  function updateStats(filteredRows) {
+    if (!filteredRows || filteredRows.length === 0) {
+      document.getElementById("statEmp").innerText = "0";
+      document.getElementById("statPresent").innerText = "0";
+      return;
     }
-    document.getElementById("statEmp").innerText = ids.size;
-    document.getElementById("statPresent").innerText = pres;
+    const eIdx = colIndexMap["EMPLOYEE ID"];
+    const sIdx = colIndexMap["STATUS"];
+    const isSum = document.getElementById('bodyRoot').classList.contains('summary-mode');
+    let uniqueEmpIds = new Set();
+    filteredRows.forEach(row => { const id = row[eIdx]?.toString().trim(); if (id && id !== "-" && id !== "") uniqueEmpIds.add(id); });
+    let totalAttendance = 0;
+    if (isSum) {
+      const tbody = document.getElementById('tableBody');
+      for (let r of tbody.rows) if (!r.classList.contains('grand-total-row')) totalAttendance += (parseInt(r.cells[5]?.innerText) || 0);
+    } else {
+      filteredRows.forEach(row => { if (isPresent(row[sIdx])) totalAttendance++; });
+    }
+    document.getElementById("statEmp").innerText = uniqueEmpIds.size;
+    document.getElementById("statPresent").innerText = totalAttendance;
   }
 
   function populateStaticFilters(data) {
-    const eSel = document.getElementById('empFilter'), sSel = document.getElementById('sideFilter');
+    const eSel = document.getElementById('empFilter'), sSel = document.getElementById('sideFilter'), mSide = document.getElementById('matrixSideFilter');
     const emps = new Map(), sides = new Set();
     data.slice(1).forEach(r => {
       if(r[colIndexMap["EMPLOYEE ID"]]) emps.set(r[colIndexMap["EMPLOYEE ID"]].toString().toUpperCase(), r[colIndexMap["EMPLOYEE NAME"]]);
       if(r[colIndexMap["SIDE NAME"]]) sides.add(r[colIndexMap["SIDE NAME"]].toString().toUpperCase());
     });
+    const sideOptions = [...sides].sort().map(s=>`<option value="${s}">${s}</option>`).join('');
     eSel.innerHTML = '<option value="">All Employees</option>' + [...emps.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([id,name])=>`<option value="${id}">${id} | ${name}</option>`).join('');
-    sSel.innerHTML = '<option value="">All Sides</option>' + [...sides].sort().map(s=>`<option value="${s}">${s}</option>`).join('');
+    sSel.innerHTML = '<option value="">All Sides</option>' + sideOptions;
+    mSide.innerHTML = '<option value="">All Sides</option>' + sideOptions;
   }
 
-  function parseDate(s) { if (!s) return new Date(0); const p = s.toString().split(/[-/]/); return p.length === 3 ? new Date(p[2], p[1]-1, p[0]) : new Date(s); }
-  function refreshData() { resetFilters(); document.getElementById('loader').style.display='block'; loadDataFromAPI(); }
+ function parseDate(s) {
+    if (!s || s.toString().trim() === "" || s === "-") return new Date(0);
+    if (s instanceof Date) return s;
+
+    let dateString = s.toString().trim().replace(/\//g, '-');
+    const parts = dateString.split('-');
+
+    if (parts.length === 3) {
+      if (parts[0].length === 4) return new Date(parts[0], parts[1] - 1, parts[2]); // YYYY-MM-DD
+      if (parts[2].length === 4) return new Date(parts[2], parts[1] - 1, parts[0]); // DD-MM-YYYY
+    }
+    const finalDate = new Date(dateString);
+    return isNaN(finalDate.getTime()) ? new Date(0) : finalDate;
+  }
+  
+  function refreshData() { loadDataFromAPI(); }
   function resetFilters() { document.getElementById("searchInput").value=""; if(startPicker) startPicker.clear(); if(endPicker) endPicker.clear(); document.getElementById("empFilter").value=""; document.getElementById("sideFilter").value=""; document.getElementById("columnSelector").value=""; document.getElementById("typeValueGroup").style.display="none"; processData(); }
 
   function openPreview() {
+    const start = document.getElementById("startDate").value || "N/A";
+    const end = document.getElementById("endDate").value || "N/A";
+    const emp = document.getElementById("empFilter").options[document.getElementById("empFilter").selectedIndex].text;
+    const side = document.getElementById("sideFilter").options[document.getElementById("sideFilter").selectedIndex].text;
+    const filterType = document.getElementById("columnSelector").options[document.getElementById("columnSelector").selectedIndex].text;
+    const filterVal = document.getElementById("typeValueSelect")?.options[document.getElementById("typeValueSelect")?.selectedIndex]?.text || "None";
+    
     const tableHeader = document.getElementById('tableHead').innerHTML;
     const tableBody = document.getElementById('tableBody').innerHTML;
-    const tableFooter = document.getElementById('tableFoot').innerHTML;
-    const startInput = document.getElementById('startDate').value;
-    const monthYear = startInput ? new Date(startInput).toLocaleString('en-us', {month:'long', year:'numeric'}) : "Full Report";
-
+    const tableFoot = document.getElementById('tableFoot').innerHTML;
+    
     const previewWindow = window.open('', '_blank');
     previewWindow.document.write(`
       <html>
         <head>
-          <title>ALAMHOW - Salary Sheet Preview</title>
+          <title>Salary Report Preview</title>
           <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
           <style>
-            @page { size: landscape; margin: 10mm 5mm; }
-            
+            @page { size: landscape; margin: 10mm; }
             body { 
-              font-family: 'Segoe UI', sans-serif; 
-              margin: 0; 
-              padding: 40px 0; 
-              background: #f0f2f5; 
-              display: flex; 
-              justify-content: center; /* Center horizontally */
-              min-height: 100vh;
+                padding: 15px; 
+                font-family: 'Segoe UI', Tahoma, sans-serif; 
+                font-size: 11px; 
+                color: #000; 
+                background: #fff;
+            }
+            /* Preview Only Section */
+            .preview-meta-info {
+                background: #fdfdfd;
+                border: 2px solid #1d3a6d;
+                padding: 10px 15px;
+                margin-bottom: 20px;
+                border-radius: 8px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 20px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            }
+            .meta-item { display: flex; flex-direction: column; }
+            .meta-label { font-size: 10px; text-transform: uppercase; color: #1d3a6d; font-weight: 800; margin-bottom: 2px; }
+            .meta-value { font-size: 12px; font-weight: 600; color: #333; }
+            
+            .report-header { text-align: center; margin-bottom: 15px; }
+            .report-header h2 { font-size: 26px; margin: 0; font-weight: 800; letter-spacing: 1px; color: #1d3a6d; }
+            .report-header .statement-title { font-size: 14px; margin: 5px 0 2px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1.5px solid #1d3a6d; display: inline-block; padding: 0 15px 3px 15px; }
+            .report-header .print-date-range { font-size: 13px; font-weight: 800; color: #000; margin-top: 8px; }
+
+            table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: auto; border: 2px solid #000; }
+            th, td { 
+                border: 1px solid #000 !important; 
+                text-align: center; 
+                padding: 6px 4px !important; 
+                background: #fff !important;
+                color: #000 !important;
+                font-size: 10px;
+                white-space: nowrap;
+            }
+            th { 
+                font-weight: 900; 
+                text-transform: uppercase; 
+                background: #f2f2f2 !important;
+                vertical-align: middle;
+            }
+
+            .text-start { text-align: left !important; padding-left: 8px !important; }
+            
+            .total-attendance-col { font-weight: bold; background: #fff9e6 !important; }
+            .highlight-col { font-weight: bold; background: #e6fffa !important; }
+
+            /* Ensure Foot appears only on the last page and stays at the end of the table content */
+            tfoot { 
+                display: table-footer-group; 
             }
             
-            .print-container { 
-              background: #fff; 
-              width: 95%; 
-              max-width: 1300px; 
-              padding: 40px; 
-              box-shadow: 0 4px 20px rgba(0,0,0,0.15); 
-              border-radius: 12px; 
-              margin: 0 auto; /* Center alignment */
-              display: flex;
-              flex-direction: column;
+            .grand-total-row td { 
+                font-weight: 900 !important; 
+                border-top: 2.5px double #000 !important; 
+                background: #f8f8f8 !important;
+                font-size: 11px;
+                padding: 8px 4px !important;
             }
 
-            .report-header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1d3a6d; padding-bottom: 15px; }
-            .report-header h2 { color: #1d3a6d; margin: 0; font-weight: 800; font-size: 28px; }
-            .report-header p { margin: 8px 0 0; font-size: 18px; color: #555; font-weight: 500; }
-            
-            table { width: 100%; border-collapse: collapse; font-size: 10.5px !important; border: 1.5px solid #000 !important; }
-            th { background-color: #f1f3f5 !important; border: 1px solid #000 !important; padding: 8px 4px !important; text-align: center; font-weight: bold; color: #1d3a6d; text-transform: uppercase; }
-            td { border: 1px solid #000 !important; padding: 6px 4px !important; text-align: center; vertical-align: middle; }
-            .align-left { text-align: left !important; padding-left: 10px !important; }
-
-            .grand-total-row { 
-              background-color: #e9ecef !important; 
-              font-weight: 900; 
-              color: #000;
-              border-top: 2px solid #000 !important;
+            .signature-section {
+                margin-top: 40px;
+                display: flex;
+                justify-content: space-between;
+                padding: 0 40px;
+                page-break-inside: avoid;
             }
 
-            .signature-container { 
-              display: flex; 
-              justify-content: space-between; 
-              width: 100%; 
-              margin-top: 60px; 
-              padding-top: 10px;
-              page-break-inside: avoid;
-            }
-            .sig-box { text-align: center; width: 22%; border-top: 1.5px solid #000; padding-top: 8px; font-size: 13px; font-weight: bold; color: #222; }
-
-            .no-print-btn { 
-              position: fixed; 
-              top: 20px; 
-              right: 40px; 
-              padding: 12px 30px; 
-              background: #1d3a6d; 
-              color: white; 
-              border: none; 
-              font-weight: bold; 
-              border-radius: 8px; 
-              cursor: pointer; 
-              z-index: 1000; 
-              box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-              transition: transform 0.2s;
-            }
-            .no-print-btn:hover { transform: scale(1.05); background: #142a50; }
+            .no-print-btn { position: fixed; top: 15px; right: 15px; z-index: 1000; padding: 10px 20px; font-weight: bold; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: none; background-color: #1d3a6d; color: #fff; }
 
             @media print {
-              body { background: #fff; padding: 0; display: block; }
-              .print-container { box-shadow: none; width: 100%; max-width: none; padding: 5mm; border-radius: 0; margin: 0; }
-              .no-print-btn { display: none; }
-              thead { display: table-header-group; }
-              tfoot { display: table-row-group; }
+                .no-print, .no-print-btn, .preview-meta-info { display: none !important; }
+                body { padding: 0; margin: 0; }
+                .report-header { margin-top: 0; }
+                table { border-width: 1.5pt; }
+                
+                /* This wrapper ensures the total row and signatures appear together at the end */
+                .print-footer-container {
+                    page-break-inside: avoid;
+                }
             }
           </style>
         </head>
         <body>
-          <button class="no-print-btn" onclick="window.print()">PRINT / SAVE AS PDF</button>
-          <div class="print-container">
-            <div class="report-header">
-              <h2>ALAMHOW CO LTD</h2>
-              <p>Monthly Salary Summary - ${monthYear}</p>
-            </div>
-            <table>
-              <thead>${tableHeader}</thead>
-              <tbody>${tableBody}</tbody>
-              <tfoot><tr class="grand-total-row">${tableFooter}</tr></tfoot>
-            </table>
-            
-            <div class="signature-container">
-              <div class="sig-box">PREPARED BY</div>
-              <div class="sig-box">CHECKED BY</div>
-              <div class="sig-box">AUTHORIZED BY</div>
-              <div class="sig-box">APPROVED BY</div>
-            </div>
+          <button class="no-print-btn" onclick="window.print()">PRINT REPORT</button>
+          
+          <!-- Detailed Meta Info - Preview Only -->
+          <div class="preview-meta-info">
+             <div class="meta-item">
+                <span class="meta-label">Period / Range</span>
+                <span class="meta-value">${start} — ${end}</span>
+             </div>
+             <div class="meta-item">
+                <span class="meta-label">Employee Selection</span>
+                <span class="meta-value">${emp}</span>
+             </div>
+             <div class="meta-item">
+                <span class="meta-label">Side / Department</span>
+                <span class="meta-value">${side}</span>
+             </div>
+             <div class="meta-item">
+                <span class="meta-label">Active Filter</span>
+                <span class="meta-value">${filterType !== 'None' ? filterType + ': ' + filterVal : 'No Filter'}</span>
+             </div>
+          </div>
+
+          <div class="report-header">
+            <h2>ALAMHOW CO LTD</h2>
+            <div class="statement-title">MONTHLY SALARY STATEMENT</div>
+            <div class="print-date-range">DATE: ${start} TO ${end}</div>
+          </div>
+
+          <table>
+            <thead>${tableHeader}</thead>
+            <tbody>${tableBody}</tbody>
+            <!-- The tfoot automatically repeats or stays at the end of the data based on browser -->
+            <tfoot>${tableFoot}</tfoot>
+          </table>
+
+          <div class="signature-section">
+            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Prepared By</div>
+            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Manager Signature</div>
+            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Authorized Signature</div>
           </div>
         </body>
       </html>
     `);
     previewWindow.document.close();
   }
+  
+
+  function showAttendanceFilter() { matrixModal.show(); }
+  
+function generateFilteredAttendanceSheet() {
+    const monthInput = document.getElementById('matrixMonth').value;
+    const sideFilter = document.getElementById('matrixSideFilter').value;
+    if (!monthInput) { alert("Please select a month."); return; }
+
+    const [year, month0] = monthInput.split('-').map(Number);
+    const month = month0 - 1;
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const dateRange = [];
+    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) dateRange.push(new Date(d));
+
+    // প্রিন্ট ডেট ও টাইম
+    const now = new Date();
+    const printDateTime = now.toLocaleString('en-GB', { 
+        day: '2-digit', month: 'short', year: 'numeric', 
+        hour: '2-digit', minute: '2-digit', hour12: true 
+    });
+
+    const attendanceMap = {}, employees = {};
+    rawData.slice(1).forEach(row => {
+        const id = row[colIndexMap["EMPLOYEE ID"]], dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+        const rSide = (row[colIndexMap["SIDE NAME"]] || "").toString().toUpperCase();
+        if (!id || !dRaw) return;
+        if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
+            if (sideFilter && rSide !== sideFilter.toUpperCase()) return;
+            const dateStr = dRaw.toISOString().split('T')[0];
+            if (!employees[id]) employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
+            if (!attendanceMap[id]) attendanceMap[id] = {};
+            let st = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
+            let shortStat = '-';
+            if (isPresent(st)) shortStat = 'P';
+            else if (st.startsWith('A')) shortStat = 'A';
+            else if (st.startsWith('L')) shortStat = 'L';
+            else if (st.startsWith('H')) shortStat = 'H';
+            attendanceMap[id][dateStr] = shortStat;
+        }
+    });
+
+    const monthName = firstDay.toLocaleString('default', { month: 'long' });
+    const sortedIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    if (sortedIds.length === 0) { alert("No data found for the selected criteria."); return; }
+
+    matrixModal.hide();
+
+    // টেবিল হেডার
+    const tableHeader = `<thead>
+      <tr>
+        <th rowspan="2" style="width:35px">SL</th>
+        <th rowspan="2" style="width:180px">EMPLOYEE ID & Name</th>
+        <th colspan="${dateRange.length}">Attendance Summary: ${monthName} ${year}</th>
+        <th colspan="4" style="background:#0d685b">SUMMARY</th>
+      </tr>
+      <tr>
+        ${dateRange.map(d => {
+            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 2);
+            const isSun = d.getDay() === 0;
+            return `<th style="width:22px; ${isSun ? 'background:#ffcccc; color:red;' : ''}">${d.getDate()}<br><span style="font-size:8px">${dayName}</span></th>`;
+        }).join('')}
+        <th style="width:25px; background:#198754">P</th>
+        <th style="width:25px; background:#dc3545">A</th>
+        <th style="width:25px; background:#ffc107; color:#000">SUN</th>
+        <th style="width:25px; background:#6c757d">HOL</th>
+      </tr>
+    </thead>`;
+
+    let dayTotals = Array(dateRange.length).fill(0);
+    let totalP = 0, totalA = 0, totalSun = 0, totalHol = 0;
+
+    const tableBody = sortedIds.map((id, idx) => {
+        let countP = 0, countA = 0, countSun = 0, countHol = 0;
+        const days = dateRange.map((d, dIdx) => {
+            const ds = d.toISOString().split('T')[0];
+            const isSunday = d.getDay() === 0;
+            let stat = attendanceMap[id] && attendanceMap[id][ds] ? attendanceMap[id][ds] : '-';
+
+            if (isSunday) {
+                countSun++;
+                return stat !== '-' ? `<td style="color:red; font-weight:bold;">${stat}</td>` : `<td></td>`;
+            }
+            if (stat === 'P') { countP++; dayTotals[dIdx]++; return `<td>P</td>`; }
+            if (stat === 'A') { countA++; return `<td style="color:red">A</td>`; }
+            if (stat === 'H' || stat === 'L') { countHol++; return `<td style="color:green">${stat}</td>`; }
+            return `<td></td>`;
+        }).join('');
+
+        totalP += countP; totalA += countA; totalSun += countSun; totalHol += countHol;
+        return `<tr>
+          <td>${idx + 1}</td>
+          <td class="text-start">${id} - ${employees[id]}</td>
+          ${days}
+          <td style="font-weight:bold; background:#e6fffa">${countP}</td>
+          <td style="font-weight:bold; background:#fff0f0">${countA}</td>
+          <td style="font-weight:bold; background:#fff9e6">${countSun}</td>
+          <td style="font-weight:bold; background:#f8f9fa">${countHol}</td>
+        </tr>`;
+    }).join('');
+
+    const tableFooter = `<tfoot>
+      <tr style="background:#f0f4f8; font-weight:bold;">
+        <td colspan="2" class="text-end">DAILY TOTAL (P):</td>
+        ${dayTotals.map(t => `<td>${t || ''}</td>`).join('')}
+        <td style="background:#e6fffa">${totalP}</td>
+        <td style="background:#fff0f0">${totalA}</td>
+        <td style="background:#fff9e6">${totalSun}</td>
+        <td style="background:#f8f9fa">${totalHol}</td>
+      </tr>
+    </tfoot>`;
+
+    const preview = window.open('', '_blank');
+    preview.document.write(`
+      <html>
+        <head>
+          <title>Attendance Summary</title>
+          <style>
+            @page { size: A4 landscape; margin: 10mm; }
+            body { font-family: sans-serif; padding: 10px; margin: 0; position: relative; min-height: 100vh; }
+            .company-name { text-align: center; color: #1d3a6d; margin: 0; font-size: 26px; font-weight: bold; text-transform: uppercase; }
+            
+            /* হেডার লাইন - যেখানে Printed On বামে এবং Month ডানে থাকবে */
+            .header-line { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; border-bottom: 2px solid #1d3a6d; padding-bottom: 5px; margin-bottom: 10px; }
+            .print-time { font-size: 10px; font-weight: normal; font-style: italic; }
+            .month-display { font-size: 14px; font-weight: bold; }
+
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.5px solid #000; }
+            th, td { border: 1px solid #000; text-align: center; font-size: 9px; padding: 3px 1px; overflow: hidden; }
+            th { background: #1d3a6d; color: #fff; }
+            .text-start { text-align: left; padding-left: 5px; white-space: nowrap; }
+            
+            /* ফুটার এবং পেজ নাম্বার স্টাইল */
+            .footer-container { position: fixed; bottom: 0; width: 100%; font-size: 10px; display: none; }
+            
+            .no-print { position: fixed; top: 10px; right: 10px; padding: 10px; background: #000; color: #fff; border: none; cursor: pointer; border-radius: 5px; z-index: 1000; }
+            
+            @media print { 
+              .no-print { display: none; } 
+              body { padding: 0; }
+              .footer-container { display: block; }
+            }
+          </style>
+        </head>
+        <body>
+          <button class="no-print" onclick="window.print()">Print Report</button>
+          
+          <h1 class="company-name">ALAMHOW CO LTD</h1>
+          
+          <div class="header-line">
+            <div class="print-time">Printed on: ${printDateTime}</div>
+            <div style="font-size:16px; font-weight:bold; position:absolute; left:50%; transform:translateX(-50%);">Attendance Summary</div>
+            <div class="month-display">Month: ${monthName} ${year} ${sideFilter ? `| Side: ${sideFilter}` : ''}</div>
+          </div>
+
+          <table>${tableHeader}<tbody>${tableBody}</tbody>${tableFooter}</table>
+
+          <div style="margin-top: 20px;">
+            <table style="width: auto; min-width: 220px; border: 1.5px solid #000;">
+              <thead><tr><th colspan="2" style="padding: 4px;">OVERALL SUMMARY</th></tr></thead>
+              <tbody>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold;">Total Present (P)</td><td style="font-weight:bold; width:60px;">${totalP}</td></tr>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold; color:red;">Total Absent (A)</td><td style="font-weight:bold; color:red;">${totalA}</td></tr>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold; color:#b58900;">Total Sundays (S)</td><td style="font-weight:bold; color:#b58900;">${totalSun}</td></tr>
+                <tr><td style="text-align:left; padding:4px 10px; font-weight:bold;">Total Holidays (HOL)</td><td style="font-weight:bold;">${totalHol}</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top: 60px; display: flex; justify-content: space-between; padding: 0 40px;">
+            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Prepared By</div>
+            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Authorized Signature</div>
+          </div>
+
+        </body>
+      </html>
+    `);
+    preview.document.close();
+}
 </script>
 </body>
 </html>
