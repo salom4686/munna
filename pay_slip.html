@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ALAMHOW - Bulk Pay Statement (GitHub Hosted)</title>
     <style>
-        /* প্রিন্ট সেটিংস */
+        /* Print Settings */
         @media print {
             @page {
                 size: A4;
@@ -41,7 +41,7 @@
             .name-value { -webkit-print-color-adjust: exact; background-color: #f5faff !important; }
         }
 
-        /* ওয়েব ভিউ স্টাইল */
+        /* Web View Styles */
         body { 
             font-family: 'Calibri', 'Arial', sans-serif; 
             background-color: #f0f2f5; 
@@ -189,7 +189,7 @@
 </head>
 <body onload="loadEmployeeList()">
 
-    <div id="loader" class="loading-overlay">প্রক্রিয়াকরণ করা হচ্ছে, দয়া করে অপেক্ষা করুন...</div>
+    <div id="loader" class="loading-overlay">Processing, please wait...</div>
 
     <div class="no-print">
         <h2 style="margin: 0 0 15px 0; color: #2c3e50;">ALAMHOW Pay Statement System</h2>
@@ -211,7 +211,7 @@
                         <span class="action-link" onclick="selectAll(false)">Unselect All</span>
                     </div>
                     <div id="employeeChecklist">
-                        <p style="padding: 10px; text-align: center;">কর্মচারী তালিকা লোড হচ্ছে...</p>
+                        <p style="padding: 10px; text-align: center;">Loading employee list...</p>
                     </div>
                 </div>
             </div>
@@ -227,7 +227,7 @@
     <div id="payslipContainer"></div>
 
     <script>
-        // আপনার Google Apps Script Web App URL এখানে দেওয়া হলো
+        // Google Apps Script Web App URL
         const API_URL = 'https://script.google.com/macros/s/AKfycbyo3jRKmzSjCNdKQXRfAAKz9Fp7_bdzDh1o6_F5bJpcKj_lw6rcaKVSF2S-yAOKJeH_/exec';
         const LOGO_URL = 'https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo=w400-h400-nc';
 
@@ -254,14 +254,14 @@
             updateBtnText();
         }
         
-        // GitHub থেকে Google Script Fetch করার মেথড
+        // Fetch method for GitHub to Google Script
         async function loadEmployeeList() {
             try {
                 const response = await fetch(`${API_URL}?action=getEmployeeList`);
                 const list = await response.json();
                 const container = document.getElementById('employeeChecklist');
                 if (!list || list.length === 0) {
-                    container.innerHTML = '<p style="padding:10px">কোন ডেটা পাওয়া যায়নি।</p>';
+                    container.innerHTML = '<p style="padding:10px">No data found.</p>';
                     return;
                 }
                 let html = '';
@@ -275,7 +275,7 @@
                 container.innerHTML = html;
             } catch (error) {
                 console.error("Error loading list:", error);
-                document.getElementById('employeeChecklist').innerHTML = '<p style="padding:10px; color:red;">সার্ভারের সাথে সংযোগ করা যাচ্ছে না।</p>';
+                document.getElementById('employeeChecklist').innerHTML = '<p style="padding:10px; color:red;">Cannot connect to server.</p>';
             }
         }
 
@@ -294,12 +294,11 @@
             const dFrom = document.getElementById('dFrom').value;
             const dTo = document.getElementById('dTo').value;
             
-            if (selectedIds.length === 0) { alert("দয়া করে অন্তত একজন কর্মচারী নির্বাচন করুন।"); return; }
+            if (selectedIds.length === 0) { alert("Please select at least one employee."); return; }
             
             document.getElementById('loader').style.display = 'flex';
             
             try {
-                // Fetch API ব্যবহার করে ডাটা আনা
                 const response = await fetch(`${API_URL}?action=getEmployeesData&ids=${selectedIds.join(',')}&from=${dFrom}&to=${dTo}`);
                 const data = await response.json();
                 
@@ -308,7 +307,7 @@
                 else renderPayslips(data);
             } catch (error) {
                 document.getElementById('loader').style.display = 'none';
-                alert("ডাটা লোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+                alert("Error loading data. Please try again.");
             }
         }
 
