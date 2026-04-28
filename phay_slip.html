@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* A4 পেপার সেটিংস */
+        @media print {
+            body { padding: 0; margin: 0; background: none; }
+            .payslip-main { border: 2px solid #000; box-shadow: none; }
+        }
+
+        body { 
+            font-family: 'Calibri', 'Arial', sans-serif; 
+            background-color: #f0f0f0; 
+            display: flex; 
+            justify-content: center; 
+            padding: 20px; 
+            margin: 0;
+        }
+
+        .payslip-main { 
+            width: 210mm; 
+            height: 297mm; 
+            background-color: white;
+            border: 2px solid #000; 
+            padding: 15mm 20mm; 
+            box-sizing: border-box;
+            position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .header { text-align: center; margin-bottom: 10px; }
+        
+        /* GANG এবং SRN এর নতুন পজিশন */
+        .gang-srn-row {
+            display: flex;
+            justify-content: center; 
+            position: relative;
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .srn-pos {
+            position: absolute;
+            right: 20px; /* একটু বামে সরানোর জন্য ০ থেকে বাড়িয়ে ২০ করা হয়েছে */
+            top: 5px;   /* একটু নিচে নামানোর জন্য ৫ পিক্সেল দেওয়া হয়েছে */
+        }
+
+        /* ইনফো সেকশন */
+        .info-header { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-top: 5px; 
+            font-size: 13px; 
+        }
+
+        .info-left-grid {
+            display: grid;
+            grid-template-columns: 80px 15px 1fr;
+            row-gap: 2px;
+            align-items: center;
+        }
+
+        .input-field {
+            border: none;
+            outline: none;
+            background: transparent;
+            font-family: inherit;
+            font-size: inherit;
+            padding: 0;
+            width: 100%;
+        }
+
+        .name-bar { border: 1px solid #000; display: flex; margin: 15px 0; }
+        .name-label { width: 60px; border-right: 1px solid #000; padding: 5px; font-weight: bold; }
+        .name-value { padding: 5px; flex-grow: 1; background-color: #f5faff; font-weight: bold; }
+
+        /* কন্টেন্ট বক্স */
+        .content-container { display: flex; border: 2px solid #000; margin-top: 5px; min-height: 420px; }
+        .left-content { width: 75%; padding: 10px; border-right: 2px solid #000; }
+        
+        .right-grid { width: 25%; background-color: #f0f4f8; display: flex; flex-direction: column; }
+        .grid-box { border-bottom: 1px solid #000; height: 28px; width: 100%; box-sizing: border-box; }
+        .grid-box:last-child { border-bottom: none; }
+
+        .row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px; font-size: 14px; }
+        .dots { flex-grow: 1; border-bottom: 1px dotted #000; margin: 0 10px; height: 14px; }
+        
+        .amount-col { width: 140px; text-align: left; }
+
+        .leave-table, .summary-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: center; font-size: 13px; }
+        .leave-table th, .leave-table td, .summary-table td { border: 1px solid #000; padding: 4px; }
+        .summary-box { width: 65%; margin: 20px auto; }
+
+        .footer { margin-top: 30px; font-size: 13px; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="payslip-main">
+    <div class="header">
+        <p style="margin:0; font-weight: bold;">PAY STATEMENT</p>
+        <h2 style="margin:5px 0">ALAMHOW CO LTD</h2>
+        <p style="margin:0">1 Dec 2025 TO 20 Dec 2025</p>
+    </div>
+
+    <!-- GANG সেন্টারে এবং SRN এর পজিশন আপডেট করা হয়েছে -->
+    <div class="gang-srn-row">
+        <span>GANG:-</span>
+        <span class="srn-pos">SRN:-</span>
+    </div>
+
+    <div class="info-header">
+        <div class="info-left-grid">
+            <span>PERIOD</span> <span>:</span> <span>M12</span>
+            <span>EMPL. NO</span> <span>:</span> <input type="text" class="input-field" placeholder="..........">
+            <span>POST</span> <span>:</span> <span>HELPER</span>
+            <span>I. D. No</span> <span>:</span> <span>PA2229358</span>
+            <span>NPS NO</span> <span>:</span> <span>-</span>
+        </div>
+        <div style="text-align: right; margin-top: 35px;">
+            DATE JOINED IN: 12/12/2024
+        </div>
+    </div>
+
+    <div class="name-bar">
+        <div class="name-label">Mr</div>
+        <div class="name-value">Padam Bahadur Budha</div>
+    </div>
+
+    <div class="content-container">
+        <div class="left-content">
+            <!-- Payments Section -->
+            <div class="row">
+                <strong>Payments</strong> 
+                <div class="dots"></div> 
+                <div class="amount-col"><strong>Amount</strong></div> 
+            </div>
+            
+            <div class="row">Normal Work <span style="margin-left:120px">Days #REF!</span><div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            <div class="row">End Of Year Bonus<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            <div class="row">Fix Travelling<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            <div class="row">Attendance Bonus<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            <div class="row">Overtime<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            <div class="row">Performance Bonus<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            <div class="row" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
+            
+            <br>
+            <!-- Deductions Section -->
+            <div class="row">
+                <strong>Deductions</strong>
+                <div class="dots"></div>
+                <div style="width: 80px;"><strong>Balance</strong></div>
+                <div class="dots"></div>
+                <div class="amount-col"><strong>Amount</strong></div>
+            </div>
+            <div class="row">CSG Employee<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
+            <div class="row">N.P.S. Employee<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
+            <div class="row">Income Tax (P.A.Y.E)<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
+            <div class="row">Advance Refund<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
+            <div class="row">Absent <span style="margin-left:140px">Days 0</span><div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
+            <div class="row" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
+        </div>
+
+        <div class="right-grid">
+            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+        </div>
+    </div>
+
+    <table class="leave-table">
+        <tr><th>A.L</th><th>S.L</th><th>L.L</th><th></th><th></th></tr>
+        <tr><td>0</td><td>0</td><td>0</td><td></td><td></td></tr>
+    </table>
+
+    <div class="summary-box">
+        <table class="summary-table">
+            <tr style="font-weight:bold"><td>GROSS PAY</td><td>DEDUCTIONS</td><td>B/F CENTS</td></tr>
+            <tr style="height:30px"><td></td><td></td><td>-</td></tr>
+            <tr style="font-weight:bold"><td>PAID BY</td><td>TO BE PAID</td><td>C/F CENTS</td></tr>
+            <tr><td>CASH/CHQ/D.D</td><td></td><td></td></tr>
+        </table>
+    </div>
+
+    <div class="footer">
+        SIGNATURE: ............................................................<br>
+        <strong>Director</strong><br>
+        DATE: ............................................................
+    </div>
+</div>
+
+</body>
+</html>
