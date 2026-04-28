@@ -3,196 +3,441 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALAMHOW - Bulk Pay Statement (GitHub Hosted)</title>
     <style>
-        /* A4 পেপার সেটিংস */
+        /* প্রিন্ট সেটিংস */
         @media print {
-            body { padding: 0; margin: 0; background: none; }
-            .payslip-main { border: 2px solid #000; box-shadow: none; }
+            @page {
+                size: A4;
+                margin: 0; 
+            }
+            body { 
+                background: white; 
+                padding: 0; 
+                margin: 0; 
+            }
+            .no-print { display: none !important; }
+            #payslipContainer {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            .payslip-main { 
+                margin: 0 auto !important; 
+                border: none !important; 
+                box-shadow: none !important;
+                width: 210mm; 
+                height: 297mm; 
+                padding: 10mm 15mm !important; 
+                box-sizing: border-box;
+                display: block;
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+            .payslip-main:last-child {
+                page-break-after: auto !important;
+            }
+            .row-item-bold { -webkit-print-color-adjust: exact; background-color: #f0f0f0 !important; }
+            .name-value { -webkit-print-color-adjust: exact; background-color: #f5faff !important; }
         }
 
+        /* ওয়েব ভিউ স্টাইল */
         body { 
             font-family: 'Calibri', 'Arial', sans-serif; 
-            background-color: #f0f0f0; 
+            background-color: #f0f2f5; 
             display: flex; 
-            justify-content: center; 
+            flex-direction: column;
+            align-items: center; 
             padding: 20px; 
             margin: 0;
         }
 
+        .no-print { 
+            background: #fff; 
+            padding: 20px; 
+            margin-bottom: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .controls-row { display: flex; align-items: center; gap: 15px; justify-content: center; flex-wrap: wrap; }
+
+        .dropdown-wrapper { position: relative; width: 350px; text-align: left; }
+        .dropbtn {
+            background-color: #ffffff;
+            color: #333;
+            padding: 10px 15px;
+            font-size: 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 45px;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #ffffff;
+            width: 100%;
+            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            max-height: 450px;
+            overflow-y: auto;
+            margin-top: 5px;
+        }
+        .dropdown-content.show { display: block; }
+        .search-box { width: 92%; padding: 10px; margin: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        
+        .select-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            font-size: 13px;
+        }
+        .action-link {
+            color: #007bff;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .employee-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f1f1f1; cursor: pointer; }
+        .employee-item:hover { background-color: #f8f9fa; }
+        .employee-item input { margin-right: 12px; transform: scale(1.2); }
+
         .payslip-main { 
             width: 210mm; 
-            height: 297mm; 
+            min-height: 297mm; 
             background-color: white;
             border: 2px solid #000; 
-            padding: 15mm 20mm; 
+            padding: 10mm 15mm; 
             box-sizing: border-box;
             position: relative;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
 
-        .header { text-align: center; margin-bottom: 10px; }
-        
-        /* GANG এবং SRN এর নতুন পজিশন */
-        .gang-srn-row {
-            display: flex;
-            justify-content: center; 
-            position: relative;
-            margin-bottom: 10px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .srn-pos {
+        .header-logo {
             position: absolute;
-            right: 20px; /* একটু বামে সরানোর জন্য ০ থেকে বাড়িয়ে ২০ করা হয়েছে */
-            top: 5px;   /* একটু নিচে নামানোর জন্য ৫ পিক্সেল দেওয়া হয়েছে */
+            top: 15mm;
+            left: 15mm;
+            width: 80px;
+            height: auto;
         }
 
-        /* ইনফো সেকশন */
-        .info-header { 
-            display: flex; 
-            justify-content: space-between; 
-            margin-top: 5px; 
-            font-size: 13px; 
-        }
+        .header { text-align: center; margin-bottom: 10px; position: relative; }
+        .gang-srn-row { display: flex; justify-content: center; position: relative; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
+        .srn-pos { position: absolute; right: 10px; top: 0px; }
+        .info-header { display: flex; justify-content: space-between; margin-top: 5px; font-size: 13px; }
+        .info-left-grid { display: grid; grid-template-columns: 85px 15px 1fr; row-gap: 3px; align-items: center; }
 
-        .info-left-grid {
-            display: grid;
-            grid-template-columns: 80px 15px 1fr;
-            row-gap: 2px;
-            align-items: center;
-        }
+        .name-bar { border: 1px solid #000; display: flex; margin: 10px 0; }
+        .name-label { width: 60px; border-right: 1px solid #000; padding: 6px; font-weight: bold; text-align: center; }
+        .name-value { padding: 6px; flex-grow: 1; background-color: #f5faff; font-weight: bold; text-transform: uppercase; font-size: 16px; }
 
-        .input-field {
-            border: none;
-            outline: none;
-            background: transparent;
-            font-family: inherit;
-            font-size: inherit;
-            padding: 0;
-            width: 100%;
-        }
-
-        .name-bar { border: 1px solid #000; display: flex; margin: 15px 0; }
-        .name-label { width: 60px; border-right: 1px solid #000; padding: 5px; font-weight: bold; }
-        .name-value { padding: 5px; flex-grow: 1; background-color: #f5faff; font-weight: bold; }
-
-        /* কন্টেন্ট বক্স */
-        .content-container { display: flex; border: 2px solid #000; margin-top: 5px; min-height: 420px; }
-        .left-content { width: 75%; padding: 10px; border-right: 2px solid #000; }
+        .content-container { display: flex; border: 2px solid #000; min-height: 480px; }
+        .left-content { width: 75%; border-right: 2px solid #000; display: flex; flex-direction: column; }
+        .right-grid { width: 25%; background-color: #fdfdfd; display: flex; flex-direction: column; }
         
-        .right-grid { width: 25%; background-color: #f0f4f8; display: flex; flex-direction: column; }
-        .grid-box { border-bottom: 1px solid #000; height: 28px; width: 100%; box-sizing: border-box; }
-        .grid-box:last-child { border-bottom: none; }
-
-        .row { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 4px; font-size: 14px; }
-        .dots { flex-grow: 1; border-bottom: 1px dotted #000; margin: 0 10px; height: 14px; }
-        
-        .amount-col { width: 140px; text-align: left; }
+        .row-item { height: 30px; display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+        .row-item-bold { font-weight: bold; border-bottom: 2px solid #000; background-color: #f0f0f0; }
+        .grid-box { height: 30px; border-bottom: 2px solid #000; text-align: right; padding-right: 12px; line-height: 30px; font-weight: bold; font-size: 14px; }
 
         .leave-table, .summary-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: center; font-size: 13px; }
-        .leave-table th, .leave-table td, .summary-table td { border: 1px solid #000; padding: 4px; }
-        .summary-box { width: 65%; margin: 20px auto; }
+        .leave-table th, .leave-table td, .summary-table td { border: 1px solid #000; padding: 6px; }
+        .summary-box { width: 70%; margin: 20px auto; }
 
-        .footer { margin-top: 30px; font-size: 13px; line-height: 1.6; }
+        .footer { margin-top: 30px; font-size: 13px; line-height: 1.8; }
+        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; justify-content: center; align-items: center; font-weight: bold; color: #007bff; }
+        
+        .watermark {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            width: 450px;
+            opacity: 0.04;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .work-details {
+            display: flex;
+            gap: 15px;
+            margin-left: auto;
+            font-size: 12px;
+            font-weight: normal;
+        }
+        .work-detail-item {
+            border-left: 1px solid #ddd;
+            padding-left: 8px;
+        }
     </style>
 </head>
-<body>
+<body onload="loadEmployeeList()">
 
-<div class="payslip-main">
-    <div class="header">
-        <p style="margin:0; font-weight: bold;">PAY STATEMENT</p>
-        <h2 style="margin:5px 0">ALAMHOW CO LTD</h2>
-        <p style="margin:0">1 Dec 2025 TO 20 Dec 2025</p>
-    </div>
+    <div id="loader" class="loading-overlay">প্রক্রিয়াকরণ করা হচ্ছে, দয়া করে অপেক্ষা করুন...</div>
 
-    <!-- GANG সেন্টারে এবং SRN এর পজিশন আপডেট করা হয়েছে -->
-    <div class="gang-srn-row">
-        <span>GANG:-</span>
-        <span class="srn-pos">SRN:-</span>
-    </div>
-
-    <div class="info-header">
-        <div class="info-left-grid">
-            <span>PERIOD</span> <span>:</span> <span>M12</span>
-            <span>EMPL. NO</span> <span>:</span> <input type="text" class="input-field" placeholder="..........">
-            <span>POST</span> <span>:</span> <span>HELPER</span>
-            <span>I. D. No</span> <span>:</span> <span>PA2229358</span>
-            <span>NPS NO</span> <span>:</span> <span>-</span>
-        </div>
-        <div style="text-align: right; margin-top: 35px;">
-            DATE JOINED IN: 12/12/2024
-        </div>
-    </div>
-
-    <div class="name-bar">
-        <div class="name-label">Mr</div>
-        <div class="name-value">Padam Bahadur Budha</div>
-    </div>
-
-    <div class="content-container">
-        <div class="left-content">
-            <!-- Payments Section -->
-            <div class="row">
-                <strong>Payments</strong> 
-                <div class="dots"></div> 
-                <div class="amount-col"><strong>Amount</strong></div> 
+    <div class="no-print">
+        <h2 style="margin: 0 0 15px 0; color: #2c3e50;">ALAMHOW Pay Statement System</h2>
+        <div class="controls-row">
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="date" id="dFrom" style="padding:8px; border:1px solid #ddd; border-radius:4px;">
+                <span>TO</span>
+                <input type="date" id="dTo" style="padding:8px; border:1px solid #ddd; border-radius:4px;">
             </div>
-            
-            <div class="row">Normal Work <span style="margin-left:120px">Days #REF!</span><div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            <div class="row">End Of Year Bonus<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            <div class="row">Fix Travelling<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            <div class="row">Attendance Bonus<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            <div class="row">Overtime<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            <div class="row">Performance Bonus<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            <div class="row" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )<div style="flex-grow: 1;"></div><div class="amount-col"></div></div>
-            
-            <br>
-            <!-- Deductions Section -->
-            <div class="row">
-                <strong>Deductions</strong>
-                <div class="dots"></div>
-                <div style="width: 80px;"><strong>Balance</strong></div>
-                <div class="dots"></div>
-                <div class="amount-col"><strong>Amount</strong></div>
+            <div class="dropdown-wrapper">
+                <button onclick="toggleDropdown()" class="dropbtn" id="dropBtn">
+                    <span>Select Employee(s)</span>
+                    <span>▼</span>
+                </button>
+                <div id="myDropdown" class="dropdown-content">
+                    <input type="text" placeholder="Search ID or Name..." id="searchInput" class="search-box" onkeyup="filterList()">
+                    <div class="select-actions">
+                        <span class="action-link" onclick="selectAll(true)">Select All</span>
+                        <span class="action-link" onclick="selectAll(false)">Unselect All</span>
+                    </div>
+                    <div id="employeeChecklist">
+                        <p style="padding: 10px; text-align: center;">কর্মচারী তালিকা লোড হচ্ছে...</p>
+                    </div>
+                </div>
             </div>
-            <div class="row">CSG Employee<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
-            <div class="row">N.P.S. Employee<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
-            <div class="row">Income Tax (P.A.Y.E)<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
-            <div class="row">Advance Refund<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
-            <div class="row">Absent <span style="margin-left:140px">Days 0</span><div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
-            <div class="row" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )<div style="flex-grow: 1;"></div><div style="width: 80px;"></div><div style="flex-grow: 0;"></div><div class="amount-col"></div></div>
-        </div>
-
-        <div class="right-grid">
-            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
-            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
-            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
-            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
-            <div class="grid-box"></div><div class="grid-box"></div><div class="grid-box"></div>
+            <button onclick="generateSelected()" style="background:#007bff; color:white; border:none; padding:12px 25px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                Generate
+            </button>
+            <button onclick="window.print()" style="background:#6c757d; color:white; border:none; padding:12px 25px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                🖨️ Print
+            </button>
         </div>
     </div>
 
-    <table class="leave-table">
-        <tr><th>A.L</th><th>S.L</th><th>L.L</th><th></th><th></th></tr>
-        <tr><td>0</td><td>0</td><td>0</td><td></td><td></td></tr>
-    </table>
+    <div id="payslipContainer"></div>
 
-    <div class="summary-box">
-        <table class="summary-table">
-            <tr style="font-weight:bold"><td>GROSS PAY</td><td>DEDUCTIONS</td><td>B/F CENTS</td></tr>
-            <tr style="height:30px"><td></td><td></td><td>-</td></tr>
-            <tr style="font-weight:bold"><td>PAID BY</td><td>TO BE PAID</td><td>C/F CENTS</td></tr>
-            <tr><td>CASH/CHQ/D.D</td><td></td><td></td></tr>
-        </table>
-    </div>
+    <script>
+        // আপনার Google Apps Script Web App URL এখানে দেওয়া হলো
+        const API_URL = 'https://script.google.com/macros/s/AKfycbyo3jRKmzSjCNdKQXRfAAKz9Fp7_bdzDh1o6_F5bJpcKj_lw6rcaKVSF2S-yAOKJeH_/exec';
+        const LOGO_URL = 'https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo=w400-h400-nc';
 
-    <div class="footer">
-        SIGNATURE: ............................................................<br>
-        <strong>Director</strong><br>
-        DATE: ............................................................
-    </div>
-</div>
+        function toggleDropdown() { document.getElementById("myDropdown").classList.toggle("show"); }
+        window.onclick = function(e) {
+            if (!e.target.matches('.dropbtn') && !e.target.closest('.dropdown-content')) {
+                document.getElementById("myDropdown").classList.remove("show");
+            }
+        }
+        function filterList() {
+            let filter = document.getElementById("searchInput").value.toUpperCase();
+            let items = document.getElementsByClassName("employee-item");
+            for (let i = 0; i < items.length; i++) {
+                let txt = items[i].innerText;
+                items[i].style.display = txt.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+            }
+        }
+        function selectAll(shouldSelect) {
+            const checkboxes = document.querySelectorAll('.emp-cb');
+            checkboxes.forEach(cb => {
+                const parentItem = cb.closest('.employee-item');
+                if (parentItem.style.display !== 'none') cb.checked = shouldSelect;
+            });
+            updateBtnText();
+        }
+        
+        // GitHub থেকে Google Script Fetch করার মেথড
+        async function loadEmployeeList() {
+            try {
+                const response = await fetch(`${API_URL}?action=getEmployeeList`);
+                const list = await response.json();
+                const container = document.getElementById('employeeChecklist');
+                if (!list || list.length === 0) {
+                    container.innerHTML = '<p style="padding:10px">কোন ডেটা পাওয়া যায়নি।</p>';
+                    return;
+                }
+                let html = '';
+                list.forEach(emp => {
+                    html += `
+                        <div class="employee-item" onclick="toggleCheckbox(this, event)">
+                            <input type="checkbox" class="emp-cb" value="${emp.id}" onclick="event.stopPropagation(); updateBtnText();">
+                            <span><strong>${emp.id}</strong> - ${emp.name}</span>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error("Error loading list:", error);
+                document.getElementById('employeeChecklist').innerHTML = '<p style="padding:10px; color:red;">সার্ভারের সাথে সংযোগ করা যাচ্ছে না।</p>';
+            }
+        }
 
+        function toggleCheckbox(div, event) {
+            const cb = div.querySelector('input');
+            cb.checked = !cb.checked;
+            updateBtnText();
+        }
+        function updateBtnText() {
+            const count = document.querySelectorAll('.emp-cb:checked').length;
+            document.getElementById('dropBtn').querySelector('span').innerText = count > 0 ? `${count} Selected` : "Select Employee(s)";
+        }
+        
+        async function generateSelected() {
+            const selectedIds = Array.from(document.querySelectorAll('.emp-cb:checked')).map(cb => cb.value);
+            const dFrom = document.getElementById('dFrom').value;
+            const dTo = document.getElementById('dTo').value;
+            
+            if (selectedIds.length === 0) { alert("দয়া করে অন্তত একজন কর্মচারী নির্বাচন করুন।"); return; }
+            
+            document.getElementById('loader').style.display = 'flex';
+            
+            try {
+                // Fetch API ব্যবহার করে ডাটা আনা
+                const response = await fetch(`${API_URL}?action=getEmployeesData&ids=${selectedIds.join(',')}&from=${dFrom}&to=${dTo}`);
+                const data = await response.json();
+                
+                document.getElementById('loader').style.display = 'none';
+                if (data.error) alert(data.error);
+                else renderPayslips(data);
+            } catch (error) {
+                document.getElementById('loader').style.display = 'none';
+                alert("ডাটা লোড করতে সমস্যা হয়েছে। দয়া করে আবার চেষ্টা করুন।");
+            }
+        }
+
+        function renderPayslips(dataArray) {
+            const container = document.getElementById('payslipContainer');
+            let html = '';
+            
+            dataArray.forEach(d => {
+                const f = (val) => parseFloat(val) || 0;
+
+                const normPay = f(d.normalWorkAmount);
+                const otPay = f(d.overtimeAmount);
+                const sunPay = f(d.sundayWorkAmount);
+                const holPay = f(d.holidayWorkAmount);
+                const bonus = f(d.endOfYearBonus);
+                const trav = f(d.fixTravelling);
+                const attBonus = f(d.attendanceBonus);
+                const perfBonus = f(d.performanceBonus);
+                const prgfPay = f(d.prgfPayment);
+
+                const totalPaymentsHeader = normPay + sunPay + holPay + bonus + trav + attBonus + otPay + perfBonus + prgfPay;
+
+                html += `
+                <div class="payslip-main">
+                    <img src="${LOGO_URL}" class="watermark">
+                    <img src="${LOGO_URL}" class="header-logo">
+                    
+                    <div class="header">
+                        <p style="margin:0; font-weight: bold; letter-spacing: 1.5px;">PAY STATEMENT</p>
+                        <h2 style="margin:8px 0; font-size: 26px;">ALAMHOW CO LTD</h2>
+                        <p style="margin:0; font-weight: bold;">${d.dateFrom || ''} TO ${d.dateTo || ''}</p>
+                    </div>
+                    
+                    <div class="gang-srn-row">
+                        <span>GANG:- ${d.gang || ''}</span>
+                        <span class="srn-pos">SRN:- ${d.srn || ''}</span>
+                    </div>
+
+                    <div class="info-header">
+                        <div class="info-left-grid">
+                            <span>PERIOD</span> <span>:</span> <span>${d.period || 'M12'}</span>
+                            <span>EMPL. NO</span> <span>:</span> <span>${d.emplNo || ''}</span>
+                            <span>POST</span> <span>:</span> <span>${d.post || ''}</span>
+                            <span>I. D. No</span> <span>:</span> <span>${d.idNo || ''}</span>
+                            <span>NPS NO</span> <span>:</span> <span>${d.npsNo || '-'}</span>
+                        </div>
+                        <div style="text-align: right; align-self: flex-end; font-weight: bold;">
+                            DATE JOINED IN: ${d.dateJoinedIn || ''}
+                        </div>
+                    </div>
+
+                    <div class="name-bar">
+                        <div class="name-label">Mr</div>
+                        <div class="name-value">${d.employeeName || ''}</div>
+                    </div>
+
+                    <div class="content-container">
+                        <div class="left-content">
+                            <div class="row-item row-item-bold">Payments <span style="margin-left:auto">Amount</span></div>
+                            <div class="row-item">
+                                Normal / Sunday / Holiday Work
+                                <div class="work-details">
+                                    <span class="work-detail-item">Norm: ${d.workDays || '0'}d</span>
+                                    <span class="work-detail-item">Sun: ${d.sundayWork || '0'}d</span>
+                                    <span class="work-detail-item">Hol: ${d.holidayWork || '0'}d</span>
+                                </div>
+                            </div>
+                            <div class="row-item">End Of Year Bonus</div>
+                            <div class="row-item">Fix Travelling</div>
+                            <div class="row-item">Attendance Bonus</div>
+                            <div class="row-item">Overtime (${d.overtimeHours || '0.00'} Hrs)</div>
+                            <div class="row-item">Performance Bonus</div>
+                            <div class="row-item" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )</div>
+                            
+                            <div style="flex-grow:1"></div>
+                            
+                            <div class="row-item row-item-bold">Deductions <span style="margin-left:auto; margin-right: 120px">Balance</span> <span>Amount</span></div>
+                            <div class="row-item">CSG Employee</div>
+                            <div class="row-item">N.P.S. Employee</div>
+                            <div class="row-item">Income Tax (P.A.Y.E)</div>
+                            <div class="row-item">Advance Refund</div>
+                            <div class="row-item">Absent <span style="margin-left: 140px">Days ${d.absentDays || '0'}</span></div>
+                            <div class="row-item" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )</div>
+                        </div>
+                        <div class="right-grid">
+                            <div class="grid-box">${totalPaymentsHeader.toFixed(2)}</div>
+                            <div class="grid-box">${(normPay + sunPay + holPay).toFixed(2)}</div>
+                            <div class="grid-box">${bonus.toFixed(2)}</div>
+                            <div class="grid-box">${trav.toFixed(2)}</div>
+                            <div class="grid-box">${attBonus.toFixed(2)}</div>
+                            <div class="grid-box">${otPay.toFixed(2)}</div>
+                            <div class="grid-box">${perfBonus.toFixed(2)}</div>
+                            <div class="grid-box">${prgfPay.toFixed(2)}</div>
+                            
+                            <div style="flex-grow:1; border-bottom: 2px solid #000;"></div>
+                            
+                            <div style="height: 30px; border-bottom: 2px solid #000; background: #eee;"></div>
+                            <div class="grid-box">${f(d.csgEmployee).toFixed(2)}</div>
+                            <div class="grid-box">${f(d.npsEmployee).toFixed(2)}</div>
+                            <div class="grid-box">${f(d.incomeTax).toFixed(2)}</div>
+                            <div class="grid-box">${f(d.advanceRefund).toFixed(2)}</div>
+                            <div class="grid-box">${f(d.absentDeduction).toFixed(2)}</div>
+                            <div class="grid-box">${f(d.prgfDeduction).toFixed(2)}</div>
+                        </div>
+                    </div>
+
+                    <table class="leave-table">
+                        <tr><th>A.L (Annual)</th><th>S.L (Sick)</th><th>L.L (Local)</th><th>Other</th><th>Remarks</th></tr>
+                        <tr style="height:35px"><td>${d.al || '0'}</td><td>${d.sl || '0'}</td><td>${d.ll || '0'}</td><td>-</td><td>-</td></tr>
+                    </table>
+
+                    <div class="summary-box">
+                        <table class="summary-table">
+                            <tr style="font-weight:bold; background:#f9f9f9"><td>GROSS PAY</td><td>DEDUCTIONS</td><td>B/F CENTS</td></tr>
+                            <tr style="height:35px; font-weight:bold; font-size:17px;"><td>${d.grossPay || '0.00'}</td><td>${d.deductionsTotal || '0.00'}</td><td>-</td></tr>
+                            <tr style="font-weight:bold; background:#f9f9f9"><td>PAID BY</td><td>TO BE PAID</td><td>C/F CENTS</td></tr>
+                            <tr style="height:45px; font-weight:bold; font-size:20px;"><td>CASH</td><td style="background:#fffde7">${d.toBePaid || '0.00'}</td><td></td></tr>
+                        </table>
+                    </div>
+
+                    <div class="footer">
+                        SIGNATURE: ............................................................<br>
+                        <strong>DIRECTOR </strong><br>
+                        DATE: ${new Date().toLocaleDateString('en-GB')}
+                    </div>
+                </div>`;
+            });
+            container.innerHTML = html;
+        }
+    </script>
 </body>
 </html>
