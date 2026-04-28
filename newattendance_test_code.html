@@ -303,9 +303,13 @@
             <h2 class="text-xs font-black text-slate-500 uppercase tracking-[0.2em] mb-4">New Attendance Entry</h2>
             <div class="grid grid-cols-2 md:flex md:flex-wrap gap-4 items-end">
                 <div class="input-group flex-1 min-w-[140px]"><label>Selection Date</label><input type="text" id="attDate" placeholder="Select Date" class="input-field"></div>
-                <div class="input-group flex-1 min-w-[120px]"><label>Status</label>
-                    <input type="text" id="attStatus" class="input-field font-semibold bg-slate-100" value="Present" readonly>
-                </div>
+                <div class="input-group flex-1 min-w-[120px]">
+    <label>Status</label>
+    <select id="attStatus" class="input-field font-bold text-[#1e3a5f] bg-white border-blue-200" onchange="handleStatusChange(this.value)">
+        <option value="Present" selected>Present</option>
+        <option value="Absent">Absent</option>
+    </select>
+</div>
                 <div class="input-group flex-[2] min-w-[180px]"><label>Assigned Site</label><select id="sideName" class="input-field font-bold text-slate-800"><option value="">Loading Sites...</option></select></div>
                 <div class="input-group flex-1 min-w-[80px]"><label>OT Hours</label><input type="number" id="dailyOt" placeholder="0" class="input-field"></div>
                 <div class="input-group flex-1 min-w-[110px]"><label>Holiday</label><input type="text" id="holidayWork" placeholder="0" class="input-field bg-slate-100 font-bold" readonly></div>
@@ -611,7 +615,60 @@ updateClock();
                 box.style.display = 'block';
             } else box.style.display = 'none';
         }
+// এই ফাংশনটি স্ট্যাটাস পরিবর্তনের সাথে সাথে সাইট ইনপুট কন্ট্রোল করবে
+function handleStatusChange(status) {
+    const siteSelect = document.getElementById('sideName');
+    const otInput = document.getElementById('dailyOt');
+    const holidayInput = document.getElementById('holidayWork');
+    const sundayInput = document.getElementById('sundayWork');
+    const remarkInput = document.getElementById('attRemark');
 
+    if (status === "Absent") {
+        // ১. সব ইনপুট ফিল্ড লক (Disabled) করে দেওয়া
+        siteSelect.disabled = true;
+        otInput.disabled = true;
+        holidayInput.disabled = true;
+        sundayInput.disabled = true;
+
+        // ২. ভ্যালুগুলো রিসেট করে ০ বা খালি করে দেওয়া
+        siteSelect.value = ""; 
+        otInput.value = 0;
+        holidayInput.value = 0;
+        sundayInput.value = 0;
+        remarkInput.value = "Absent"; // রিমার্ক অটোমেটিক Absent সেট হবে
+
+        // ৩. ব্যাকগ্রাউন্ড কালার ধূসর (Gray) করা এবং কার্সর পরিবর্তন করা
+        [siteSelect, otInput, holidayInput, sundayInput].forEach(el => {
+            el.classList.add('bg-gray-100', 'cursor-not-allowed', 'opacity-60');
+            el.classList.remove('bg-white', 'bg-blue-50'); // আগের স্টাইল থাকলে রিমুভ করা
+        });
+
+    } else {
+        // ৪. "Present" হলে ফিল্ডগুলো আবার আনলক করা
+        const desig = document.getElementById('designation').value.toLowerCase();
+        
+        // কুক (Cook) না হলে সাইট আনলক হবে
+        if (desig !== 'cook') {
+            siteSelect.disabled = false;
+            siteSelect.classList.remove('bg-gray-100', 'cursor-not-allowed', 'opacity-60');
+        }
+        
+        // বাকি ফিল্ডগুলো সবার জন্য আনলক হবে
+        otInput.disabled = false;
+        // Holiday এবং Sunday সাধারণত readonly থাকে লজিক অনুযায়ী, তবে চাইলে এখানে আনলক করতে পারেন
+        // holidayInput.disabled = false; 
+        // sundayInput.disabled = false;
+
+        [otInput, holidayInput, sundayInput].forEach(el => {
+            el.classList.remove('bg-gray-100', 'cursor-not-allowed', 'opacity-60');
+        });
+
+        // ৫. ডেট অনুযায়ী রিমার্ক এবং হলিডে/সানডে ক্যালকুলেশন আবার কল করা
+        remarkInput.value = "NORMAL WORK";
+        const currentAttDate = document.getElementById('attDate').value;
+        if(currentAttDate) handleDateChange(currentAttDate);
+    }
+}
       function selectEmployee(emp) {
     document.getElementById('empId').value = emp.id;
     document.getElementById('empName').value = emp.name;
@@ -647,35 +704,39 @@ function requestAddEntry() {
     let rawEmpId = document.getElementById('empId').value.trim();
     const attDate = document.getElementById('attDate').value;
     const site = document.getElementById('sideName').value;
+    const status = document.getElementById('attStatus').value; // স্ট্যাটাস ভ্যালু নিলাম
     
     // ১. বেসিক ভ্যালিডেশন
     if(!rawEmpId) {
         document.getElementById('empId').focus();
         return showCustomAlert("Missing ID", "Please search and select an Employee first!", "warning");
     }
-    if(!attDate || !site) return showCustomAlert("Missing Data", "Fill Date and Site!", "warning");
+    
+    // তারিখ চেক (সব সময় লাগবে)
+    if(!attDate) return showCustomAlert("Missing Date", "Please select a Date!", "warning");
+
+    // ২. কন্ডিশনাল সাইড চেক (যদি Present হয় তবেই সাইট চেক করবে)
+    if (status === "Present" && !site) {
+        return showCustomAlert("Missing Site", "Please select an Assigned Site for Present status!", "warning");
+    }
     
     let formattedId = isNaN(rawEmpId) ? rawEmpId : rawEmpId.padStart(4, '0');
     
-    // ২. লোকাল টেবিল (বর্তমানে যা এন্ট্রি করছেন) ডুপ্লিকেট চেক
+    // ৩. ডুপ্লিকেট চেক (লোকাল ও সার্ভার)
     const isLocalDuplicate = attendanceData.some(e => e.id !== editModeId && e.empId.replace("'", "") === formattedId && e.date === attDate);
     if (isLocalDuplicate) return showCustomAlert("Duplicate", "This entry is already in your current list!", "error");
 
-    // ৩. সার্ভার ডাটা (Google Sheet থেকে যা লোড হয়েছে) ডুপ্লিকেট চেক
-    // currentMonthAttendance ভেরিয়েবলটি refreshAllData থেকে ডাটা পায়
     const isServerDuplicate = currentMonthAttendance.some(s => String(s.empId).padStart(4, '0') === formattedId && s.date === attDate);
-    
     if (isServerDuplicate) {
         return showCustomAlert("Already Exists", `ID: ${formattedId} is already saved in Google Sheet for ${attDate}!`, "error");
     }
 
-    // ৪. সব ঠিক থাকলে ডাটা অবজেক্ট তৈরি
+    // ৪. ডাটা অবজেক্ট তৈরি
     const newEntry = { 
         id: editModeId || Date.now(),
         slNo: editModeId ? attendanceData.find(i=>i.id === editModeId).slNo : slCount++,
         date: attDate,
-        // এই লাইনটি পরিবর্তন করুন
-empId: formattedId,
+        empId: formattedId,
         empName: document.getElementById('empName').value,
         period: document.getElementById('period').value || '',
         designation: document.getElementById('designation').value,
@@ -684,19 +745,23 @@ empId: formattedId,
         passport: document.getElementById('passport').value || '',
         salary: document.getElementById('basicSalary').value || 0,
         otRate: document.getElementById('globalOtRate').value || 0,
-        ot: parseFloat(document.getElementById('dailyOt').value) || 0,
-        site: site,
-        status: "Present",
-        holidayWork: parseFloat(document.getElementById('holidayWork').value) || 0,
-        sundayWork: parseFloat(document.getElementById('sundayWork').value) || 0,
+        
+        // Absent হলে OT এবং অন্যান্য বোনাস ০ হয়ে যাবে
+        ot: status === "Absent" ? 0 : (parseFloat(document.getElementById('dailyOt').value) || 0),
+        site: status === "Absent" ? "ABSENT" : site, // Absent হলে সাইটে ABSENT লিখা থাকবে
+        status: status, // Present অথবা Absent
+        
+        holidayWork: status === "Absent" ? 0 : (parseFloat(document.getElementById('holidayWork').value) || 0),
+        sundayWork: status === "Absent" ? 0 : (parseFloat(document.getElementById('sundayWork').value) || 0),
         attBonus: 0,
         perfBonus: 0,
         advance: 0,
         nps: 0,
         csg: 0,
-        remark: document.getElementById('attRemark').value
+        remark: status === "Absent" ? "LEAVE/ABSENT" : document.getElementById('attRemark').value
     };
 
+    // ৫. এন্ট্রি সেভ করা
     if (editModeId) { 
         attendanceData[attendanceData.findIndex(i => i.id === editModeId)] = newEntry; 
         editModeId = null; 
@@ -710,6 +775,7 @@ empId: formattedId,
     resetAllInputs(); 
     window.currentWorkingAs = ""; 
 }
+
 
 function resetAllInputs() {
     const inputsToClear = [
