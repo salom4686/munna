@@ -552,32 +552,37 @@ function renderSummaryView(rows) {
   });
 
   // হেডার ডিজাইন: ATTENDANCE কলামকে ৪ ভাগে ভাগ করা হয়েছে
-  thead.innerHTML = `<tr>
-    <th rowspan="2" class="text-center">SL</th>
-    <th rowspan="2" class="text-center">ID</th>
-    <th rowspan="2" class="text-start">NAME</th>
-    <th rowspan="2" class="text-center">MAIN BASIC</th>
-    <th rowspan="2" class="text-center">DAILY BASIC</th>
-    <th colspan="4" class="text-center" style="background-color: #f8fafc;">ATTENDANCE</th>
-    <th rowspan="2" class="text-center">TOTAL BASIC</th>
-    <th rowspan="2" class="text-center">OT AMTOUNT</th>
-    <th rowspan="2" class="text-center">HOLIDAY</th>
-    <th rowspan="2" class="text-center">SUNDAY</th>
-    <th rowspan="2" class="text-center">GROS SALARY</th>
-    <th colspan="5" class="text-center deduction-col">DEDUCTION</th>
-    <th rowspan="2" class="text-center highlight-col">NEED SALARY</th>
-    <th rowspan="2" class="text-center">SIGNATURE</th>
+   thead.innerHTML = `<tr>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SL</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">ID</th>
+    <th rowspan="2" class="text-start" style="position: sticky; top: 0; z-index: 100;">NAME</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">MAIN BASIC</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">DAILY BASIC</th>
+    
+    <th colspan="4" class="text-center" style="background-color: #f8fafc; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #142a50;">ATTENDANCE</th>
+    
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">TOTAL BASIC</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">OT AMTOUNT</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">HOLIDAY</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SUNDAY</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">GROS SALARY</th>
+    
+    <th colspan="5" class="text-center deduction-col" style="position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #142a50;">DEDUCTION</th>
+    
+    <th rowspan="2" class="text-center highlight-col" style="position: sticky; top: 0; z-index: 100;">NEED SALARY</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SIGNATURE</th>
   </tr>
   <tr>
-    <th class="text-center" style="font-size: 10px; background-color: #f1f5f9;">NARMAL</th>
-    <th class="text-center" style="font-size: 10px; background-color: #f1f5f9;">SUNDAY</th>
-    <th class="text-center" style="font-size: 10px; background-color: #f1f5f9;">HOLIDAY</th>
-    <th class="text-center" style="font-size: 10px; background-color: #e2e8f0; font-weight: bold;">TOTAL</th>
-    <th class="text-center deduction-col">ADVANCE</th>
-    <th class="text-center deduction-col">FINE</th>
-    <th class="text-center deduction-col">NPS 1%</th>
-    <th class="text-center deduction-col">CSG 1.5%</th>
-    <th class="text-center deduction-col">TOTAL DEDUCTION.</th>
+    <th class="text-center" style="font-size: 10px; background-color: #f1f5f9; position: sticky; top: 22px; z-index: 90;">NARMAL</th>
+    <th class="text-center" style="font-size: 10px; background-color: #f1f5f9; position: sticky; top: 22px; z-index: 90;">SUNDAY</th>
+    <th class="text-center" style="font-size: 10px; background-color: #f1f5f9; position: sticky; top: 22px; z-index: 90;">HOLIDAY</th>
+    <th class="text-center" style="font-size: 10px; background-color: #e2e8f0; font-weight: bold; position: sticky; top: 22px; z-index: 90;">TOTAL</th>
+    
+    <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">ADVANCE</th>
+    <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">FINE</th>
+    <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">NPS 1%</th>
+    <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">CSG 1.5%</th>
+    <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">TOTAL DEDUCTION.</th>
   </tr>`;
   
   let g_mB=0, g_dB=0, g_nar=0, g_sunD=0, g_holD=0, g_totA=0, g_actB=0, g_otA=0, g_holA=0, g_sunA=0, g_gross=0, g_adv=0, g_fine=0, g_nps=0, g_csg=0, g_tD=0, g_need=0;
