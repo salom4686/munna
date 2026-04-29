@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALAMHOW CO LTD - Official Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+        
+        :root {
+            --alamhow-navy: #1e3a5f;
+            --alamhow-gold: #c5a059;
+            --alamhow-light: #f8fafc;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f1f5f9; 
+            color: #1e293b;
+        }
+
+        /* Control Panel Styling */
+        .search-container {
+            background: white;
+            border-top: 4px solid var(--alamhow-navy);
+            border-bottom: 2px solid var(--alamhow-gold);
+        }
+
+        .date-box {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 15px;
+            transition: all 0.3s ease;
+        }
+        .date-box:focus-within {
+            border-color: var(--alamhow-navy);
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.1);
+        }
+        .date-box input {
+            border: none;
+            outline: none;
+            font-weight: 700;
+            width: 100%;
+            color: var(--alamhow-navy);
+        }
+
+        /* Payslip Page Styling */
+        .payslip-page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 12mm 15mm;
+            margin: 30px auto;
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            page-break-after: always;
+            border: 1px solid #e2e8f0;
+        }
+
+        .watermark-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            width: 550px;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content-layer { position: relative; z-index: 1; flex-grow: 1; }
+
+        table { width: 100%; border-collapse: collapse; margin-bottom: -1px; }
+        th, td { border: 1px solid #1e3a5f; padding: 6px 10px; text-align: left; font-size: 12px; }
+        .no-border td { border: none !important; padding: 4px 10px; }
+        
+        .bg-navy-header { background-color: var(--alamhow-navy); color: white; }
+        .bg-gold-sub { background-color: #fefce8; }
+
+        @media print {
+            .no-print { display: none !important; }
+            body { padding: 0; background: white; }
+            .payslip-page { margin: 0; box-shadow: none; border: none; width: 100%; }
+        }
+
+        /* Checkbox Custom Styling */
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--alamhow-navy);
+        }
+    </style>
+</head>
+<body class="p-6">
+
+    <!-- Header Section -->
+    <div class="max-w-5xl mx-auto mb-8 no-print flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <div class="bg-white p-2 rounded-lg shadow-sm border">
+                <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" class="h-12 w-auto" alt="Logo">
+            </div>
+            <div>
+                <h1 class="text-2xl font-black text-[#1e3a5f] tracking-tight">ALAMHOW CO LTD</h1>
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-widest">Payroll Management System</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Compact Control Panel -->
+    <div class="max-w-5xl mx-auto no-print search-container p-8 rounded-2xl shadow-xl mb-10">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            
+            <div class="space-y-2">
+                <label class="text-[11px] font-black text-[#1e3a5f] uppercase ml-1">শুরু (From Date)</label>
+                <div class="date-box">
+                    <input type="text" id="fromDate" placeholder="YYYY-MM-DD">
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="text-[11px] font-black text-[#1e3a5f] uppercase ml-1">শেষ (To Date)</label>
+                <div class="date-box">
+                    <input type="text" id="toDate" placeholder="YYYY-MM-DD">
+                </div>
+            </div>
+
+            <button onclick="fetchByRange()" class="bg-[#1e3a5f] hover:bg-[#2c5282] text-white h-[50px] rounded-xl font-bold text-sm shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                SEARCH EMPLOYEES
+            </button>
+        </div>
+
+        <!-- Selection Table -->
+        <div id="selectionArea" class="mt-10 hidden animate-in fade-in duration-500">
+            <div class="flex justify-between items-center mb-4 px-2">
+                <h3 class="font-bold text-[#1e3a5f] text-sm flex items-center gap-2">
+                    <span class="w-2 h-2 bg-yellow-500 rounded-full"></span>
+                    SELECT EMPLOYEES FOR PRINTING
+                </h3>
+                <div class="flex gap-4 text-[11px] font-bold">
+                    <button onclick="toggleAll(true)" class="text-blue-600 hover:underline">Select All</button>
+                    <button onclick="toggleAll(false)" class="text-red-500 hover:underline">Clear Selection</button>
+                </div>
+            </div>
+            
+            <div class="overflow-hidden border-2 border-slate-100 rounded-2xl bg-slate-50">
+                <table class="w-full text-sm border-none">
+                    <thead class="bg-white border-b-2 border-slate-100">
+                        <tr class="text-left text-[#1e3a5f]">
+                            <th class="p-4 w-16 text-center border-none">Select</th>
+                            <th class="p-4 border-none">Month</th>
+                            <th class="p-4 border-none">Emp ID</th>
+                            <th class="p-4 border-none">Employee Name</th>
+                            <th class="p-4 border-none">Designation</th>
+                        </tr>
+                    </thead>
+                    <tbody id="employeeListBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+            </div>
+
+            <div class="mt-8 flex justify-center">
+                <button onclick="generateBulk()" class="bg-[#c5a059] hover:bg-[#b08b45] text-white px-12 py-4 rounded-2xl font-black text-sm shadow-xl flex items-center gap-3 uppercase tracking-tighter transition-all hover:translate-y-[-2px]">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
+                    </svg>
+                    Generate Official Payslips
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rendering Area -->
+    <div id="resultsContainer"></div>
+
+    <!-- Print Action Floating Button -->
+    <div id="printAction" class="hidden fixed bottom-10 right-10 no-print z-50">
+        <button onclick="window.print()" class="bg-[#1e3a5f] text-white px-10 py-5 rounded-full font-black shadow-2xl hover:scale-105 transition-all flex items-center gap-3 border-4 border-white">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
+            PRINT ALL COPIES
+        </button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'alamhow-payroll';
+
+        // Initialize Calendar
+        flatpickr("#fromDate", { dateFormat: "Y-m-d", defaultDate: "2025-04-01" });
+        flatpickr("#toDate", { dateFormat: "Y-m-d", defaultDate: "2025-04-30" });
+
+        let allData = [];
+        let currentFiltered = [];
+
+        // Auth & Real-time Sync
+        const initAuth = async () => {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                await signInWithCustomToken(auth, __initial_auth_token);
+            } else {
+                await signInAnonymously(auth);
+            }
+        };
+        initAuth();
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const q = collection(db, 'artifacts', appId, 'public', 'data', 'payslips');
+                onSnapshot(q, (snapshot) => {
+                    allData = [];
+                    snapshot.forEach(doc => {
+                        const d = doc.data();
+                        d.docId = doc.id;
+                        allData.push(d);
+                    });
+                });
+            }
+        });
+
+        window.fetchByRange = () => {
+            const start = document.getElementById('fromDate').value;
+            const end = document.getElementById('toDate').value;
+            
+            currentFiltered = allData.filter(i => (i.date || i.month) >= start && (i.date || i.month) <= end);
+            
+            // Mock data for preview if empty
+            if (currentFiltered.length === 0 && allData.length === 0) {
+                currentFiltered = [{
+                    docId: 'demo-1', date: start, month: start.substring(0,7), empId: "ALM-2025-01", 
+                    name: "MD. ARIFUL ISLAM", position: "PROJECT MANAGER", dept: "Construction",
+                    location: "HEAD OFFICE", empCode: "AC-00451", businessUnit: "Real Estate",
+                    paymentType: "Bank Transfer", depotName: "Dhaka HQ", doj: "01-Jan-2020",
+                    basic: 45000, houseRent: 22500, conveyance: 5000, medical: 4000, coPF: 4500, allowance: 10000,
+                    pfContribution: 4500, pfLoan: 2000, superannuation: 500,
+                    netInWords: "Seventy-Nine Thousand Taka Only."
+                }];
+            }
+
+            const body = document.getElementById('employeeListBody');
+            body.innerHTML = '';
+            currentFiltered.forEach(e => {
+                body.innerHTML += `
+                    <tr class="hover:bg-white transition-colors cursor-pointer group" onclick="this.querySelector('input').click()">
+                        <td class="p-4 text-center border-none" onclick="event.stopPropagation()">
+                            <input type="checkbox" class="emp-checkbox custom-checkbox" value="${e.docId}">
+                        </td>
+                        <td class="p-4 font-bold text-slate-500 border-none">${e.date || e.month}</td>
+                        <td class="p-4 font-black text-[#1e3a5f] border-none">${e.empId}</td>
+                        <td class="p-4 font-semibold border-none">${e.name}</td>
+                        <td class="p-4 text-slate-500 border-none">${e.position}</td>
+                    </tr>`;
+            });
+            
+            document.getElementById('selectionArea').classList.remove('hidden');
+            document.getElementById('resultsContainer').innerHTML = '';
+            document.getElementById('printAction').classList.add('hidden');
+        };
+
+        window.toggleAll = (s) => document.querySelectorAll('.emp-checkbox').forEach(c => c.checked = s);
+        
+        window.generateBulk = () => {
+            const selectedIds = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
+            if (selectedIds.length === 0) return alert("প্রথমে কর্মচারী নির্বাচন করুন!");
+            
+            const dataToRender = currentFiltered.filter(emp => selectedIds.includes(emp.docId));
+            const container = document.getElementById('resultsContainer');
+            container.innerHTML = '';
+            
+            dataToRender.forEach(data => {
+                container.innerHTML += createLayout(data, "Employee Copy");
+                container.innerHTML += createLayout(data, "Office Copy");
+            });
+            document.getElementById('printAction').classList.remove('hidden');
+            window.scrollTo({ top: container.offsetTop - 50, behavior: 'smooth' });
+        };
+
+        function createLayout(data, copyType) {
+            const format = (v) => (parseFloat(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const basic = parseFloat(data.basic) || 0;
+            const hr = parseFloat(data.houseRent) || 0;
+            const conv = parseFloat(data.conveyance) || 0;
+            const med = parseFloat(data.medical) || 0;
+            const pfCo = parseFloat(data.coPF) || 0;
+            const allow = parseFloat(data.allowance) || 0;
+            const gross = basic + hr + conv + med + pfCo + allow;
+            
+            const pfCont = parseFloat(data.pfContribution) || 0;
+            const pfLoan = parseFloat(data.pfLoan) || 0;
+            const superAnn = parseFloat(data.superannuation) || 0;
+            const totalDed = pfCont + pfLoan + superAnn;
+            const net = gross - totalDed;
+            
+            const monthDisplay = data.month ? new Date(data.month + "-01").toLocaleString('en-US', { month: 'long', year: 'numeric' }) : "N/A";
+            const logoUrl = "https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo";
+
+            return `
+                <div class="payslip-page">
+                    <!-- Watermark -->
+                    <div class="watermark-container"><img src="${logoUrl}" class="w-full grayscale opacity-40"></div>
+                    
+                    <div class="content-layer">
+                        <div class="flex justify-between items-start mb-8">
+                            <img src="${logoUrl}" class="h-20 w-auto" alt="Logo">
+                            <div class="text-right">
+                                <h1 class="text-3xl font-black text-[#1e3a5f] tracking-tighter">ALAMHOW CO LTD</h1>
+                                <p class="text-sm font-bold text-[#c5a059]">Building the Future, Together</p>
+                                <p class="text-[10px] text-gray-400 mt-1 uppercase font-bold">${copyType}</p>
+                            </div>
+                        </div>
+
+                        <div class="text-center mb-6">
+                            <h2 class="text-lg font-black border-y-2 border-[#1e3a5f] inline-block px-10 py-1 uppercase tracking-widest text-[#1e3a5f]">
+                                Pay Slip for ${monthDisplay}
+                            </h2>
+                        </div>
+
+                        <div class="border-2 border-[#1e3a5f] p-4 mb-4 bg-slate-50">
+                            <table class="no-border text-[11px] font-semibold">
+                                <tr>
+                                    <td width="20%" class="text-[#1e3a5f]">Employee ID</td><td width="30%">: ${data.empId}</td>
+                                    <td width="20%" class="text-[#1e3a5f]">Unit</td><td width="30%">: ${data.businessUnit || 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-[#1e3a5f]">Employee Name</td><td class="text-sm font-bold">: ${data.name}</td>
+                                    <td class="text-[#1e3a5f]">Location</td><td>: ${data.location || 'HEAD OFFICE'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-[#1e3a5f]">Designation</td><td>: ${data.position}</td>
+                                    <td class="text-[#1e3a5f]">Join Date</td><td>: ${data.doj || 'N/A'}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-[#1e3a5f]">Department</td><td>: ${data.dept}</td>
+                                    <td class="text-[#1e3a5f]">Payment</td><td>: ${data.paymentType || 'OS'}</td>
+                                </tr>
+                            </table>
+                        </div>
+
+                        <table class="border-2 border-[#1e3a5f]">
+                            <thead>
+                                <tr class="bg-navy-header font-black text-center text-[13px]">
+                                    <th class="text-center border-r border-white py-2" width="50%">EARNINGS (Tk.)</th>
+                                    <th class="text-center py-2" width="50%">DEDUCTIONS (Tk.)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td valign="top" class="p-0 border-r border-[#1e3a5f]">
+                                        <table class="no-border w-full">
+                                            <tr><td>Basic Salary</td><td class="text-right font-bold">${format(basic)}</td></tr>
+                                            <tr><td>House Rent</td><td class="text-right font-bold">${format(hr)}</td></tr>
+                                            <tr><td>Conveyance</td><td class="text-right font-bold">${format(conv)}</td></tr>
+                                            <tr><td>Medical Allowance</td><td class="text-right font-bold">${format(med)}</td></tr>
+                                            <tr class="bg-slate-50"><td>Co's Contribution to PF</td><td class="text-right font-bold">${format(pfCo)}</td></tr>
+                                            <tr><td>Other Allowance</td><td class="text-right font-bold">${format(allow)}</td></tr>
+                                        </table>
+                                    </td>
+                                    <td valign="top" class="p-0">
+                                        <table class="no-border w-full">
+                                            <tr><td>PF Contribution</td><td class="text-right font-bold">${format(pfCont)}</td></tr>
+                                            <tr><td>PF Loan Recovery</td><td class="text-right font-bold">${format(pfLoan)}</td></tr>
+                                            <tr><td>Superannuation Fund</td><td class="text-right font-bold">${format(superAnn)}</td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr class="bg-[#1e3a5f] text-white font-black text-sm">
+                                    <td class="border-r border-white">
+                                        <div class="flex justify-between px-3 py-2">
+                                            <span>GROSS EARNINGS</span>
+                                            <span>${format(gross)}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="flex justify-between px-3 py-2">
+                                            <span>TOTAL DEDUCTION</span>
+                                            <span>${format(totalDed)}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="mt-4 border-2 border-[#1e3a5f] p-4 bg-yellow-50 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-bold text-[#1e3a5f] uppercase block">Net Salary Payable</span>
+                                <span class="text-2xl font-black text-[#1e3a5f]">Tk. ${format(net)}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] font-bold text-gray-500 uppercase block">In Words</span>
+                                <span class="text-xs font-bold italic text-[#1e3a5f]">${data.netInWords}</span>
+                            </div>
+                        </div>
+
+                        <div class="mt-20 flex justify-between px-4">
+                            <div class="text-center">
+                                <div class="w-40 border-t-2 border-black mb-1"></div>
+                                <p class="text-[10px] font-bold uppercase">Employee's Signature</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-40 border-t-2 border-black mb-1"></div>
+                                <p class="text-[10px] font-bold uppercase">Prepared By</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-48 border-t-2 border-[#1e3a5f] mb-1"></div>
+                                <p class="text-[10px] font-black text-[#1e3a5f] uppercase">In-Charge, Payroll Section</p>
+                                <p class="text-[9px] font-bold text-[#c5a059]">ALAMHOW CO LTD</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto pt-10 border-t border-slate-100 text-center">
+                        <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">
+                            Official Document - ALAMHOW CO LTD - Head Office, Dhaka, Bangladesh
+                        </p>
+                    </div>
+                </div>`;
+        }
+    </script>
+</body>
+</html>
