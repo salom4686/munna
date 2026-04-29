@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ALAMHOW CO LTD - Official Generator</title>
+    <title>Pay Slip</title>
+    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -124,14 +125,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             
             <div class="space-y-2">
-                <label class="text-[11px] font-black text-[#1e3a5f] uppercase ml-1">শুরু (From Date)</label>
+                <label class="text-[11px] font-black text-[#1e3a5f] uppercase ml-1"> From Date</label>
                 <div class="date-box">
                     <input type="text" id="fromDate" placeholder="YYYY-MM-DD">
                 </div>
             </div>
 
             <div class="space-y-2">
-                <label class="text-[11px] font-black text-[#1e3a5f] uppercase ml-1">শেষ (To Date)</label>
+                <label class="text-[11px] font-black text-[#1e3a5f] uppercase ml-1"> To Date</label>
                 <div class="date-box">
                     <input type="text" id="toDate" placeholder="YYYY-MM-DD">
                 </div>
@@ -282,7 +283,7 @@
         
         window.generateBulk = () => {
             const selectedIds = Array.from(document.querySelectorAll('.emp-checkbox:checked')).map(cb => cb.value);
-            if (selectedIds.length === 0) return alert("প্রথমে কর্মচারী নির্বাচন করুন!");
+            if (selectedIds.length === 0) return alert("Select Employee!");
             
             const dataToRender = currentFiltered.filter(emp => selectedIds.includes(emp.docId));
             const container = document.getElementById('resultsContainer');
