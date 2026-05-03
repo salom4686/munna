@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ALAMHOW CO LTD - Advance System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* ব্র্যান্ড কালার ভেরিয়েবল */
+        :root {
+            --brand-blue: #1e3a5f;   /* লোগোর গাঢ় নীল */
+            --brand-gold: #d4af37;   /* লোগোর সোনালী রঙ */
+            --brand-light-blue: #2c5282;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border-left-color: var(--brand-blue);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .search-results {
+            max-height: 300px;
+            overflow-y: auto;
+            position: absolute;
+            width: 100%;
+            z-index: 50;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            display: none;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            margin-top: 2px;
+        }
+        .search-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+        }
+        .search-item:hover {
+            background-color: #fef9c3; 
+            border-left: 4px solid var(--brand-gold);
+        }
+        .id-badge {
+            background-color: #f1f5f9;
+            color: var(--brand-blue);
+            font-weight: 900;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            margin-right: 12px;
+            min-width: 60px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        input:read-only {
+            background-color: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+        }
+        .input-compact {
+            padding: 0.6rem 0.8rem !important;
+            font-size: 0.85rem !important;
+        }
+        .label-compact {
+            font-size: 9px !important;
+            margin-bottom: 3px !important;
+        }
+        th, td {
+            white-space: nowrap;
+        }
+        .modal-animate {
+            animation: modalIn 0.3s ease-out;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* --- CRITICAL PRINT STYLING --- */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 0;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #receipt-print-area, #receipt-print-area * {
+                visibility: visible;
+            }
+            #receipt-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                display: block !important;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .dual-receipt-wrapper {
+                page-break-after: always;
+                display: flex;
+                width: 100%;
+                height: 100vh;
+            }
+            .receipt-slip {
+                border: 2px solid var(--brand-blue); 
+                height: 100%;
+                width: 50%;
+                padding: 30px !important;
+                box-sizing: border-box;
+                position: relative;
+            }
+            .receipt-slip:first-child {
+                border-right: 2px dashed var(--brand-blue);
+            }
+        }
+
+        /* Screen Styling */
+        .dual-receipt-wrapper {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .receipt-slip {
+            background: white;
+            color: #000;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px dashed #94a3b8;
+            padding: 20px;
+            flex: 1;
+        }
+        .copy-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            border: 1px solid var(--brand-blue);
+            background: var(--brand-blue);
+            color: white;
+            padding: 2px 5px;
+            text-transform: uppercase;
+        }
+        
+        /* লোগো কন্টেইনার স্টাইল */
+        .brand-logo-img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+        .receipt-logo {
+            height: 60px;
+            margin: 0 auto 10px;
+            display: block;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen font-sans antialiased">
+
+    <!-- Header Section -->
+    <nav class="bg-[#1e3a5f] text-white shadow-md p-3 sticky top-0 z-40 no-print border-b-4 border-[#d4af37]">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-0.5 rounded-lg flex items-center justify-center">
+                    <!-- লোগো ইমেজ ড্রাইভ লিঙ্ক প্রক্সি ব্যবহার করে -->
+                    <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="brand-logo-img" onerror="this.src='https://ui-avatars.com/api/?name=ALAMHOW&background=fff&color=1e3a5f'">
+                </div>
+                <div>
+                    <h1 class="text-lg font-black uppercase tracking-tight leading-none">ALAMHOW <span class="text-[#d4af37]">CO LTD</span></h1>
+                    <p class="text-[8px] font-bold opacity-70 tracking-widest mt-0.5">ADVANCE MANAGEMENT SYSTEM</p>
+                </div>
+            </div>
+            <div id="header-date" class="text-[9px] font-mono bg-blue-900/40 px-3 py-1.5 rounded-lg border border-blue-700/30 uppercase"></div>
+        </div>
+    </nav>
+
+
+    <main class="container mx-auto p-3 lg:p-6 max-w-full no-print">
+        
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+                <div class="md:col-span-3 relative">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Search Employee</label>
+                    <div class="relative group">
+                        <input type="text" id="emp-search" placeholder="ID or Name..." autocomplete="off" class="input-compact block w-full rounded-xl border border-slate-200 bg-slate-50 focus:border-[#d4af37] focus:bg-white transition-all font-bold text-slate-800">
+                        <button onclick="resetSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 hover:text-red-500 transition-colors">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                    </div>
+                    <div id="search-results" class="search-results"></div>
+                    <input type="hidden" id="selected-emp-id">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+                    <input type="text" id="display-name" readonly placeholder="---" class="input-compact block w-full rounded-xl border border-slate-100 font-bold uppercase">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Designation</label>
+                    <input type="text" id="auto-desig" readonly placeholder="---" class="input-compact block w-full rounded-xl border border-slate-100 font-semibold">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Passport No</label>
+                    <input type="text" id="auto-passport" readonly placeholder="---" class="input-compact block w-full rounded-xl border border-slate-100 font-mono">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Record Date</label>
+                    <input type="date" id="record-date" class="input-compact block w-full rounded-xl border border-slate-200 bg-white focus:border-[#1e3a5f] font-bold">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Advance Amount</label>
+                    <input type="number" id="advance-amount" value="0" class="input-compact block w-full rounded-xl border border-slate-200 bg-white focus:border-[#1e3a5f] outline-none font-black text-[#1e3a5f]">
+                </div>
+                <div class="md:col-span-3">
+                    <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Reference</label>
+                    <input type="text" id="reference" placeholder="Ref Name" class="input-compact block w-full rounded-xl border border-slate-200 bg-white focus:border-[#1e3a5f] outline-none font-semibold">
+                </div>
+                <div class="md:col-span-3 flex gap-2 items-end">
+                    <div class="flex-grow">
+                        <label class="label-compact block font-black text-slate-400 uppercase tracking-wider ml-1">Remark</label>
+                        <input type="text" id="remark" placeholder="Note" class="input-compact block w-full rounded-xl border border-slate-200 bg-white focus:border-[#1e3a5f] outline-none">
+                    </div>
+                    <button onclick="addToList()" class="bg-[#1e3a5f] hover:bg-[#2c5282] text-white font-black h-[38px] px-4 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center uppercase text-[10px]">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+            <div class="px-5 py-4 bg-slate-50/50 border-b flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center">
+                        <div class="bg-[#d4af37] w-1.5 h-6 rounded-full mr-3"></div>
+                        <h3 class="font-black text-slate-800 uppercase tracking-tight text-sm">Draft Entries</h3>
+                    </div>
+                    <div class="flex items-center bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                        <span class="text-[9px] font-black text-blue-400 uppercase tracking-widest mr-2">Next Advance No:</span>
+                        <span id="next-adv-no" class="text-[11px] font-mono font-black text-[#1e3a5f] tracking-wider">---</span>
+                    </div>
+                </div>
+                <div id="row-count-badge" class="bg-white text-[#1e3a5f] text-[9px] font-black px-3 py-1.5 rounded-lg border border-blue-50 shadow-sm uppercase tracking-wider">0 Records</div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-slate-100">
+                    <thead class="bg-slate-50/30">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Advance No</th>
+                            <th class="px-4 py-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">ID</th>
+                            <th class="px-4 py-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Employee Name</th>
+                            <th class="px-4 py-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Record Date</th>
+                            <th class="px-4 py-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Designation</th>
+                            <th class="px-4 py-3 text-left text-[9px] font-black text-slate-400 uppercase tracking-widest">Amount</th>
+                            <th class="px-4 py-3 text-center text-[9px] font-black text-slate-400 uppercase tracking-widest">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="data-body" class="bg-white divide-y divide-slate-50 text-[11px]">
+                        <tr id="empty-state">
+                            <td colspan="7" class="px-5 py-16 text-center">
+                                <div class="opacity-10">
+                                    <i class="fas fa-folder-open text-6xl mb-3 text-[#1e3a5f]"></i>
+                                    <p class="font-black text-sm uppercase tracking-widest">No draft records found</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="px-6 py-5 bg-slate-50/80 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+                <button onclick="clearAll()" class="text-slate-400 hover:text-red-500 text-[10px] font-black transition uppercase tracking-widest">
+                    <i class="fas fa-trash-alt mr-1"></i> Clear All
+                </button>
+                <button id="save-btn" onclick="saveToSheet()" disabled class="w-full sm:w-auto bg-[#d4af37] hover:bg-[#b8962d] text-[#1e3a5f] font-black py-3 px-12 rounded-xl shadow-lg disabled:opacity-20 transition-all active:scale-95 flex items-center justify-center text-sm uppercase">
+                    <i class="fas fa-cloud-arrow-up mr-2"></i> Sync To ADVANCE Sheet
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center z-[60] no-print">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full mx-4 modal-animate flex flex-col items-center text-center border-t-8 border-[#d4af37]">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mb-4 shadow-inner">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-xl font-black text-[#1e3a5f] mb-1 uppercase tracking-tight">Sync Completed!</h3>
+            <p class="text-slate-500 font-medium text-[11px] mb-6 uppercase tracking-wider">The data is safe in the Google Sheet.</p>
+            <div class="grid grid-cols-2 gap-3 w-full">
+                <button onclick="prepareAndPrint()" class="bg-[#1e3a5f] hover:bg-[#2c5282] text-white font-black py-3 rounded-xl shadow-md transition-all active:scale-95 uppercase text-[10px] tracking-widest flex items-center justify-center">
+                    <i class="fas fa-print mr-2"></i> Print Receipts
+                </button>
+                <button onclick="closeSuccessModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-black py-3 rounded-xl transition-all active:scale-95 uppercase text-[10px] tracking-widest">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden Receipt Print Area -->
+    <div id="receipt-print-area" class="hidden"></div>
+
+    <!-- Toast & Loader -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-xl shadow-2xl text-white font-black hidden z-50 text-[11px] uppercase tracking-wider no-print"></div>
+    <div id="loader" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden flex items-center justify-center z-50 no-print">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-[#1e3a5f] font-black text-sm uppercase tracking-widest">Synchronizing...</p>
+        </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhmAYu0RWFiAo0U_1cqtUy1OwrVM2cBIf9Dw-yO8EEYblsLt4bYoxPqF1mesCobrmXJA/exec"; 
+        
+        let employees = [];
+        let recordEntries = [];
+        let lastSavedEntries = []; 
+
+        window.onload = () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('record-date').value = today;
+            const now = new Date();
+            document.getElementById('header-date').innerText = now.toLocaleDateString('en-GB', { 
+                weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' 
+            }).toUpperCase();
+            
+            updateNextAdvanceNo();
+            fetchEmployees();
+            setupSearch();
+        };
+
+        function generateAdvanceNo(indexOffset) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const nextIndex = recordEntries.length + indexOffset;
+            const serial = nextIndex.toString().padStart(3, '0');
+            return `ACL-ADV-${year}-${month}-${serial}`;
+        }
+
+        function updateNextAdvanceNo() {
+            const nextNo = generateAdvanceNo(1);
+            document.getElementById('next-adv-no').innerText = nextNo;
+        }
+
+        async function fetchEmployees() {
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getEmployees`);
+                employees = await response.json();
+            } catch (error) {
+                showToast("Connection Failed!", "bg-red-500");
+            }
+        }
+
+        function setupSearch() {
+            const searchInput = document.getElementById('emp-search');
+            const resultsDiv = document.getElementById('search-results');
+            searchInput.addEventListener('click', () => showSuggestions(searchInput.value));
+            searchInput.addEventListener('input', (e) => {
+                clearAutoFields();
+                showSuggestions(e.target.value);
+            });
+            function showSuggestions(term) {
+                const searchTerm = term.toLowerCase().trim();
+                const filtered = employees.filter(emp => {
+                    const name = (emp['employee name'] || emp.name || "").toString().toLowerCase();
+                    const id = (emp.id || "").toString().toLowerCase();
+                    return name.includes(searchTerm) || id.includes(searchTerm);
+                }).slice(0, 50);
+                if (filtered.length > 0) {
+                    resultsDiv.innerHTML = filtered.map(emp => {
+                        const name = emp['employee name'] || emp.name || "N/A";
+                        const id = emp.id || "N/A";
+                        return `<div class="search-item" onclick="selectEmployee('${id}')"><span class="id-badge">${id}</span><span class="text-slate-900 font-bold text-[13px] capitalize">${name.toLowerCase()}</span></div>`;
+                    }).join('');
+                    resultsDiv.style.display = 'block';
+                } else {
+                    resultsDiv.style.display = 'none';
+                }
+            }
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !resultsDiv.contains(e.target)) {
+                    resultsDiv.style.display = 'none';
+                }
+            });
+        }
+
+        function clearAutoFields() {
+            document.getElementById('selected-emp-id').value = "";
+            document.getElementById('display-name').value = "";
+            document.getElementById('auto-desig').value = "";
+            document.getElementById('auto-passport').value = "";
+        }
+
+        function selectEmployee(id) {
+            const emp = employees.find(e => e.id == id);
+            if (emp) {
+                document.getElementById('emp-search').value = id;
+                document.getElementById('selected-emp-id').value = id;
+                document.getElementById('display-name').value = (emp['employee name'] || emp.name || "N/A").toUpperCase();
+                document.getElementById('auto-desig').value = emp.designation || emp.desig || "---";
+                document.getElementById('auto-passport').value = emp['passport no'] || emp.passport || "---";
+                document.getElementById('search-results').style.display = 'none';
+                document.getElementById('advance-amount').focus();
+            }
+        }
+
+        function resetSearch() {
+            document.getElementById('emp-search').value = "";
+            clearAutoFields();
+            document.getElementById('emp-search').focus();
+        }
+
+        function addToList() {
+            const id = document.getElementById('selected-emp-id').value;
+            const amount = parseFloat(document.getElementById('advance-amount').value);
+            if (!id || amount <= 0) {
+                showToast("Check ID & Amount!", "bg-amber-500");
+                return;
+            }
+            const now = new Date();
+            const tsDate = now.toLocaleDateString('en-GB'); 
+            const tsTime = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+            const entry = {
+                advanceNo: generateAdvanceNo(1),
+                tsDate: tsDate,      
+                tsTime: tsTime,      
+                id: id,
+                name: document.getElementById('display-name').value,
+                recordDate: document.getElementById('record-date').value,
+                desig: document.getElementById('auto-desig').value,
+                passport: document.getElementById('auto-passport').value,
+                amount: amount,
+                reference: document.getElementById('reference').value,
+                remark: document.getElementById('remark').value
+            };
+            recordEntries.push(entry);
+            renderTable();
+            updateNextAdvanceNo();
+            resetInputs();
+        }
+
+        function resetInputs() {
+            resetSearch();
+            document.getElementById('advance-amount').value = 0;
+            document.getElementById('reference').value = "";
+            document.getElementById('remark').value = "";
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('data-body');
+            if (recordEntries.length === 0) {
+                tbody.innerHTML = `<tr id="empty-state"><td colspan="7" class="px-5 py-16 text-center opacity-10"><i class="fas fa-folder-open text-6xl mb-3 text-[#1e3a5f]"></i><p class="font-black text-sm uppercase tracking-widest">No draft records found</p></td></tr>`;
+                document.getElementById('save-btn').disabled = true;
+                document.getElementById('row-count-badge').innerText = "0 Records";
+                return;
+            }
+            tbody.innerHTML = recordEntries.map((entry, index) => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="px-4 py-3 font-mono font-black text-[#1e3a5f] text-[10px]">${entry.advanceNo}</td>
+                    <td class="px-4 py-3 font-black text-slate-700">${entry.id}</td>
+                    <td class="px-4 py-3 font-bold text-slate-800 capitalize">${entry.name.toLowerCase()}</td>
+                    <td class="px-4 py-3 text-slate-600 font-mono">${entry.recordDate}</td>
+                    <td class="px-4 py-3 text-slate-500 font-semibold uppercase text-[9px]">${entry.desig}</td>
+                    <td class="px-4 py-3 font-black text-[#1e3a5f] text-sm">${entry.amount}</td>
+                    <td class="px-4 py-3 text-center">
+                        <button onclick="removeRow(${index})" class="text-slate-300 hover:text-red-500 transition-all p-2">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            document.getElementById('row-count-badge').innerText = `${recordEntries.length} Records`;
+            document.getElementById('save-btn').disabled = false;
+        }
+
+        function removeRow(i) {
+            recordEntries.splice(i, 1);
+            renderTable();
+            updateNextAdvanceNo();
+        }
+
+        function clearAll() {
+            if (confirm("Clear all draft entries?")) {
+                recordEntries = [];
+                renderTable();
+                updateNextAdvanceNo();
+            }
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+        }
+
+        async function saveToSheet() {
+            const loader = document.getElementById('loader');
+            const saveBtn = document.getElementById('save-btn');
+            loader.classList.remove('hidden');
+            saveBtn.disabled = true;
+            try {
+                lastSavedEntries = [...recordEntries]; 
+                await fetch(SCRIPT_URL, {
+                    method: "POST",
+                    mode: "no-cors",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(recordEntries)
+                });
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    document.getElementById('success-modal').classList.remove('hidden');
+                    recordEntries = [];
+                    renderTable();
+                    updateNextAdvanceNo();
+                }, 1500);
+            } catch (e) {
+                loader.classList.add('hidden');
+                saveBtn.disabled = false;
+                showToast("Sync Error!", "bg-red-600");
+            }
+        }
+
+        function getReceiptHTML(item, copyType) {
+            return `
+                <div class="receipt-slip">
+                    <div class="copy-tag">${copyType} Copy</div>
+                    
+                    <!-- লোগো কন্টেইনার (প্রিন্ট রিসিট) -->
+                    <div style="text-align: center; border-bottom: 2px solid #1e3a5f; padding-bottom: 10px; margin-bottom: 15px;">
+                        <div style="margin-bottom: 5px;">
+                            <i class="fas fa-building" style="font-size: 24px; color: #1e3a5f;"></i>
+                        </div>
+                        <h2 style="margin: 0; font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #1e3a5f;">ALAMHOW <span style="color: #d4af37;">CO LTD</span></h2>
+                        <p style="margin: 3px 0 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: bold; color: #1e3a5f;">Money Advance Receipt</p>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 15px; font-weight: bold;">
+                        <span>Receipt No: ${item.advanceNo}</span>
+                        <span>Date: ${item.tsDate}</span>
+                    </div>
+
+                    <div style="font-size: 13px; line-height: 2.2;">
+                        <div style="display: flex; border-bottom: 1px dotted #1e3a5f;">
+                            <span style="width: 110px; font-weight: bold;">Employee ID</span>
+                            <span style="margin-right: 10px;">:</span>
+                            <span style="font-weight: 900;">${item.id}</span>
+                        </div>
+                        <div style="display: flex; border-bottom: 1px dotted #1e3a5f;">
+                            <span style="width: 110px; font-weight: bold;">Full Name</span>
+                            <span style="margin-right: 10px;">:</span>
+                            <span style="font-weight: 900; text-transform: uppercase;">${item.name}</span>
+                        </div>
+                        <div style="display: flex; border-bottom: 1px dotted #1e3a5f;">
+                            <span style="width: 110px; font-weight: bold;">Designation</span>
+                            <span style="margin-right: 10px;">:</span>
+                            <span>${item.desig}</span>
+                        </div>
+                        <div style="display: flex; border-bottom: 1px dotted #1e3a5f;">
+                            <span style="width: 110px; font-weight: bold;">Passport No</span>
+                            <span style="margin-right: 10px;">:</span>
+                            <span>${item.passport}</span>
+                        </div>
+                        
+                        <div style="margin-top: 15px; background: #1e3a5f; color: white; padding: 10px; border: 2px solid #d4af37; text-align: center;">
+                            <span style="font-size: 16px; font-weight: 900; letter-spacing: 1px;">
+                                ADVANCE AMOUNT: ${Number(item.amount).toLocaleString()} /-
+                            </span>
+                        </div>
+
+                        <div style="margin-top: 15px; display: flex;">
+                            <span style="width: 110px; font-weight: bold;">Reference</span>
+                            <span style="margin-right: 10px;">:</span>
+                            <span>${item.reference || 'N/A'}</span>
+                        </div>
+                        <div style="display: flex;">
+                            <span style="width: 110px; font-weight: bold;">Remarks</span>
+                            <span style="margin-right: 10px;">:</span>
+                            <span style="font-style: italic;">${item.remark || 'N/A'}</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 50px; display: flex; justify-content: space-between; font-size: 10px; text-transform: uppercase; font-weight: bold;">
+                        <div style="text-align: center; width: 100px; border-top: 2px solid #1e3a5f; padding-top: 5px;">
+                            Receiver Sig
+                        </div>
+                        <div style="text-align: center; width: 100px; border-top: 2px solid #1e3a5f; padding-top: 5px;">
+                            Accounts
+                        </div>
+                        <div style="text-align: center; width: 100px; border-top: 2px solid #1e3a5f; padding-top: 5px;">
+                            Authorized
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px; font-size: 8px; text-align: center; color: #555; border-top: 1px solid #ccc; padding-top: 5px;">
+                        SYSTEM GENERATED RECORD • TIMESTAMP: ${item.tsDate} ${item.tsTime}
+                    </div>
+                </div>
+            `;
+        }
+
+        function prepareAndPrint() {
+            const printArea = document.getElementById('receipt-print-area');
+            let htmlContent = '';
+            if (lastSavedEntries.length === 0) {
+                showToast("No data to print!", "bg-amber-500");
+                return;
+            }
+            lastSavedEntries.forEach((item) => {
+                htmlContent += `
+                    <div class="dual-receipt-wrapper">
+                        ${getReceiptHTML(item, 'Office')}
+                        ${getReceiptHTML(item, 'Employee')}
+                    </div>
+                `;
+            });
+            printArea.innerHTML = htmlContent;
+            printArea.classList.remove('hidden');
+            setTimeout(() => {
+                window.print();
+                printArea.classList.add('hidden');
+                closeSuccessModal();
+            }, 500);
+        }
+
+        function showToast(msg, colorClass) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 px-8 py-3 rounded-xl shadow-2xl text-white font-black z-50 ${colorClass}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+    </script>
+</body>
+</html>
