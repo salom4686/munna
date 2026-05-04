@@ -31,34 +31,10 @@
             border-radius: 12px;
         }
         .flatpickr-day.selected, 
-        .flatpickr-day.startRange, 
-        .flatpickr-day.endRange, 
-        .flatpickr-day.selected.prevMonthDay, 
-        .flatpickr-day.selected.nextMonthDay, 
-        .flatpickr-day.selected:hover, 
-        .flatpickr-day.startRange:hover, 
-        .flatpickr-day.endRange:hover, 
-        .flatpickr-day.selected.prevMonthDay:hover, 
-        .flatpickr-day.selected.nextMonthDay:hover {
+        .flatpickr-day.today {
             background: var(--brand-blue) !important;
             border-color: var(--brand-blue) !important;
             color: #fff !important;
-        }
-        .flatpickr-months .flatpickr-month,
-        .flatpickr-current-month .flatpickr-monthDropdown-months,
-        .flatpickr-calendar.hasWeeks .flatpickr-weekdays,
-        .flatpickr-calendar.hasTime .flatpickr-time,
-        span.flatpickr-weekday {
-            background: transparent;
-            color: var(--brand-blue) !important;
-            font-weight: 900;
-        }
-        .flatpickr-day.today {
-            border-color: var(--brand-gold) !important;
-        }
-        .flatpickr-day.today:hover {
-            background: var(--brand-gold) !important;
-            color: white !important;
         }
 
         .loading-spinner {
@@ -130,10 +106,6 @@
             display: flex; justify-content: space-between; align-items: center;
             width: 100%; padding: 10px; background: white !important;
         }
-        .amount-words {
-            font-size: 11px; font-weight: bold; text-transform: uppercase; color: #444; margin: 8px 0;
-            font-style: italic; border-left: 3px solid #d4af37; padding-left: 8px;
-        }
         
         .input-label {
             font-size: 10px;
@@ -144,9 +116,45 @@
             display: block;
             letter-spacing: 0.05em;
         }
+
+        /* Initial Loader Overlay */
+        #page-init-loader {
+            position: fixed;
+            inset: 0;
+            background: #1e3a5f;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+
+        .refresh-btn {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .refresh-btn:hover {
+            color: var(--brand-gold);
+            transform: rotate(180deg);
+        }
+        .refresh-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
     </style>
 </head>
 <body class="bg-[#f0f2f5] min-h-screen py-6">
+
+    <!-- Page Initialization Loader -->
+    <div id="page-init-loader">
+        <div class="mb-6 bg-white p-3 rounded-2xl">
+            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-16 w-auto">
+        </div>
+        <div class="loading-spinner border-left-color-white mb-4" style="border-left-color: white;"></div>
+        <h2 class="text-lg font-black uppercase tracking-[0.2em]">Loading Data Please Wait...</h2>
+        <p class="text-[10px] mt-2 opacity-70">Synchronizing Please Wait</p>
+    </div>
 
     <header class="page-wrapper mb-6 no-print">
         <div class="bg-[#1e3a5f] rounded-2xl shadow-lg border-b-4 border-[#d4af37]">
@@ -160,7 +168,7 @@
                         <p class="text-[9px] font-bold opacity-60 tracking-[0.2em] mt-1">ADVANCE MANAGEMENT SYSTEM</p>
                     </div>
                 </div>
-                <div id="header-date" class="text-[20px] font-mono font-bold uppercase"></div>
+                <div id="header-date" class="font-mono font-bold uppercase" style="font-size: 20px;"></div>
             </div>
         </div>
     </header>
@@ -170,21 +178,25 @@
             <div class="bg-slate-50/50 px-8 py-5 border-b flex justify-between items-center">
                 <h2 class="font-black text-[#1e3a5f] uppercase text-sm">New Advance Entry</h2>
                 <div class="flex items-center space-x-3">
-                    <span class="text-[10px] font-bold text-[#1e3a5f] uppercase">Voucher No:</span>
-                    <span id="next-adv-no" class="text-xs font-mono font-black text-[#1e3a5f] bg-slate-100 px-2 py-1 rounded">Voucher No Search...</span>
+                    <!-- Refresh Button Added Here -->
+                    <button type="button" onclick="refreshSystemData()" title="Refresh Data" class="refresh-btn text-[#1e3a5f] hover:text-[#d4af37]">
+                        <i id="refresh-icon" class="fas fa-sync-alt text-sm"></i>
+                    </button>
+                    <span class="text-[10px] font-bold text-[#1e3a5f] uppercase ml-2">Voucher:</span>
+                    <span id="next-adv-no" class="text-xs font-mono font-black text-[#1e3a5f] bg-slate-100 px-2 py-1 rounded">Syncing...</span>
                 </div>
             </div>
 
             <form id="advance-form" onsubmit="return false;" class="p-8 lg:p-10">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                     <div class="md:col-span-3 relative">
-                        <label class="input-label">Search Employee</label>
-                        <input type="text" id="emp-search" autocomplete="off" placeholder="Type ID..." class="w-full p-2 rounded-lg border-2 bg-slate-50 font-bold outline-none border-slate-100 focus:border-[#d4af37]">
+                        <label class="input-label">Search Employee ID</label>
+                        <input type="text" id="emp-search" autocomplete="off" placeholder="Type ID or Name..." class="w-full p-2 rounded-lg border-2 bg-slate-50 font-bold outline-none border-slate-100 focus:border-[#d4af37]">
                         <div id="search-results" class="search-results"></div>
                         <input type="hidden" id="selected-emp-id">
                     </div>
                     <div class="md:col-span-3">
-                        <label class="input-label">Employee Name</label>
+                        <label class="input-label">Employee  Name</label>
                         <input type="text" id="display-name" readonly class="w-full p-2 rounded-lg border bg-slate-100 font-bold text-slate-500 uppercase">
                     </div>
                     <div class="md:col-span-3">
@@ -234,8 +246,8 @@
             <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <h3 class="text-xl font-black text-[#1e3a5f] mb-2 uppercase"> Saved!</h3>
-            <p class="text-slate-500 text-[11px] font-bold mb-6 uppercase">Save successful</p>
+            <h3 class="text-xl font-black text-[#1e3a5f] mb-2 uppercase">Entry Saved!</h3>
+            <p class="text-slate-500 text-[11px] font-bold mb-6 uppercase">Syncing to cloud successful</p>
             <div class="grid grid-cols-2 gap-3 w-full">
                 <button onclick="prepareAndPrint()" class="bg-[#1e3a5f] text-white font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">Print Receipt</button>
                 <button onclick="resetEntry()" class="bg-slate-100 text-slate-600 font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">New Entry</button>
@@ -243,7 +255,7 @@
         </div>
     </div>
 
-    <!-- Alert Modal (Custom Message Box) -->
+    <!-- Alert Modal -->
     <div id="alert-modal" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-[70]">
         <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-red-500 shadow-2xl">
             <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto">
@@ -260,7 +272,7 @@
     <div id="loader" class="fixed inset-0 bg-slate-900/80 hidden flex items-center justify-center z-50">
         <div class="bg-white p-8 rounded-3xl flex flex-col items-center">
             <div class="loading-spinner mb-4"></div>
-            <p class="text-[#1e3a5f] font-black uppercase text-xs tracking-widest">Saving to Cloud...</p>
+            <p id="loader-text" class="text-[#1e3a5f] font-black uppercase text-xs tracking-widest">Saving to Cloud...</p>
         </div>
     </div>
 
@@ -271,22 +283,47 @@
         let employees = [];
         let lastSavedEntries = [];
 
-        window.onload = () => {
+        window.onload = async () => {
             const now = new Date();
             document.getElementById('header-date').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
             
             flatpickr("#record-date", {
                 dateFormat: "d/m/Y",
-                allowInput: true,
-                disableMobile: true
+                defaultDate: null, 
+                allowInput: true
             });
 
-            fetchEmployees();
-            fetchNextVoucher();
+            // Initial load
+            await refreshSystemData(true);
+
             setupSearch();
+            
+            // Hide Initial Loader
+            setTimeout(() => {
+                document.getElementById('page-init-loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('page-init-loader').style.display = 'none';
+                }, 500);
+            }, 800);
         };
 
-        // Custom Alert Function
+        // Added Refresh Logic
+        async function refreshSystemData(silent = false) {
+            const icon = document.getElementById('refresh-icon');
+            if(!silent) icon.classList.add('spinning');
+            
+            try {
+                await Promise.all([
+                    fetchEmployees(),
+                    fetchNextVoucher()
+                ]);
+            } finally {
+                if(!silent) {
+                    setTimeout(() => icon.classList.remove('spinning'), 500);
+                }
+            }
+        }
+
         function showAlert(msg) {
             document.getElementById('alert-msg').innerText = msg;
             document.getElementById('alert-modal').classList.remove('hidden');
@@ -297,49 +334,28 @@
         }
 
         async function fetchNextVoucher() {
-            document.getElementById('next-adv-no').innerText = "Voucher No Search...";
+            const voucherSpan = document.getElementById('next-adv-no');
             try {
                 const r = await fetch(`${SCRIPT_URL}?action=getNextVoucher`);
                 const data = await r.json();
                 if (data.nextVoucher) {
-                    document.getElementById('next-adv-no').innerText = data.nextVoucher;
+                    voucherSpan.innerText = data.nextVoucher;
+                    return data.nextVoucher;
                 }
             } catch (e) {
-                document.getElementById('next-adv-no').innerText = "VOUCHER-ERR";
+                voucherSpan.innerText = "VOUCHER-ERR";
             }
+            return null;
         }
 
         async function fetchEmployees() {
             try { 
                 const r = await fetch(`${SCRIPT_URL}?action=getEmployees`); 
-                employees = await r.json(); 
-            } catch(e) {}
-        }
-
-        function resetEntry() {
-            document.getElementById('advance-form').reset();
-            document.getElementById('selected-emp-id').value = "";
-            document.getElementById('display-name').value = "";
-            document.getElementById('auto-passport').value = "";
-            document.getElementById('display-desig').value = "";
-            document.getElementById('success-modal').classList.add('hidden');
-            fetchNextVoucher(); 
-        }
-
-        function numberToWords(num) {
-            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-            const numStr = num.toString();
-            if (numStr.length > 9) return 'Amount too large';
-            let n = ('000000000' + numStr).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-            if (!n) return ''; 
-            let str = '';
-            str += (Number(n[1]) != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
-            str += (Number(n[2]) != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
-            str += (Number(n[3]) != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
-            str += (Number(n[4]) != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
-            str += (Number(n[5]) != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-            return str ? str + 'Taka Only' : 'Zero Taka Only';
+                const data = await r.json();
+                employees = Array.isArray(data) ? data : [];
+            } catch(e) {
+                showAlert("Critical: Could not load employee data.");
+            }
         }
 
         function setupSearch() {
@@ -354,17 +370,19 @@
 
         function showFilteredResults(val) {
             const res = document.getElementById('search-results');
-            const lowerVal = val.toLowerCase();
+            const lowerVal = val.trim().toLowerCase();
+            
             const filtered = employees.filter(emp => {
                 const name = (emp.name || emp['employee name'] || "").toString().toLowerCase();
                 const id = (emp.id || "").toString().toLowerCase();
                 return name.includes(lowerVal) || id.includes(lowerVal);
-            }).slice(0, 10);
+            }).slice(0, 20);
+
             if (filtered.length > 0) {
                 res.innerHTML = filtered.map(emp => `
                     <div class="search-item" onclick="selectEmployee('${emp.id}')">
                         <span class="id-badge">${emp.id}</span>
-                        ${emp.name || emp['employee name'] || 'Unknown'}
+                        ${(emp.name || emp['employee name'] || 'Unknown').toUpperCase()}
                     </div>
                 `).join('');
                 res.style.display = 'block';
@@ -376,7 +394,7 @@
             if(emp) {
                 document.getElementById('emp-search').value = id;
                 document.getElementById('selected-emp-id').value = id;
-                document.getElementById('display-name').value = (emp.name || emp['employee name'] || "").toString().toUpperCase();
+                document.getElementById('display-name').value = (emp.name || emp['employee name'] || "No Employee Name").toString().toUpperCase();
                 document.getElementById('auto-passport').value = (emp.passport || emp['passport no'] || "---").toString();
                 document.getElementById('display-desig').value = (emp.designation || emp.desig || "---").toString().toUpperCase();
                 document.getElementById('search-results').style.display = 'none';
@@ -418,6 +436,32 @@
             }
         }
 
+        function resetEntry() {
+            document.getElementById('advance-form').reset();
+            document.getElementById('selected-emp-id').value = "";
+            document.getElementById('display-name').value = "";
+            document.getElementById('auto-passport').value = "";
+            document.getElementById('display-desig').value = "";
+            document.getElementById('success-modal').classList.add('hidden');
+            refreshSystemData(true); 
+        }
+
+        function numberToWords(num) {
+            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const numStr = num.toString();
+            if (numStr.length > 9) return 'Amount too large';
+            let n = ('000000000' + numStr).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return ''; 
+            let str = '';
+            str += (Number(n[1]) != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (Number(n[2]) != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (Number(n[3]) != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (Number(n[4]) != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (Number(n[5]) != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            return str ? str + 'Taka Only' : 'Zero Taka Only';
+        }
+
         function getReceiptHTML(item, copyType) {
             return `
                 <div class="receipt-slip">
@@ -426,13 +470,11 @@
                         <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="height: 35px;">
                         <div style="text-align: left;">
                             <h2 style="margin: 0; font-size: 22px; font-weight: 900; color: #1e3a5f !important;">ALAMHOW <span style="color: #d4af37 !important;">CO LTD</span></h2>
-                            <p style="margin: 0; font-size: 9px; text-transform: uppercase; font-weight: 800; color: #333 !important; text-align: center;"> 
-    Advance Money Receipt
-</p>
+                            <p style="margin: 0; font-size: 9px; text-transform: uppercase; font-weight: 800; color: #333 !important; text-align: center;">Money Advance Receipt</p>
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 15px; font-weight: 900; color: #1e3a5f !important;">
-                        <span>VOUCHER NO: ${item.advanceNo}</span>
+                        <span>VOUCHER: ${item.advanceNo}</span>
                         <span>DATE: ${item.recordDate}</span>
                     </div>
                     <div style="font-size: 13px; line-height: 2.2;">
@@ -441,11 +483,11 @@
                         <div style="display: flex; border-bottom: 1px dashed #ccc;"><span style="width: 100px; font-weight: 800; color: #555 !important;">DESIG</span>: <span style="color: #000 !important;">${item.desig}</span></div>
                         <div style="display: flex; border-bottom: 1px dashed #ccc;"><span style="width: 100px; font-weight: 800; color: #555 !important;">PASSPORT</span>: <span style="color: #000 !important;">${item.passport}</span></div>
                         <div style="margin-top: 15px; background: #1e3a5f !important; color: white !important; padding: 12px; border: 2.5px solid #d4af37 !important; text-align: center; border-radius: 6px; -webkit-print-color-adjust: exact;"><span style="font-size: 18px; font-weight: 900;">AMOUNT: ${Number(item.amount).toLocaleString()} /-</span></div>
-                        <div class="amount-words" style="border-left: 3px solid #d4af37 !important;">In Words: ${item.amountWords}</div>
+                        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #444; margin: 8px 0; font-style: italic; border-left: 3px solid #d4af37 !important; padding-left: 8px;">In Words: ${item.amountWords}</div>
                     </div>
                     <div style="flex-grow: 1; margin-top: 15px;">
-                        <div style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">REFERENCE:</div><div style="font-size: 10px; color: #000 !important;">${item.reference || ''}</div>
-                        <div style="font-size: 9px; font-weight: 900; margin-top: 5px; color: #1e3a5f !important;">REMARKS:</div><div style="font-size: 10px; font-style: italic; color: #000 !important;">${item.remark || ''}</div>
+                        <div style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">REFERENCE: ${item.reference || 'No Reference Entry'}</div>
+                        <div style="font-size: 9px; font-weight: 900; margin-top: 5px; color: #1e3a5f !important;">REMARKS: ${item.remark || 'No Remarks Entry'}</div>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: auto; padding-bottom: 30px;">
                         <div style="text-align: center; width: 100px;"><div style="border-top: 1px solid #1e3a5f !important;"></div><span style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">RECEIVER</span></div>
