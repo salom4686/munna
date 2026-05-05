@@ -407,7 +407,7 @@
         "DESIGNATION",
         "PASSPORT NO",
         "JOINING DATE",
-        "BASIC SALARY",
+        "MONTHLY BASIC",
         "OT RATE",
         "TOTAL OT HOURS",
         "OT AMOUNT",
@@ -602,7 +602,7 @@
               extraStyle += "background-color: #ebf8ff; color: #2b6cb0;";
 
             let headerHtml = `<th style="${extraStyle}">${h}</th>`;
-            if (h === "BASIC SALARY") {
+            if (h === "MONTHLY BASIC ") {
               headerHtml += `<th style="background-color: #f0fdf4; color: #166534; vertical-align: middle; text-align: center; white-space: normal; min-width: 70px; line-height: 1.1;">DAILY BASIC</th>`;
             }
             return headerHtml;
@@ -635,7 +635,7 @@
             }
 
             const basicSalary =
-              parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0;
+              parseFloat(row[colIndexMap["MONTHLY BASIC "]]) || 0;
             const holidayAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
             const sundayAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
             const status = (row[colIndexMap["STATUS"]] || "")
@@ -679,7 +679,7 @@
               .map((h) => {
                 let val = row[colIndexMap[h]];
                 const isNumeric = [
-                  "BASIC SALARY",
+                  "MONTHLY BASIC ",
                   "DAILY BASIC",
                   "OT AMOUNT",
                   "HOLIDAY",
@@ -719,7 +719,7 @@
 
                 let cellHtml = `<td class="${align}" style="white-space: nowrap; padding: 4px 8px; ${cellBg}">${val}</td>`;
 
-                if (h === "BASIC SALARY") {
+                if (h === " MONTHLY BASIC ") {
                   let bg =
                     holidayAmt > 0 || sundayAmt > 0 ? "#e0f2fe" : "#f0fdf4";
                   cellHtml += `<td class="text-end" style="background-color: ${bg}; font-weight: bold; white-space: nowrap; padding: 4px 8px;">${dailyBasicDisplay.toFixed(2)}</td>`;
@@ -760,7 +760,7 @@
             summary[id] = {
               id,
               name: row[colIndexMap["EMPLOYEE NAME"]],
-              mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0,
+              mBasic: parseFloat(row[colIndexMap["MONTHLY BASIC"]]) || 0,
               daysInMonth: daysInMonth,
               narDays: 0, // সাধারণ দিন (Normal)
               sunDays: 0, // রবিবার (Sunday)
@@ -813,7 +813,7 @@
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SL</th>
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">ID</th>
     <th rowspan="2" class="text-start" style="position: sticky; top: 0; z-index: 100;">NAME</th>
-    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">MAIN BASIC</th>
+    <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">MONTHLY BASIC</th>
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">DAILY BASIC</th>
     
     <th colspan="4" class="text-center" style="background-color: #f8fafc; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #142a50;">ATTENDANCE</th>
@@ -1114,8 +1114,8 @@
       }
 
       function openPreview() {
-        const start = document.getElementById("startDate").value || "N/A";
-        const end = document.getElementById("endDate").value || "N/A";
+        const start = document.getElementById("startDate").value || "NO DATE SELECT";
+        const end = document.getElementById("endDate").value || "NO DATE SELECT";
         const emp =
           document.getElementById("empFilter").options[
             document.getElementById("empFilter").selectedIndex
