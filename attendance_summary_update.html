@@ -1,558 +1,815 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Attendance & Salary</title>
-  
-   <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Attendance & Salary</title>
 
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css"
+    />
 
-  <style>
-    :root {
-      --brand-blue: #1d3a6d; --header-text: #ffffff; --bg-light: #f4f6f9; --accent-yellow: #fff9e6;  --btn-reset: #dc3545; --highlight-green: #e6fffa; }
-    body {
-      background-color: var(--bg-light);padding: 10px;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .main-card { background: #ffffff; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08);margin: 0 auto;border: 1px solid #e0e0e0; overflow: hidden; display: flex; flex-direction: column; max-height: 96vh;}
-/* বাটনের সাধারণ অবস্থা এবং হোভার অবস্থা নিয়ন্ত্রণ */
-.btn-reset.btn-action {
-    background-color: #ffc107; /* আপনার পছন্দের ব্যাকগ্রাউন্ড কালার */
-    color: #000; /* টেক্সট কালার কালো */
-    border: 1px solid #000;
-    transition: all 0.3s ease; /* স্মুথ ট্রানজিশনের জন্য */
-}
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-.btn-reset.btn-action:hover {
-    /* হোভার করলে যা হবে */
-    background-color: #ff2802 !important; /* হোভার ব্যাকগ্রাউন্ড (একটু গাঢ় হলুদ) */
-    color: #000000 !important; /* হোভার করলেও টেক্সট কালোই থাকবে, সাদা হবে না */
-    border-color: #f8f7f7 !important;
-    box-shadow: 0 2px 5px rgba(228, 221, 221, 0.2); /* হালকা শ্যাডো */
-}
+    <style>
+          :root {
+            --brand-blue: #1d3a6d; --header-text: #ffffff; --bg-light: #f4f6f9; --accent-yellow: #fff9e6;  --btn-reset: #dc3545; --highlight-green: #e6fffa; }
+          body {
+            background-color: var(--bg-light);padding: 10px;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+          .main-card { background: #ffffff; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08);margin: 0 auto;border: 1px solid #e0e0e0; overflow: hidden; display: flex; flex-direction: column; max-height: 96vh;}
+      /* বাটনের সাধারণ অবস্থা এবং হোভার অবস্থা নিয়ন্ত্রণ */
+      .btn-reset.btn-action {
+          background-color: #ffc107; /* আপনার পছন্দের ব্যাকগ্রাউন্ড কালার */
+          color: #000; /* টেক্সট কালার কালো */
+          border: 1px solid #000;
+          transition: all 0.3s ease; /* স্মুথ ট্রানজিশনের জন্য */
+      }
 
-.btn-reset.btn-action:active {
-    background-color: #d39e00 !important;
-    transform: translateY(5px); /* ক্লিক করলে সামান্য নিচে নামবে */
-}
-    .page-header { background-color: #ffffff; padding: 10px 20px;  border-bottom: 4px solid var(--brand-blue);display: flex; justify-content: space-between; align-items: center;  flex-shrink: 0; }
-    .brand-title h2 { color: var(--brand-blue); font-weight: 800; margin: 0; font-size: 1.3rem; }
-    .filter-section {  padding: 12px; background: #f8f9fc; border-bottom: 1px solid #eee; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;align-items: end; flex-shrink: 0; }
-    .filter-group label { font-size: 9px; font-weight: 700; color: var(--brand-blue); margin-bottom: 2px; display: block; text-transform: uppercase; }
-    .custom-date-input { background-color: #ffffff !important; cursor: pointer !important; font-weight: 600; font-size: 11px; }
-    .btn-action { font-size: 10px; padding: 4px 10px; font-weight: 600; }
-    .btn-reset { background-color: var(--btn-reset); color: white; border: none; }
-    .summary-bar { padding: 8px 20px;background: #eef2f7; border-bottom: 1px solid #ddd;display: flex;gap: 20px; font-weight: bold; color: var(--brand-blue);font-size: 13px;align-items: center; }
-    .stat-box { background: #fff; padding: 2px 10px; border-radius: 4px; border: 1px solid #cbd5e0; }
-    .table-responsive { overflow: auto; flex-grow: 1; position: relative; }
-    .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-   .attendance-table thead th { background-color: var(--brand-blue) !important; color: var(--header-text) !important; padding: 6px 4px; text-align: center; font-size: 9px;
- position: sticky;
-      top: 0;
-      z-index: 20;
-      border: 1px solid #142a50; <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
+      .btn-reset.btn-action:hover {
+          /* হোভার করলে যা হবে */
+          background-color: #ff2802 !important; /* হোভার ব্যাকগ্রাউন্ড (একটু গাঢ় হলুদ) */
+          color: #000000 !important; /* হোভার করলেও টেক্সট কালোই থাকবে, সাদা হবে না */
+          border-color: #f8f7f7 !important;
+          box-shadow: 0 2px 5px rgba(228, 221, 221, 0.2); /* হালকা শ্যাডো */
+      }
 
-    .attendance-table tbody td {
-      padding: 4px 3px;
-      text-align: center;
-      font-size: 10px;
-      border: 1px solid #e0e0e0;
-      white-space: nowrap;
-    }
+      .btn-reset.btn-action:active {
+          background-color: #d39e00 !important;
+          transform: translateY(5px); /* ক্লিক করলে সামান্য নিচে নামবে */
+      }
+          .page-header { background-color: #ffffff; padding: 10px 20px;  border-bottom: 4px solid var(--brand-blue);display: flex; justify-content: space-between; align-items: center;  flex-shrink: 0; }
+          .brand-title h2 { color: var(--brand-blue); font-weight: 800; margin: 0; font-size: 1.3rem; }
+          .filter-section {  padding: 12px; background: #f8f9fc; border-bottom: 1px solid #eee; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;align-items: end; flex-shrink: 0; }
+          .filter-group label { font-size: 9px; font-weight: 700; color: var(--brand-blue); margin-bottom: 2px; display: block; text-transform: uppercase; }
+          .custom-date-input { background-color: #ffffff !important; cursor: pointer !important; font-weight: 600; font-size: 11px; }
+          .btn-action { font-size: 10px; padding: 4px 10px; font-weight: 600; }
+          .btn-reset { background-color: var(--btn-reset); color: white; border: none; }
+          .summary-bar { padding: 8px 20px;background: #eef2f7; border-bottom: 1px solid #ddd;display: flex;gap: 20px; font-weight: bold; color: var(--brand-blue);font-size: 13px;align-items: center; }
+          .stat-box { background: #fff; padding: 2px 10px; border-radius: 4px; border: 1px solid #cbd5e0; }
+          .table-responsive { overflow: auto; flex-grow: 1; position: relative; }
+          .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+         .attendance-table thead th { background-color: var(--brand-blue) !important; color: var(--header-text) !important; padding: 6px 4px; text-align: center; font-size: 9px;
+       position: sticky;
+            top: 0;
+            z-index: 20;
+            border: 1px solid #142a50; <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
+            text-transform: uppercase;
+            white-space: nowrap;
+          }
 
-    .total-attendance-col { background-color: var(--accent-yellow); font-weight: 700; color: var(--brand-blue); }
-    .highlight-col { background-color: var(--highlight-green); font-weight: 700; color: #0d685b; }
-    .deduction-col { background-color: #fff0f0; }
-    
-    #loader { padding: 40px; text-align: center; color: var(--brand-blue); display: none; }
+          .attendance-table tbody td {
+            padding: 4px 3px;
+            text-align: center;
+            font-size: 10px;
+            border: 1px solid #e0e0e0;
+            white-space: nowrap;
+          }
 
-    .search-input-group { display: flex; }
-    .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 80px; font-size: 10px; }
-    .search-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 10px; }
-    
-    .grand-total-row td { background-color: #f0f4f8 !important; font-weight: 900 !important; color: var(--brand-blue); }
-  </style>
-</head>
-<body id="bodyRoot">
+          .total-attendance-col { background-color: var(--accent-yellow); font-weight: 700; color: var(--brand-blue); }
+          .highlight-col { background-color: var(--highlight-green); font-weight: 700; color: #0d685b; }
+          .deduction-col { background-color: #fff0f0; }
 
-<div class="container-fluid">
-  <div class="main-card">
-    <div class="page-header">
-      <div class="brand-title">
-        <h2>ALAMHOW CO LTD</h2>
-        <span style="font-size: 0.75rem; color: #666;">Attendance & Salary Repoprt</span>
-      </div>
-      <div class="d-flex gap-2">
-        <button class="btn btn-action btn-outline-success" onclick="showAttendanceFilter()">Attendance Sheet</button>
-        <button class="btn btn-action btn-outline-primary" onclick="openPreview()">Salary Report</button>
-        <button class="btn btn-action btn-primary" onclick="refreshData()">Refresh</button>
-      </div>
-    </div>
+          #loader { padding: 40px; text-align: center; color: var(--brand-blue); display: none; }
 
-    <!-- Filters -->
-    <div class="filter-section">
-      <div class="filter-group" style="grid-column: span 2;">
-        <label>Search By:</label>
-        <div class="search-input-group">
-          <select id="searchType" class="form-select form-select-sm" onchange="processData()">
-            <option value="ALL">ALL</option>
-            <option value="EMPLOYEE ID">ID</option>
-            <option value="EMPLOYEE NAME">NAME</option>
-            <option value="PASSPORT NO">PASSPORT</option>
-          </select>
-          <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Type info..." onkeyup="processData()">
+          .search-input-group { display: flex; }
+          .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 80px; font-size: 10px; }
+          .search-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 10px; }
+
+          .grand-total-row td { background-color: #f0f4f8 !important; font-weight: 900 !important; color: var(--brand-blue); }
+    </style>
+  </head>
+  <body id="bodyRoot">
+    <div class="container-fluid">
+      <div class="main-card">
+        <div class="page-header">
+          <div class="brand-title">
+            <h2>ALAMHOW CO LTD</h2>
+            <span style="font-size: 0.75rem; color: #666"
+              >Attendance & Salary Repoprt</span
+            >
+          </div>
+          <div class="d-flex gap-2">
+            <button
+              class="btn btn-action btn-outline-success"
+              onclick="showAttendanceFilter()"
+            >
+              Attendance Sheet
+            </button>
+            <button
+              class="btn btn-action btn-outline-primary"
+              onclick="openPreview()"
+            >
+              Salary Report
+            </button>
+            <button class="btn btn-action btn-primary" onclick="refreshData()">
+              Refresh
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="filter-group">
-        <label>Start Date:</label>
-        <input type="text" id="startDate" class="form-control form-control-sm custom-date-input">
-      </div>
-      <div class="filter-group">
-        <label>End Date:</label>
-        <input type="text" id="endDate" class="form-control form-control-sm custom-date-input">
-      </div>
-      <div class="filter-group">
-        <label>Employee NAME:</label>
-        <select id="empFilter" class="form-select form-select-sm" onchange="processData()"></select>
-      </div>
-      <div class="filter-group">
-        <label>PROJECT NAME:</label>
-        <select id="sideFilter" class="form-select form-select-sm" onchange="processData()"></select>
-      </div>
-      <div class="filter-group">
-        <label>Status Filter:</label>
-        <select id="columnSelector" class="form-select form-select-sm" onchange="handleTypeChange()">
-          <option value="">Select</option>
-          <option value="STATUS">STATUS</option>
-          <option value="HOLIDAY">HOLIDAY</option>
-          <option value="SUNDAY WORK">SUNDAY WORK</option>
-        </select>
-      </div>
-      <div class="filter-group" id="typeValueGroup" style="display:none;">
-        <label id="typeValueLabel">Value:</label>
-        <select id="typeValueSelect" class="form-select form-select-sm" onchange="processData()"></select>
-      </div>
-      <div class="filter-group">
-        <button class="btn btn-sm btn-reset btn-action w-100" onclick="resetFilters()">Clear</button>
-      </div>
-    </div>
 
-    <div class="summary-bar" id="summaryBar">
-      <span>Total Employee: <span id="statEmp" class="stat-box"></span></span>
-      <span>Total Present: <span id="statPresent" class="stat-box"></span></span>
-      <span id="salarySheetTitle" class="ms-auto" style="display: none; font-weight: 800; color: #1d3a6d;"></span>
-    </div>
-
-    <div id="loader">
-      <div class="spinner-border spinner-border-sm" role="status"></div>
-      <p class="mt-2" style="font-size: 11px;">Data Loading...</p>
-    </div>
-
-    <div class="table-responsive">
-      <table class="table attendance-table" id="attendanceTable">
-        <thead id="tableHead"></thead>
-        <tbody id="tableBody"></tbody>
-        <tfoot id="tableFoot"></tfoot>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-dark text-white">
-        <h6 class="modal-title">Quick Edit Record</h6>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editForm">
-          <input type="hidden" id="editRowIndex">
-          <p class="mb-3 text-primary fw-bold" id="displayEmpName"></p>
-          <div class="row g-2">
-            <div class="col-6">
-              <label class="form-label small fw-bold">STATUS</label>
-              <select id="editStatus" class="form-select form-select-sm">
-                <option value="PRESENT">PRESENT</option>
-                <option value="ABSENT">ABSENT</option>
-                <option value="OFF">OFF</option>
-                <option value="LEAVE">LEAVE</option>
+        <!-- Filters -->
+        <div class="filter-section">
+          <div class="filter-group" style="grid-column: span 2">
+            <label>Search By:</label>
+            <div class="search-input-group">
+              <select
+                id="searchType"
+                class="form-select form-select-sm"
+                onchange="processData()"
+              >
+                <option value="ALL">ALL</option>
+                <option value="EMPLOYEE ID">ID</option>
+                <option value="EMPLOYEE NAME">NAME</option>
+                <option value="PASSPORT NO">PASSPORT</option>
               </select>
-            </div>
-            <div class="col-6">
-              <label class="form-label small fw-bold">OT HOURS</label>
-              <input type="number" id="editOT" class="form-control form-control-sm" step="0.5">
-            </div>
-            <div class="col-12">
-              <label class="form-label small fw-bold">HOLIDAY WORK</label>
-              <input type="number" id="editHoliday" class="form-control form-control-sm" step="0.5">
+              <input
+                type="text"
+                id="searchInput"
+                class="form-control form-control-sm"
+                placeholder="Type info..."
+                onkeyup="processData()"
+              />
             </div>
           </div>
-        </form>
-      </div>
-      <div class="modal-footer p-2">
-        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm" onclick="saveEdit()">Update</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Attendance Matrix Filter Modal -->
-<div class="modal fade" id="matrixFilterModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-success text-white">
-        <h6 class="modal-title">Generate Attendance Report</h6>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label small fw-bold">Select Month & Year</label>
-            <input type="text" id="matrixMonth" class="form-control form-control-sm custom-date-input" placeholder="Select Month">
+          <div class="filter-group">
+            <label>Start Date:</label>
+            <input
+              type="text"
+              id="startDate"
+              class="form-control form-control-sm custom-date-input"
+            />
           </div>
-          
-          <div class="col-12">
-            <label class="form-label small fw-bold">Select Employee ID (Optional)</label>
-            <input list="employeeIdList" id="matrixIdFilter" class="form-control form-control-sm" placeholder="Type or click to select ID">
-            <datalist id="employeeIdList">
-              </datalist>
+          <div class="filter-group">
+            <label>End Date:</label>
+            <input
+              type="text"
+              id="endDate"
+              class="form-control form-control-sm custom-date-input"
+            />
           </div>
-
-          <div class="col-12">
-            <label class="form-label small fw-bold">Filter by Project </label>
-            <select id="matrixSideFilter" class="form-select form-select-sm">
-              <option value="">All Project</option>
+          <div class="filter-group">
+            <label>Employee NAME:</label>
+            <select
+              id="empFilter"
+              class="form-select form-select-sm"
+              onchange="processData()"
+            ></select>
+          </div>
+          <div class="filter-group">
+            <label>PROJECT NAME:</label>
+            <select
+              id="sideFilter"
+              class="form-select form-select-sm"
+              onchange="processData()"
+            ></select>
+          </div>
+          <div class="filter-group">
+            <label>Status Filter:</label>
+            <select
+              id="columnSelector"
+              class="form-select form-select-sm"
+              onchange="handleTypeChange()"
+            >
+              <option value="">Select</option>
+              <option value="STATUS">STATUS</option>
+              <option value="HOLIDAY">HOLIDAY</option>
+              <option value="SUNDAY WORK">SUNDAY WORK</option>
             </select>
           </div>
-        </div>      </div>
-      <div class="modal-footer p-2">
-        <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-success btn-sm" onclick="generateFilteredAttendanceSheet()">VIEW ATTENDANCE </button>
+          <div class="filter-group" id="typeValueGroup" style="display: none">
+            <label id="typeValueLabel">Value:</label>
+            <select
+              id="typeValueSelect"
+              class="form-select form-select-sm"
+              onchange="processData()"
+            ></select>
+          </div>
+          <div class="filter-group">
+            <button
+              class="btn btn-sm btn-reset btn-action w-100"
+              onclick="resetFilters()"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="summary-bar" id="summaryBar">
+          <span
+            >Total Employee: <span id="statEmp" class="stat-box"></span
+          ></span>
+          <span
+            >Total Present: <span id="statPresent" class="stat-box"></span
+          ></span>
+          <span
+            id="salarySheetTitle"
+            class="ms-auto"
+            style="display: none; font-weight: 800; color: #1d3a6d"
+          ></span>
+        </div>
+
+        <div id="loader">
+          <div class="spinner-border spinner-border-sm" role="status"></div>
+          <p class="mt-2" style="font-size: 11px">Data Loading...</p>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table attendance-table" id="attendanceTable">
+            <thead id="tableHead"></thead>
+            <tbody id="tableBody"></tbody>
+            <tfoot id="tableFoot"></tfoot>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
-</div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h6 class="modal-title">Quick Edit Record</h6>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="editForm">
+              <input type="hidden" id="editRowIndex" />
+              <p class="mb-3 text-primary fw-bold" id="displayEmpName"></p>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small fw-bold">STATUS</label>
+                  <select id="editStatus" class="form-select form-select-sm">
+                    <option value="PRESENT">PRESENT</option>
+                    <option value="ABSENT">ABSENT</option>
+                    <option value="OFF">OFF</option>
+                    <option value="LEAVE">LEAVE</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label small fw-bold">OT HOURS</label>
+                  <input
+                    type="number"
+                    id="editOT"
+                    class="form-control form-control-sm"
+                    step="0.5"
+                  />
+                </div>
+                <div class="col-12">
+                  <label class="form-label small fw-bold">HOLIDAY WORK</label>
+                  <input
+                    type="number"
+                    id="editHoliday"
+                    class="form-control form-control-sm"
+                    step="0.5"
+                  />
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer p-2">
+            <button
+              type="button"
+              class="btn btn-light btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              onclick="saveEdit()"
+            >
+              Update
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-<script>
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxUTUqS8NS7nARLXSr_tbkoBnsmcxeGnOCSSmL4d1ZHxvg4PwlYiFpwMxGoy9XwJRuF1g/exec";
-  let rawData = [];
-  let colIndexMap = {}; 
-  const DAYS_IN_MONTH = 30;
-  let startPicker, endPicker, matrixPicker, bootstrapModal, matrixModal;
+    <!-- Attendance Matrix Filter Modal -->
+    <div class="modal fade" id="matrixFilterModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-success text-white">
+            <h6 class="modal-title">Generate Attendance Report</h6>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small fw-bold"
+                  >Select Month & Year</label
+                >
+                <input
+                  type="text"
+                  id="matrixMonth"
+                  class="form-control form-control-sm custom-date-input"
+                  placeholder="Select Month"
+                />
+              </div>
 
-  const leftAlignCols = ["EMPLOYEE NAME", "DESIGNATION", "PROJECT NAME"];
+              <div class="col-12">
+                <label class="form-label small fw-bold"
+                  >Select Employee ID (Optional)</label
+                >
+                <input
+                  list="employeeIdList"
+                  id="matrixIdFilter"
+                  class="form-control form-control-sm"
+                  placeholder="Type or click to select ID"
+                />
+                <datalist id="employeeIdList"> </datalist>
+              </div>
 
- const displayHeaders = [
-    "ISSUE DATE", "ISSUE TIME", "ATTENDANCE DATE", "EMPLOYEE ID", "EMPLOYEE NAME", 
-    "DESIGNATION", "PASSPORT NO", "JOINING DATE", "BASIC SALARY", "OT RATE", "TOTAL OT HOURS", 
-    "OT AMOUNT", 
-    "SUNDAY WORK", 
-    "HOLIDAY",
-    "ATTENDANCE BONUS",   
-    "PERFORMANCE BONUS",  
-    "GROS SALARY",
-    "ADVANCE",            
-    "FINE",               
-    "NPS 1%",             
-    "CSG 1.5%", 
-    "TOTAL DEDUCTION",          
-    "NEED SALARY",        // CSG 1.5% এর ডানে যোগ করা হলো
-    "STATUS",
-    "SIDE NAME", 
-    "REMARK"
-];
+              <div class="col-12">
+                <label class="form-label small fw-bold"
+                  >Filter by Project
+                </label>
+                <select
+                  id="matrixSideFilter"
+                  class="form-select form-select-sm"
+                >
+                  <option value="">All Project</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer p-2">
+            <button
+              type="button"
+              class="btn btn-light btn-sm"
+              data-bs-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              type="button"
+              class="btn btn-success btn-sm"
+              onclick="generateFilteredAttendanceSheet()"
+            >
+              VIEW ATTENDANCE
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
-  window.onload = function() { 
-    initCustomDatePickers();
-    bootstrapModal = new bootstrap.Modal(document.getElementById('editModal'));
-    matrixModal = new bootstrap.Modal(document.getElementById('matrixFilterModal'));
-    loadDataFromAPI(); 
-  };
+    <script>
+      const WEB_APP_URL =
+        "https://script.google.com/macros/s/AKfycbxUTUqS8NS7nARLXSr_tbkoBnsmcxeGnOCSSmL4d1ZHxvg4PwlYiFpwMxGoy9XwJRuF1g/exec";
+      let rawData = [];
+      let colIndexMap = {};
+      const DAYS_IN_MONTH = 30;
+      let startPicker, endPicker, matrixPicker, bootstrapModal, matrixModal;
 
-  function initCustomDatePickers() {
-    const config = { dateFormat: "Y-m-d", altInput: true, altFormat: "d-m-Y", onChange: () => processData() };
-    startPicker = flatpickr("#startDate", config);
-    endPicker = flatpickr("#endDate", config);
+      const leftAlignCols = ["EMPLOYEE NAME", "DESIGNATION", "PROJECT NAME"];
 
-    matrixPicker = flatpickr("#matrixMonth", {
-      plugins: [
-        new monthSelectPlugin({ shorthand: true, dateFormat: "Y-m", altFormat: "F Y", theme: "material_blue" })
-      ]
-    });
+      const displayHeaders = [
+        "ISSUE DATE",
+        "ISSUE TIME",
+        "ATTENDANCE DATE",
+        "EMPLOYEE ID",
+        "EMPLOYEE NAME",
+        "DESIGNATION",
+        "PASSPORT NO",
+        "JOINING DATE",
+        "BASIC SALARY",
+        "OT RATE",
+        "TOTAL OT HOURS",
+        "OT AMOUNT",
+        "SUNDAY WORK",
+        "HOLIDAY",
+        "ATTENDANCE BONUS",
+        "PERFORMANCE BONUS",
+        "GROS SALARY",
+        "ADVANCE",
+        "FINE",
+        "NPS 1%",
+        "CSG 1.5%",
+        "TOTAL DEDUCTION",
+        "NEED SALARY", // CSG 1.5% এর ডানে যোগ করা হলো
+        "STATUS",
+        "SIDE NAME",
+        "REMARK",
+      ];
 
-    const now = new Date();
-    matrixPicker.setDate(`${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2, '0')}`);
-  }
+      window.onload = function () {
+        initCustomDatePickers();
+        bootstrapModal = new bootstrap.Modal(
+          document.getElementById("editModal"),
+        );
+        matrixModal = new bootstrap.Modal(
+          document.getElementById("matrixFilterModal"),
+        );
+        loadDataFromAPI();
+      };
 
-  async function loadDataFromAPI() {
-    try {
-      document.getElementById('loader').style.display = 'block';
-      const response = await fetch(WEB_APP_URL);
-      const data = await response.json();
-      if (!data || data.length === 0) return;
-      rawData = data;
-      mapSheetColumns(data[0]); 
-      populateStaticFilters(data);
-      document.getElementById('loader').style.display = 'none';
-      processData();
-    } catch (error) { console.error(error); }
-  }
+      function initCustomDatePickers() {
+        const config = {
+          dateFormat: "Y-m-d",
+          altInput: true,
+          altFormat: "d-m-Y",
+          onChange: () => processData(),
+        };
+        startPicker = flatpickr("#startDate", config);
+        endPicker = flatpickr("#endDate", config);
 
-  function mapSheetColumns(headers) {
-    headers.forEach((h, i) => { colIndexMap[h.toString().trim().toUpperCase()] = i; });
-  }
+        matrixPicker = flatpickr("#matrixMonth", {
+          plugins: [
+            new monthSelectPlugin({
+              shorthand: true,
+              dateFormat: "Y-m",
+              altFormat: "F Y",
+              theme: "material_blue",
+            }),
+          ],
+        });
 
-  function isPresent(statusValue) {
-    if (!statusValue) return false;
-    const s = statusValue.toString().trim().toUpperCase();
-    return s === 'P' || s === 'PRESENT' || s === ''; 
-  }
-
-// --- ২. সংশোধিত ফিল্টারিং এবং প্রসেস লজিক ---
-  function processData() {
-    const startStr = document.getElementById("startDate").value;
-    const endStr = document.getElementById("endDate").value;
-    
-    let startDate = startStr ? new Date(startStr) : null;
-    if(startDate) startDate.setHours(0, 0, 0, 0);
-
-    let endDate = endStr ? new Date(endStr) : null;
-    if(endDate) endDate.setHours(23, 59, 59, 999);
-
-    const search = document.getElementById("searchInput").value.toLowerCase();
-    const searchType = document.getElementById("searchType").value;
-    const fEmp = document.getElementById("empFilter").value;
-    const fSide = document.getElementById("sideFilter").value;
-    const fType = document.getElementById("columnSelector").value;
-    const fTypeVal = document.getElementById("typeValueSelect").value.toLowerCase();
-
-    const titleSpan = document.getElementById("salarySheetTitle");
-    if (startStr && endStr) {
-        titleSpan.innerText = `Records: ${startStr} to ${endStr}`;
-        titleSpan.style.display = "inline";
-    } else { titleSpan.style.display = "none"; }
-
-    const dIdx = colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
-    const eIdx = colIndexMap["EMPLOYEE ID"];
-    const sIdx = colIndexMap["SIDE NAME"];
-
-    let filteredRows = rawData.slice(1).filter(row => {
-      const rId = row[eIdx]?.toString().toUpperCase() || "";
-      const rSide = row[sIdx]?.toString().toUpperCase() || "";
-      
-      const rDate = parseDate(row[dIdx]);
-      const compareDate = new Date(rDate.getTime());
-      compareDate.setHours(0, 0, 0, 0); 
-      
-      let match = true;
-      if (startDate && compareDate < startDate) match = false;
-      if (match && endDate && compareDate > endDate) match = false;
-      
-      if (match && search) {
-        if (searchType === "ALL") match = row.join(" ").toLowerCase().includes(search);
-        else match = (row[colIndexMap[searchType]] || "").toString().toLowerCase().includes(search);
+        const now = new Date();
+        matrixPicker.setDate(
+          `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}`,
+        );
       }
-      if (match && fEmp && rId !== fEmp) match = false;
-      if (match && fSide && rSide !== fSide) match = false;
-      if (match && fType && fTypeVal) {
-        const cellVal = (row[colIndexMap[fType]] || "").toString().toLowerCase();
-        if (cellVal !== fTypeVal) match = false;
+
+      async function loadDataFromAPI() {
+        try {
+          document.getElementById("loader").style.display = "block";
+          const response = await fetch(WEB_APP_URL);
+          const data = await response.json();
+          if (!data || data.length === 0) return;
+          rawData = data;
+          mapSheetColumns(data[0]);
+          populateStaticFilters(data);
+          document.getElementById("loader").style.display = "none";
+          processData();
+        } catch (error) {
+          console.error(error);
+        }
       }
-      return match;
-    });
 
-    // সর্টিং (নতুন ডেটা উপরে)
-    filteredRows.sort((a, b) => parseDate(b[dIdx]) - parseDate(a[dIdx]));
+      function mapSheetColumns(headers) {
+        headers.forEach((h, i) => {
+          colIndexMap[h.toString().trim().toUpperCase()] = i;
+        });
+      }
 
-    const isSummary = (startStr || endStr || fEmp || fSide || (fType && fTypeVal));
-    if (isSummary) renderSummaryView(filteredRows);
-    else renderDetailedView(filteredRows);
-    
-    updateStats(filteredRows);
-  }
-function renderDetailedView(rows) {
-    const thead = document.getElementById('tableHead');
-    const tbody = document.getElementById('tableBody');
-    document.getElementById('tableFoot').innerHTML = "";
-    document.getElementById('bodyRoot').classList.remove('summary-mode');
+      function isPresent(statusValue) {
+        if (!statusValue) return false;
+        const s = statusValue.toString().trim().toUpperCase();
+        return s === "P" || s === "PRESENT" || s === "";
+      }
 
-    // ১. হেডার রেন্ডার
-    thead.innerHTML = `<tr>
+      // --- ২. সংশোধিত ফিল্টারিং এবং প্রসেস লজিক ---
+      function processData() {
+        const startStr = document.getElementById("startDate").value;
+        const endStr = document.getElementById("endDate").value;
+
+        let startDate = startStr ? new Date(startStr) : null;
+        if (startDate) startDate.setHours(0, 0, 0, 0);
+
+        let endDate = endStr ? new Date(endStr) : null;
+        if (endDate) endDate.setHours(23, 59, 59, 999);
+
+        const search = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const searchType = document.getElementById("searchType").value;
+        const fEmp = document.getElementById("empFilter").value;
+        const fSide = document.getElementById("sideFilter").value;
+        const fType = document.getElementById("columnSelector").value;
+        const fTypeVal = document
+          .getElementById("typeValueSelect")
+          .value.toLowerCase();
+
+        const titleSpan = document.getElementById("salarySheetTitle");
+        if (startStr && endStr) {
+          titleSpan.innerText = `Records: ${startStr} to ${endStr}`;
+          titleSpan.style.display = "inline";
+        } else {
+          titleSpan.style.display = "none";
+        }
+
+        const dIdx =
+          colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
+        const eIdx = colIndexMap["EMPLOYEE ID"];
+        const sIdx = colIndexMap["SIDE NAME"];
+
+        let filteredRows = rawData.slice(1).filter((row) => {
+          const rId = row[eIdx]?.toString().toUpperCase() || "";
+          const rSide = row[sIdx]?.toString().toUpperCase() || "";
+
+          const rDate = parseDate(row[dIdx]);
+          const compareDate = new Date(rDate.getTime());
+          compareDate.setHours(0, 0, 0, 0);
+
+          let match = true;
+          if (startDate && compareDate < startDate) match = false;
+          if (match && endDate && compareDate > endDate) match = false;
+
+          if (match && search) {
+            if (searchType === "ALL")
+              match = row.join(" ").toLowerCase().includes(search);
+            else
+              match = (row[colIndexMap[searchType]] || "")
+                .toString()
+                .toLowerCase()
+                .includes(search);
+          }
+          if (match && fEmp && rId !== fEmp) match = false;
+          if (match && fSide && rSide !== fSide) match = false;
+          if (match && fType && fTypeVal) {
+            const cellVal = (row[colIndexMap[fType]] || "")
+              .toString()
+              .toLowerCase();
+            if (cellVal !== fTypeVal) match = false;
+          }
+          return match;
+        });
+
+        // সর্টিং (নতুন ডেটা উপরে)
+        filteredRows.sort((a, b) => parseDate(b[dIdx]) - parseDate(a[dIdx]));
+
+        const isSummary =
+          startStr || endStr || fEmp || fSide || (fType && fTypeVal);
+        if (isSummary) renderSummaryView(filteredRows);
+        else renderDetailedView(filteredRows);
+
+        updateStats(filteredRows);
+      }
+      function renderDetailedView(rows) {
+        const thead = document.getElementById("tableHead");
+        const tbody = document.getElementById("tableBody");
+        document.getElementById("tableFoot").innerHTML = "";
+        document.getElementById("bodyRoot").classList.remove("summary-mode");
+
+        // ১. হেডার রেন্ডার
+        thead.innerHTML = `<tr>
         <th style="width: 40px; background-color: #f8f9fa; vertical-align: middle;" class="text-center">SL</th>
-        ${displayHeaders.filter(h => h !== "JOINING DATE").map(h => {
-            let extraStyle = "vertical-align: middle; text-align: center; white-space: normal; word-wrap: break-word; min-width: 70px; max-width: 110px; line-height: 1.1; padding: 5px;";
-            
-            if(h.includes("BONUS")) extraStyle += "background-color: #e6fffa; color: #006655;";
-            else if(["ADVANCE", "FINE", "NPS 1%", "CSG 1.5%"].includes(h)) extraStyle += "background-color: #fff5f5; color: #c53030;";
-            else if(h === "TOTAL DEDUCTION") extraStyle += "background-color: #ffebeb; color: #b91c1c; font-weight: bold;";
-            else if(h === "NEED SALARY") extraStyle += "background-color: #1d3a6d; color: #ffffff; font-weight: bold;";
-            else if(h === "TOTAL OT HOURS") extraStyle += "background-color: #fff9e6; color: #856404; font-weight: bold;";
-            else if(h === "GROS SALARY") extraStyle += "background-color: #ebf8ff; color: #2b6cb0;";
+        ${displayHeaders
+          .filter((h) => h !== "JOINING DATE")
+          .map((h) => {
+            let extraStyle =
+              "vertical-align: middle; text-align: center; white-space: normal; word-wrap: break-word; min-width: 70px; max-width: 110px; line-height: 1.1; padding: 5px;";
+
+            if (h.includes("BONUS"))
+              extraStyle += "background-color: #e6fffa; color: #006655;";
+            else if (["ADVANCE", "FINE", "NPS 1%", "CSG 1.5%"].includes(h))
+              extraStyle += "background-color: #fff5f5; color: #c53030;";
+            else if (h === "TOTAL DEDUCTION")
+              extraStyle +=
+                "background-color: #ffebeb; color: #b91c1c; font-weight: bold;";
+            else if (h === "NEED SALARY")
+              extraStyle +=
+                "background-color: #1d3a6d; color: #ffffff; font-weight: bold;";
+            else if (h === "TOTAL OT HOURS")
+              extraStyle +=
+                "background-color: #fff9e6; color: #856404; font-weight: bold;";
+            else if (h === "GROS SALARY")
+              extraStyle += "background-color: #ebf8ff; color: #2b6cb0;";
 
             let headerHtml = `<th style="${extraStyle}">${h}</th>`;
             if (h === "BASIC SALARY") {
-                headerHtml += `<th style="background-color: #f0fdf4; color: #166534; vertical-align: middle; text-align: center; white-space: normal; min-width: 70px; line-height: 1.1;">DAILY BASIC</th>`;
+              headerHtml += `<th style="background-color: #f0fdf4; color: #166534; vertical-align: middle; text-align: center; white-space: normal; min-width: 70px; line-height: 1.1;">DAILY BASIC</th>`;
             }
             return headerHtml;
-        }).join('')}
+          })
+          .join("")}
         <th class="no-print text-center" style="background-color: #f8f9fa; vertical-align: middle;">ACTION</th>
     </tr>`;
-    
-    // ২. ডাটা রেন্ডার
-    tbody.innerHTML = rows.map((row, idx) => {
-        const originalIndex = rawData.indexOf(row);
-        const reverseSerial = rows.length - idx; 
-        const empId = row[colIndexMap["EMPLOYEE ID"]];
-        const attDateRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
 
-        let otHours = 0;
-        if (empId && attDateRaw && typeof globalOTMap !== 'undefined') {
-            const y = attDateRaw.getFullYear(), m = attDateRaw.getMonth() + 1, d = attDateRaw.getDate();
-            const key1 = `${empId}_${y}-${m}-${d}`, key2 = `${empId}_${y}-${m.toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-            otHours = parseFloat(globalOTMap[key1] || globalOTMap[key2]) || parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
-        } else {
-            otHours = parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
-        }
+        // ২. ডাটা রেন্ডার
+        tbody.innerHTML = rows
+          .map((row, idx) => {
+            const originalIndex = rawData.indexOf(row);
+            const reverseSerial = rows.length - idx;
+            const empId = row[colIndexMap["EMPLOYEE ID"]];
+            const attDateRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
 
-        const basicSalary = parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0;
-        const holidayAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
-        const sundayAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
-        const status = (row[colIndexMap["STATUS"]] || "").toString().toUpperCase();
-        let daysInMonth = (attDateRaw && attDateRaw.getTime() !== 0) ? new Date(attDateRaw.getFullYear(), attDateRaw.getMonth() + 1, 0).getDate() : 30;
+            let otHours = 0;
+            if (empId && attDateRaw && typeof globalOTMap !== "undefined") {
+              const y = attDateRaw.getFullYear(),
+                m = attDateRaw.getMonth() + 1,
+                d = attDateRaw.getDate();
+              const key1 = `${empId}_${y}-${m}-${d}`,
+                key2 = `${empId}_${y}-${m.toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}`;
+              otHours =
+                parseFloat(globalOTMap[key1] || globalOTMap[key2]) ||
+                parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) ||
+                0;
+            } else {
+              otHours = parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
+            }
 
-        let dailyBasicDisplay = 0;
-        if (holidayAmt > 0) dailyBasicDisplay = holidayAmt;
-        else if (sundayAmt > 0) dailyBasicDisplay = sundayAmt;
-        else if (isPresent(status)) dailyBasicDisplay = basicSalary / daysInMonth;
+            const basicSalary =
+              parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0;
+            const holidayAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
+            const sundayAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
+            const status = (row[colIndexMap["STATUS"]] || "")
+              .toString()
+              .toUpperCase();
+            let daysInMonth =
+              attDateRaw && attDateRaw.getTime() !== 0
+                ? new Date(
+                    attDateRaw.getFullYear(),
+                    attDateRaw.getMonth() + 1,
+                    0,
+                  ).getDate()
+                : 30;
 
-        const otRate = parseFloat(row[colIndexMap["OT RATE"]]) || 0;
-        const otAmt = otHours * otRate;
-        const grossSalary = dailyBasicDisplay + otAmt + (parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0) + (parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0);
-        const nps = grossSalary * 0.01; 
-        const csg = grossSalary * 0.015;
-        const totalDeduction = nps + csg + (parseFloat(row[colIndexMap["ADVANCE"]]) || 0) + (parseFloat(row[colIndexMap["FINE"]]) || 0);
-        const needSalary = grossSalary - totalDeduction;
+            let dailyBasicDisplay = 0;
+            if (holidayAmt > 0) dailyBasicDisplay = holidayAmt;
+            else if (sundayAmt > 0) dailyBasicDisplay = sundayAmt;
+            else if (isPresent(status))
+              dailyBasicDisplay = basicSalary / daysInMonth;
 
-        return `<tr>
+            const otRate = parseFloat(row[colIndexMap["OT RATE"]]) || 0;
+            const otAmt = otHours * otRate;
+            const grossSalary =
+              dailyBasicDisplay +
+              otAmt +
+              (parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0) +
+              (parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0);
+            const nps = grossSalary * 0.01;
+            const csg = grossSalary * 0.015;
+            const totalDeduction =
+              nps +
+              csg +
+              (parseFloat(row[colIndexMap["ADVANCE"]]) || 0) +
+              (parseFloat(row[colIndexMap["FINE"]]) || 0);
+            const needSalary = grossSalary - totalDeduction;
+
+            return `<tr>
             <td class="text-center" style="font-weight: bold;">${reverseSerial}</td>
-            ${displayHeaders.filter(h => h !== "JOINING DATE").map(h => {
+            ${displayHeaders
+              .filter((h) => h !== "JOINING DATE")
+              .map((h) => {
                 let val = row[colIndexMap[h]];
-                const isNumeric = ["BASIC SALARY", "DAILY BASIC", "OT AMOUNT", "HOLIDAY", "SUNDAY WORK", "GROS SALARY", "NEED SALARY", "TOTAL OT HOURS", "NPS 1%", "CSG 1.5%", "TOTAL DEDUCTION", "ADVANCE", "FINE"].includes(h.toUpperCase());
-                const align = isNumeric ? 'text-end' : (leftAlignCols.includes(h) ? 'text-start' : 'text-center');
+                const isNumeric = [
+                  "BASIC SALARY",
+                  "DAILY BASIC",
+                  "OT AMOUNT",
+                  "HOLIDAY",
+                  "SUNDAY WORK",
+                  "GROS SALARY",
+                  "NEED SALARY",
+                  "TOTAL OT HOURS",
+                  "NPS 1%",
+                  "CSG 1.5%",
+                  "TOTAL DEDUCTION",
+                  "ADVANCE",
+                  "FINE",
+                ].includes(h.toUpperCase());
+                const align = isNumeric
+                  ? "text-end"
+                  : leftAlignCols.includes(h)
+                    ? "text-start"
+                    : "text-center";
 
                 if (h === "TOTAL OT HOURS") val = otHours > 0 ? otHours : "-";
-                else if (h === "OT AMOUNT") val = otAmt > 0 ? otAmt.toFixed(2) : "-";
+                else if (h === "OT AMOUNT")
+                  val = otAmt > 0 ? otAmt.toFixed(2) : "-";
                 else if (h === "NPS 1%") val = nps.toFixed(2);
                 else if (h === "CSG 1.5%") val = csg.toFixed(2);
-                else if (h === "TOTAL DEDUCTION") val = totalDeduction.toFixed(2);
+                else if (h === "TOTAL DEDUCTION")
+                  val = totalDeduction.toFixed(2);
                 else if (h === "GROS SALARY") val = grossSalary.toFixed(2);
                 else if (h === "NEED SALARY") val = needSalary.toFixed(2);
-                else if (typeof val === 'number') val = val.toFixed(2);
-                
+                else if (typeof val === "number") val = val.toFixed(2);
+
                 if (val === undefined || val === null || val === "") val = "-";
 
                 // STATUS কলামের জন্য ব্যাকগ্রাউন্ড কালার কন্ডিশন
                 let cellBg = "";
-                if (h === "STATUS") cellBg = "background-color: #dcfce7; font-weight: 500;"; // হালকা সবুজ (Green-100)
+                if (h === "STATUS")
+                  cellBg = "background-color: #dcfce7; font-weight: 500;"; // হালকা সবুজ (Green-100)
 
                 let cellHtml = `<td class="${align}" style="white-space: nowrap; padding: 4px 8px; ${cellBg}">${val}</td>`;
-                
+
                 if (h === "BASIC SALARY") {
-                    let bg = (holidayAmt > 0 || sundayAmt > 0) ? '#e0f2fe' : '#f0fdf4';
-                    cellHtml += `<td class="text-end" style="background-color: ${bg}; font-weight: bold; white-space: nowrap; padding: 4px 8px;">${dailyBasicDisplay.toFixed(2)}</td>`;
+                  let bg =
+                    holidayAmt > 0 || sundayAmt > 0 ? "#e0f2fe" : "#f0fdf4";
+                  cellHtml += `<td class="text-end" style="background-color: ${bg}; font-weight: bold; white-space: nowrap; padding: 4px 8px;">${dailyBasicDisplay.toFixed(2)}</td>`;
                 }
                 return cellHtml;
-            }).join('')}
+              })
+              .join("")}
             <td class="no-print text-center">
                 <button class="btn btn-warning btn-sm" onclick="openEditModal(${originalIndex})">EDIT</button>
             </td>
         </tr>`;
-    }).join('');
-}
-function renderSummaryView(rows) {
-  const thead = document.getElementById('tableHead');
-  const tbody = document.getElementById('tableBody');
-  const tfoot = document.getElementById('tableFoot');
-  document.getElementById('bodyRoot').classList.add('summary-mode');
-
-  const summary = {};
-  
-  rows.forEach(row => {
-    const id = row[colIndexMap["EMPLOYEE ID"]];
-    if (!id) return;
-
-    if (!summary[id]) {
-      const attDateRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-      let daysInMonth = 30;
-      if (attDateRaw && attDateRaw.getTime() !== 0) {
-        daysInMonth = new Date(attDateRaw.getFullYear(), attDateRaw.getMonth() + 1, 0).getDate();
+          })
+          .join("");
       }
+      function renderSummaryView(rows) {
+        const thead = document.getElementById("tableHead");
+        const tbody = document.getElementById("tableBody");
+        const tfoot = document.getElementById("tableFoot");
+        document.getElementById("bodyRoot").classList.add("summary-mode");
 
-      summary[id] = { 
-        id, 
-        name: row[colIndexMap["EMPLOYEE NAME"]], 
-        mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0, 
-        daysInMonth: daysInMonth,
-        narDays: 0,   // সাধারণ দিন (Normal)
-        sunDays: 0,   // রবিবার (Sunday)
-        holiDays: 0,  // ছুটির দিন (Holiday)
-        totalAtt: 0,  // মোট হাজিরা
-        otHrs: 0, 
-        otRate: parseFloat(row[colIndexMap["OT RATE"]]) || 0, 
-        holAmt: 0, 
-        sunAmt: 0,
-        adv: 0,
-        fine: 0,
-        attBonus: 0,
-        perfBonus: 0
-      };
-    }
+        const summary = {};
 
-    const hAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
-    const sAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
-    const status = (row[colIndexMap["STATUS"]] || "").toString().toUpperCase();
-    const isP = isPresent(status);
+        rows.forEach((row) => {
+          const id = row[colIndexMap["EMPLOYEE ID"]];
+          if (!id) return;
 
-    // উপস্থিতি বিভাজন লজিক
-    if (isP || hAmt > 0 || sAmt > 0) {
-      summary[id].totalAtt += 1;
-      if (hAmt > 0) {
-        summary[id].holiDays += 1;
-        summary[id].holAmt += hAmt;
-      } else if (sAmt > 0) {
-        summary[id].sunDays += 1;
-        summary[id].sunAmt += sAmt;
-      } else {
-        summary[id].narDays += 1;
-      }
-    }
+          if (!summary[id]) {
+            const attDateRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+            let daysInMonth = 30;
+            if (attDateRaw && attDateRaw.getTime() !== 0) {
+              daysInMonth = new Date(
+                attDateRaw.getFullYear(),
+                attDateRaw.getMonth() + 1,
+                0,
+              ).getDate();
+            }
 
-    summary[id].otHrs += parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
-    summary[id].adv += parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
-    summary[id].fine += parseFloat(row[colIndexMap["FINE"]]) || 0;
-    summary[id].attBonus += parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0;
-    summary[id].perfBonus += parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0;
-  });
+            summary[id] = {
+              id,
+              name: row[colIndexMap["EMPLOYEE NAME"]],
+              mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || 0,
+              daysInMonth: daysInMonth,
+              narDays: 0, // সাধারণ দিন (Normal)
+              sunDays: 0, // রবিবার (Sunday)
+              holiDays: 0, // ছুটির দিন (Holiday)
+              totalAtt: 0, // মোট হাজিরা
+              otHrs: 0,
+              otRate: parseFloat(row[colIndexMap["OT RATE"]]) || 0,
+              holAmt: 0,
+              sunAmt: 0,
+              adv: 0,
+              fine: 0,
+              attBonus: 0,
+              perfBonus: 0,
+            };
+          }
 
-  // হেডার ডিজাইন: ATTENDANCE কলামকে ৪ ভাগে ভাগ করা হয়েছে
-   thead.innerHTML = `<tr>
+          const hAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
+          const sAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
+          const status = (row[colIndexMap["STATUS"]] || "")
+            .toString()
+            .toUpperCase();
+          const isP = isPresent(status);
+
+          // উপস্থিতি বিভাজন লজিক
+          if (isP || hAmt > 0 || sAmt > 0) {
+            summary[id].totalAtt += 1;
+            if (hAmt > 0) {
+              summary[id].holiDays += 1;
+              summary[id].holAmt += hAmt;
+            } else if (sAmt > 0) {
+              summary[id].sunDays += 1;
+              summary[id].sunAmt += sAmt;
+            } else {
+              summary[id].narDays += 1;
+            }
+          }
+
+          summary[id].otHrs +=
+            parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
+          summary[id].adv += parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
+          summary[id].fine += parseFloat(row[colIndexMap["FINE"]]) || 0;
+          summary[id].attBonus +=
+            parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0;
+          summary[id].perfBonus +=
+            parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0;
+        });
+
+        // হেডার ডিজাইন: ATTENDANCE কলামকে ৪ ভাগে ভাগ করা হয়েছে
+        thead.innerHTML = `<tr>
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SL</th>
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">ID</th>
     <th rowspan="2" class="text-start" style="position: sticky; top: 0; z-index: 100;">NAME</th>
@@ -584,28 +841,69 @@ function renderSummaryView(rows) {
     <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">CSG 1.5%</th>
     <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">TOTAL DEDUCTION.</th>
   </tr>`;
-  
-  let g_mB=0, g_dB=0, g_nar=0, g_sunD=0, g_holD=0, g_totA=0, g_actB=0, g_otA=0, g_holA=0, g_sunA=0, g_gross=0, g_adv=0, g_fine=0, g_nps=0, g_csg=0, g_tD=0, g_need=0;
-  
-  const sortedSummary = Object.values(summary).sort((a,b) => a.id.toString().localeCompare(b.id.toString(), undefined, {numeric:true}));
 
-  tbody.innerHTML = sortedSummary.map((emp, i) => {
-    const dailyRate = emp.mBasic / emp.daysInMonth;
-    const actB = dailyRate * emp.narDays; // শুধুমাত্র Normal দিনের বেসিক
-    const otA = emp.otHrs * emp.otRate;
-    const gross = actB + otA + emp.holAmt + emp.sunAmt + emp.attBonus + emp.perfBonus;
-    const nps = gross * 0.01;
-    const csg = gross * 0.015;
-    const tDed = emp.adv + emp.fine + nps + csg;
-    const need = gross - tDed;
+        let g_mB = 0,
+          g_dB = 0,
+          g_nar = 0,
+          g_sunD = 0,
+          g_holD = 0,
+          g_totA = 0,
+          g_actB = 0,
+          g_otA = 0,
+          g_holA = 0,
+          g_sunA = 0,
+          g_gross = 0,
+          g_adv = 0,
+          g_fine = 0,
+          g_nps = 0,
+          g_csg = 0,
+          g_tD = 0,
+          g_need = 0;
 
-    // গ্র্যান্ড টোটাল আপডেট
-    g_mB+=emp.mBasic; g_dB+=dailyRate; g_nar+=emp.narDays; g_sunD+=emp.sunDays; g_holD+=emp.holiDays;
-    g_totA+=emp.totalAtt; g_actB+=actB; g_otA+=otA; g_holA+=emp.holAmt; g_sunA+=emp.sunAmt;
-    g_gross+=gross; g_adv+=emp.adv; g_fine+=emp.fine; g_nps+=nps; g_csg+=csg; g_tD+=tDed; g_need+=need;
+        const sortedSummary = Object.values(summary).sort((a, b) =>
+          a.id
+            .toString()
+            .localeCompare(b.id.toString(), undefined, { numeric: true }),
+        );
 
-    return `<tr class="text-center">
-      <td>${i+1}</td>
+        tbody.innerHTML = sortedSummary
+          .map((emp, i) => {
+            const dailyRate = emp.mBasic / emp.daysInMonth;
+            const actB = dailyRate * emp.narDays; // শুধুমাত্র Normal দিনের বেসিক
+            const otA = emp.otHrs * emp.otRate;
+            const gross =
+              actB +
+              otA +
+              emp.holAmt +
+              emp.sunAmt +
+              emp.attBonus +
+              emp.perfBonus;
+            const nps = gross * 0.01;
+            const csg = gross * 0.015;
+            const tDed = emp.adv + emp.fine + nps + csg;
+            const need = gross - tDed;
+
+            // গ্র্যান্ড টোটাল আপডেট
+            g_mB += emp.mBasic;
+            g_dB += dailyRate;
+            g_nar += emp.narDays;
+            g_sunD += emp.sunDays;
+            g_holD += emp.holiDays;
+            g_totA += emp.totalAtt;
+            g_actB += actB;
+            g_otA += otA;
+            g_holA += emp.holAmt;
+            g_sunA += emp.sunAmt;
+            g_gross += gross;
+            g_adv += emp.adv;
+            g_fine += emp.fine;
+            g_nps += nps;
+            g_csg += csg;
+            g_tD += tDed;
+            g_need += need;
+
+            return `<tr class="text-center">
+      <td>${i + 1}</td>
       <td>${emp.id}</td>
       <td class="text-start">${emp.name}</td>
       <td>${emp.mBasic.toFixed(2)}</td>
@@ -627,9 +925,10 @@ function renderSummaryView(rows) {
       <td class="highlight-col">${need.toFixed(2)}</td>
       <td></td>
     </tr>`;
-  }).join('');
-  
-  tfoot.innerHTML = `<tr class="grand-total-row text-center">
+          })
+          .join("");
+
+        tfoot.innerHTML = `<tr class="grand-total-row text-center">
     <td colspan="3" style="font-weight: bold;">GRAND TOTAL:</td>
     <td>${g_mB.toFixed(2)}</td>
     <td>${g_dB.toFixed(2)}</td>
@@ -650,111 +949,196 @@ function renderSummaryView(rows) {
     <td class="highlight-col" style="font-weight: bold;">${g_need.toFixed(2)}</td>
     <td></td>
   </tr>`;
-}
+      }
 
-  function openEditModal(rowIndex) {
-    const row = rawData[rowIndex];
-    document.getElementById('editRowIndex').value = rowIndex;
-    document.getElementById('displayEmpName').innerText = row[colIndexMap["EMPLOYEE NAME"]];
-    document.getElementById('editStatus').value = (row[colIndexMap["STATUS"]] || "PRESENT").toUpperCase();
-    document.getElementById('editOT').value = row[colIndexMap["TOTAL OT HOURS"]] || 0;
-    document.getElementById('editHoliday').value = row[colIndexMap["HOLIDAY"]] || 0;
-    bootstrapModal.show();
-  }
+      function openEditModal(rowIndex) {
+        const row = rawData[rowIndex];
+        document.getElementById("editRowIndex").value = rowIndex;
+        document.getElementById("displayEmpName").innerText =
+          row[colIndexMap["EMPLOYEE NAME"]];
+        document.getElementById("editStatus").value = (
+          row[colIndexMap["STATUS"]] || "PRESENT"
+        ).toUpperCase();
+        document.getElementById("editOT").value =
+          row[colIndexMap["TOTAL OT HOURS"]] || 0;
+        document.getElementById("editHoliday").value =
+          row[colIndexMap["HOLIDAY"]] || 0;
+        bootstrapModal.show();
+      }
 
-  async function saveEdit() {
-    const idx = document.getElementById('editRowIndex').value;
-    const payload = {
-        action: "updateRow",
-        row: parseInt(idx) + 1,
-        updates: { "STATUS": document.getElementById('editStatus').value, "TOTAL OT HOURS": document.getElementById('editOT').value, "HOLIDAY": document.getElementById('editHoliday').value }
-    };
-    bootstrapModal.hide();
-    document.getElementById('loader').style.display = 'block';
-    try {
-      await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify(payload) });
-      loadDataFromAPI();
-    } catch (e) { console.error(e); }
-  }
+      async function saveEdit() {
+        const idx = document.getElementById("editRowIndex").value;
+        const payload = {
+          action: "updateRow",
+          row: parseInt(idx) + 1,
+          updates: {
+            STATUS: document.getElementById("editStatus").value,
+            "TOTAL OT HOURS": document.getElementById("editOT").value,
+            HOLIDAY: document.getElementById("editHoliday").value,
+          },
+        };
+        bootstrapModal.hide();
+        document.getElementById("loader").style.display = "block";
+        try {
+          await fetch(WEB_APP_URL, {
+            method: "POST",
+            body: JSON.stringify(payload),
+          });
+          loadDataFromAPI();
+        } catch (e) {
+          console.error(e);
+        }
+      }
 
-  function handleTypeChange() {
-    const sel = document.getElementById("columnSelector"), valG = document.getElementById("typeValueGroup"), valS = document.getElementById("typeValueSelect");
-    if (sel.value !== "") {
-      valG.style.display = "block";
-      const vals = [...new Set(rawData.slice(1).map(r => (r[colIndexMap[sel.value]] || "").toString().trim()))].filter(v => v && v !== "-");
-      valS.innerHTML = '<option value="">-- All --</option>' + vals.sort().map(v => `<option value="${v}">${v}</option>`).join('');
-      document.getElementById("typeValueLabel").innerText = sel.options[sel.selectedIndex].text + ":";
-    } else valG.style.display = "none";
-    processData();
-  }
+      function handleTypeChange() {
+        const sel = document.getElementById("columnSelector"),
+          valG = document.getElementById("typeValueGroup"),
+          valS = document.getElementById("typeValueSelect");
+        if (sel.value !== "") {
+          valG.style.display = "block";
+          const vals = [
+            ...new Set(
+              rawData
+                .slice(1)
+                .map((r) =>
+                  (r[colIndexMap[sel.value]] || "").toString().trim(),
+                ),
+            ),
+          ].filter((v) => v && v !== "-");
+          valS.innerHTML =
+            '<option value="">-- All --</option>' +
+            vals
+              .sort()
+              .map((v) => `<option value="${v}">${v}</option>`)
+              .join("");
+          document.getElementById("typeValueLabel").innerText =
+            sel.options[sel.selectedIndex].text + ":";
+        } else valG.style.display = "none";
+        processData();
+      }
 
-  function updateStats(filteredRows) {
-    if (!filteredRows || filteredRows.length === 0) {
-      document.getElementById("statEmp").innerText = "0";
-      document.getElementById("statPresent").innerText = "0";
-      return;
-    }
-    const eIdx = colIndexMap["EMPLOYEE ID"];
-    const sIdx = colIndexMap["STATUS"];
-    const isSum = document.getElementById('bodyRoot').classList.contains('summary-mode');
-    let uniqueEmpIds = new Set();
-    filteredRows.forEach(row => { const id = row[eIdx]?.toString().trim(); if (id && id !== "-" && id !== "") uniqueEmpIds.add(id); });
-    let totalAttendance = 0;
-    if (isSum) {
-      const tbody = document.getElementById('tableBody');
-      for (let r of tbody.rows) if (!r.classList.contains('grand-total-row')) totalAttendance += (parseInt(r.cells[5]?.innerText) || 0);
-    } else {
-      filteredRows.forEach(row => { if (isPresent(row[sIdx])) totalAttendance++; });
-    }
-    document.getElementById("statEmp").innerText = uniqueEmpIds.size;
-    document.getElementById("statPresent").innerText = totalAttendance;
-  }
+      function updateStats(filteredRows) {
+        if (!filteredRows || filteredRows.length === 0) {
+          document.getElementById("statEmp").innerText = "0";
+          document.getElementById("statPresent").innerText = "0";
+          return;
+        }
+        const eIdx = colIndexMap["EMPLOYEE ID"];
+        const sIdx = colIndexMap["STATUS"];
+        const isSum = document
+          .getElementById("bodyRoot")
+          .classList.contains("summary-mode");
+        let uniqueEmpIds = new Set();
+        filteredRows.forEach((row) => {
+          const id = row[eIdx]?.toString().trim();
+          if (id && id !== "-" && id !== "") uniqueEmpIds.add(id);
+        });
+        let totalAttendance = 0;
+        if (isSum) {
+          const tbody = document.getElementById("tableBody");
+          for (let r of tbody.rows)
+            if (!r.classList.contains("grand-total-row"))
+              totalAttendance += parseInt(r.cells[5]?.innerText) || 0;
+        } else {
+          filteredRows.forEach((row) => {
+            if (isPresent(row[sIdx])) totalAttendance++;
+          });
+        }
+        document.getElementById("statEmp").innerText = uniqueEmpIds.size;
+        document.getElementById("statPresent").innerText = totalAttendance;
+      }
 
-  function populateStaticFilters(data) {
-    const eSel = document.getElementById('empFilter'), sSel = document.getElementById('sideFilter'), mSide = document.getElementById('matrixSideFilter');
-    const emps = new Map(), sides = new Set();
-    data.slice(1).forEach(r => {
-      if(r[colIndexMap["EMPLOYEE ID"]]) emps.set(r[colIndexMap["EMPLOYEE ID"]].toString().toUpperCase(), r[colIndexMap["EMPLOYEE NAME"]]);
-      if(r[colIndexMap["SIDE NAME"]]) sides.add(r[colIndexMap["SIDE NAME"]].toString().toUpperCase());
-    });
-    const sideOptions = [...sides].sort().map(s=>`<option value="${s}">${s}</option>`).join('');
-    eSel.innerHTML = '<option value="">All Employees</option>' + [...emps.entries()].sort((a,b)=>a[0].localeCompare(b[0],undefined,{numeric:true})).map(([id,name])=>`<option value="${id}">${id} | ${name}</option>`).join('');
-    sSel.innerHTML = '<option value="">All Projects</option>' + sideOptions;
-    mSide.innerHTML = '<option value="">All Projects</option>' + sideOptions;
-  }
+      function populateStaticFilters(data) {
+        const eSel = document.getElementById("empFilter"),
+          sSel = document.getElementById("sideFilter"),
+          mSide = document.getElementById("matrixSideFilter");
+        const emps = new Map(),
+          sides = new Set();
+        data.slice(1).forEach((r) => {
+          if (r[colIndexMap["EMPLOYEE ID"]])
+            emps.set(
+              r[colIndexMap["EMPLOYEE ID"]].toString().toUpperCase(),
+              r[colIndexMap["EMPLOYEE NAME"]],
+            );
+          if (r[colIndexMap["SIDE NAME"]])
+            sides.add(r[colIndexMap["SIDE NAME"]].toString().toUpperCase());
+        });
+        const sideOptions = [...sides]
+          .sort()
+          .map((s) => `<option value="${s}">${s}</option>`)
+          .join("");
+        eSel.innerHTML =
+          '<option value="">All Employees</option>' +
+          [...emps.entries()]
+            .sort((a, b) =>
+              a[0].localeCompare(b[0], undefined, { numeric: true }),
+            )
+            .map(
+              ([id, name]) => `<option value="${id}">${id} | ${name}</option>`,
+            )
+            .join("");
+        sSel.innerHTML = '<option value="">All Projects</option>' + sideOptions;
+        mSide.innerHTML =
+          '<option value="">All Projects</option>' + sideOptions;
+      }
 
- function parseDate(s) {
-    if (!s || s.toString().trim() === "" || s === "-") return new Date(0);
-    if (s instanceof Date) return s;
+      function parseDate(s) {
+        if (!s || s.toString().trim() === "" || s === "-") return new Date(0);
+        if (s instanceof Date) return s;
 
-    let dateString = s.toString().trim().replace(/\//g, '-');
-    const parts = dateString.split('-');
+        let dateString = s.toString().trim().replace(/\//g, "-");
+        const parts = dateString.split("-");
 
-    if (parts.length === 3) {
-      if (parts[0].length === 4) return new Date(parts[0], parts[1] - 1, parts[2]); // YYYY-MM-DD
-      if (parts[2].length === 4) return new Date(parts[2], parts[1] - 1, parts[0]); // DD-MM-YYYY
-    }
-    const finalDate = new Date(dateString);
-    return isNaN(finalDate.getTime()) ? new Date(0) : finalDate;
-  }
-  
-  function refreshData() { loadDataFromAPI(); }
-  function resetFilters() { document.getElementById("searchInput").value=""; if(startPicker) startPicker.clear(); if(endPicker) endPicker.clear(); document.getElementById("empFilter").value=""; document.getElementById("sideFilter").value=""; document.getElementById("columnSelector").value=""; document.getElementById("typeValueGroup").style.display="none"; processData(); }
+        if (parts.length === 3) {
+          if (parts[0].length === 4)
+            return new Date(parts[0], parts[1] - 1, parts[2]); // YYYY-MM-DD
+          if (parts[2].length === 4)
+            return new Date(parts[2], parts[1] - 1, parts[0]); // DD-MM-YYYY
+        }
+        const finalDate = new Date(dateString);
+        return isNaN(finalDate.getTime()) ? new Date(0) : finalDate;
+      }
 
-  function openPreview() {
-    const start = document.getElementById("startDate").value || "N/A";
-    const end = document.getElementById("endDate").value || "N/A";
-    const emp = document.getElementById("empFilter").options[document.getElementById("empFilter").selectedIndex].text;
-    const side = document.getElementById("sideFilter").options[document.getElementById("sideFilter").selectedIndex].text;
-    const filterType = document.getElementById("columnSelector").options[document.getElementById("columnSelector").selectedIndex].text;
-    const filterVal = document.getElementById("typeValueSelect")?.options[document.getElementById("typeValueSelect")?.selectedIndex]?.text || "None";
-    
-    const tableHeader = document.getElementById('tableHead').innerHTML;
-    const tableBody = document.getElementById('tableBody').innerHTML;
-    const tableFoot = document.getElementById('tableFoot').innerHTML;
-    
-    const previewWindow = window.open('', '_blank');
-    previewWindow.document.write(`
+      function refreshData() {
+        loadDataFromAPI();
+      }
+      function resetFilters() {
+        document.getElementById("searchInput").value = "";
+        if (startPicker) startPicker.clear();
+        if (endPicker) endPicker.clear();
+        document.getElementById("empFilter").value = "";
+        document.getElementById("sideFilter").value = "";
+        document.getElementById("columnSelector").value = "";
+        document.getElementById("typeValueGroup").style.display = "none";
+        processData();
+      }
+
+      function openPreview() {
+        const start = document.getElementById("startDate").value || "N/A";
+        const end = document.getElementById("endDate").value || "N/A";
+        const emp =
+          document.getElementById("empFilter").options[
+            document.getElementById("empFilter").selectedIndex
+          ].text;
+        const side =
+          document.getElementById("sideFilter").options[
+            document.getElementById("sideFilter").selectedIndex
+          ].text;
+        const filterType =
+          document.getElementById("columnSelector").options[
+            document.getElementById("columnSelector").selectedIndex
+          ].text;
+        const filterVal =
+          document.getElementById("typeValueSelect")?.options[
+            document.getElementById("typeValueSelect")?.selectedIndex
+          ]?.text || "None";
+
+        const tableHeader = document.getElementById("tableHead").innerHTML;
+        const tableBody = document.getElementById("tableBody").innerHTML;
+        const tableFoot = document.getElementById("tableFoot").innerHTML;
+
+        const previewWindow = window.open("", "_blank");
+        previewWindow.document.write(`
       <html>
         <head>
           <title>Salary Report Preview</title>
@@ -866,7 +1250,7 @@ function renderSummaryView(rows) {
              </div>
              <div class="meta-item">
                 <span class="meta-label">Active Filter</span>
-                <span class="meta-value">${filterType !== 'None' ? filterType + ': ' + filterVal : 'No Filter'}</span>
+                <span class="meta-value">${filterType !== "None" ? filterType + ": " + filterVal : "No Filter"}</span>
              </div>
           </div>
 
@@ -883,85 +1267,115 @@ function renderSummaryView(rows) {
             <tfoot>${tableFoot}</tfoot>
           </table>
 
-          <div class="signature-section">
-            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Prepared By</div>
-            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Manager Signature</div>
-            <div style="border-top:1.5px solid #000; width:180px; text-align:center; font-weight:bold; font-size:11px; padding-top:5px;">Authorized Signature</div>
+          <div style="margin-top: 40px; display: flex; justify-content: space-between; padding: 0 40px;">
+            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Prepared By</div>
+            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Authorized Signature</div>
           </div>
         </body>
       </html>
     `);
-    previewWindow.document.close();
-  }
-  
+        previewWindow.document.close();
+      }
 
-  function showAttendanceFilter() { matrixModal.show(); }
- function generateFilteredAttendanceSheet() {
-    const monthInput = document.getElementById('matrixMonth').value;
-    const sideFilter = document.getElementById('matrixSideFilter').value;
-    if (!monthInput) { alert("Please select a month."); return; }
-
-    const [year, month0] = monthInput.split('-').map(Number);
-    const month = month0 - 1;
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const dateRange = [];
-    for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) dateRange.push(new Date(d));
-
-    // ১. পাবলিক হলিডে শনাক্ত করা
-    const publicHolidayDates = new Set();
-    rawData.slice(1).forEach(row => {
-        const dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-        const rem = (row[colIndexMap["REMARK"]] || "").toString().toUpperCase();
-        if (dRaw && (rem.includes("HOLIDAY") || rem.includes("PUBLIC HOLIDAY"))) {
-            publicHolidayDates.add(dRaw.toISOString().split('T')[0]);
+      function showAttendanceFilter() {
+        matrixModal.show();
+      }
+      function generateFilteredAttendanceSheet() {
+        const monthInput = document.getElementById("matrixMonth").value;
+        const sideFilter = document.getElementById("matrixSideFilter").value;
+        if (!monthInput) {
+          alert("Please select a month.");
+          return;
         }
-    });
 
-    const now = new Date();
-    const printDateTime = now.toLocaleString('en-GB', { 
-        day: '2-digit', month: 'short', year: 'numeric', 
-        hour: '2-digit', minute: '2-digit', hour12: true 
-    });
+        const [year, month0] = monthInput.split("-").map(Number);
+        const month = month0 - 1;
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const dateRange = [];
+        for (
+          let d = new Date(firstDay);
+          d <= lastDay;
+          d.setDate(d.getDate() + 1)
+        )
+          dateRange.push(new Date(d));
 
-    const attendanceMap = {}, employees = {};
-    rawData.slice(1).forEach(row => {
-        const id = row[colIndexMap["EMPLOYEE ID"]], dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-        const rSide = (row[colIndexMap["SIDE NAME"]] || "").toString().toUpperCase();
-        if (!id || !dRaw) return;
-        if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
+        const publicHolidayDates = new Set();
+        rawData.slice(1).forEach((row) => {
+          const dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+          const rem = (row[colIndexMap["REMARK"]] || "")
+            .toString()
+            .toUpperCase();
+          if (
+            dRaw &&
+            (rem.includes("HOLIDAY") || rem.includes("PUBLIC HOLIDAY"))
+          ) {
+            publicHolidayDates.add(dRaw.toISOString().split("T")[0]);
+          }
+        });
+
+        const now = new Date();
+        const printDateTime = now.toLocaleString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        const attendanceMap = {},
+          employees = {};
+        rawData.slice(1).forEach((row) => {
+          const id = row[colIndexMap["EMPLOYEE ID"]],
+            dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+          const rSide = (row[colIndexMap["SIDE NAME"]] || "")
+            .toString()
+            .toUpperCase();
+          if (!id || !dRaw) return;
+          if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
             if (sideFilter && rSide !== sideFilter.toUpperCase()) return;
-            const dateStr = dRaw.toISOString().split('T')[0];
-            if (!employees[id]) employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
+            const dateStr = dRaw.toISOString().split("T")[0];
+            if (!employees[id])
+              employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
             if (!attendanceMap[id]) attendanceMap[id] = {};
-            let st = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
-            
-            let shortStat = '-';
-            if (isPresent(st)) shortStat = 'P';
-            else if (st.startsWith('A')) shortStat = 'A';
-            else if (st.startsWith('L')) shortStat = 'L';
-            else if (st.startsWith('H')) shortStat = 'H';
+            let st = (row[colIndexMap["STATUS"]] || "")
+              .toString()
+              .trim()
+              .toUpperCase();
+
+            let shortStat = "-";
+            if (isPresent(st)) shortStat = "P";
+            else if (st.startsWith("A")) shortStat = "A";
+            else if (st.startsWith("L")) shortStat = "L";
+            else if (st.startsWith("H")) shortStat = "H";
             attendanceMap[id][dateStr] = shortStat;
-        }
-    });
+          }
+        });
 
-    const monthName = firstDay.toLocaleString('default', { month: 'long' });
-    const sortedIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
-    if (sortedIds.length === 0) { alert("No data found for the selected criteria."); return; }
+        const monthName = firstDay.toLocaleString("default", { month: "long" });
+        const sortedIds = Object.keys(employees).sort((a, b) =>
+          a.localeCompare(b, undefined, { numeric: true }),
+        );
 
-    const displaySideName = sideFilter ? ` - ${sideFilter.toUpperCase()}` : " - ALL PROJECT";
+        let dayTotalsP = Array(dateRange.length).fill(0);
+        let dayTotalsSun = Array(dateRange.length).fill(0);
+        let dayTotalsHol = Array(dateRange.length).fill(0);
+        let dayTotalsA = Array(dateRange.length).fill(0);
+        let grandTotalP = 0,
+          grandTotalA = 0,
+          grandTotalSun = 0,
+          grandTotalHol = 0;
 
-    matrixModal.hide();
-
-    // টেবিল হেডার
-    const tableHeader = `<thead>
+        // টেবিল হেডার জেনারেশন
+        const tableHeader = `<thead>
       <tr style="height: 22px;">
         <th rowspan="2" style="width:20px; padding: 1px;">SL</th>
         <th rowspan="2" style="width:160px; padding: 1px;">EMPLOYEE ID & Name</th>
         <th colspan="${dateRange.length}" style="padding: 0 10px; font-size: 11px;">
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                <div style="flex: 1;"></div> <div style="flex: 2; text-align: center; font-weight: bold;">
-                    Attendance Summary: ${monthName} ${year}${displaySideName}
+                <div style="flex: 2; text-align: center; font-weight: bold;">
+                    Attendance Summary: ${monthName} ${year}${sideFilter ? ` - ${sideFilter.toUpperCase()}` : " - ALL PROJECT"}
                 </div>
                 <div style="flex: 1; text-align: right; font-size: 9px; font-weight: normal;">
                     Printed on: ${printDateTime}
@@ -971,31 +1385,37 @@ function renderSummaryView(rows) {
         <th colspan="4" style="background:#0d685b; padding: 1px; font-size: 10px;">SUMMARY</th>
       </tr>
       <tr style="height: 35px;">
-        ${dateRange.map(d => {
-            const dayName = d.toLocaleDateString('en-US', { weekday: 'short' }).substring(0, 2);
-            const dateStr = d.toISOString().split('T')[0];
+        ${dateRange
+          .map((d) => {
+            const dayName = d
+              .toLocaleDateString("en-US", { weekday: "short" })
+              .substring(0, 2);
             const isSun = d.getDay() === 0;
-            const isPubHol = publicHolidayDates.has(dateStr);
-            
-            // রবিবারের জন্য ব্যাকগ্রাউন্ড সাদা কিন্তু টেক্সট লাল
-            let headerStyle = isSun ? 'background:#fff; color:red;' : (isPubHol ? 'background:#fff; color:red;' : '');
-            
+            const isPubHol = publicHolidayDates.has(
+              d.toISOString().split("T")[0],
+            );
+
+            // হেডার ব্যাকগ্রাউন্ড সাধারণ দিনের মতোই নীল থাকবে, শুধু টেক্সট লাল হবে
+            let headerStyle =
+              isSun || isPubHol ? "color: #ff4d4d !important;" : "";
+
             let headerContent = `<div style="line-height: 1;">${d.getDate()}<br><span style="font-size:7px">${dayName}</span></div>`;
-            
+
             if (isPubHol) {
-                headerContent = `
+              headerContent = `
                 <div class="holiday-box" style="width: 25px; height: 25px;">
                     <svg viewBox="0 0 100 100" class="holiday-svg">
-                        <circle cx="50" cy="50" r="47" class="outer-circle" />
+                        <circle cx="50" cy="50" r="47" style="fill: none; stroke: #ff4d4d; stroke-width: 6;" />
                         <path id="curve${d.getDate()}" d="M 15,55 A 35,35 0 0,1 85,55" fill="transparent" />
-                        <text class="curve-text" style="font-size: 16px;"><textPath xlink:href="#curve${d.getDate()}" startOffset="50%" text-anchor="middle">Public Holiday</textPath></text>
-                        <text x="50" y="62" class="date-text" style="font-size: 40px;">${d.getDate()}</text>
-                        <text x="50" y="88" class="day-text" style="font-size: 24px;">${dayName}</text>
+                        <text style="fill: #ff4d4d; font-weight: 900; font-size: 16px;"><textPath xlink:href="#curve${d.getDate()}" startOffset="50%" text-anchor="middle">Holiday</textPath></text>
+                        <text x="50" y="62" style="fill: #ff4d4d; font-weight: bold; text-anchor: middle; font-size: 40px;">${d.getDate()}</text>
+                        <text x="50" y="88" style="fill: #ff4d4d; font-weight: bold; text-anchor: middle; font-size: 24px;">${dayName}</text>
                     </svg>
                 </div>`;
             }
             return `<th style="width:25px; padding: 1px 0; vertical-align: middle; ${headerStyle}">${headerContent}</th>`;
-        }).join('')}
+          })
+          .join("")}
         <th style="width:25px; background:#198754; padding: 1px;">P</th>
         <th style="width:25px; background:#dc3545; padding: 1px;">A</th>
         <th style="width:25px; background:#ffc107; color:#000; padding: 1px;">SUN</th>
@@ -1003,56 +1423,89 @@ function renderSummaryView(rows) {
       </tr>
     </thead>`;
 
-    let dayTotals = Array(dateRange.length).fill(0);
-    let grandTotalP = 0, grandTotalA = 0, grandTotalSun = 0, grandTotalHol = 0;
+        // টেবিল বডি জেনারেশন
+        const tableBody = sortedIds
+          .map((id, idx) => {
+            let countP = 0,
+              countA = 0,
+              countSun = 0,
+              countHol = 0;
+            const daysHtml = dateRange
+              .map((d, dIdx) => {
+                const ds = d.toISOString().split("T")[0];
+                const isSunday = d.getDay() === 0;
+                const isPubHol = publicHolidayDates.has(ds);
+                let stat =
+                  attendanceMap[id] && attendanceMap[id][ds]
+                    ? attendanceMap[id][ds]
+                    : "-";
 
-    // টেবিল বডি
-    const tableBody = sortedIds.map((id, idx) => {
-        let countP = 0, countA = 0, countSun = 0, countHol = 0;
-        const daysHtml = dateRange.map((d, dIdx) => {
-            const ds = d.toISOString().split('T')[0];
-            const isSunday = d.getDay() === 0;
-            const isPubHol = publicHolidayDates.has(ds);
-            let stat = attendanceMap[id] && attendanceMap[id][ds] ? attendanceMap[id][ds] : '-';
-            
-            // ডাটা আপডেট
-            if (stat === 'P') { 
-                countP++; 
-                dayTotals[dIdx]++; 
-                if (isSunday) countSun++; 
-                if (isPubHol) countHol++; 
-            }
-            if (stat === 'A') countA++;
+                if (stat === "P") {
+                  if (isSunday) {
+                    dayTotalsSun[dIdx]++;
+                    countSun++;
+                  } else if (isPubHol) {
+                    dayTotalsHol[dIdx]++;
+                    countHol++;
+                  } else {
+                    dayTotalsP[dIdx]++;
+                    countP++;
+                  }
+                }
+                if (stat === "A") {
+                  dayTotalsA[dIdx]++;
+                  countA++;
+                }
 
-            // কন্ডিশনাল স্টাইলিং: রবিবারের জন্য ব্যাকগ্রাউন্ড অন্যগুলোর মতোই
-            if (isSunday) {
-                return `<td style="color:red; font-weight:bold;">${stat !== '-' ? stat : ''}</td>`;
-            }
-            
-            // পাবলিক হলিডের জন্য (চাইলে এখানে ব্যাকগ্রাউন্ড রাখতে পারেন)
-            if (isPubHol) {
-                return `<td style="background-color: #fffafa; color:red; font-weight:bold;">${stat !== '-' ? stat : ''}</td>`;
-            }
+                // বডি কলাম স্টাইল: হালকা লাল ব্যাকগ্রাউন্ড এবং গাঢ় লাল টেক্সট
+                if (isSunday || isPubHol) {
+                  return `<td style="background-color: #fff0f0; color: #cc0000; font-weight:bold; border: 1px solid #000;">${stat !== "-" ? stat : ""}</td>`;
+                }
 
-            // সাধারণ দিনের জন্য
-            if (stat === 'P') return `<td>P</td>`;
-            if (stat === 'A') return `<td style="color:red">A</td>`;
-            if (stat === 'H' || stat === 'L') return `<td style="color:green">${stat}</td>`;
-            return `<td></td>`;
-        }).join('');
+                if (stat === "P") return `<td>P</td>`;
+                if (stat === "A") return `<td style="color:red">A</td>`;
+                if (stat === "H" || stat === "L")
+                  return `<td style="color:green">${stat}</td>`;
+                return `<td></td>`;
+              })
+              .join("");
 
-        grandTotalP += countP; grandTotalA += countA; grandTotalSun += countSun; grandTotalHol += countHol;
-        return `<tr><td>${idx + 1}</td><td class="text-start">${id} - ${employees[id]}</td>${daysHtml}<td style="font-weight:bold; background:#e6fffa">${countP}</td><td style="font-weight:bold; background:#fff0f0">${countA}</td><td style="font-weight:bold; background:#fff9e6">${countSun}</td><td style="font-weight:bold; background:#f8f9fa">${countHol}</td></tr>`;
-    }).join('');
+            grandTotalP += countP;
+            grandTotalA += countA;
+            grandTotalSun += countSun;
+            grandTotalHol += countHol;
+            return `<tr><td>${idx + 1}</td><td class="text-start">${id} - ${employees[id]}</td>${daysHtml}
+                <td style="font-weight:bold; background:#e6fffa">${countP}</td>
+                <td style="font-weight:bold; background:#fff0f0">${countA}</td>
+                <td style="font-weight:bold; background:#fff9e6">${countSun}</td>
+                <td style="font-weight:bold; background:#f8f9fa">${countHol}</td></tr>`;
+          })
+          .join("");
 
-    const tableFooter = `<tfoot><tr style="background:#f0f4f8; font-weight:bold; height: 18px;"><td colspan="2" class="text-end" style="padding: 1px 5px;">DAILY TOTAL (P):</td>${dayTotals.map(t => `<td style="padding: 1px;">${t || ''}</td>`).join('')}<td style="background:#e6fffa; padding: 1px;">${grandTotalP}</td><td style="background:#fff0f0; padding: 1px;">${grandTotalA}</td><td style="background:#fff9e6; padding: 1px;">${grandTotalSun}</td><td style="background:#f8f9fa; padding: 1px;">${grandTotalHol}</td></tr></tfoot>`;
+        const tableFooter = `<tr>
+            <td colspan="2" style="text-align:left; padding: 4px 8px; font-weight: bold; background: #f3f4f6;">DAILY TOTAL</td>
+            ${dayTotalsP
+              .map((p, idx) => {
+                const pVal = dayTotalsP[idx];
+                const sunVal = dayTotalsSun[idx];
+                const holVal = dayTotalsHol[idx];
+                const allP = pVal + sunVal + holVal;
+                return `<td style="text-align:center; font-weight: bold; background: #f8f9fa; font-size:9px;">${allP}</td>`;
+              })
+              .join("")}
+            <td style="font-weight: bold; background: #e6fffa;">${grandTotalP}</td>
+            <td style="font-weight: bold; background: #fff0f0;">${grandTotalA}</td>
+            <td style="font-weight: bold; background: #fff9e6;">${grandTotalSun}</td>
+            <td style="font-weight: bold; background: #f8f9fa;">${grandTotalHol}</td>
+          </tr>`;
 
-    const preview = window.open('', '_blank');
-    preview.document.write(`
+        // ... (বাকি ক্যালকুলেশন আগের মতোই)
+
+        const preview = window.open("", "_blank");
+        preview.document.write(`
       <html>
         <head>
           <title>Attendance Summary</title>
-          <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
           <style>
             @page { size: A4 landscape; margin: 5mm; }
             body { font-family: sans-serif; padding: 10px; margin: 0; zoom: 1.4; }
@@ -1067,6 +1520,11 @@ function renderSummaryView(rows) {
             .date-text { fill: red; font-weight: bold; text-anchor: middle; }
             .day-text { fill: red; font-weight: bold; text-anchor: middle; }
             .text-start { text-align: left; padding-left: 5px; white-space: nowrap; overflow: hidden; }
+            .signature-section { display: flex; justify-content: space-between; margin-top: 30px; gap: 10px; flex-wrap: wrap; }
+            .signature-card { flex: 1 1 130px; min-width: 140px; max-width: 180px; padding-top: 22px; border-top: 1px solid #000; text-align: center; font-weight: bold; font-size: 12px; }
+            .summary-small-table { margin-top: 18px; border-collapse: collapse; }
+            .summary-small-table th, .summary-small-table td { border: 1px solid #000; padding: 6px 10px; font-size: 11px; }
+            .summary-small-table th { background: #f2f2f2; }
             .no-print { position: fixed; top: 10px; right: 10px; padding: 10px; background: #000; color: #fff; border-radius: 5px; cursor: pointer; z-index: 1000; }
             @media print { body { zoom: 1.0; } th, td { font-size: 8.5px; } .no-print { display: none; } }
           </style>
@@ -1074,37 +1532,27 @@ function renderSummaryView(rows) {
         <body>
           <button class="no-print" onclick="window.print()">Print Report</button>
           <h1 class="company-name">ALAMHOW CO LTD</h1>
-          <table>${tableHeader}<tbody>${tableBody}</tbody>${tableFooter}</table>
-          <div style="margin-top: 15px;">
+          <table>${tableHeader}<tbody>${tableBody}</tbody><tfoot>${tableFooter}</tfoot></table>
+          <div style="margin-top: 15px; display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start;">
             <table style="width: auto; min-width: 220px;">
-              <thead><tr><th colspan="2" style="padding: 2px; height: 18px;">OVERALL SUMMARY</th></tr></thead>
+              <thead><tr><th colspan="2" style="padding: 2px; height: 18px;">PRESENT SUMMARY</th></tr></thead>
               <tbody>
-                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold;">Total Present (P)</td><td style="font-weight:bold; width:60px;">${grandTotalP}</td></tr>
-                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold; color:red;">Total Absent (A)</td><td style="font-weight:bold; color:red;">${grandTotalA}</td></tr>
-                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold; color:#b58900;">Total Sundays (S)</td><td style="font-weight:bold; color:#b58900;">${grandTotalSun}</td></tr>
-                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold;">Total Holidays (HOL)</td><td style="font-weight:bold;">${grandTotalHol}</td></tr>
+                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold;">Total Normal Working Days</td><td style="font-weight:bold; width:60px;">${grandTotalP}</td></tr>
+                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold; color:#b58900;">Total Sunday Working Days</td><td style="font-weight:bold; color:#b58900;">${grandTotalSun}</td></tr>
+                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold;">Total Holiday Working Days</td><td style="font-weight:bold;">${grandTotalHol}</td></tr>
+                <tr><td style="text-align:left; padding:2px 10px; font-weight:bold; color:red;">Total Absent </td><td style="font-weight:bold; color:red;">${grandTotalA}</td></tr>
               </tbody>
             </table>
           </div>
-          <div style="margin-top: 40px; display: flex; justify-content: space-between; padding: 0 40px;">
+           <div style="margin-top: 40px; display: flex; justify-content: space-between; padding: 0 40px;">
             <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Prepared By</div>
             <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Authorized Signature</div>
           </div>
         </body>
       </html>
     `);
-    
-    preview.document.close();
-    setTimeout(() => {
-        const monthInputEl = document.getElementById('matrixMonth');
-        const idInputEl = document.getElementById('matrixIdFilter');
-        const sideInputEl = document.getElementById('matrixSideFilter');
-
-        if(monthInputEl) monthInputEl.value = "";
-        if(idInputEl) idInputEl.value = "";
-        if(sideInputEl) sideInputEl.value = "";
-    }, 300);
-}
-</script>
-</body>
+        preview.document.close();
+      }
+    </script>
+  </body>
 </html>
