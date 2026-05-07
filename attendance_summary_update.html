@@ -391,10 +391,176 @@
     <script>
       const WEB_APP_URL =
         "https://script.google.com/macros/s/AKfycbxUTUqS8NS7nARLXSr_tbkoBnsmcxeGnOCSSmL4d1ZHxvg4PwlYiFpwMxGoy9XwJRuF1g/exec";
+      const OT_SHEET_ID = "1CaMe4R9hSLRO1NAiM7trz6jtFapSu63jORYdWMjkF8o";
+      const OT_SHEET_NAME = "OVER TIME";
       let rawData = [];
       let colIndexMap = {};
+      let globalOTMap = {};
+      let globalOTHeaderMap = {};
       const DAYS_IN_MONTH = 30;
       let startPicker, endPicker, matrixPicker, bootstrapModal, matrixModal;
+
+      function normalizeDateKey(dateValue) {
+        const date = parseDate(dateValue);
+        if (!date || date.getTime() === 0) return "";
+        return `${date.getFullYear()}-${(date.getMonth() + 1)
+          .toString()
+          .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+      }
+
+      function parseGvizSheet(text) {
+        const start = text.indexOf("(") + 1;
+        const end = text.lastIndexOf(")");
+        const json = text.substring(start, end);
+        return JSON.parse(json);
+      }
+
+      function sheetToArray(gvizObject) {
+        const cols = gvizObject.table.cols.map((c) =>
+          (c.label || c.id || "").toString().trim().toUpperCase(),
+        );
+        const rows = gvizObject.table.rows.map((r) =>
+          r.c.map((cell) => (cell && cell.v !== undefined ? cell.v : "")),
+        );
+        return [cols, ...rows];
+      }
+
+      function buildOTMap(otRows) {
+        if (!Array.isArray(otRows) || otRows.length < 2) return {};
+        const headers = otRows[0].map((h) => h.toString().trim().toUpperCase());
+        const idIndex = headers.findIndex((h) =>
+          ["EMPLOYEE ID", "ID", "EMPLOYEEID", "WORKER ID"].includes(h),
+        );
+        const dateIndex = headers.findIndex((h) =>
+          ["OT DATE", "DATE", "ATTENDANCE DATE", "WORK DATE"].includes(h),
+        );
+        const otIndex = headers.findIndex((h) =>
+          ["TOTAL OT HOURS", "OT HOURS", "OVERTIME", "OT"].includes(h),
+        );
+        const otRateIndex = headers.findIndex((h) =>
+          ["OT RATE", "OVERTIME RATE", "RATE"].includes(h),
+        );
+        const nameIndex = headers.findIndex((h) =>
+          ["EMPLOYEE NAME", "NAME", "WORKER NAME", "EMPLOYEE"].includes(h),
+        );
+        const designationIndex = headers.findIndex((h) =>
+          ["DESIGNATION", "ROLE", "POSITION"].includes(h),
+        );
+        const passportIndex = headers.findIndex((h) =>
+          ["PASSPORT", "PASSPORT NO", "PASSPORT NUMBER"].includes(h),
+        );
+        globalOTHeaderMap = {
+          idIndex,
+          dateIndex,
+          otIndex,
+          otRateIndex,
+          nameIndex,
+          designationIndex,
+          passportIndex,
+        };
+        if (idIndex === -1 || dateIndex === -1 || otIndex === -1) return {};
+
+        return otRows.slice(1).reduce((map, row) => {
+          const id = (row[idIndex] || "").toString().trim().toUpperCase();
+          const dateKey = normalizeDateKey(row[dateIndex]);
+          const hours = parseFloat(row[otIndex]) || 0;
+          const otRate =
+            globalOTHeaderMap.otRateIndex !== -1
+              ? parseFloat(row[globalOTHeaderMap.otRateIndex]) || 0
+              : 0;
+          if (!id || !dateKey || hours === 0) return map;
+          const key = `${id}_${dateKey}`;
+          if (!map[key]) map[key] = { hours: 0, otRate: 0, row };
+          map[key].hours += hours;
+          if (otRate > 0) map[key].otRate = otRate;
+          return map;
+        }, {});
+      }
+
+      async function loadOTData() {
+        if (!OT_SHEET_ID) return;
+        const otUrl = `https://docs.google.com/spreadsheets/d/${OT_SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(
+          OT_SHEET_NAME,
+        )}`;
+        try {
+          const response = await fetch(otUrl);
+          const text = await response.text();
+          const gviz = parseGvizSheet(text);
+          const array = sheetToArray(gviz);
+          globalOTMap = buildOTMap(array);
+        } catch (error) {
+          console.warn("Failed to load OT sheet:", error);
+          globalOTMap = {};
+        }
+      }
+
+      function applyOTToMainData() {
+        if (!rawData || rawData.length < 2) return;
+        const totalOtIndex = colIndexMap["TOTAL OT HOURS"];
+        const dateIndex =
+          colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
+        const idIndex = colIndexMap["EMPLOYEE ID"];
+        if (totalOtIndex === undefined || idIndex === undefined) return;
+
+        const otRateIndexMain = colIndexMap["OT RATE"];
+        const usedKeys = new Set();
+        rawData.slice(1).forEach((row) => {
+          const id = (row[idIndex] || "").toString().trim().toUpperCase();
+          const dateValue = row[dateIndex] || row[colIndexMap["ISSUE DATE"]];
+          const dateKey = normalizeDateKey(dateValue);
+          if (!id || !dateKey) return;
+          const key = `${id}_${dateKey}`;
+          const otEntry = globalOTMap[key];
+          if (otEntry) {
+            row[totalOtIndex] = otEntry.hours;
+            if (
+              otRateIndexMain !== undefined &&
+              (!row[otRateIndexMain] ||
+                row[otRateIndexMain].toString().trim() === "") &&
+              otEntry.otRate
+            ) {
+              row[otRateIndexMain] = otEntry.otRate;
+            }
+            usedKeys.add(key);
+          }
+        });
+
+        const nameIndex = colIndexMap["EMPLOYEE NAME"];
+        const designationIndex = colIndexMap["DESIGNATION"];
+        const passportIndex = colIndexMap["PASSPORT NO"];
+
+        Object.entries(globalOTMap).forEach(([key, otEntry]) => {
+          if (usedKeys.has(key)) return;
+          const sepIndex = key.lastIndexOf("_");
+          const id = sepIndex > 0 ? key.slice(0, sepIndex) : key;
+          const dateStr = sepIndex > 0 ? key.slice(sepIndex + 1) : "";
+          const newRow = Array(rawData[0].length).fill("");
+          newRow[idIndex] = id;
+          newRow[dateIndex] = dateStr;
+          newRow[totalOtIndex] = otEntry.hours;
+          if (otRateIndexMain !== undefined && otEntry.otRate) {
+            newRow[otRateIndexMain] = otEntry.otRate;
+          }
+          if (nameIndex !== undefined && globalOTHeaderMap.nameIndex !== -1) {
+            newRow[nameIndex] = otEntry.row[globalOTHeaderMap.nameIndex] || "";
+          }
+          if (
+            designationIndex !== undefined &&
+            globalOTHeaderMap.designationIndex !== -1
+          ) {
+            newRow[designationIndex] =
+              otEntry.row[globalOTHeaderMap.designationIndex] || "";
+          }
+          if (
+            passportIndex !== undefined &&
+            globalOTHeaderMap.passportIndex !== -1
+          ) {
+            newRow[passportIndex] =
+              otEntry.row[globalOTHeaderMap.passportIndex] || "";
+          }
+          rawData.push(newRow);
+        });
+      }
 
       const leftAlignCols = ["EMPLOYEE NAME", "DESIGNATION", "PROJECT NAME"];
 
@@ -473,7 +639,9 @@
           if (!data || data.length === 0) return;
           rawData = data;
           mapSheetColumns(data[0]);
-          populateStaticFilters(data);
+          await loadOTData();
+          applyOTToMainData();
+          populateStaticFilters(rawData);
           document.getElementById("loader").style.display = "none";
           processData();
         } catch (error) {
@@ -616,20 +784,24 @@
           .map((row, idx) => {
             const originalIndex = rawData.indexOf(row);
             const reverseSerial = rows.length - idx;
-            const empId = row[colIndexMap["EMPLOYEE ID"]];
-            const attDateRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+            const empId = (row[colIndexMap["EMPLOYEE ID"]] || "")
+              .toString()
+              .trim()
+              .toUpperCase();
+            const dateValue =
+              row[colIndexMap["ATTENDANCE DATE"]] ||
+              row[colIndexMap["ISSUE DATE"]];
+            const attDateRaw = parseDate(dateValue);
 
             let otHours = 0;
             if (empId && attDateRaw && typeof globalOTMap !== "undefined") {
-              const y = attDateRaw.getFullYear(),
-                m = attDateRaw.getMonth() + 1,
-                d = attDateRaw.getDate();
-              const key1 = `${empId}_${y}-${m}-${d}`,
-                key2 = `${empId}_${y}-${m.toString().padStart(2, "0")}-${d.toString().padStart(2, "0")}`;
-              otHours =
-                parseFloat(globalOTMap[key1] || globalOTMap[key2]) ||
-                parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) ||
-                0;
+              const key = `${empId}_${normalizeDateKey(attDateRaw)}`;
+              const otEntry = globalOTMap[key];
+              if (otEntry) {
+                otHours = otEntry.hours;
+              } else {
+                otHours = parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
+              }
             } else {
               otHours = parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
             }
@@ -777,6 +949,11 @@
             };
           }
 
+          const designation = (row[colIndexMap["DESIGNATION"]] || "")
+            .toString()
+            .trim()
+            .toUpperCase();
+          const isCook = designation.includes("COOK");
           const hAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
           const sAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
           const status = (row[colIndexMap["STATUS"]] || "")
@@ -787,7 +964,10 @@
           // উপস্থিতি বিভাজন লজিক
           if (isP || hAmt > 0 || sAmt > 0) {
             summary[id].totalAtt += 1;
-            if (hAmt > 0) {
+            if (isCook) {
+              // Cook gets no Sunday/Holiday pay; সবদিন Normal হিসেবেই গণনা হবে
+              summary[id].narDays += 1;
+            } else if (hAmt > 0) {
               summary[id].holiDays += 1;
               summary[id].holAmt += hAmt;
             } else if (sAmt > 0) {
@@ -824,8 +1004,8 @@
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SUNDAY</th>
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">GROS SALARY</th>
     
-    <th colspan="5" class="text-center deduction-col" style="position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #142a50;">DEDUCTION</th>
-    
+    <th colspan="4" class="text-center deduction-col" style="position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #142a50;">DEDUCTION</th>
+    <th rowspan="2" class="deduction-col" style="position: sticky; top: 0; z-index: 100; text-align: left; padding-left: 6px; white-space: normal;">TOTAL DEDUCTION</th>
     <th rowspan="2" class="text-center highlight-col" style="position: sticky; top: 0; z-index: 100;">NEED SALARY</th>
     <th rowspan="2" class="text-center" style="position: sticky; top: 0; z-index: 100;">SIGNATURE</th>
   </tr>
@@ -839,7 +1019,6 @@
     <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">FINE</th>
     <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">NPS 1%</th>
     <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">CSG 1.5%</th>
-    <th class="text-center deduction-col" style="position: sticky; top: 22px; z-index: 90;">TOTAL DEDUCTION.</th>
   </tr>`;
 
         let g_mB = 0,
@@ -1083,10 +1262,26 @@
       }
 
       function parseDate(s) {
-        if (!s || s.toString().trim() === "" || s === "-") return new Date(0);
+        if (!s && s !== 0) return new Date(0);
         if (s instanceof Date) return s;
 
-        let dateString = s.toString().trim().replace(/\//g, "-");
+        const asString = s.toString().trim();
+        if (asString === "" || asString === "-") return new Date(0);
+
+        const gvizDateMatch = asString.match(
+          /^Date\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+))?)?\)$/i,
+        );
+        if (gvizDateMatch) {
+          const year = Number(gvizDateMatch[1]);
+          const month = Number(gvizDateMatch[2]);
+          const day = Number(gvizDateMatch[3]);
+          const hour = gvizDateMatch[4] ? Number(gvizDateMatch[4]) : 0;
+          const minute = gvizDateMatch[5] ? Number(gvizDateMatch[5]) : 0;
+          const second = gvizDateMatch[6] ? Number(gvizDateMatch[6]) : 0;
+          return new Date(year, month, day, hour, minute, second);
+        }
+
+        let dateString = asString.replace(/\//g, "-");
         const parts = dateString.split("-");
 
         if (parts.length === 3) {
@@ -1114,8 +1309,10 @@
       }
 
       function openPreview() {
-        const start = document.getElementById("startDate").value || "NO DATE SELECT";
-        const end = document.getElementById("endDate").value || "NO DATE SELECT";
+        const start =
+          document.getElementById("startDate").value || "NO DATE SELECT";
+        const end =
+          document.getElementById("endDate").value || "NO DATE SELECT";
         const emp =
           document.getElementById("empFilter").options[
             document.getElementById("empFilter").selectedIndex
@@ -1132,6 +1329,7 @@
           document.getElementById("typeValueSelect")?.options[
             document.getElementById("typeValueSelect")?.selectedIndex
           ]?.text || "None";
+        const printDateTime = new Date().toLocaleString();
 
         const tableHeader = document.getElementById("tableHead").innerHTML;
         const tableBody = document.getElementById("tableBody").innerHTML;
@@ -1168,10 +1366,17 @@
             .meta-label { font-size: 10px; text-transform: uppercase; color: #1d3a6d; font-weight: 800; margin-bottom: 2px; }
             .meta-value { font-size: 12px; font-weight: 600; color: #333; }
             
-            .report-header { text-align: center; margin-bottom: 15px; }
-            .report-header h2 { font-size: 26px; margin: 0; font-weight: 800; letter-spacing: 1px; color: #1d3a6d; }
-            .report-header .statement-title { font-size: 14px; margin: 5px 0 2px 0; font-weight: bold; text-transform: uppercase; border-bottom: 1.5px solid #1d3a6d; display: inline-block; padding: 0 15px 3px 15px; }
-            .report-header .print-date-range { font-size: 13px; font-weight: 800; color: #000; margin-top: 8px; }
+            .report-header { margin-bottom: 15px; }
+            .report-header h2 { font-size: 26px; margin: 0 0 8px 0; font-weight: 800; letter-spacing: 1px; color: #1d3a6d; text-align: center; }
+            .report-header-line { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: nowrap; }
+            .report-header-line .header-left,
+            .report-header-line .header-center,
+            .report-header-line .header-right { font-size: 12px; font-weight: 700; color: #000; white-space: nowrap; }
+            .report-header-line .header-center { text-align: center; flex: 1 1 340px; min-width: 220px; }
+            .report-header-line .header-left,
+            .report-header-line .header-right { flex: 0 1 auto; }
+            .report-header-line .header-right { text-align: right; }
+            .report-header-line .statement-title { text-transform: uppercase; color: #1d3a6d; }
 
             table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: auto; border: 2px solid #000; }
             th, td { 
@@ -1223,6 +1428,7 @@
                 body { padding: 0; margin: 0; }
                 .report-header { margin-top: 0; }
                 table { border-width: 1.5pt; }
+                tfoot { display: table-row-group !important; }
                 
                 /* This wrapper ensures the total row and signatures appear together at the end */
                 .print-footer-container {
@@ -1256,8 +1462,11 @@
 
           <div class="report-header">
             <h2>ALAMHOW CO LTD</h2>
-            <div class="statement-title">MONTHLY SALARY STATEMENT</div>
-            <div class="print-date-range">DATE: ${start} TO ${end}</div>
+            <div class="report-header-line">
+              <div class="header-left">DATE: ${start} TO ${end}</div>
+              <div class="header-center statement-title">MONTHLY SALARY STATEMENT</div>
+              <div class="header-right">Printed: ${printDateTime}</div>
+            </div>
           </div>
 
           <table>
