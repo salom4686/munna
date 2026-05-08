@@ -24,7 +24,8 @@
     />
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css"/>
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css"
+    />
 
     <link
       rel="stylesheet"
@@ -33,70 +34,189 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-          :root {
-            --brand-blue: #1d3a6d; --header-text: #ffffff; --bg-light: #f4f6f9; --accent-yellow: #fff9e6;  --btn-reset: #dc3545; --highlight-green: #e6fffa; }
-          body {
-            background-color: var(--bg-light);padding: 10px;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-          .main-card { background: #ffffff; border-radius: 12px; box-shadow: 0 8px 25px rgba(0,0,0,0.08);margin: 0 auto;border: 1px solid #e0e0e0; overflow: hidden; display: flex; flex-direction: column; max-height: 96vh;}
+      :root {
+        --brand-blue: #1d3a6d;
+        --header-text: #ffffff;
+        --bg-light: #f4f6f9;
+        --accent-yellow: #fff9e6;
+        --btn-reset: #dc3545;
+        --highlight-green: #e6fffa;
+      }
+      body {
+        background-color: var(--bg-light);
+        padding: 10px;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .main-card {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+        margin: 0 auto;
+        border: 1px solid #e0e0e0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        max-height: 96vh;
+      }
       /* বাটনের সাধারণ অবস্থা এবং হোভার অবস্থা নিয়ন্ত্রণ */
       .btn-reset.btn-action {
-          background-color: #ffc107; /* আপনার পছন্দের ব্যাকগ্রাউন্ড কালার */
-          color: #000; /* টেক্সট কালার কালো */
-          border: 1px solid #000;
-          transition: all 0.3s ease; /* স্মুথ ট্রানজিশনের জন্য */
+        background-color: #ffc107; /* আপনার পছন্দের ব্যাকগ্রাউন্ড কালার */
+        color: #000; /* টেক্সট কালার কালো */
+        border: 1px solid #000;
+        transition: all 0.3s ease; /* স্মুথ ট্রানজিশনের জন্য */
       }
 
       .btn-reset.btn-action:hover {
-          /* হোভার করলে যা হবে */
-          background-color: #ff2802 !important; /* হোভার ব্যাকগ্রাউন্ড (একটু গাঢ় হলুদ) */
-          color: #000000 !important; /* হোভার করলেও টেক্সট কালোই থাকবে, সাদা হবে না */
-          border-color: #f8f7f7 !important;
-          box-shadow: 0 2px 5px rgba(228, 221, 221, 0.2); /* হালকা শ্যাডো */
+        /* হোভার করলে যা হবে */
+        background-color: #ff2802 !important; /* হোভার ব্যাকগ্রাউন্ড (একটু গাঢ় হলুদ) */
+        color: #000000 !important; /* হোভার করলেও টেক্সট কালোই থাকবে, সাদা হবে না */
+        border-color: #f8f7f7 !important;
+        box-shadow: 0 2px 5px rgba(228, 221, 221, 0.2); /* হালকা শ্যাডো */
       }
 
       .btn-reset.btn-action:active {
-          background-color: #d39e00 !important;
-          transform: translateY(5px); /* ক্লিক করলে সামান্য নিচে নামবে */
+        background-color: #d39e00 !important;
+        transform: translateY(5px); /* ক্লিক করলে সামান্য নিচে নামবে */
       }
-          .page-header { background-color: #ffffff; padding: 10px 20px;  border-bottom: 4px solid var(--brand-blue);display: flex; justify-content: space-between; align-items: center;  flex-shrink: 0; }
-          .brand-title h2 { color: var(--brand-blue); font-weight: 800; margin: 0; font-size: 1.3rem; }
-          .filter-section {  padding: 12px; background: #f8f9fc; border-bottom: 1px solid #eee; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px;align-items: end; flex-shrink: 0; }
-          .filter-group label { font-size: 9px; font-weight: 700; color: var(--brand-blue); margin-bottom: 2px; display: block; text-transform: uppercase; }
-          .custom-date-input { background-color: #ffffff !important; cursor: pointer !important; font-weight: 600; font-size: 11px; }
-          .btn-action { font-size: 10px; padding: 4px 10px; font-weight: 600; }
-          .btn-reset { background-color: var(--btn-reset); color: white; border: none; }
-          .summary-bar { padding: 8px 20px;background: #eef2f7; border-bottom: 1px solid #ddd;display: flex;gap: 20px; font-weight: bold; color: var(--brand-blue);font-size: 13px;align-items: center; }
-          .stat-box { background: #fff; padding: 2px 10px; border-radius: 4px; border: 1px solid #cbd5e0; }
-          .table-responsive { overflow: auto; flex-grow: 1; position: relative; }
-          .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; }
-         .attendance-table thead th { background-color: var(--brand-blue) !important; color: var(--header-text) !important; padding: 6px 4px; text-align: center; font-size: 9px;
-       position: sticky;
-            top: 0;
-            z-index: 20;
-            border: 1px solid #142a50; <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
-            text-transform: uppercase;
-            white-space: nowrap;
-          }
+      .page-header {
+        background-color: #ffffff;
+        padding: 10px 20px;
+        border-bottom: 4px solid var(--brand-blue);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
+      }
+      .brand-title h2 {
+        color: var(--brand-blue);
+        font-weight: 800;
+        margin: 0;
+        font-size: 1.3rem;
+      }
+      .filter-section {
+        padding: 12px;
+        background: #f8f9fc;
+        border-bottom: 1px solid #eee;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 8px;
+        align-items: end;
+        flex-shrink: 0;
+      }
+      .filter-group label {
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--brand-blue);
+        margin-bottom: 2px;
+        display: block;
+        text-transform: uppercase;
+      }
+      .custom-date-input {
+        background-color: #ffffff !important;
+        cursor: pointer !important;
+        font-weight: 600;
+        font-size: 11px;
+      }
+      .btn-action {
+        font-size: 10px;
+        padding: 4px 10px;
+        font-weight: 600;
+      }
+      .btn-reset {
+        background-color: var(--btn-reset);
+        color: white;
+        border: none;
+      }
+      .summary-bar {
+        padding: 8px 20px;
+        background: #eef2f7;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        gap: 20px;
+        font-weight: bold;
+        color: var(--brand-blue);
+        font-size: 13px;
+        align-items: center;
+      }
+      .stat-box {
+        background: #fff;
+        padding: 2px 10px;
+        border-radius: 4px;
+        border: 1px solid #cbd5e0;
+      }
+      .table-responsive {
+        overflow: auto;
+        flex-grow: 1;
+        position: relative;
+      }
+      .attendance-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+      }
+      .attendance-table thead th {
+        background-color: var(--brand-blue) !important;
+        color: var(--header-text) !important;
+        padding: 6px 4px;
+        text-align: center;
+        font-size: 9px;
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border: 1px solid #142a50;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
 
-          .attendance-table tbody td {
-            padding: 4px 3px;
-            text-align: center;
-            font-size: 10px;
-            border: 1px solid #e0e0e0;
-            white-space: nowrap;
-          }
+      .attendance-table tbody td {
+        padding: 4px 3px;
+        text-align: center;
+        font-size: 10px;
+        border: 1px solid #e0e0e0;
+        white-space: nowrap;
+      }
 
-          .total-attendance-col { background-color: var(--accent-yellow); font-weight: 700; color: var(--brand-blue); }
-          .highlight-col { background-color: var(--highlight-green); font-weight: 700; color: #0d685b; }
-          .deduction-col { background-color: #fff0f0; }
+      .total-attendance-col {
+        background-color: var(--accent-yellow);
+        font-weight: 700;
+        color: var(--brand-blue);
+      }
+      .highlight-col {
+        background-color: var(--highlight-green);
+        font-weight: 700;
+        color: #0d685b;
+      }
+      .deduction-col {
+        background-color: #fff0f0;
+      }
 
-          #loader { padding: 40px; text-align: center; color: var(--brand-blue); display: none; }
+      #loader {
+        padding: 40px;
+        text-align: center;
+        color: var(--brand-blue);
+        display: none;
+      }
 
-          .search-input-group { display: flex; }
-          .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 80px; font-size: 10px; }
-          .search-input-group input { border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 10px; }
+      .search-input-group {
+        display: flex;
+      }
+      .search-input-group select {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        width: 80px;
+        font-size: 10px;
+      }
+      .search-input-group input {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        font-size: 10px;
+      }
 
-          .grand-total-row td { background-color: #f0f4f8 !important; font-weight: 900 !important; color: var(--brand-blue); }
+      .grand-total-row td {
+        background-color: #f0f4f8 !important;
+        font-weight: 900 !important;
+        color: var(--brand-blue);
+      }
     </style>
   </head>
   <body id="bodyRoot">
@@ -497,7 +617,7 @@
         if (!rawData || rawData.length < 2) return;
         const totalOtIndex = colIndexMap["TOTAL OT HOURS"];
         const dateIndex =
-          colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
+          colIndexMap["ATTENDANCE DATE"] ?? colIndexMap["ISSUE DATE"];
         const idIndex = colIndexMap["EMPLOYEE ID"];
         if (totalOtIndex === undefined || idIndex === undefined) return;
 
@@ -691,7 +811,7 @@
         }
 
         const dIdx =
-          colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
+          colIndexMap["ATTENDANCE DATE"] ?? colIndexMap["ISSUE DATE"];
         const eIdx = colIndexMap["EMPLOYEE ID"];
         const sIdx = colIndexMap["SIDE NAME"];
 
@@ -737,28 +857,38 @@
 
         updateStats(filteredRows);
       }
-  function renderDetailedView(rows) {
-  const thead = document.getElementById("tableHead");
-  const tbody = document.getElementById("tableBody");
-  document.getElementById("tableFoot").innerHTML = "";
-  document.getElementById("bodyRoot").classList.remove("summary-mode");
+      function renderDetailedView(rows) {
+        const thead = document.getElementById("tableHead");
+        const tbody = document.getElementById("tableBody");
+        document.getElementById("tableFoot").innerHTML = "";
+        document.getElementById("bodyRoot").classList.remove("summary-mode");
 
-  // ১. হেডার রেন্ডার
-  thead.innerHTML = `<tr>
+        // ১. হেডার রেন্ডার
+        thead.innerHTML = `<tr>
     <th style="width: 40px; background-color: #f8f9fa; vertical-align: middle;" class="text-center">SL</th>
     ${displayHeaders
       .filter((h) => h !== "JOINING DATE")
       .map((h) => {
-        let extraStyle = "vertical-align: middle; text-align: center; white-space: normal; word-wrap: break-word; min-width: 70px; max-width: 110px; line-height: 1.1; padding: 5px;";
-        if (h.includes("BONUS")) extraStyle += "background-color: #e6fffa; color: #006655;";
-        else if (["ADVANCE", "FINE", "NPS 1%", "CSG 1.5%"].includes(h)) extraStyle += "background-color: #fff5f5; color: #c53030;";
-        else if (h === "TOTAL DEDUCTION") extraStyle += "background-color: #ffebeb; color: #b91c1c; font-weight: bold;";
-        else if (h === "NEED SALARY") extraStyle += "background-color: #1d3a6d; color: #ffffff; font-weight: bold;";
-        else if (h === "TOTAL OT HOURS") extraStyle += "background-color: #fff9e6; color: #856404; font-weight: bold;";
-        else if (h === "GROS SALARY") extraStyle += "background-color: #ebf8ff; color: #2b6cb0;";
+        let extraStyle =
+          "vertical-align: middle; text-align: center; white-space: normal; word-wrap: break-word; min-width: 70px; max-width: 110px; line-height: 1.1; padding: 5px;";
+        if (h.includes("BONUS"))
+          extraStyle += "background-color: #e6fffa; color: #006655;";
+        else if (["ADVANCE", "FINE", "NPS 1%", "CSG 1.5%"].includes(h))
+          extraStyle += "background-color: #fff5f5; color: #c53030;";
+        else if (h === "TOTAL DEDUCTION")
+          extraStyle +=
+            "background-color: #ffebeb; color: #b91c1c; font-weight: bold;";
+        else if (h === "NEED SALARY")
+          extraStyle +=
+            "background-color: #1d3a6d; color: #ffffff; font-weight: bold;";
+        else if (h === "TOTAL OT HOURS")
+          extraStyle +=
+            "background-color: #fff9e6; color: #856404; font-weight: bold;";
+        else if (h === "GROS SALARY")
+          extraStyle += "background-color: #ebf8ff; color: #2b6cb0;";
 
         let headerHtml = `<th style="${extraStyle}">${h}</th>`;
-        if (h === "BASIC SALARY ") {
+        if (h === "BASIC SALARY") {
           headerHtml += `<th style="background-color: #f0fdf4; color: #166534; vertical-align: middle; text-align: center; white-space: normal; min-width: 70px; line-height: 1.1;">DAILY BASIC</th>`;
         }
         return headerHtml;
@@ -767,89 +897,122 @@
     <th class="no-print text-center" style="background-color: #f8f9fa; vertical-align: middle;">ACTION</th>
   </tr>`;
 
-  // ২. ডাটা রেন্ডার
-  tbody.innerHTML = rows
-    .map((row, idx) => {
-      const originalIndex = rawData.indexOf(row);
-      const reverseSerial = rows.length - idx;
+        // ২. ডাটা রেন্ডার
+        tbody.innerHTML = rows
+          .map((row, idx) => {
+            const originalIndex = rawData.indexOf(row);
+            const reverseSerial = rows.length - idx;
 
-      // ডাটা ক্লিন করার হেল্পার
-      const cleanNum = (val) => {
-        if (val === undefined || val === null || val === "") return 0;
-        const cleaned = val.toString().replace(/,/g, '').trim();
-        const num = parseFloat(cleaned);
-        return isNaN(num) ? 0 : num;
-      };
+            // ডাটা ক্লিন করার হেল্পার
+            const cleanNum = (val) => {
+              if (val === undefined || val === null || val === "") return 0;
+              const cleaned = val.toString().replace(/,/g, "").trim();
+              const num = parseFloat(cleaned);
+              return isNaN(num) ? 0 : num;
+            };
 
-      // OT ডাটা প্রসেসিং
-      const otHours = cleanNum(row[colIndexMap["TOTAL OT HOURS"]]);
-      let sheetRate = cleanNum(row[colIndexMap["OT RATE"]]);
-      
-      // ব্যাকআপ রেট ১০০ থেকে পরিবর্তন করে ১০৫ করা হলো
-      const otRate = sheetRate > 0 ? sheetRate : 105; 
-      const otAmt = otHours * otRate;
+            // OT ডাটা প্রসেসিং
+            const otHours = cleanNum(row[colIndexMap["TOTAL OT HOURS"]]);
+            let sheetRate = cleanNum(row[colIndexMap["OT RATE"]]);
 
-      const basicSalary = cleanNum(row[colIndexMap["BASIC SALARY "]]);
-      const holidayAmt = cleanNum(row[colIndexMap["HOLIDAY"]]);
-      const sundayAmt  = cleanNum(row[colIndexMap["SUNDAY WORK"]]);
-      const attBonus   = cleanNum(row[colIndexMap["ATTENDANCE BONUS"]]);
-      const perfBonus  = cleanNum(row[colIndexMap["PERFORMANCE BONUS"]]);
-      const advance    = cleanNum(row[colIndexMap["ADVANCE"]]);
-      const fine       = cleanNum(row[colIndexMap["FINE"]]);
+            // ব্যাকআপ রেট ১০০ থেকে পরিবর্তন করে ১০৫ করা হলো
+            const otRate = sheetRate > 0 ? sheetRate : 105;
+            const otAmt = otHours * otRate;
 
-      const status = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
-      const dateValue = row[colIndexMap["ATTENDANCE DATE"]] || row[colIndexMap["ISSUE DATE"]];
-      const attDateRaw = parseDate(dateValue);
+            const basicSalary = cleanNum(row[colIndexMap["BASIC SALARY"]]);
+            const holidayAmt = cleanNum(row[colIndexMap["HOLIDAY"]]);
+            const sundayAmt = cleanNum(row[colIndexMap["SUNDAY WORK"]]);
+            const attBonus = cleanNum(row[colIndexMap["ATTENDANCE BONUS"]]);
+            const perfBonus = cleanNum(row[colIndexMap["PERFORMANCE BONUS"]]);
+            const advance = cleanNum(row[colIndexMap["ADVANCE"]]);
+            const fine = cleanNum(row[colIndexMap["FINE"]]);
 
-      let daysInMonth = (attDateRaw && attDateRaw.getTime() !== 0)
-        ? new Date(attDateRaw.getFullYear(), attDateRaw.getMonth() + 1, 0).getDate()
-        : 30;
+            const status = (row[colIndexMap["STATUS"]] || "")
+              .toString()
+              .trim()
+              .toUpperCase();
+            const dateValue =
+              row[colIndexMap["ATTENDANCE DATE"]] ||
+              row[colIndexMap["ISSUE DATE"]];
+            const attDateRaw = parseDate(dateValue);
 
-      let dailyBasicDisplay = 0;
-      if (holidayAmt > 0) dailyBasicDisplay = holidayAmt;
-      else if (sundayAmt > 0) dailyBasicDisplay = sundayAmt;
-      else if (isPresent(status)) dailyBasicDisplay = basicSalary / daysInMonth;
+            let daysInMonth =
+              attDateRaw && attDateRaw.getTime() !== 0
+                ? new Date(
+                    attDateRaw.getFullYear(),
+                    attDateRaw.getMonth() + 1,
+                    0,
+                  ).getDate()
+                : 30;
 
-      const grossSalary = dailyBasicDisplay + otAmt + attBonus + perfBonus;
-      const nps = grossSalary * 0.01;
-      const csg = grossSalary * 0.015;
-      const totalDeduction = nps + csg + advance + fine;
-      const needSalary = grossSalary - totalDeduction;
+            let dailyBasicDisplay = 0;
+            if (holidayAmt > 0) dailyBasicDisplay = holidayAmt;
+            else if (sundayAmt > 0) dailyBasicDisplay = sundayAmt;
+            else if (isPresent(status))
+              dailyBasicDisplay = basicSalary / daysInMonth;
 
-      return `<tr>
+            const grossSalary =
+              dailyBasicDisplay + otAmt + attBonus + perfBonus;
+            const nps = grossSalary * 0.01;
+            const csg = grossSalary * 0.015;
+            const totalDeduction = nps + csg + advance + fine;
+            const needSalary = grossSalary - totalDeduction;
+
+            return `<tr>
         <td class="text-center" style="font-weight: bold;">${reverseSerial}</td>
         ${displayHeaders
           .filter((h) => h !== "JOINING DATE")
           .map((h) => {
             let cellVal = row[colIndexMap[h]];
-            let val = (cellVal !== undefined && cellVal !== null) ? cellVal.toString().trim() : "";
+            let val =
+              cellVal !== undefined && cellVal !== null
+                ? cellVal.toString().trim()
+                : "";
 
             const isNumeric = [
-              "BASIC SALARY ", "DAILY BASIC", "OT AMOUNT", "HOLIDAY",
-              "SUNDAY WORK", "GROS SALARY", "NEED SALARY", "TOTAL OT HOURS",
-              "NPS 1%", "CSG 1.5%", "TOTAL DEDUCTION", "ADVANCE", "FINE",
+              "BASIC SALARY",
+              "DAILY BASIC",
+              "OT AMOUNT",
+              "HOLIDAY",
+              "SUNDAY WORK",
+              "GROS SALARY",
+              "NEED SALARY",
+              "TOTAL OT HOURS",
+              "NPS 1%",
+              "CSG 1.5%",
+              "TOTAL DEDUCTION",
+              "ADVANCE",
+              "FINE",
             ].includes(h.toUpperCase());
 
-            const align = isNumeric ? "text-end" : (typeof leftAlignCols !== "undefined" && leftAlignCols.includes(h) ? "text-start" : "text-center");
+            const align = isNumeric
+              ? "text-end"
+              : typeof leftAlignCols !== "undefined" &&
+                  leftAlignCols.includes(h)
+                ? "text-start"
+                : "text-center";
 
             if (h === "TOTAL OT HOURS") val = otHours > 0 ? otHours : "-";
-            else if (h === "OT AMOUNT") val = otAmt > 0 ? otAmt.toFixed(2) : "-";
+            else if (h === "OT AMOUNT")
+              val = otAmt > 0 ? otAmt.toFixed(2) : "-";
             else if (h === "NPS 1%") val = nps.toFixed(2);
             else if (h === "CSG 1.5%") val = csg.toFixed(2);
             else if (h === "TOTAL DEDUCTION") val = totalDeduction.toFixed(2);
             else if (h === "GROS SALARY") val = grossSalary.toFixed(2);
             else if (h === "NEED SALARY") val = needSalary.toFixed(2);
-            else if (isNumeric && val !== "" && val !== "-") val = cleanNum(val).toFixed(2);
+            else if (isNumeric && val !== "" && val !== "-")
+              val = cleanNum(val).toFixed(2);
 
             if (val === "" || val === "NaN" || val === "0.00") val = "-";
 
             let cellBg = "";
-            if (h === "STATUS") cellBg = "background-color: #dcfce7; font-weight: 500;";
+            if (h === "STATUS")
+              cellBg = "background-color: #dcfce7; font-weight: 500;";
 
             let cellHtml = `<td class="${align}" style="white-space: nowrap; padding: 4px 8px; ${cellBg}">${val}</td>`;
 
-            if (h === "BASIC SALARY ") {
-              let bg = (holidayAmt > 0 || sundayAmt > 0) ? "#e0f2fe" : "#f0fdf4";
+            if (h === "BASIC SALARY") {
+              let bg = holidayAmt > 0 || sundayAmt > 0 ? "#e0f2fe" : "#f0fdf4";
               cellHtml += `<td class="text-end" style="background-color: ${bg}; font-weight: bold; white-space: nowrap; padding: 4px 8px;">${dailyBasicDisplay.toFixed(2)}</td>`;
             }
             return cellHtml;
@@ -859,9 +1022,9 @@
           <button class="btn btn-warning btn-sm" onclick="openEditModal(${originalIndex})">EDIT</button>
         </td>
       </tr>`;
-    })
-    .join("");
-}
+          })
+          .join("");
+      }
       function renderSummaryView(rows) {
         const thead = document.getElementById("tableHead");
         const tbody = document.getElementById("tableBody");
@@ -1350,6 +1513,7 @@
                 background: #f2f2f2 !important;
                 vertical-align: middle;
             }
+            table th { position: static !important; top: auto !important; z-index: auto !important; }
 
             .text-start { text-align: left !important; padding-left: 8px !important; }
             
