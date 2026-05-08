@@ -1308,35 +1308,29 @@
         processData();
       }
 
-      function openPreview() {
-        const start =
-          document.getElementById("startDate").value || "NO DATE SELECT";
-        const end =
-          document.getElementById("endDate").value || "NO DATE SELECT";
-        const emp =
-          document.getElementById("empFilter").options[
-            document.getElementById("empFilter").selectedIndex
-          ].text;
-        const side =
-          document.getElementById("sideFilter").options[
-            document.getElementById("sideFilter").selectedIndex
-          ].text;
-        const filterType =
-          document.getElementById("columnSelector").options[
-            document.getElementById("columnSelector").selectedIndex
-          ].text;
-        const filterVal =
-          document.getElementById("typeValueSelect")?.options[
-            document.getElementById("typeValueSelect")?.selectedIndex
-          ]?.text || "None";
-        const printDateTime = new Date().toLocaleString();
+     function openPreview() {
+    const start = document.getElementById("startDate").value || "NO DATE SELECT";
+    const end = document.getElementById("endDate").value || "NO DATE SELECT";
+    const emp = document.getElementById("empFilter").options[
+        document.getElementById("empFilter").selectedIndex
+    ].text;
+    const side = document.getElementById("sideFilter").options[
+        document.getElementById("sideFilter").selectedIndex
+    ].text;
+    const filterType = document.getElementById("columnSelector").options[
+        document.getElementById("columnSelector").selectedIndex
+    ].text;
+    const filterVal = document.getElementById("typeValueSelect")?.options[
+        document.getElementById("typeValueSelect")?.selectedIndex
+    ]?.text || "None";
+    const printDateTime = new Date().toLocaleString();
 
-        const tableHeader = document.getElementById("tableHead").innerHTML;
-        const tableBody = document.getElementById("tableBody").innerHTML;
-        const tableFoot = document.getElementById("tableFoot").innerHTML;
+    const tableHeader = document.getElementById("tableHead").innerHTML;
+    const tableBody = document.getElementById("tableBody").innerHTML;
+    const tableFoot = document.getElementById("tableFoot").innerHTML;
 
-        const previewWindow = window.open("", "_blank");
-        previewWindow.document.write(`
+    const previewWindow = window.open("", "_blank");
+    previewWindow.document.write(`
       <html>
         <head>
           <title>Salary Report Preview</title>
@@ -1350,7 +1344,6 @@
                 color: #000; 
                 background: #fff;
             }
-            /* Preview Only Section */
             .preview-meta-info {
                 background: #fdfdfd;
                 border: 2px solid #1d3a6d;
@@ -1369,25 +1362,24 @@
             .report-header { margin-bottom: 15px; }
             .report-header h2 { font-size: 26px; margin: 0 0 8px 0; font-weight: 800; letter-spacing: 1px; color: #1d3a6d; text-align: center; }
             .report-header-line { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: nowrap; }
-            .report-header-line .header-left,
-            .report-header-line .header-center,
-            .report-header-line .header-right { font-size: 12px; font-weight: 700; color: #000; white-space: nowrap; }
+            .report-header-line .header-left, .report-header-line .header-center, .report-header-line .header-right { font-size: 12px; font-weight: 700; color: #000; white-space: nowrap; }
             .report-header-line .header-center { text-align: center; flex: 1 1 340px; min-width: 220px; }
-            .report-header-line .header-left,
-            .report-header-line .header-right { flex: 0 1 auto; }
             .report-header-line .header-right { text-align: right; }
             .report-header-line .statement-title { text-transform: uppercase; color: #1d3a6d; }
 
             table { width: 100%; border-collapse: collapse; margin-top: 5px; table-layout: auto; border: 2px solid #000; }
+            
             th, td { 
                 border: 1px solid #000 !important; 
                 text-align: center; 
-                padding: 6px 4px !important; 
+                padding: 12px 4px !important; 
                 background: #fff !important;
                 color: #000 !important;
                 font-size: 10px;
                 white-space: nowrap;
+                position: static !important;
             }
+
             th { 
                 font-weight: 900; 
                 text-transform: uppercase; 
@@ -1395,14 +1387,9 @@
                 vertical-align: middle;
             }
 
-            .text-start { text-align: left !important; padding-left: 8px !important; }
-            
-            .total-attendance-col { font-weight: bold; background: #fff9e6 !important; }
-            .highlight-col { font-weight: bold; background: #e6fffa !important; }
-
-            /* Ensure Foot appears only on the last page and stays at the end of the table content */
+            /* --- আপডেট: টোটাল রো শুধুমাত্র শেষ পৃষ্ঠায় দেখানোর জন্য --- */
             tfoot { 
-                display: table-footer-group; 
+                display: table-row-group !important; /* এটি প্রতি পৃষ্ঠায় রিপিট হওয়া বন্ধ করবে */
             }
             
             .grand-total-row td { 
@@ -1410,15 +1397,23 @@
                 border-top: 2.5px double #000 !important; 
                 background: #f8f8f8 !important;
                 font-size: 11px;
-                padding: 8px 4px !important;
+                padding: 15px 4px !important;
             }
 
-            .signature-section {
-                margin-top: 40px;
-                display: flex;
-                justify-content: space-between;
+            .signature-wrapper {
+                margin-top: 50px; 
+                display: flex; 
+                justify-content: space-between; 
                 padding: 0 40px;
-                page-break-inside: avoid;
+                page-break-inside: avoid; /* সিগনেচার যেন ভেঙে না যায় */
+            }
+            .sig-box {
+                border-top: 1px solid #000; 
+                width: 180px; 
+                text-align: center; 
+                font-size: 11px; 
+                font-weight: bold; 
+                padding-top: 5px;
             }
 
             .no-print-btn { position: fixed; top: 15px; right: 15px; z-index: 1000; padding: 10px 20px; font-weight: bold; border-radius: 5px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: none; background-color: #1d3a6d; color: #fff; }
@@ -1426,21 +1421,15 @@
             @media print {
                 .no-print, .no-print-btn, .preview-meta-info { display: none !important; }
                 body { padding: 0; margin: 0; }
-                .report-header { margin-top: 0; }
-                table { border-width: 1.5pt; }
+                /* প্রিন্টে হেডার প্রতি পাতায় দেখাবে কিন্তু ফুটার শুধুমাত্র শেষে দেখাবে */
+                thead { display: table-header-group !important; }
                 tfoot { display: table-row-group !important; }
-                
-                /* This wrapper ensures the total row and signatures appear together at the end */
-                .print-footer-container {
-                    page-break-inside: avoid;
-                }
             }
           </style>
         </head>
         <body>
           <button class="no-print-btn" onclick="window.print()">PRINT REPORT</button>
           
-          <!-- Detailed Meta Info - Preview Only -->
           <div class="preview-meta-info">
              <div class="meta-item">
                 <span class="meta-label">Period / Range</span>
@@ -1472,20 +1461,19 @@
           <table>
             <thead>${tableHeader}</thead>
             <tbody>${tableBody}</tbody>
-            <!-- The tfoot automatically repeats or stays at the end of the data based on browser -->
             <tfoot>${tableFoot}</tfoot>
           </table>
 
-          <div style="margin-top: 40px; display: flex; justify-content: space-between; padding: 0 40px;">
-            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Prepared By</div>
-            <div style="border-top: 1px solid #000; width: 140px; text-align: center; font-size: 10px; font-weight: bold;">Authorized Signature</div>
+          <div class="signature-wrapper">
+            <div class="sig-box">Prepared By</div>
+            <div class="sig-box">Checked By</div>
+            <div class="sig-box">Authorized Signature</div>
           </div>
         </body>
       </html>
     `);
-        previewWindow.document.close();
-      }
-
+    previewWindow.document.close();
+}
       function showAttendanceFilter() {
         matrixModal.show();
       }
