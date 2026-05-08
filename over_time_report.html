@@ -283,209 +283,225 @@
         </div>
     </div>
 
-    <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRrMcjKvg4pkCC3APIlH29Mxi0YgfFq_tySGnCCq83qsilRjBc2i0moIRgphnW6Svyrw/exec?get=data";
-        let rawData = [];
-        let uniqueEmployeeMap = [];
-        const daysEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-        const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRrMcjKvg4pkCC3APIlH29Mxi0YgfFq_tySGnCCq83qsilRjBc2i0moIRgphnW6Svyrw/exec?get=data";
+    let rawData = [];
+    let uniqueEmployeeMap = [];
+    const daysEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        async function initSystem() {
-            try {
-                const response = await fetch(SCRIPT_URL);
-                const data = await response.json();
-                rawData = data.map(item => {
-                    const cleanedItem = {};
-                    for (let key in item) {
-                        let val = item[key];
-                        cleanedItem[key] = (typeof val === 'string') ? val.trim() : (val === null ? "" : val);
-                    }
-                    return cleanedItem;
-                });
-                initFilters();
-                document.getElementById('initial-overlay').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-            } catch (error) {
-                document.getElementById('initial-overlay').innerHTML = `<p class="text-red-500">Error loading data. Refresh.</p>`;
-            }
-        }
-
-        function initFilters() {
-            const seenIds = new Set();
-            rawData.forEach(item => {
-                const empId = String(item.id).trim();
-                if (empId && !seenIds.has(empId)) {
-                    seenIds.add(empId);
-                    uniqueEmployeeMap.push({ id: empId, name: (item.name || "N/A").trim() });
+    // সিস্টেম ইনিশিয়েলাইজেশন
+    async function initSystem() {
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            rawData = data.map(item => {
+                const cleanedItem = {};
+                for (let key in item) {
+                    let val = item[key];
+                    cleanedItem[key] = (typeof val === 'string') ? val.trim() : (val === null ? "" : val);
                 }
+                return cleanedItem;
             });
-            uniqueEmployeeMap.sort((a, b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
-            
-            const siteSelect = document.getElementById('filterSite');
-            const sites = [...new Set(rawData.map(item => item.site))].filter(Boolean);
-            sites.sort().forEach(site => {
-                const opt = document.createElement('option');
-                opt.value = site; opt.textContent = site;
-                siteSelect.appendChild(opt);
-            });
-
-            setupCustomDatePicker('fromDate', 'fromCalendar');
-            setupCustomDatePicker('toDate', 'toCalendar');
-            setupIdSuggestions();
+            initFilters();
+            document.getElementById('initial-overlay').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+        } catch (error) {
+            document.getElementById('initial-overlay').innerHTML = `<p class="text-red-500">Error loading data. Please refresh.</p>`;
         }
+    }
 
-        function setupCustomDatePicker(inputId, calendarId) {
-            const input = document.getElementById(inputId);
-            const calendar = document.getElementById(calendarId);
-            input.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.custom-calendar, .suggestion-box').forEach(el => el.style.display = 'none');
-                calendar.style.display = 'block';
-                renderCalendar(calendar, input);
-            });
-            document.addEventListener('click', (e) => { if (!calendar.contains(e.target)) calendar.style.display = 'none'; });
-        }
-
-        function renderCalendar(calendarEl, inputEl) {
-            let initialDate = new Date();
-            if (inputEl.value) {
-                const parsed = new Date(inputEl.value);
-                if (!isNaN(parsed.getTime())) initialDate = parsed;
+    // ফিল্টার ইনিশিয়েলাইজেশন
+    function initFilters() {
+        const seenIds = new Set();
+        rawData.forEach(item => {
+            const empId = String(item.id).trim();
+            if (empId && !seenIds.has(empId)) {
+                seenIds.add(empId);
+                uniqueEmployeeMap.push({ id: empId, name: (item.name || "N/A").trim() });
             }
-            let cMonth = initialDate.getMonth();
-            let cYear = initialDate.getFullYear();
+        });
+        uniqueEmployeeMap.sort((a, b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
+        
+        const siteSelect = document.getElementById('filterSite');
+        const sites = [...new Set(rawData.map(item => item.site))].filter(Boolean);
+        sites.sort().forEach(site => {
+            const opt = document.createElement('option');
+            opt.value = site; opt.textContent = site;
+            siteSelect.appendChild(opt);
+        });
 
-            const build = () => {
-                const firstDay = new Date(cYear, cMonth, 1).getDay();
-                const daysInMonth = new Date(cYear, cMonth + 1, 0).getDate();
-                const selectedVal = inputEl.value;
+        setupCustomDatePicker('fromDate', 'fromCalendar');
+        setupCustomDatePicker('toDate', 'toCalendar');
+        setupIdSuggestions();
+    }
 
-                let html = `<div class="flex justify-between items-center mb-4 border-b pb-3">
-                    <button class="prev p-2 text-blue-700 font-bold hover:bg-blue-50 rounded-full">❮</button>
-                    <div class="text-base font-black text-blue-900">${monthsEn[cMonth]} ${cYear}</div>
-                    <button class="next p-2 text-blue-700 font-bold hover:bg-blue-50 rounded-full">❯</button>
-                </div>
-                <div class="grid grid-cols-7 gap-1 text-[11px] text-center font-bold text-slate-500 mb-3">
-                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                </div><div class="grid grid-cols-7 gap-1">`;
+    function setupCustomDatePicker(inputId, calendarId) {
+        const input = document.getElementById(inputId);
+        const calendar = document.getElementById(calendarId);
+        input.addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.querySelectorAll('.custom-calendar, .suggestion-box').forEach(el => el.style.display = 'none');
+            calendar.style.display = 'block';
+            renderCalendar(calendar, input);
+        });
+        document.addEventListener('click', (e) => { if (!calendar.contains(e.target)) calendar.style.display = 'none'; });
+    }
 
-                for (let i = 0; i < firstDay; i++) html += `<div></div>`;
-                for (let i = 1; i <= daysInMonth; i++) {
-                    const ds = `${cYear}-${String(cMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                    const isSelected = ds === selectedVal ? 'bg-amber-500 text-white font-bold' : '';
-                    html += `<div class="calendar-day-cell ${isSelected}" data-date="${ds}">${i}</div>`;
-                }
-                calendarEl.innerHTML = html + `</div>`;
-                calendarEl.querySelector('.prev').onclick = (e) => { e.stopPropagation(); cMonth--; if(cMonth < 0){cMonth=11; cYear--;} build(); };
-                calendarEl.querySelector('.next').onclick = (e) => { e.stopPropagation(); cMonth++; if(cMonth > 11){cMonth=0; cYear++;} build(); };
-                calendarEl.querySelectorAll('.calendar-day-cell').forEach(c => {
-                    c.onclick = (e) => { e.stopPropagation(); inputEl.value = c.dataset.date; calendarEl.style.display = 'none'; };
-                });
-            };
-            build();
+    function renderCalendar(calendarEl, inputEl) {
+        let initialDate = new Date();
+        if (inputEl.value) {
+            const parsed = new Date(inputEl.value);
+            if (!isNaN(parsed.getTime())) initialDate = parsed;
         }
+        let cMonth = initialDate.getMonth();
+        let cYear = initialDate.getFullYear();
 
-        function setupIdSuggestions() {
-            const input = document.getElementById('filterId');
-            const box = document.getElementById('idSuggestions');
-            input.oninput = (e) => {
-                const term = e.target.value.toLowerCase();
-                const filtered = uniqueEmployeeMap.filter(emp => emp.id.toLowerCase().includes(term) || emp.name.toLowerCase().includes(term)).slice(0, 10);
-                if (filtered.length && term) {
-                    box.innerHTML = filtered.map(emp => `<div class="p-3 cursor-pointer border-b text-xs hover:bg-blue-50 flex justify-between" data-id="${emp.id}"><b>${emp.id}</b><span>${emp.name}</span></div>`).join('');
-                    box.style.display = 'block';
-                    box.querySelectorAll('div').forEach(d => d.onclick = () => { input.value = d.dataset.id; box.style.display = 'none'; });
-                } else box.style.display = 'none';
-            };
-        }
+        const build = () => {
+            const firstDay = new Date(cYear, cMonth, 1).getDay();
+            const daysInMonth = new Date(cYear, cMonth + 1, 0).getDate();
+            const selectedVal = inputEl.value;
 
-        function applyFilters() {
-            const from = document.getElementById('fromDate').value;
-            const to = document.getElementById('toDate').value;
-            if(!from || !to) return;
-            const id = document.getElementById('filterId').value.trim().toLowerCase();
-            const site = document.getElementById('filterSite').value;
-            const startD = new Date(from);
-            const endD = new Date(to);
-            const filtered = rawData.filter(item => {
-                const d = new Date(item.otDate);
-                const matchId = id ? (String(item.id).toLowerCase().includes(id) || item.name.toLowerCase().includes(id)) : true;
-                const matchSite = site ? item.site === site : true;
-                return matchId && matchSite && d >= startD && d <= endD;
+            let html = `<div class="flex justify-between items-center mb-4 border-b pb-3">
+                <button class="prev p-2 text-blue-700 font-bold hover:bg-blue-50 rounded-full">❮</button>
+                <div class="text-base font-black text-blue-900">${monthsEn[cMonth]} ${cYear}</div>
+                <button class="next p-2 text-blue-700 font-bold hover:bg-blue-50 rounded-full">❯</button>
+            </div>
+            <div class="grid grid-cols-7 gap-1 text-[11px] text-center font-bold text-slate-500 mb-3">
+                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div><div class="grid grid-cols-7 gap-1">`;
+
+            for (let i = 0; i < firstDay; i++) html += `<div></div>`;
+            for (let i = 1; i <= daysInMonth; i++) {
+                const ds = `${cYear}-${String(cMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
+                const isSelected = ds === selectedVal ? 'bg-amber-500 text-white font-bold' : '';
+                html += `<div class="calendar-day-cell ${isSelected}" data-date="${ds}">${i}</div>`;
+            }
+            calendarEl.innerHTML = html + `</div>`;
+            calendarEl.querySelector('.prev').onclick = (e) => { e.stopPropagation(); cMonth--; if(cMonth < 0){cMonth=11; cYear--;} build(); };
+            calendarEl.querySelector('.next').onclick = (e) => { e.stopPropagation(); cMonth++; if(cMonth > 11){cMonth=0; cYear++;} build(); };
+            calendarEl.querySelectorAll('.calendar-day-cell').forEach(c => {
+                c.onclick = (e) => { e.stopPropagation(); inputEl.value = c.dataset.date; calendarEl.style.display = 'none'; };
             });
+        };
+        build();
+    }
 
-            document.getElementById('attendanceSection').style.display = 'block';
-            document.getElementById('detailedReportSection').style.display = 'none';
-            document.getElementById('breakdownBtn').classList.remove('hidden');
-            document.getElementById('printBtn').classList.remove('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            renderAll(filtered, startD, endD);
-        }
+    function setupIdSuggestions() {
+        const input = document.getElementById('filterId');
+        const box = document.getElementById('idSuggestions');
+        input.oninput = (e) => {
+            const term = e.target.value.toLowerCase();
+            const filtered = uniqueEmployeeMap.filter(emp => emp.id.toLowerCase().includes(term) || emp.name.toLowerCase().includes(term)).slice(0, 10);
+            if (filtered.length && term) {
+                box.innerHTML = filtered.map(emp => `<div class="p-3 cursor-pointer border-b text-xs hover:bg-blue-50 flex justify-between" data-id="${emp.id}"><b>${emp.id}</b><span>${emp.name}</span></div>`).join('');
+                box.style.display = 'block';
+                box.querySelectorAll('div').forEach(d => d.onclick = () => { input.value = d.dataset.id; box.style.display = 'none'; });
+            } else box.style.display = 'none';
+        };
+    }
 
-        function renderAll(data, start, end) {
-            const dateRangeStr = `${start.toLocaleDateString('en-GB')} To ${end.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}`;
-            document.getElementById('monthYearDisplay').innerText = dateRangeStr;
-            document.getElementById('printPeriodDisplay').innerText = dateRangeStr;
+    // ফিল্টার প্রয়োগ
+    function applyFilters() {
+        const from = document.getElementById('fromDate').value;
+        const to = document.getElementById('toDate').value;
+        if(!from || !to) return;
+        const id = document.getElementById('filterId').value.trim().toLowerCase();
+        const site = document.getElementById('filterSite').value;
+        const startD = new Date(from);
+        const endD = new Date(to);
+        const filtered = rawData.filter(item => {
+            const d = new Date(item.otDate);
+            const matchId = id ? (String(item.id).toLowerCase().includes(id) || item.name.toLowerCase().includes(id)) : true;
+            const matchSite = site ? item.site === site : true;
+            return matchId && matchSite && d >= startD && d <= endD;
+        });
 
-            const dateList = [];
-            let curr = new Date(start);
-            while(curr <= end){ dateList.push(new Date(curr)); curr.setDate(curr.getDate()+1); }
+        document.getElementById('attendanceSection').style.display = 'block';
+        document.getElementById('detailedReportSection').style.display = 'none';
+        document.getElementById('breakdownBtn').classList.remove('hidden');
+        document.getElementById('printBtn').classList.remove('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
+        renderAll(filtered, startD, endD);
+    }
 
-            const head = document.getElementById('attendanceHead');
-            const body = document.getElementById('attendanceBody');
-            const foot = document.getElementById('attendanceFoot');
+    // ডাটা রেন্ডারিং (দশমিক ফিক্সসহ)
+    function renderAll(data, start, end) {
+        const dateRangeStr = `${start.toLocaleDateString('en-GB')} To ${end.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}`;
+        document.getElementById('monthYearDisplay').innerText = dateRangeStr;
+        document.getElementById('printPeriodDisplay').innerText = dateRangeStr;
 
-            let hHtml = `<tr class="bg-blue-900 text-white"><th>SL</th><th class="sticky-id">ID</th><th class="sticky-name">EMPLOYEE NAME</th>`;
-            dateList.forEach(d => { hHtml += `<th class="${d.getDay() === 0 ? 'bg-red-600' : ''} text-[9px] min-w-[32px]">${daysEn[d.getDay()]}<br>${d.getDate()}</th>`; });
-            head.innerHTML = hHtml + `<th class="total-col bg-blue-900 text-white">TOTAL</th></tr>`;
+        const dateList = [];
+        let curr = new Date(start);
+        while(curr <= end){ dateList.push(new Date(curr)); curr.setDate(curr.getDate()+1); }
 
-            const employees = {};
-            data.forEach(item => { if(!employees[item.id]) employees[item.id] = { name: item.name }; });
-            const empIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+        const head = document.getElementById('attendanceHead');
+        const body = document.getElementById('attendanceBody');
+        const foot = document.getElementById('attendanceFoot');
 
-            let gt = 0; const colTot = {};
-            body.innerHTML = empIds.map((uid, idx) => {
-                let rowTot = 0;
-                let row = `<tr><td>${idx+1}</td><td class="sticky-id font-bold text-blue-900">${uid}</td><td class="sticky-name">${employees[uid].name}</td>`;
-                dateList.forEach(d => {
-                    const ds = d.toLocaleDateString('en-CA');
-                    const entry = data.find(e => String(e.id) === uid && new Date(e.otDate).toLocaleDateString('en-CA') === ds);
-                    const hours = entry ? parseFloat(entry.otHours) || 0 : 0;
-                    rowTot += hours; colTot[ds] = (colTot[ds]||0) + hours;
-                    row += `<td class="${d.getDay()===0?'sun-col':''}">${hours||'—'}</td>`;
-                });
-                gt += rowTot;
-                return row + `<td class="total-col bg-blue-50">${rowTot.toFixed(1)}</td></tr>`;
-            }).join('');
+        let hHtml = `<tr class="bg-blue-900 text-white"><th>SL</th><th class="sticky-id">ID</th><th class="sticky-name">EMPLOYEE NAME</th>`;
+        dateList.forEach(d => { hHtml += `<th class="${d.getDay() === 0 ? 'bg-red-600' : ''} text-[9px] min-w-[32px]">${daysEn[d.getDay()]}<br>${d.getDate()}</th>`; });
+        head.innerHTML = hHtml + `<th class="total-col bg-blue-900 text-white">TOTAL</th></tr>`;
 
-            let fHtml = `<tr><td colspan="3" class="text-right pr-2">GRAND TOTAL</td>`;
-            dateList.forEach(d => { fHtml += `<td>${(colTot[d.toLocaleDateString('en-CA')]||0).toFixed(1)}</td>`; });
-            foot.innerHTML = fHtml + `<td class="total-col bg-blue-900 text-white">${gt.toFixed(1)}</td></tr>`;
+        const employees = {};
+        data.forEach(item => { if(!employees[item.id]) employees[item.id] = { name: item.name }; });
+        const empIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
 
-            const dBody = document.getElementById('detailsBody');
-            const sortedDetails = [...data].sort((a, b) => new Date(a.otDate) - new Date(b.otDate));
-            let tAmt = 0;
-            dBody.innerHTML = sortedDetails.map(item => {
-                const amt = parseFloat(item.totalTaka)||0; tAmt += amt;
-                return `<tr><td class="text-left pl-4">${item.otDate}</td><td>${item.id}</td><td class="text-left">${item.name}</td><td class="text-left">${item.designation||'-'}</td><td class="text-left">${item.site}</td><td>${item.otRate}</td><td>${item.otHours}</td><td>${amt.toLocaleString()}</td></tr>`;
-            }).join('');
-            document.getElementById('detailsFoot').innerHTML = `<tr><td colspan="6" class="text-right px-6">TOTAL</td><td>${gt.toFixed(1)} hrs</td><td>${tAmt.toLocaleString()} /-</td></tr>`;
-        }
+        let gt = 0; const colTot = {};
+        body.innerHTML = empIds.map((uid, idx) => {
+            let rowTot = 0;
+            let row = `<tr><td>${idx+1}</td><td class="sticky-id font-bold text-blue-900">${uid}</td><td class="sticky-name">${employees[uid].name}</td>`;
+            dateList.forEach(d => {
+                const ds = d.toLocaleDateString('en-CA');
+                const entry = data.find(e => String(e.id) === uid && new Date(e.otDate).toLocaleDateString('en-CA') === ds);
+                
+                // শিটের ভ্যালুকে সংখ্যায় রূপান্তর (যা আছে তাই থাকবে)
+                const hours = entry ? Number(entry.otHours) || 0 : 0;
+                rowTot += hours; 
+                colTot[ds] = (colTot[ds]||0) + hours;
+                
+                // সেল এ ডাটা দেখানোর সময় দশমিকসহ দেখানো
+                row += `<td class="${d.getDay()===0?'sun-col':''}">${hours > 0 ? Number(hours.toFixed(2)) : '—'}</td>`;
+            });
+            gt += rowTot;
+            return row + `<td class="total-col bg-blue-50 font-bold">${Number(rowTot.toFixed(2))}</td></tr>`;
+        }).join('');
 
-        function showBreakdownOnly() {
-            document.getElementById('attendanceSection').style.display = 'none';
-            document.getElementById('detailedReportSection').classList.remove('hidden');
-            document.getElementById('detailedReportSection').style.display = 'block';
-        }
+        let fHtml = `<tr><td colspan="3" class="text-right pr-2 font-bold">GRAND TOTAL</td>`;
+        dateList.forEach(d => { 
+            const cVal = colTot[d.toLocaleDateString('en-CA')] || 0;
+            fHtml += `<td class="font-bold">${cVal > 0 ? Number(cVal.toFixed(2)) : '0'}</td>`; 
+        });
+        foot.innerHTML = fHtml + `<td class="total-col bg-blue-900 text-white font-bold">${Number(gt.toFixed(2))}</td></tr>`;
 
-        function handlePrint() {
-            const now = new Date();
-            document.getElementById('pd').innerText = now.toLocaleDateString('en-GB');
-            document.getElementById('pt').innerText = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-            window.print();
-        }
+        // ব্রেকডাউন সেকশন
+        const dBody = document.getElementById('detailsBody');
+        const sortedDetails = [...data].sort((a, b) => new Date(a.otDate) - new Date(b.otDate));
+        let tAmt = 0;
+        dBody.innerHTML = sortedDetails.map(item => {
+            const amt = Number(item.totalTaka) || 0; 
+            tAmt += amt;
+            const hVal = Number(item.otHours) || 0;
+            return `<tr><td class="text-left pl-4">${item.otDate}</td><td>${item.id}</td><td class="text-left">${item.name}</td><td class="text-left">${item.designation||'-'}</td><td class="text-left">${item.site}</td><td>${item.otRate}</td><td>${Number(hVal.toFixed(2))}</td><td>${amt.toLocaleString()}</td></tr>`;
+        }).join('');
+        
+        document.getElementById('detailsFoot').innerHTML = `<tr><td colspan="6" class="text-right px-6 font-bold">TOTAL</td><td class="font-bold">${Number(gt.toFixed(2))} hrs</td><td class="font-bold">${tAmt.toLocaleString()} /-</td></tr>`;
+    }
 
-        window.onload = initSystem;
-    </script>
+    function showBreakdownOnly() {
+        document.getElementById('attendanceSection').style.display = 'none';
+        document.getElementById('detailedReportSection').classList.remove('hidden');
+        document.getElementById('detailedReportSection').style.display = 'block';
+    }
+
+    function handlePrint() {
+        const now = new Date();
+        document.getElementById('pd').innerText = now.toLocaleDateString('en-GB');
+        document.getElementById('pt').innerText = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        window.print();
+    }
+
+    window.onload = initSystem;
+</script>
 </body>
 </html>
