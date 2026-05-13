@@ -430,14 +430,12 @@
     </style>
   </head>
   <body class="p-2 md:p-4">
-     <div id="loadingOverlay">
+    <div id="loadingOverlay">
       <div class="loader-circle mb-6"></div>
       <h2 class="text-xl font-bold text-slate-800 tracking-tight">
         <span class="text-white">ALAMHOW</span>
         <span class="text-yellow-400">CO LTD</span>
       </h2>
-      <p class="text-sm text-white mt-2 font-medium">ALAMHOW CO LTD</p>
-      <p id="loadingTask" class="text-sm text-slate-500 mt-2 font-medium">
         Please Wait...
       </p>
     </div>
@@ -599,7 +597,9 @@
         <div
           class="p-5 bg-[#1e3a5f] text-white flex justify-between items-center no-print"
         >
-          <h3 class="font-bold text-xl italic hover:bg-white hover:text-[#1e3a5f] transition-colors">
+          <h3
+            class="font-bold text-xl italic hover:bg-white hover:text-[#1e3a5f] transition-colors"
+          >
             ALAMHOW <span class="text-[#f1c40f]">CO LTD</span> - Full Preview
           </h3>
           <button
@@ -767,7 +767,7 @@
             Employee Details
           </h2>
           <div class="flex gap-2">
-             <button
+            <button
               onclick="bulkEntry()"
               class="text-[10px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold"
             >
@@ -779,13 +779,13 @@
             >
               Edit Server Data
             </button>
-           
+
             <button
               id="refreshBtn"
               onclick="refreshAllData(true)"
               class="text-[10px] bg-[#1e3a5f] text-white px-4 py-2 rounded-lg font-bold"
             >
-              Refresh Server 
+              Refresh Server
             </button>
           </div>
         </div>
@@ -879,18 +879,20 @@
       <!-- Entry Form -->
       <div class="card p-5 mb-6 border border-slate-200">
         <div class="flex justify-between items-center mb-4">
-    <h2 class="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">
-      New Attendance Entry
-    </h2>
-    <button
-      id="holidayToggleBtn"
-      type="button"
-      onclick="toggleHolidayList()"
-      class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline"
-    >
-      View Public Holidays
-    </button>
-  </div>
+          <h2
+            class="text-xs font-black text-slate-500 uppercase tracking-[0.2em]"
+          >
+            New Attendance Entry
+          </h2>
+          <button
+            id="holidayToggleBtn"
+            type="button"
+            onclick="toggleHolidayList()"
+            class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline"
+          >
+            View Public Holidays
+          </button>
+        </div>
         <div class="grid grid-cols-2 md:flex md:flex-wrap gap-4 items-end">
           <div class="input-group flex-1 min-w-[140px]">
             <label>Selection Date</label
@@ -900,7 +902,6 @@
               placeholder="Select Date"
               class="input-field bg-[#eff6ff] border-[#1d4ed8]/20"
             />
-           
           </div>
           <div class="input-group flex-1 min-w-[120px]">
             <label>Status</label>
@@ -986,11 +987,12 @@
               onclick="saveAllToFirestore()"
               class="text-[10px] bg-white text-[#1e3a5f] px-5 py-2 rounded-lg font-black uppercase hover:bg-green-600 hover:text-white transition-all shadow-lg active:scale-95"
             >
-              Save 
+              Save
             </button>
             <button
-              onclick="clearTable()" 
-              class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold uppercase">
+              onclick="clearTable()"
+              class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold uppercase"
+            >
               Clear All
             </button>
           </div>
@@ -1022,7 +1024,7 @@
             <tfoot class="bg-[#1e3a5f]/5 font-black">
               <tr>
                 <td colspan="4" class="p-3 text-right uppercase">
-                  Page Totals:
+                    Grand Total:
                 </td>
                 <td class="p-3 text-center text-[#1e3a5f]" id="totalHrs">0</td>
                 <td class="p-3 text-center text-orange-600" id="totalHoli">
@@ -1150,151 +1152,196 @@
           isSitesLoaded = true;
         let datePicker, editQueryPicker;
 
-
         function clearTable() {
-    // টেবিলের বডি সিলেক্ট করা হচ্ছে
-    const tableBody = document.getElementById("attendanceBody");
-    
-    if (tableBody) {
-        // টেবিলের ভেতরের সব রো (Rows) খালি করে দেওয়া হচ্ছে
-        tableBody.innerHTML = ""; 
-        
-        // ইউজারকে জানানোর জন্য একটি ছোট টোস্ট মেসেজ
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'info',
-            title: 'Table cleared from view',
-            showConfirmButton: false,
-            timer: 1500
-        });
-    } else {
-        console.warn("Table body with id 'attendanceBody' not found!");
-    }
-}
+          // টেবিলের বডি সিলেক্ট করা হচ্ছে
+          const tableBody = document.getElementById("attendanceBody");
+
+          if (tableBody) {
+            // টেবিলের ভেতরের সব রো (Rows) খালি করে দেওয়া হচ্ছে
+            tableBody.innerHTML = "";
+
+            // ইউজারকে জানানোর জন্য একটি ছোট টোস্ট মেসেজ
+            Swal.fire({
+              toast: true,
+              position: "top-end",
+              icon: "info",
+              title: "Table cleared from view",
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          } else {
+            console.warn("Table body with id 'attendanceBody' not found!");
+          }
+        }
 
         /**
          * বাল্ক এন্ট্রি ফাংশন: সকল এমপ্লয়িকে একসাথে লিস্টে যোগ করার জন্য
          */
         async function bulkEntry() {
-  console.log("bulkEntry called, employees:", employees.length);
-  try {
-    if (!employees || employees.length === 0) {
-      return Swal.fire({
-        title: "No Employees",
-        text: "Employee list is not loaded yet.",
-        icon: "error",
-        width: "320px",
-      });
-    }
-
-    const initialDate = document.getElementById("attDate").value || "";
-    const initialSite = document.getElementById("sideName").value || "";
-    const initialStatus = document.getElementById("attStatus").value || "PRESENT";
-
-    // Check if there are any cook employees
-    const hasCooks = employees.some((emp) =>
-      (emp.designation || "").toLowerCase().includes("cook"),
-    );
-
-    // Include Kitchen in site options if there are cooks
-    const availableSites = [...currentSites];
-    if (hasCooks && !availableSites.includes("Kitchen")) {
-      availableSites.push("Kitchen");
-    }
-
-    // --- পরিবর্তন ১: ডিফল্টভাবে "Select Site" সিলেক্টেড থাকবে ---
-    const siteOptions = availableSites.length
-      ? availableSites
-          .map(
-            (s) => `<option value="${s}">${s}</option>`,
-          )
-          .join("")
-      : `<option value="" disabled>No sites loaded</option>`;
-
-    const buildEmployeeRows = (selectedDate, filterText = "") => {
-      const filteredEmployees = employees.filter((emp) => {
-        if (!filterText) return true;
-        const searchText = filterText.toLowerCase();
-        return (
-          emp.id.toLowerCase().includes(searchText) ||
-          emp.name.toLowerCase().includes(searchText) ||
-          (emp.designation || "").toLowerCase().includes(searchText)
-        );
-      });
-
-      const rows = filteredEmployees
-        .map((emp, index) => {
-          const fId = normalizeEmpId(emp.id);
-          const isAlreadyExists = selectedDate
-            ? attendanceData.some(
-                (d) =>
-                  normalizeEmpId(d.empId) === fId &&
-                  d.date === selectedDate,
-              ) ||
-              currentMonthAttendance.some(
-                (s) =>
-                  normalizeEmpId(s.ID || s.empId) === fId &&
-                  s.DATE === selectedDate,
-              )
-            : false;
-
-          if (isAlreadyExists) {
-            return "";
-          }
-
-          // মূল ইনডেক্স ধরে রাখার জন্য
-          const actualIndex = employees.indexOf(emp);
-
-          return `
-            <div class="bulk-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 10px 8px; border-radius: 8px; transition: background-color 0.2s ease; background: rgba(0, 33, 71, 0.05); border: 1px solid rgba(255, 215, 0, 0.1); cursor: default;" onclick="event.stopPropagation();">
-              <input type="checkbox" class="emp-checkbox" id="emp_${actualIndex}" value="${actualIndex}" style="margin: 0; flex-shrink: 0; width: 20px; height: 20px; accent-color: #002147;" onclick="event.stopPropagation();" />
-              <label style="flex: 1; min-width: 0; font-size: 15px; line-height: 1.6; text-align: left; color: #ffffff; cursor: default;">
-                ${fId} - ${emp.name} ${emp.designation ? `(${emp.designation})` : ""}
-              </label>
-            </div>
-          `;
-        })
-        .join("");
-      const container = document.getElementById("employeeCheckboxes");
-      if (container) {
-        container.innerHTML = rows;
-        attachCheckboxHighlightHandlers();
-      }
-    };
-
-    const updateBulkRowHighlight = (checkbox) => {
-      const row = checkbox.closest(".bulk-row");
-      if (!row) return;
-      row.style.backgroundColor = checkbox.checked
-        ? "rgba(255, 215, 0, 0.15)"
-        : "rgba(0, 33, 71, 0.05)";
-    };
-
-    const attachCheckboxHighlightHandlers = () => {
-      document
-        .querySelectorAll('#employeeCheckboxes input[type="checkbox"]')
-        .forEach((checkbox) => {
-          checkbox.addEventListener("change", () => {
-            updateBulkRowHighlight(checkbox);
-            
-            // --- পরিবর্তন ২: একা কেউ সিলেক্ট হলে এবং সে কুক হলে অটো কিচেন সিলেক্ট হবে ---
-            const checkedBoxes = document.querySelectorAll('.emp-checkbox:checked');
-            if (checkedBoxes.length === 1) {
-                const empIndex = checkedBoxes[0].value;
-                const emp = employees[empIndex];
-                if ((emp.designation || "").toLowerCase().includes("cook")) {
-                    const siteSelect = document.getElementById("bulkSideName");
-                    if (siteSelect) siteSelect.value = "Kitchen";
-                }
+          console.log("bulkEntry called, employees:", employees.length);
+          try {
+            if (!employees || employees.length === 0) {
+              return Swal.fire({
+                title: "No Employees",
+                text: "Employee list is not loaded yet.",
+                icon: "error",
+                width: "320px",
+              });
             }
-          });
-          updateBulkRowHighlight(checkbox);
-        });
-    };
 
-    const modalHtml = `
-      <div style="font-family: Inter, sans-serif; text-align: left; background: linear-gradient(135deg, #002147 0%, #001a38 100%); color: #ffffff; padding: 20px; border-radius: 12px;">
+            const initialDate = document.getElementById("attDate").value || "";
+            const initialSite = document.getElementById("sideName").value || "";
+            const initialStatus =
+              document.getElementById("attStatus").value || "PRESENT";
+
+            // Check if there are any cook employees
+            const hasCooks = employees.some((emp) =>
+              (emp.designation || "").toLowerCase().includes("cook"),
+            );
+
+            // Include Kitchen in site options if there are cooks
+            const availableSites = [...currentSites];
+            if (hasCooks && !availableSites.includes("Kitchen")) {
+              availableSites.push("Kitchen");
+            }
+
+            // --- পরিবর্তন ১: ডিফল্টভাবে "Select Site" সিলেক্টেড থাকবে ---
+            const siteOptions = availableSites.length
+              ? availableSites
+                  .map((s) => `<option value="${s}">${s}</option>`)
+                  .join("")
+              : `<option value="" disabled>No sites loaded</option>`;
+
+            const selectedEmployeeIndexes = new Set();
+
+            const updateBulkSelectionCount = () => {
+              const countEl = document.getElementById("bulkSelectionCount");
+              if (countEl) {
+                countEl.textContent = `Selected: ${selectedEmployeeIndexes.size}`;
+              }
+            };
+
+            const updateBulkRowHighlight = (checkbox) => {
+              const row = checkbox.closest(".bulk-row");
+              if (!row) return;
+              row.style.backgroundColor = checkbox.checked
+                ? "rgba(255, 215, 0, 0.15)"
+                : "rgba(0, 33, 71, 0.05)";
+            };
+
+            const attachCheckboxHighlightHandlers = () => {
+              document
+                .querySelectorAll('#employeeCheckboxes input[type="checkbox"]')
+                .forEach((checkbox) => {
+                  checkbox.addEventListener("change", () => {
+                    const index = parseInt(checkbox.value, 10);
+                    if (checkbox.checked) {
+                      selectedEmployeeIndexes.add(index);
+                    } else {
+                      selectedEmployeeIndexes.delete(index);
+                    }
+                    updateBulkRowHighlight(checkbox);
+                    updateBulkSelectionCount();
+
+                    const filterInput =
+                      document.getElementById("bulkFilterInput");
+                    if (filterInput) {
+                      filterInput.value = "";
+                      filterInput.focus();
+                    }
+                    const dateInput = document.getElementById("bulkAttDate");
+                    const currentDate = dateInput ? dateInput.value : "";
+                    buildEmployeeRows(currentDate, "");
+
+                    const checkedBoxes = document.querySelectorAll(
+                      ".emp-checkbox:checked",
+                    );
+                    if (checkedBoxes.length === 1) {
+                      const empIndex = checkedBoxes[0].value;
+                      const emp = employees[empIndex];
+                      if (
+                        (emp.designation || "").toLowerCase().includes("cook")
+                      ) {
+                        const siteSelect =
+                          document.getElementById("bulkSideName");
+                        if (siteSelect) siteSelect.value = "Kitchen";
+                      }
+                    }
+                  });
+
+                  checkbox.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      checkbox.click();
+                      const filterInput =
+                        document.getElementById("bulkFilterInput");
+                      if (filterInput) {
+                        filterInput.focus();
+                      }
+                    }
+                  });
+
+                  updateBulkRowHighlight(checkbox);
+                });
+            };
+
+            const buildEmployeeRows = (selectedDate, filterText = "") => {
+              const filteredEmployees = employees.filter((emp) => {
+                if (!filterText) return true;
+                const searchText = filterText.toLowerCase();
+                return (
+                  emp.id.toLowerCase().includes(searchText) ||
+                  emp.name.toLowerCase().includes(searchText) ||
+                  (emp.designation || "").toLowerCase().includes(searchText)
+                );
+              });
+
+              const rows = filteredEmployees
+                .map((emp) => {
+                  const fId = normalizeEmpId(emp.id);
+                  const isAlreadyExists = selectedDate
+                    ? attendanceData.some(
+                        (d) =>
+                          normalizeEmpId(d.empId) === fId &&
+                          d.date === selectedDate,
+                      ) ||
+                      currentMonthAttendance.some(
+                        (s) =>
+                          normalizeEmpId(s.ID || s.empId) === fId &&
+                          s.DATE === selectedDate,
+                      )
+                    : false;
+
+                  if (isAlreadyExists) {
+                    return "";
+                  }
+
+                  const actualIndex = employees.indexOf(emp);
+
+                  return `
+              <div class="bulk-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 10px 8px; border-radius: 8px; transition: background-color 0.2s ease; background: rgba(0, 33, 71, 0.05); border: 1px solid rgba(255, 215, 0, 0.1); cursor: default;" onclick="event.stopPropagation();">
+                <input type="checkbox" class="emp-checkbox" id="emp_${actualIndex}" value="${actualIndex}" style="margin: 0; flex-shrink: 0; width: 20px; height: 20px; accent-color: #002147;" ${selectedEmployeeIndexes.has(actualIndex) ? "checked" : ""} onclick="event.stopPropagation();" />
+                <label style="flex: 1; min-width: 0; font-size: 15px; line-height: 1.6; text-align: left; color: #ffffff; cursor: default;">
+                  ${fId} - ${emp.name} ${emp.designation ? `(${emp.designation})` : ""}
+                </label>
+              </div>
+            `;
+                })
+                .join("");
+              const container = document.getElementById("employeeCheckboxes");
+              if (container) {
+                container.innerHTML = rows;
+                attachCheckboxHighlightHandlers();
+              }
+              updateBulkSelectionCount();
+            };
+
+            const modalHtml = `
+        <div style="font-family: Inter, sans-serif; text-align: left; background: linear-gradient(135deg, #002147 0%, #001a38 100%); color: #ffffff; padding: 20px; border-radius: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; color: #ffd700;">ALL EMPLOYEES ENTRY & SELECTION FORM</h3>
+          <button type="button" id="closeBulkModalBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease; cursor: pointer;">✕</button>
+        </div>
         <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px;">
           <div>
             <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">Selection Date</label>
@@ -1325,225 +1372,290 @@
             <button type="button" id="selectAllBtn" style="background: #002147; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">All Select</button>
             <button type="button" id="unselectAllBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">Unselect All</button>
           </div>
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
-            <button type="button" id="confirmBulkBtn" style="background: #002147; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;"> + Add </button>
-            <button type="button" id="cancelBulkBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">Cancel</button>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: flex-end;">
+            <span id="bulkSelectionCount" style="color: #ffd700; font-size: 0.95rem; font-weight: 700; min-width: 120px; text-align: left;">Selected: 0</span>
+             <button type="button" id="confirmBulkBtn" style="background: #002147; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;"> + Add </button>
+              <button type="button" id="cancelBulkBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">Cancel</button>
+            </div>
+            
           </div>
+          <div id="employeeCheckboxes" style="max-height: 400px; overflow-y: auto; text-align: left; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.2);"></div>
         </div>
-        <div id="employeeCheckboxes" style="max-height: 400px; overflow-y: auto; text-align: left; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.2);"></div>
-      </div>
-    `;
+      `;
 
-    const result = await Swal.fire({
-      title: "ALL EMPLOYEES ENTRY & SELECTION FORM ",
-      html: modalHtml,
-      width: 750,
-      showConfirmButton: false,
-      showCancelButton: false,
-      background: "linear-gradient(135deg, #002147 0%, #001a38 100%)",
-      color: "#ffffff",
-      customClass: {
-        popup: "bulk-modal-popup",
-        title: "bulk-modal-title",
-      },
-      didOpen: () => {
-        buildEmployeeRows(initialDate);
+            const result = await Swal.fire({
+              title: "",
+              html: modalHtml,
+              width: 750,
+              showConfirmButton: false,
+              showCancelButton: false,
+              allowOutsideClick: false,
+              allowEscapeKey: false,
+              background: "linear-gradient(135deg, #002147 0%, #001a38 100%)",
+              color: "#ffffff",
+              customClass: {
+                popup: "bulk-modal-popup",
+                title: "bulk-modal-title",
+              },
+              didOpen: () => {
+                buildEmployeeRows(initialDate);
 
-        const dateInput = document.getElementById("bulkAttDate");
-        const filterInput = document.getElementById("bulkFilterInput");
-        const selectAllBtn = document.getElementById("selectAllBtn");
-        const unselectAllBtn = document.getElementById("unselectAllBtn");
-        const confirmBulkBtn = document.getElementById("confirmBulkBtn");
-        const cancelBulkBtn = document.getElementById("cancelBulkBtn");
+                const dateInput = document.getElementById("bulkAttDate");
+                const filterInput = document.getElementById("bulkFilterInput");
+                const selectAllBtn = document.getElementById("selectAllBtn");
+                const unselectAllBtn =
+                  document.getElementById("unselectAllBtn");
+                const confirmBulkBtn =
+                  document.getElementById("confirmBulkBtn");
+                const cancelBulkBtn = document.getElementById("cancelBulkBtn");
+                const closeBulkModalBtn =
+                  document.getElementById("closeBulkModalBtn");
 
-        if (dateInput) {
-          flatpickr(dateInput, {
-            dateFormat: "Y-m-d",
-            altInput: true,
-            altFormat: "F j, Y",
-            defaultDate: initialDate || null,
-            onChange: (selectedDates, dateStr) => {
-              const currentFilter = filterInput ? filterInput.value : "";
-              buildEmployeeRows(dateStr, currentFilter);
-            },
-          });
-        }
+                if (dateInput) {
+                  flatpickr(dateInput, {
+                    dateFormat: "Y-m-d",
+                    altInput: true,
+                    altFormat: "F j, Y",
+                    defaultDate: initialDate || null,
+                    onChange: (selectedDates, dateStr) => {
+                      const currentFilter = filterInput
+                        ? filterInput.value
+                        : "";
+                      buildEmployeeRows(dateStr, currentFilter);
+                    },
+                  });
+                }
 
-        if (filterInput) {
-          filterInput.addEventListener("input", (event) => {
-            const currentDate = dateInput ? dateInput.value : "";
-            buildEmployeeRows(currentDate, event.target.value);
-          });
-        }
+                if (filterInput) {
+                  filterInput.addEventListener("input", (event) => {
+                    const currentDate = dateInput ? dateInput.value : "";
+                    buildEmployeeRows(currentDate, event.target.value);
+                  });
 
-        if (selectAllBtn) {
-          selectAllBtn.addEventListener("click", () => {
-            document
-              .querySelectorAll('#employeeCheckboxes input[type="checkbox"]:not(:disabled)')
-              .forEach((cb) => {
-                cb.checked = true;
-                updateBulkRowHighlight(cb);
+                  filterInput.addEventListener("keydown", (event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      const firstCheckbox = document.querySelector(
+                        '#employeeCheckboxes input[type="checkbox"]',
+                      );
+                      if (firstCheckbox) {
+                        firstCheckbox.focus();
+                      }
+                    }
+                  });
+                }
+
+                if (selectAllBtn) {
+                  selectAllBtn.addEventListener("click", () => {
+                    document
+                      .querySelectorAll(
+                        '#employeeCheckboxes input[type="checkbox"]:not(:disabled)',
+                      )
+                      .forEach((cb) => {
+                        cb.checked = true;
+                        selectedEmployeeIndexes.add(parseInt(cb.value, 10));
+                        updateBulkRowHighlight(cb);
+                      });
+                    updateBulkSelectionCount();
+                  });
+                }
+
+                if (unselectAllBtn) {
+                  unselectAllBtn.addEventListener("click", () => {
+                    selectedEmployeeIndexes.clear();
+                    document
+                      .querySelectorAll(
+                        '#employeeCheckboxes input[type="checkbox"]',
+                      )
+                      .forEach((cb) => {
+                        cb.checked = false;
+                        updateBulkRowHighlight(cb);
+                      });
+                    updateBulkSelectionCount();
+                  });
+                }
+
+                if (closeBulkModalBtn) {
+                  closeBulkModalBtn.addEventListener("click", () => {
+                    Swal.close();
+                  });
+                }
+
+                if (confirmBulkBtn) {
+                  confirmBulkBtn.addEventListener("click", () => {
+                    Swal.clickConfirm();
+                  });
+                }
+
+                if (cancelBulkBtn) {
+                  cancelBulkBtn.addEventListener("click", () => {
+                    selectedEmployeeIndexes.clear();
+                    document
+                      .querySelectorAll(
+                        '#employeeCheckboxes input[type="checkbox"]',
+                      )
+                      .forEach((cb) => {
+                        cb.checked = false;
+                        updateBulkRowHighlight(cb);
+                      });
+                    updateBulkSelectionCount();
+                    const filterInput =
+                      document.getElementById("bulkFilterInput");
+                    if (filterInput) {
+                      filterInput.value = "";
+                    }
+                    const dateInput = document.getElementById("bulkAttDate");
+                    const currentDate = dateInput ? dateInput.value : "";
+                    buildEmployeeRows(currentDate, "");
+                  });
+                }
+              },
+              preConfirm: () => {
+                const selectedDate =
+                  document.getElementById("bulkAttDate").value;
+                const selectedSite =
+                  document.getElementById("bulkSideName").value;
+                const selectedStatus =
+                  document.getElementById("bulkStatus").value;
+
+                if (!selectedDate || !selectedSite) {
+                  Swal.showValidationMessage(
+                    "Please select Selection Date and Assigned Project.",
+                  );
+                  return false;
+                }
+
+                return {
+                  date: selectedDate,
+                  site: selectedSite,
+                  status: selectedStatus,
+                };
+              },
+            });
+
+            if (!result.isConfirmed || !result.value) return;
+
+            const {
+              date: selectedDate,
+              site: selectedSite,
+              status: selectedStatus,
+            } = result.value;
+            const selectedIndexes = Array.from(selectedEmployeeIndexes);
+
+            if (selectedIndexes.length === 0) {
+              return Swal.fire({
+                title: "No Selection",
+                text: "Please select at least one employee.",
+                icon: "warning",
+                width: "320px",
               });
-          });
-        }
+            }
 
-        if (unselectAllBtn) {
-          unselectAllBtn.addEventListener("click", () => {
-            document
-              .querySelectorAll('#employeeCheckboxes input[type="checkbox"]')
-              .forEach((cb) => {
-                cb.checked = false;
-                updateBulkRowHighlight(cb);
+            let added = 0;
+            let skipped = 0;
+            const dateObj = new Date(selectedDate);
+            const isSunday = dateObj.getDay() === 0;
+            const isInHoli = HOLIDAY_LIST.includes(selectedDate);
+
+            selectedIndexes.forEach((index) => {
+              const emp = employees[index];
+              const fId = normalizeEmpId(emp.id);
+
+              const isLocal = attendanceData.some(
+                (d) =>
+                  normalizeEmpId(d.empId) === fId && d.date === selectedDate,
+              );
+              const isServer = currentMonthAttendance.some(
+                (s) =>
+                  normalizeEmpId(s.ID || s.empId) === fId &&
+                  s.DATE === selectedDate,
+              );
+
+              if (isLocal || isServer) {
+                skipped++;
+                return;
+              }
+
+              const salary = parseFloat(emp.salary) || 0;
+              const designation = (emp.designation || "").toLowerCase();
+              let hWork = "";
+              let sWork = "";
+              let rem = "NORMAL WORK";
+              let statusValue = selectedStatus;
+
+              if (selectedStatus === "ABSENT") {
+                rem = "ABSENT";
+                hWork = 0;
+                sWork = 0;
+              } else if (selectedStatus === "PRESENT") {
+                if (designation.includes("cook")) {
+                  rem = "NORMAL WORK";
+                  hWork = 0;
+                  sWork = 0;
+                } else if (isSunday) {
+                  rem = "Sunday";
+                  sWork =
+                    salary > 0
+                      ? parseFloat(((salary / 26) * 1.5).toFixed(2))
+                      : 0;
+                } else if (isInHoli) {
+                  rem = "Public Holiday";
+                  hWork =
+                    salary > 0
+                      ? parseFloat(((salary / 26) * 1.5).toFixed(2))
+                      : 0;
+                } else {
+                  rem = "NORMAL WORK";
+                  hWork = 0;
+                  sWork = 0;
+                }
+              } else {
+                rem = "NORMAL WORK";
+                hWork = 0;
+                sWork = 0;
+              }
+
+              // --- পরিবর্তন ৩: ডাটা সেভ করার সময় কুকদের জন্য কিচেন নিশ্চিত করা ---
+              const siteValue = designation.includes("cook")
+                ? "Kitchen"
+                : selectedSite;
+
+              attendanceData.push({
+                id: Date.now() + Math.random(),
+                slNo: slCount++,
+                date: selectedDate,
+                empId: fId,
+                empName: emp.name,
+                period: emp.period || "",
+                designation: emp.designation,
+                workingAs: emp.workingAs || emp.designation,
+                joiningDate: emp.joining || "",
+                passport: emp.passport || "",
+                salary: emp.salary || 0,
+                otRate: emp.otRate || 0,
+                ot: 0,
+                site: siteValue,
+                status: statusValue,
+                holidayWork: hWork,
+                sundayWork: sWork,
+                amount: 0,
+                remark: rem,
               });
-          });
+              added++;
+            });
+
+            renderTable();
+            Swal.fire({
+              title: "Done!",
+              text: `${added} employee(s) added${skipped > 0 ? `, ${skipped} already existed` : ""}।`,
+              icon: "success",
+              timer: 2500,
+            });
+          } catch (error) {
+            console.error("Error in bulkEntry:", error);
+            Swal.fire("Error", error.message, "error");
+          }
         }
-
-        if (confirmBulkBtn) {
-          confirmBulkBtn.addEventListener("click", () => {
-            Swal.clickConfirm();
-          });
-        }
-
-        if (cancelBulkBtn) {
-          cancelBulkBtn.addEventListener("click", () => {
-            Swal.close();
-          });
-        }
-      },
-      preConfirm: () => {
-        const selectedDate = document.getElementById("bulkAttDate").value;
-        const selectedSite = document.getElementById("bulkSideName").value;
-        const selectedStatus = document.getElementById("bulkStatus").value;
-
-        if (!selectedDate || !selectedSite) {
-          Swal.showValidationMessage("Please select Selection Date and Assigned Project.");
-          return false;
-        }
-
-        return {
-          date: selectedDate,
-          site: selectedSite,
-          status: selectedStatus,
-        };
-      },
-    });
-
-    if (!result.isConfirmed || !result.value) return;
-
-    const {
-      date: selectedDate,
-      site: selectedSite,
-      status: selectedStatus,
-    } = result.value;
-    const selectedIndexes = Array.from(
-      document.querySelectorAll('#employeeCheckboxes input[type="checkbox"]:checked:not(:disabled)'),
-    ).map((cb) => parseInt(cb.value, 10));
-
-    if (selectedIndexes.length === 0) {
-      return Swal.fire({
-        title: "No Selection",
-        text: "Please select at least one employee.",
-        icon: "warning",
-        width: "320px",
-      });
-    }
-
-    let added = 0;
-    let skipped = 0;
-    const dateObj = new Date(selectedDate);
-    const isSunday = dateObj.getDay() === 0;
-    const isInHoli = HOLIDAY_LIST.includes(selectedDate);
-
-    selectedIndexes.forEach((index) => {
-      const emp = employees[index];
-      const fId = normalizeEmpId(emp.id);
-
-      const isLocal = attendanceData.some(
-        (d) => normalizeEmpId(d.empId) === fId && d.date === selectedDate,
-      );
-      const isServer = currentMonthAttendance.some(
-        (s) =>
-          normalizeEmpId(s.ID || s.empId) === fId &&
-          s.DATE === selectedDate,
-      );
-
-      if (isLocal || isServer) {
-        skipped++;
-        return;
-      }
-
-      const salary = parseFloat(emp.salary) || 0;
-      const designation = (emp.designation || "").toLowerCase();
-      let hWork = "";
-      let sWork = "";
-      let rem = "NORMAL WORK";
-      let statusValue = selectedStatus;
-
-      if (selectedStatus === "ABSENT") {
-        rem = "ABSENT";
-        hWork = 0;
-        sWork = 0;
-      } else if (selectedStatus === "PRESENT") {
-        if (designation.includes("cook")) {
-          rem = "NORMAL WORK";
-          hWork = 0;
-          sWork = 0;
-        } else if (isSunday) {
-          rem = "Sunday";
-          sWork = salary > 0 ? parseFloat(((salary / 26) * 1.5).toFixed(2)) : 0;
-        } else if (isInHoli) {
-          rem = "Public Holiday";
-          hWork = salary > 0 ? parseFloat(((salary / 26) * 1.5).toFixed(2)) : 0;
-        } else {
-          rem = "NORMAL WORK";
-          hWork = 0;
-          sWork = 0;
-        }
-      } else {
-        rem = "NORMAL WORK";
-        hWork = 0;
-        sWork = 0;
-      }
-
-      // --- পরিবর্তন ৩: ডাটা সেভ করার সময় কুকদের জন্য কিচেন নিশ্চিত করা ---
-      const siteValue = designation.includes("cook") ? "Kitchen" : selectedSite;
-
-      attendanceData.push({
-        id: Date.now() + Math.random(),
-        slNo: slCount++,
-        date: selectedDate,
-        empId: fId,
-        empName: emp.name,
-        period: emp.period || "",
-        designation: emp.designation,
-        workingAs: emp.workingAs || emp.designation,
-        joiningDate: emp.joining || "",
-        passport: emp.passport || "",
-        salary: emp.salary || 0,
-        otRate: emp.otRate || 0,
-        ot: 0,
-        site: siteValue,
-        status: statusValue,
-        holidayWork: hWork,
-        sundayWork: sWork,
-        amount: 0,
-        remark: rem,
-      });
-      added++;
-    });
-
-    renderTable();
-    Swal.fire({
-      title: "Done!",
-      text: `${added} employee(s) added${skipped > 0 ? `, ${skipped} already existed` : ""}।`,
-      icon: "success",
-      timer: 2500,
-    });
-  } catch (error) {
-    console.error("Error in bulkEntry:", error);
-    Swal.fire("Error", error.message, "error");
-  }
-}
         let editModeId = null;
         let currentMonthAttendance = [];
 
@@ -1570,13 +1682,13 @@
 
                 // SVG ????? ??? ???
                 dayElem.innerHTML += `
-                              <svg viewBox="0 0 100 100" class="holiday-label-svg">
-                                  <circle cx="50" cy="50" r="45" fill="rgba(239, 68, 68, 0.05)" stroke="#ef4444" stroke-width="5" />
-                                  <path id="curve${dayElem.dateObj.getDate()}" d="M 12,55 A 38,38 0 0,1 88,55" fill="transparent" />
-                                  <text style="fill: #ef4444; font-weight: 800; font-size: 10px;"><textPath xlink:href="#curve${dayElem.dateObj.getDate()}" startOffset="50%" text-anchor="middle">PUBLIC HOLIDAY</textPath></text>
-                                  <text x="50" y="62" style="fill: #ef4444; font-weight: bold; text-anchor: middle; font-size: 38px;">${dayElem.dateObj.getDate()}</text>
-                              </svg>
-                          `;
+                                <svg viewBox="0 0 100 100" class="holiday-label-svg">
+                                    <circle cx="50" cy="50" r="45" fill="rgba(239, 68, 68, 0.05)" stroke="#ef4444" stroke-width="5" />
+                                    <path id="curve${dayElem.dateObj.getDate()}" d="M 12,55 A 38,38 0 0,1 88,55" fill="transparent" />
+                                    <text style="fill: #ef4444; font-weight: 800; font-size: 10px;"><textPath xlink:href="#curve${dayElem.dateObj.getDate()}" startOffset="50%" text-anchor="middle">PUBLIC HOLIDAY</textPath></text>
+                                    <text x="50" y="62" style="fill: #ef4444; font-weight: bold; text-anchor: middle; font-size: 38px;">${dayElem.dateObj.getDate()}</text>
+                                </svg>
+                            `;
               } else if (isSunday) {
                 dayElem.classList.add("sunday-date");
               }
@@ -1602,7 +1714,6 @@
 
           refreshAllData(false);
         };
-        
 
         // --- ???? ??????? ???? ---
         async function refreshAllData(isManual) {
@@ -2077,23 +2188,23 @@
                 showConfirmButton: false,
               });
             }
-if (isManual && btn) {
-        btn.innerHTML = `Refresh Database`;
-        btn.disabled = false;
-        
-        // সিঙ্ক সাকসেস মেসেজ দেখাবে
-        await Swal.fire({
-          title: "Synced & Refreshing!",
-          text: "Server Data Updated. Page will reload now.",
-          icon: "success",
-          width: "300px",
-          timer: 1500,
-          showConfirmButton: false,
-        });
+            if (isManual && btn) {
+              btn.innerHTML = `Refresh Database`;
+              btn.disabled = false;
 
-        // এই লাইনটি পুরো পেজকে রিফ্রেশ করে দিবে
-        window.location.reload(); 
-      }
+              // সিঙ্ক সাকসেস মেসেজ দেখাবে
+              await Swal.fire({
+                title: "Synced & Refreshing!",
+                text: "Server Data Updated. Page will reload now.",
+                icon: "success",
+                width: "300px",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+
+              // এই লাইনটি পুরো পেজকে রিফ্রেশ করে দিবে
+              window.location.reload();
+            }
             renderHolidayInfo();
           } catch (err) {
             console.error("Critical Sync Error:", err);
@@ -2406,30 +2517,32 @@ if (isManual && btn) {
 
           el.innerText = `Public Holidays: ${formatted}`;
         }
-       function toggleHolidayList() {
-  // HOLIDAY_LIST অ্যারে থেকে তারিখগুলোকে সুন্দরভাবে সাজিয়ে নিচ্ছি
-  const holidayContent = HOLIDAY_LIST.length > 0 
-    ? `<ul style="text-align: left; list-style: none; padding: 0;">
-        ${HOLIDAY_LIST.map(date => 
-          `<li style="padding: 8px; border-bottom: 1px solid #eee; color: #333;">
-            📅 ${new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </li>`
-        ).join('')}
-       </ul>`
-    : '<p style="color: #666;">No holidays listed.</p>';
+        function toggleHolidayList() {
+          // HOLIDAY_LIST অ্যারে থেকে তারিখগুলোকে সুন্দরভাবে সাজিয়ে নিচ্ছি
+          const holidayContent =
+            HOLIDAY_LIST.length > 0
+              ? `<ul style="text-align: left; list-style: none; padding: 0;">
+          ${HOLIDAY_LIST.map(
+            (date) =>
+              `<li style="padding: 8px; border-bottom: 1px solid #eee; color: #333;">
+              📅 ${new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
+            </li>`,
+          ).join("")}
+         </ul>`
+              : '<p style="color: #666;">No holidays listed.</p>';
 
-  Swal.fire({
-    title: '<span style="color: #002147;">Public Holiday List</span>',
-    html: `<div style="max-height: 300px; overflow-y: auto;">${holidayContent}</div>`,
-    icon: 'info',
-    confirmButtonText: 'Close',
-    confirmButtonColor: '#002147',
-    width: '400px',
-    customClass: {
-      popup: 'rounded-xl'
-    }
-  });
-}
+          Swal.fire({
+            title: '<span style="color: #002147;">Public Holiday List</span>',
+            html: `<div style="max-height: 300px; overflow-y: auto;">${holidayContent}</div>`,
+            icon: "info",
+            confirmButtonText: "Close",
+            confirmButtonColor: "#002147",
+            width: "400px",
+            customClass: {
+              popup: "rounded-xl",
+            },
+          });
+        }
 
         // --- ???? ? ???? ????? ---
         async function fetchDataForEdit() {
@@ -2493,23 +2606,23 @@ if (isManual && btn) {
                 )
                 .join("");
               return `
-                                  <tr class="hover:bg-slate-50 transition-colors">
-                                      <td class="p-3 border font-bold text-slate-700">${item.ID}</td>
-                                      <td class="p-3 border uppercase font-medium text-slate-600">${item.EMPLOYEE_NAME}</td>
-                                      <td class="p-3 border text-slate-50">${item.DATE}</td>
-                                      <td class="p-3 border text-center text-green-600 font-bold">${item.AMOUNT || 0}</td>
-                                      <td class="p-3 border">
-                                          <select onchange="updateLocalServerData(${idx}, 'SITE_NAME', this.value)" class="w-full bg-orange-50 border-orange-200 text-[#1e3a5f] p-1.5 rounded font-bold text-xs outline-none">
-                                              ${siteOptions}
-                                          </select>
-                                      </td>
-                                      <td class="p-3 border">
-                                          <input type="number" step="0.5" value="${item.DAILY_OT}" onchange="updateLocalServerData(${idx}, 'DAILY_OT', parseFloat(this.value))" class="w-full bg-orange-50 border-orange-200 p-1.5 rounded text-center font-bold text-xs outline-none">
-                                      </td>
-                                      <td class="p-3 border text-center text-slate-500 font-bold">${item.HOLIDAY_WORK || 0}</td>
-                                      <td class="p-3 border text-center text-slate-500 font-bold">${item.SUNDAY_WORK || 0}</td>
-                                      <td class="p-3 italic text-slate-400">${item.REMARK || ""}</td>
-                                  </tr>`;
+                                    <tr class="hover:bg-slate-50 transition-colors">
+                                        <td class="p-3 border font-bold text-slate-700">${item.ID}</td>
+                                        <td class="p-3 border uppercase font-medium text-slate-600">${item.EMPLOYEE_NAME}</td>
+                                        <td class="p-3 border text-slate-50">${item.DATE}</td>
+                                        <td class="p-3 border text-center text-green-600 font-bold">${item.AMOUNT || 0}</td>
+                                        <td class="p-3 border">
+                                            <select onchange="updateLocalServerData(${idx}, 'SITE_NAME', this.value)" class="w-full bg-orange-50 border-orange-200 text-[#1e3a5f] p-1.5 rounded font-bold text-xs outline-none">
+                                                ${siteOptions}
+                                            </select>
+                                        </td>
+                                        <td class="p-3 border">
+                                            <input type="number" step="0.5" value="${item.DAILY_OT}" onchange="updateLocalServerData(${idx}, 'DAILY_OT', parseFloat(this.value))" class="w-full bg-orange-50 border-orange-200 p-1.5 rounded text-center font-bold text-xs outline-none">
+                                        </td>
+                                        <td class="p-3 border text-center text-slate-500 font-bold">${item.HOLIDAY_WORK || 0}</td>
+                                        <td class="p-3 border text-center text-slate-500 font-bold">${item.SUNDAY_WORK || 0}</td>
+                                        <td class="p-3 italic text-slate-400">${item.REMARK || ""}</td>
+                                    </tr>`;
             })
             .join("");
         }
@@ -2778,26 +2891,26 @@ if (isManual && btn) {
             tSun += sundayWork;
 
             tbody.innerHTML += `
-                              <tr class="hover:bg-slate-50 border-b">
-                                  <td class="p-3">${item.slNo}</td>
-                                  <td class="p-3 font-bold">${item.date}</td>
-                                  <td class="p-3 font-black text-[#1e3a5f]">${normalizeEmpId(item.empId)}</td>
-                                  <td class="p-3 uppercase font-medium">${item.empName}</td>
-                                  <td class="p-3 text-center">${item.ot}</td>
-                                  <td class="p-3 text-center text-orange-600 font-bold">${holidayWork.toFixed(2)}</td>
-                                  <td class="p-3 text-center text-orange-600 font-bold">${sundayWork.toFixed(2)}</td>
-                                  <td class="p-3 text-[10px] uppercase">${item.site}</td>
-                                  <td class="p-3 text-center text-green-600 font-bold">${(item.amount || 0).toFixed(2)}</td>
-                                  <td class="p-3">
-                                      <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[9px] font-black">${item.status}</span>
-                                  </td>
-                                  <td class="p-3 italic text-slate-500 font-bold">${item.remark}</td>
-                                  <td class="p-3 text-center no-print flex gap-2 justify-center">
+                                <tr class="hover:bg-slate-50 border-b">
+                                    <td class="p-3">${item.slNo}</td>
+                                    <td class="p-3 font-bold">${item.date}</td>
+                                    <td class="p-3 font-black text-[#1e3a5f]">${normalizeEmpId(item.empId)}</td>
+                                    <td class="p-3 uppercase font-medium">${item.empName}</td>
+                                    <td class="p-3 text-center">${item.ot}</td>
+                                    <td class="p-3 text-center text-orange-600 font-bold">${holidayWork.toFixed(2)}</td>
+                                    <td class="p-3 text-center text-orange-600 font-bold">${sundayWork.toFixed(2)}</td>
+                                    <td class="p-3 text-[10px] uppercase">${item.site}</td>
+                                    <td class="p-3 text-center text-green-600 font-bold">${(item.amount || 0).toFixed(2)}</td>
+                                    <td class="p-3">
+                                        <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[9px] font-black">${item.status}</span>
+                                    </td>
+                                    <td class="p-3 italic text-slate-500 font-bold">${item.remark}</td>
+                                    <td class="p-3 text-center no-print flex gap-2 justify-center">
 
-                  <button onclick="editEntry('${rowId}')" class="text-blue-600 font-bold px-2 py-1 hover:bg-blue-50 rounded">Edit</button>
-                  <button onclick="confirmDelete('${rowId}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button>
-                                  </td>
-                              </tr>`;
+                    <button onclick="editEntry('${rowId}')" class="text-blue-600 font-bold px-2 py-1 hover:bg-blue-50 rounded">Edit</button>
+                    <button onclick="confirmDelete('${rowId}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button>
+                                    </td>
+                                </tr>`;
           });
 
           if (document.getElementById("totalHrs"))
@@ -3069,55 +3182,57 @@ if (isManual && btn) {
           }
         }
         function openFullPreview() {
-    const body = document.getElementById("fullPreviewBody"),
-          foot = document.getElementById("fullPreviewFoot");
+  const body = document.getElementById("fullPreviewBody");
+  const foot = document.getElementById("fullPreviewFoot");
 
-    // ১. চেক করুন ডেটা আছে কি না
-    if (!attendanceData || attendanceData.length === 0) {
-        Swal.fire("No Data", "Server is not available.", "warning");
-        return;
-    }
+  if (!attendanceData || attendanceData.length === 0) {
+    Swal.fire("No Data", "No attendance records found.", "warning");
+    return;
+  }
 
-    let tOt = 0, tHol = 0, tSun = 0;
+  let tOt = 0, tHol = 0, tSun = 0;
 
-    body.innerHTML = attendanceData.map((item) => {
-        // ডেটা যদি অবজেক্টে না থাকে তবে ব্ল্যাঙ্ক দেখাবে, তাই সুরক্ষা নিশ্চিত করা
-        const otVal = Number(item.ot) || 0;
-        const holVal = Number(item.holidayWork) || 0;
-        const sunVal = Number(item.sundayWork) || 0;
-        const empName = item.empName || "N/A";
-        const designation = item.workingAs || item.designation || "N/A"; // আপনার কি-এর নাম অনুযায়ী
+  body.innerHTML = attendanceData.map((item, index) => {
+    const otVal = parseFloat(item.ot) || 0;
+    const holVal = parseFloat(item.holidayWork) || 0;
+    const sunVal = parseFloat(item.sundayWork) || 0;
+    
+    tOt += otVal;
+    tHol += holVal;
+    tSun += sunVal;
 
-        tOt += otVal;
-        tHol += holVal;
-        tSun += sunVal;
+    const displayID = (typeof normalizeEmpId === "function") ? normalizeEmpId(item.empId) : item.empId;
 
-        return `<tr>
-            <td class="p-4 border">${item.slNo || ""}</td>
-            <td class="p-4 border font-bold">${item.date || ""}</td>
-            <td class="p-4 border font-black">${normalizeEmpId(item.empId)}</td>
-            <td class="p-4 border uppercase">${empName}</td>
-            <td class="p-4 border">${designation}</td>
-            <td class="p-4 border text-center font-bold">${otVal}</td>
-            <td class="p-4 border text-center text-orange-600 font-bold">${holVal}</td>
-            <td class="p-4 border text-center text-orange-600 font-bold">${sunVal}</td>
-            <td class="p-4 border uppercase text-[10px]">${item.site || ""}</td>
-            <td class="p-4 border text-center font-bold">${item.status || ""}</td>
-            <td class="p-4 border italic font-bold text-slate-500">${item.remark || ""}</td>
-        </tr>`;
-    }).join("");
+    // টেক্সট কালার নিশ্চিত করতে text-slate-900 এবং font-bold ব্যবহার করা হয়েছে
+    return `
+      <tr class="border-b border-gray-300">
+        <td class="p-4 border text-center text-slate-900">${item.slNo || (index + 1)}</td>
+        <td class="p-4 border font-bold text-slate-900">${item.date || ""}</td>
+        <td class="p-4 border font-black text-[#1e3a5f]">${displayID || ""}</td>
+        <td class="p-4 border uppercase font-bold text-slate-900">${item.empName || "N/A"}</td>
+        <td class="p-4 border font-medium text-slate-800">${item.designation || item.workingAs || "N/A"}</td>
+        <td class="p-4 border text-center font-bold text-slate-900">${otVal > 0 ? otVal.toFixed(1) : "0.0"}</td>
+        <td class="p-4 border text-center text-orange-600 font-bold">${holVal.toFixed(2)}</td>
+        <td class="p-4 border text-center text-orange-600 font-bold">${sunVal.toFixed(2)}</td>
+        <td class="p-4 border uppercase text-[10px] font-bold text-slate-800">${item.site || ""}</td>
+        <td class="p-4 border text-center">
+            <span class="text-green-700 font-black">${item.status || ""}</span>
+        </td>
+        <td class="p-4 border italic font-bold text-slate-600">${item.remark || ""}</td>
+      </tr>`;
+  }).join("");
 
-    foot.innerHTML = `
-        <tr class="bg-slate-50 font-black">
-            <td colspan="5" class="p-4 border text-right uppercase">Total:</td>
-            <td class="p-4 border text-center">${tOt.toFixed(1)}</td>
-            <td class="p-4 border text-center">${tHol.toFixed(2)}</td>
-            <td class="p-4 border text-center">${tSun.toFixed(2)}</td>
-            <td colspan="3" class="border"></td>
-        </tr>`;
+  foot.innerHTML = `
+    <tr class="bg-slate-100 font-black">
+        <td colspan="5" class="p-4 border text-right text-slate-900 uppercase">Grand Total:</td>
+        <td class="p-4 border text-center text-[#1e3a5f]">${tOt.toFixed(1)}</td>
+        <td class="p-4 border text-center text-orange-600">${tHol.toFixed(2)}</td>
+        <td class="p-4 border text-center text-orange-600">${tSun.toFixed(2)}</td>
+        <td colspan="3" class="border"></td>
+    </tr>`;
 
-    document.getElementById("printReportDate").innerText = "Reported: " + new Date().toLocaleString();
-    document.getElementById("fullPreviewModal").style.display = "flex";
+  document.getElementById("printReportDate").innerText = "Reported: " + new Date().toLocaleString();
+  document.getElementById("fullPreviewModal").style.display = "flex";
 }
         function closeFullPreview() {
           document.getElementById("fullPreviewModal").style.display = "none";
@@ -3144,120 +3259,129 @@ if (isManual && btn) {
          * Firestore-এ ডাটা সেভ করার ফাংশন
          */
         async function saveAllToFirestore() {
-  if (!isFirebaseAvailable || !db) {
-    return Swal.fire("Error", "Server is not available.", "error");
-  }
+          if (!isFirebaseAvailable || !db) {
+            return Swal.fire("Error", "Server is not available.", "error");
+          }
 
-  if (!attendanceData || attendanceData.length === 0) {
-    return Swal.fire("Empty", "No data to save.", "warning");
-  }
+          if (!attendanceData || attendanceData.length === 0) {
+            return Swal.fire("Empty", "No data to save.", "warning");
+          }
 
-  try {
-    // লোডিং দেখানো
-    Swal.fire({
-      title: "Processing...",
-      text: "Checking duplicates and preparing data",
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
+          try {
+            // লোডিং দেখানো
+            Swal.fire({
+              title: "Processing...",
+              text: "Checking duplicates and preparing data",
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading(),
+            });
 
-    // ১. সার্ভার থেকে ডাটা একবারেই নিয়ে আসা (অপ্টিমাইজড)
-    const snapshot = await db.ref("Daily Attendance").once("value");
-    const serverData = snapshot.val() || {};
-    const serverEntries = Object.values(serverData);
+            // ১. সার্ভার থেকে ডাটা একবারেই নিয়ে আসা (অপ্টিমাইজড)
+            const snapshot = await db.ref("Daily Attendance").once("value");
+            const serverData = snapshot.val() || {};
+            const serverEntries = Object.values(serverData);
 
-    let finalDataToSave = [];
-    let duplicates = attendanceData.filter(entry => 
-      serverEntries.some(s => (s.ID === entry.empId || s.empId === entry.empId) && s.DATE === entry.date)
-    );
+            let finalDataToSave = [];
+            let duplicates = attendanceData.filter((entry) =>
+              serverEntries.some(
+                (s) =>
+                  (s.ID === entry.empId || s.empId === entry.empId) &&
+                  s.DATE === entry.date,
+              ),
+            );
 
-    Swal.close();
+            Swal.close();
 
-    // ডুপ্লিকেট কনফার্মেশন (যদি থাকে)
-    if (duplicates.length > 0) {
-      const confirmResult = await Swal.fire({
-        title: "Duplicate Found!",
-        html: `<b>${duplicates.length}</b> entries already exist. Save anyway?`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Yes, Save All",
-        cancelButtonText: "Skip Duplicates",
-      });
+            // ডুপ্লিকেট কনফার্মেশন (যদি থাকে)
+            if (duplicates.length > 0) {
+              const confirmResult = await Swal.fire({
+                title: "Duplicate Found!",
+                html: `<b>${duplicates.length}</b> entries already exist. Save anyway?`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, Save All",
+                cancelButtonText: "Skip Duplicates",
+              });
 
-      if (confirmResult.isConfirmed) {
-        finalDataToSave = attendanceData;
-      } else if (confirmResult.dismiss === Swal.DismissReason.cancel) {
-        finalDataToSave = attendanceData.filter(entry => !duplicates.includes(entry));
-      } else {
-        return;
-      }
-    } else {
-      finalDataToSave = attendanceData;
-    }
+              if (confirmResult.isConfirmed) {
+                finalDataToSave = attendanceData;
+              } else if (confirmResult.dismiss === Swal.DismissReason.cancel) {
+                finalDataToSave = attendanceData.filter(
+                  (entry) => !duplicates.includes(entry),
+                );
+              } else {
+                return;
+              }
+            } else {
+              finalDataToSave = attendanceData;
+            }
 
-    if (finalDataToSave.length === 0) return;
+            if (finalDataToSave.length === 0) return;
 
-    // ২. ডাটা রাইটিং শুরু (সবচেয়ে ফাস্ট পদ্ধতি)
-    Swal.fire({
-      title: "Saving Data...",
-      text: `Uploading ${finalDataToSave.length} records. Please wait...`,
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading(),
-    });
+            // ২. ডাটা রাইটিং শুরু (সবচেয়ে ফাস্ট পদ্ধতি)
+            Swal.fire({
+              title: "Saving Data...",
+              text: `Uploading ${finalDataToSave.length} records. Please wait...`,
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading(),
+            });
 
-    const updates = {};
-    const now = new Date();
-    const issueDate = now.toLocaleDateString("en-GB");
-    const issueTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
-    
-    // প্রি-রেফারেন্স তৈরি করা (স্পিড বাড়াতে সাহায্য করে)
-    const attendanceRef = db.ref("Daily Attendance");
+            const updates = {};
+            const now = new Date();
+            const issueDate = now.toLocaleDateString("en-GB");
+            const issueTime = now.toLocaleTimeString("en-US", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+            });
 
-    finalDataToSave.forEach((entry) => {
-      // দ্রুত কী জেনারেট করা
-      const newKey = attendanceRef.push().key;
-      
-      updates[`Daily Attendance/${newKey}`] = {
-        ID: entry.empId,
-        EMPLOYEE_NAME: entry.empName,
-        DATE: entry.date,
-        STATUS: entry.status || "PRESENT",
-        BASIC_SALARY: Number(entry.salary) || 0,
-        DESIGNATION: entry.designation || "",
-        JOINING_DATE: entry.joiningDate || "",
-        PASSPORT_NO: entry.passport || "",
-        SIDE_NAME: entry.site || "",
-        TOTAL_OT_HOURS: Number(entry.ot) || 0,
-        OT_RATE__PER_HOUR_: Number(entry.otRate) || 0,
-        PERIOD: entry.period || "",
-        REMARK: entry.remark || "",
-        ISSUE_DATE: issueDate,
-        ISSUE_TIME: issueTime,
-        HOLIDAY: Number(entry.holidayWork) || 0,
-        SUNDAY_WORK: Number(entry.sundayWork) || 0,
-        AMOUNT: Number(entry.amount) || 0,
-      };
-    });
+            // প্রি-রেফারেন্স তৈরি করা (স্পিড বাড়াতে সাহায্য করে)
+            const attendanceRef = db.ref("Daily Attendance");
 
-    // ৩. এক ক্লিকে সব ডাটা পুশ (Atomic Update)
-    await db.ref().update(updates);
+            finalDataToSave.forEach((entry) => {
+              // দ্রুত কী জেনারেট করা
+              const newKey = attendanceRef.push().key;
 
-    Swal.close();
-    await Swal.fire({
-      title: "Success!",
-      text: `${finalDataToSave.length} records saved instantly.`,
-      icon: "success",
-      timer: 2000,
-    });
+              updates[`Daily Attendance/${newKey}`] = {
+                ID: entry.empId,
+                EMPLOYEE_NAME: entry.empName,
+                DATE: entry.date,
+                STATUS: entry.status || "PRESENT",
+                BASIC_SALARY: Number(entry.salary) || 0,
+                DESIGNATION: entry.designation || "",
+                JOINING_DATE: entry.joiningDate || "",
+                PASSPORT_NO: entry.passport || "",
+                SIDE_NAME: entry.site || "",
+                TOTAL_OT_HOURS: Number(entry.ot) || 0,
+                OT_RATE__PER_HOUR_: Number(entry.otRate) || 0,
+                PERIOD: entry.period || "",
+                REMARK: entry.remark || "",
+                ISSUE_DATE: issueDate,
+                ISSUE_TIME: issueTime,
+                HOLIDAY: Number(entry.holidayWork) || 0,
+                SUNDAY_WORK: Number(entry.sundayWork) || 0,
+                AMOUNT: Number(entry.amount) || 0,
+              };
+            });
 
-    attendanceData = [];
-    renderTable();
+            // ৩. এক ক্লিকে সব ডাটা পুশ (Atomic Update)
+            await db.ref().update(updates);
 
-  } catch (error) {
-    Swal.close();
-    Swal.fire("Error", "Upload failed: " + error.message, "error");
-  }
-}
+            Swal.close();
+            await Swal.fire({
+              title: "Success!",
+              text: `${finalDataToSave.length} records saved instantly.`,
+              icon: "success",
+              timer: 2000,
+            });
+
+            attendanceData = [];
+            renderTable();
+          } catch (error) {
+            Swal.close();
+            Swal.fire("Error", "Upload failed: " + error.message, "error");
+          }
+        }
 
         if (typeof bulkEntry === "function") window.bulkEntry = bulkEntry;
         if (typeof refreshAllData === "function")
