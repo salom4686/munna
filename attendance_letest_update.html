@@ -1,0 +1,3361 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEW ATTENDANCE</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
+
+      :root {
+        --brand-blue: #002147;
+        --brand-gold: #ffd700;
+      }
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #002147 0%, #001a38 100%);
+        color: #ffffff;
+        overflow-x: hidden;
+      }
+
+      #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        background: linear-gradient(135deg, var(--brand-blue) 0%, #001a38 100%);
+        color: #ffffff; /* লোডিং স্ক্রিনের সব টেক্সট সাদা হবে */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      #loadingOverlay.processing-mode {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(4px);
+      }
+
+      .screen-lock-blur {
+        filter: blur(3px);
+        pointer-events: none;
+        user-select: none;
+        transition: all 0.4s ease;
+      }
+      /* ????????? ?????? ???? ?????????? */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.9);
+        }
+      }
+
+      /* ??? ????????? ?????? */
+      .alert-show {
+        display: flex !important;
+        animation: slideIn 0.4s ease-out forwards;
+      }
+
+      /* ??? ????????? ??? ???? */
+      .alert-hide {
+        animation: slideOut 0.4s ease-in forwards;
+      }
+      /* ?????? ??????????? ????? ?????? */
+      /* ????? ??????? ??? ????? ??? ??? */
+      .modern-alert {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.8); /* ??? ???? ??? ??? ???? */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .modern-alert.show {
+        opacity: 1;
+        transform: translateY(0) scale(1); /* ????????? ???????? ???? */
+      }
+
+      /* ?????????????? ????? ?????? */
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.6) !important;
+        backdrop-filter: blur(15px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--brand-gold);
+        color: #333333;
+      }
+      .input-group label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        margin-bottom: 0.15rem;
+        text-transform: uppercase;
+      }
+      .input-field {
+        width: 100%;
+        padding: 0.4rem 0.5rem;
+        border: 1px solid var(--brand-gold);
+        border-radius: 0.375rem;
+        outline: none;
+        font-size: 0.8rem;
+        background-color: white;
+        color: var(--brand-blue);
+      }
+      .input-field:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+      }
+
+      /* Custom Dropdown Styling for Golden Hover */
+      .custom-select-wrapper {
+        position: relative;
+        width: 100%;
+      }
+      .custom-select-trigger {
+        background-color: var(--brand-blue);
+        color: white;
+        border: 2px solid var(--brand-gold);
+        border-radius: 0.375rem;
+        padding: 0.4rem 0.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+      }
+      .custom-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        z-index: 1000;
+        display: none;
+        overflow: visible;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      .custom-select-option {
+        padding: 10px 15px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+      }
+      .custom-select-option:hover {
+        background-color: var(--brand-gold);
+        color: var(--brand-blue);
+        font-weight: bold;
+      }
+
+      .suggestion-box {
+        position: absolute;
+        left: 0;
+        right: 0;
+        overflow: visible;
+        background: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-radius: 12px;
+        z-index: 1000;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        display: none;
+        margin-top: 4px;
+        color: white;
+      }
+      .suggestion-item {
+        padding: 10px 14px;
+        padding: 14px 18px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: background-color 0.2s ease;
+        font-weight: 500;
+        font-size: 15px;
+      }
+      .suggestion-item:hover,
+      .suggestion-item.active {
+        background-color: var(--brand-gold);
+        color: var(--brand-blue);
+      }
+
+      .loader-circle {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--brand-blue);
+        border: 4px solid var(--brand-gold); /* গোল্ডেন বর্ডার */
+        border-top: 4px solid #ffffff; /* সাদা টপ বর্ডার */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      /* ?. ??? ??????? ????????? ???? (??????? ?? ??? ?????) */
+      #loadingOverlay.processing-mode {
+        background: rgba(255, 255, 255, 0.4); /* ?????? ????????????? */
+        backdrop-filter: blur(8px) saturate(150%); /* ????????? ????? ?????? */
+        display: flex !important;
+      }
+
+      /* ?. ?????? ????????? ?????????? */
+      .modern-alert {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      .modern-alert.show {
+        transform: scale(1);
+        opacity: 1;
+      }
+      /* ????? ???? ??? ?????? */
+      .holiday-date {
+        position: relative !important;
+        background-color: #fee2e2 !important;
+        color: #b91c1c !important;
+        border-radius: 50% !important;
+        font-weight: bold !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 1;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.35);
+      }
+
+      /* ??? ?????? ?????????? ??? ??? ????? ????? */
+      .holiday-label-svg {
+        position: absolute;
+        width: 130%; /* ????????? ???? ???? ?? */
+        height: 130%;
+        top: -15%;
+        left: -15%;
+        pointer-events: none;
+        opacity: 0.9;
+        transform: scale(0.9); /* ?????????? ???? ??? ????? */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .holiday-label-svg text {
+        fill: #050101;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* --- ???? ???? (Hover) ?????? --- */
+      .holiday-date:hover {
+        transform: translateY(-5px); /* ???? ????????? ??????? ???? ???? */
+        z-index: 100; /* ???? ??????? ???? ??????? ???? */
+        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+      }
+
+      .holiday-date:hover .holiday-label-svg {
+        opacity: 1;
+        transform: scale(1.2) rotate(45deg); /* ??? ??? ??? ??????? ????? */
+      }
+
+      /* ????? ?? ?????? ??? ?? */
+      .sunday-date {
+        color: #ef4444 !important;
+        font-weight: bold !important;
+      }
+
+      /* ?. ?????????????? ????? ?????? (??????? ??? ??????) */
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #ffffff;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        animation: rotation 1s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .fade-out {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+      }
+
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white;
+          padding: 0;
+          overflow: visible !important;
+        }
+        .card {
+          box-shadow: none;
+          border: 1px solid #e5e7eb;
+        }
+        #fullPreviewModal {
+          position: relative;
+          background: white;
+          display: block !important;
+          padding: 0;
+          margin: 0;
+        }
+        .modal-overlay {
+          background: white;
+          position: static;
+        }
+        #fullPreviewModal .bg-white {
+          box-shadow: none;
+          width: 100%;
+          max-height: none;
+          overflow: visible;
+        }
+        #fullPreviewContent {
+          overflow: visible !important;
+        }
+        table {
+          font-size: 10px;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        th,
+        td {
+          border: 1px solid #000 !important;
+          padding: 4px !important;
+        }
+      }
+
+      /* Bulk Entry Modal Theme */
+      .bulk-modal-popup {
+        background: linear-gradient(
+          135deg,
+          #002147 0%,
+          #001a38 100%
+        ) !important;
+        border: 2px solid #ffd700 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+      }
+
+      .bulk-modal-title {
+        color: #ffd700 !important;
+        font-weight: 700 !important;
+        font-size: 1.5rem !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      .bulk-modal-popup .swal2-html-container {
+        background: transparent !important;
+        color: #ffffff !important;
+      }
+    </style>
+  </head>
+  <body class="p-2 md:p-4">
+     <div id="loadingOverlay">
+      <div class="loader-circle mb-6"></div>
+      <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+        <span class="text-white">ALAMHOW</span>
+        <span class="text-yellow-400">CO LTD</span>
+      </h2>
+      <p class="text-sm text-white mt-2 font-medium">ALAMHOW CO LTD</p>
+      <p id="loadingTask" class="text-sm text-slate-500 mt-2 font-medium">
+        Please Wait...
+      </p>
+    </div>
+    <div id="loadingOverlay" style="display: none !important">
+      <div class="loader-circle mb-6"></div>
+      <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+        <span class="text-white">ALAMHOW</span>
+        <span class="text-yellow-400">CO LTD</span>
+      </h2>
+      <p class="text-sm text-white mt-2 font-medium">ALAMHOW CO LTD</p>
+      <p id="loadingTask" class="text-sm text-slate-500 mt-2 font-medium">
+        Please Wait...
+      </p>
+    </div>
+
+    <!-- Custom Message Box -->
+    <div id="customAlert" class="modal-overlay">
+      <div
+        class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full mx-4 transform transition-all border border-slate-100"
+      >
+        <div
+          id="alertIconContainer"
+          class="flex items-center justify-center w-16 h-16 mx-auto rounded-full mb-6"
+        ></div>
+        <h3
+          id="alertTitle"
+          class="text-xl font-bold text-center text-slate-900 mb-2"
+        >
+          Notification
+        </h3>
+        <p
+          id="alertMessage"
+          class="text-sm text-center text-slate-600 mb-8 leading-relaxed"
+        ></p>
+        <div class="flex gap-2">
+          <button
+            id="alertCancelBtn"
+            onclick="closeAlert()"
+            class="hidden flex-1 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold py-3 rounded-xl transition-all uppercase tracking-wider"
+          >
+            Cancel
+          </button>
+          <button
+            id="alertOkBtn"
+            onclick="closeAlert()"
+            class="flex-1 bg-[#1e3a5f] hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-all active:scale-95 shadow-lg uppercase tracking-wider"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Sheet Module (Server Data Editor) -->
+    <div id="editSheetModal" class="modal-overlay">
+      <div
+        class="bg-white rounded-xl shadow-2xl w-[95vw] max-h-[90vh] flex flex-col overflow-hidden"
+      >
+        <div
+          class="p-4 bg-[#1e3a5f] text-white flex justify-between items-center"
+        >
+          <div class="flex items-center gap-4">
+            <h3 class="font-bold text-lg">Server Record Editor</h3>
+            <div class="flex items-center gap-2 no-print">
+              <input
+                type="text"
+                id="editQueryDate"
+                placeholder="Select Date"
+                class="text-slate-800 px-3 py-1.5 rounded-lg text-sm font-bold w-40 outline-none"
+              />
+              <button
+                onclick="fetchDataForEdit()"
+                id="fetchDataBtn"
+                class="bg-[#f1c40f] text-[#1e3a5f] px-4 py-1.5 rounded-lg font-bold text-xs uppercase hover:bg-yellow-400 transition-all"
+              >
+                Load Data
+              </button>
+            </div>
+          </div>
+          <button
+            onclick="closeEditModal()"
+            class="bg-white/10 hover:bg-white/20 p-2 rounded-full transition-colors"
+          >
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <div
+          class="p-2 bg-blue-50 text-[10px] font-bold text-blue-800 uppercase text-center border-b"
+        >
+          Only 'PROJECT NAME' and 'OT Hours' are editable here.
+        </div>
+        <div class="flex-1 overflow-auto bg-white p-2">
+          <table class="w-full text-xs text-left border-collapse min-w-[800px]">
+            <thead class="bg-slate-100 sticky top-0 z-10">
+              <tr class="text-[#1e3a5f]">
+                <th class="p-3 border">ID</th>
+                <th class="p-3 border">NAME</th>
+                <th class="p-3 border">DATE</th>
+                <th class="p-3 border w-24 text-green-600 text-center">
+                  OTHERS
+                </th>
+                <th class="p-3 border w-64 text-orange-600">PROJECT NAME</th>
+                <th class="p-3 border w-24 text-orange-600 text-center">
+                  OT HRS
+                </th>
+                <th class="p-3 border text-center">HOLIDAY</th>
+                <th class="p-3 border text-center">SUNDAY</th>
+                <th class="p-3 border">REMARK</th>
+              </tr>
+            </thead>
+            <tbody id="editSheetBody" class="divide-y divide-slate-200">
+              <tr>
+                <td
+                  colspan="9"
+                  class="p-10 text-center text-slate-400 font-medium"
+                >
+                  Please select a date and click "Load Data" to fetch records
+                  from Google Sheets.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-4 border-t bg-slate-50 flex justify-end gap-3">
+          <button
+            onclick="closeEditModal()"
+            class="bg-slate-200 text-slate-700 px-6 py-2 rounded-lg font-bold text-sm uppercase"
+          >
+            Close
+          </button>
+          <button
+            onclick="updateServerRecords()"
+            id="updateRecordsBtn"
+            class="bg-[#1e3a5f] text-white px-8 py-2 rounded-lg font-bold text-sm uppercase shadow-lg hover:bg-slate-800 transition-all"
+          >
+            Update Records
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Preview Modal -->
+    <div id="fullPreviewModal" class="modal-overlay">
+      <div
+        class="bg-white rounded-xl shadow-2xl w-[98vw] max-h-[95vh] flex flex-col overflow-hidden"
+      >
+        <div
+          class="p-5 bg-[#1e3a5f] text-white flex justify-between items-center no-print"
+        >
+          <h3 class="font-bold text-xl italic hover:bg-white hover:text-[#1e3a5f] transition-colors">
+            ALAMHOW <span class="text-[#f1c40f]">CO LTD</span> - Full Preview
+          </h3>
+          <button
+            onclick="closeFullPreview()"
+            class="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-colors"
+          >
+            <svg
+              class="w-7 h-7"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
+            </svg>
+          </button>
+        </div>
+        <div
+          class="hidden print:block text-center mb-4 p-4 border-b-2 border-black"
+        >
+          <h1 class="text-2xl font-bold">ALAMHOW CO LTD</h1>
+          <p class="text-sm uppercase tracking-widest font-semibold">
+            Daily Attendance Report
+          </p>
+          <p class="text-xs mt-1" id="printReportDate"></p>
+        </div>
+        <div id="fullPreviewContent" class="overflow-auto p-2 flex-1 bg-white">
+          <table
+            class="w-full text-xs md:text-sm text-left border-collapse min-w-[1100px]"
+          >
+            <thead class="bg-slate-100 sticky top-0 z-10 print:static">
+              <tr class="text-[#1e3a5f] font-bold print:text-black">
+                <th class="p-4 border">SL</th>
+                <th class="p-4 border">DATE</th>
+                <th class="p-4 border">ID</th>
+                <th class="p-4 border">NAME</th>
+                <th class="p-4 border">DESIGNATION</th>
+                <th class="p-4 border text-center">OT HRS</th>
+                <th class="p-4 border text-center">HOLIDAY</th>
+                <th class="p-4 border text-center">SUNDAY</th>
+                <th class="p-4 border">SITE</th>
+                <th class="p-4 border">STATUS</th>
+                <th class="p-4 border">REMARK</th>
+              </tr>
+            </thead>
+            <tbody
+              id="fullPreviewBody"
+              class="divide-y divide-slate-200 print:divide-black"
+            ></tbody>
+            <tfoot
+              id="fullPreviewFoot"
+              class="bg-slate-50 font-black print:bg-white"
+            ></tfoot>
+          </table>
+        </div>
+        <div class="p-5 border-t bg-slate-50 flex justify-end gap-3 no-print">
+          <button
+            onclick="window.print()"
+            class="bg-[#f1c40f] text-[#1e3a5f] px-8 py-2.5 rounded-lg font-bold shadow-lg active:scale-95 transition-all"
+          >
+            Print Report
+          </button>
+          <button
+            onclick="closeFullPreview()"
+            class="bg-slate-200 text-slate-800 px-8 py-2.5 rounded-lg font-bold shadow-lg active:scale-95 transition-all"
+          >
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="mainContent"
+      class="max-w-7xl mx-auto opacity-0 transition-opacity duration-700 no-print"
+    >
+      <header
+        class="bg-[#002147] border border-[#ffd700] py-4 mb-6 shadow-sm mx-auto mt-2 rounded-2xl max-w-[98%] md:max-w-7xl"
+      >
+        <div class="px-4">
+          <div
+            class="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8"
+          >
+            <div class="flex flex-col md:flex-row items-center gap-4 md:gap-8">
+              <img
+                src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+                alt="ALAMHOW Logo"
+                class="w-20 h-20 md:w-24 md:h-24 object-contain"
+              />
+              <div
+                class="text-center md:text-left md:border-l-2 md:border-[#ffd700] md:pl-8 py-1"
+              >
+                <h1
+                  class="text-xl md:text-2xl font-extrabold text-[#ffd700] tracking-tight uppercase leading-none"
+                >
+                  ALAMHOW <span class="text-[#f1c40f]">CO LTD</span>
+                </h1>
+                <p
+                  class="text-[9px] md:text-[10px] font-bold text-slate-300 tracking-[0.3em] uppercase mt-1"
+                >
+                  Daily Attendance Form
+                </p>
+              </div>
+            </div>
+
+            <div class="flex flex-col items-center md:items-end gap-2">
+              <div class="flex items-center gap-2 font-mono">
+                <div
+                  id="clockHH"
+                  class="bg-white text-[#002147] font-black text-2xl md:text-3xl px-3 py-2 rounded-xl border border-[#ffd700] shadow-[0_5px_0_#b8860b,inset_0_1px_1px_white] min-w-[55px] text-center"
+                >
+                  00
+                </div>
+
+                <div class="text-[#ffd700] font-bold text-2xl animate-pulse">
+                  :
+                </div>
+
+                <div
+                  id="clockMM"
+                  class="bg-white text-[#002147] font-black text-2xl md:text-3xl px-3 py-2 rounded-xl border border-[#ffd700] shadow-[0_5px_0_#b8860b,inset_0_1px_1px_white] min-w-[55px] text-center"
+                >
+                  00
+                </div>
+
+                <div class="text-[#ffd700] font-bold text-2xl animate-pulse">
+                  :
+                </div>
+
+                <div
+                  id="clockSS"
+                  class="bg-white text-[#002147] font-black text-2xl md:text-3xl px-3 py-2 rounded-xl border border-[#ffd700] shadow-[0_5px_0_#b8860b,inset_0_1px_1px_white] min-w-[55px] text-center"
+                >
+                  00
+                </div>
+
+                <div
+                  id="clockAP"
+                  class="ml-1 bg-[#ffd700] text-[#002147] font-black text-xs px-2 py-1 rounded-lg shadow-[0_3px_0_#b8860b] border border-[#ffd700] self-start mt-1"
+                >
+                  AM
+                </div>
+              </div>
+
+              <div
+                id="digitalDate"
+                class="text-[10px] font-extrabold text-[#ffd700] uppercase tracking-widest px-2"
+              >
+                LOADING...
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <!-- Employee Details -->
+      <div class="card p-5 mb-5 border-l-8 border-[#ffd700]">
+        <div class="flex justify-between items-center mb-4">
+          <h2
+            class="text-xs font-black text-[#002147] uppercase tracking-[0.2em]"
+          >
+            Employee Details
+          </h2>
+          <div class="flex gap-2">
+             <button
+              onclick="bulkEntry()"
+              class="text-[10px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+              All ENTRY
+            </button>
+            <button
+              onclick="openEditModal()"
+              class="text-[10px] bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+              Edit Server Data
+            </button>
+           
+            <button
+              id="refreshBtn"
+              onclick="refreshAllData(true)"
+              class="text-[10px] bg-[#1e3a5f] text-white px-4 py-2 rounded-lg font-bold"
+            >
+              Refresh Server 
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="input-group relative">
+            <label>ID / Name Search</label>
+            <input
+              type="text"
+              id="empId"
+              placeholder="Click or type to search..."
+              class="input-field border-[#002147]/20 bg-[#002147]/5 font-bold"
+              autocomplete="off"
+              oninput="handleIdInput(this)"
+              onclick="handleIdInput(this)"
+              onblur="
+                setTimeout(() => {
+                  document.getElementById('idSuggestions').style.display =
+                    'none';
+                }, 200)
+              "
+              onkeydown="handleIdInputKeydown(event)"
+            />
+            <div id="idSuggestions" class="suggestion-box"></div>
+          </div>
+          <div class="input-group">
+            <label>Employee Name</label
+            ><input
+              type="text"
+              id="empName"
+              class="input-field bg-slate-50"
+              readonly
+            />
+          </div>
+          <div class="input-group">
+            <label>Passport No</label
+            ><input
+              type="text"
+              id="passport"
+              class="input-field bg-slate-50"
+              readonly
+            />
+          </div>
+          <div class="input-group">
+            <label>Joining Date</label
+            ><input
+              type="text"
+              id="joiningDate"
+              class="input-field bg-slate-50"
+              readonly
+            />
+          </div>
+          <div class="input-group">
+            <label>Designation</label
+            ><input
+              type="text"
+              id="designation"
+              class="input-field bg-slate-50"
+              readonly
+            />
+          </div>
+          <div class="input-group">
+            <label>Period</label
+            ><input
+              type="text"
+              id="period"
+              class="input-field bg-slate-50"
+              readonly
+            />
+          </div>
+          <div class="input-group">
+            <label>Salary</label
+            ><input
+              type="text"
+              id="basicSalary"
+              class="input-field bg-slate-50 font-bold"
+              readonly
+            />
+          </div>
+          <div class="input-group">
+            <label>OT Rate (Hr)</label
+            ><input
+              type="text"
+              id="globalOtRate"
+              class="input-field bg-[#f1c40f]/10 font-black text-[#1e3a5f]"
+              readonly
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Entry Form -->
+      <div class="card p-5 mb-6 border border-slate-200">
+        <div class="flex justify-between items-center mb-4">
+    <h2 class="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">
+      New Attendance Entry
+    </h2>
+    <button
+      id="holidayToggleBtn"
+      type="button"
+      onclick="toggleHolidayList()"
+      class="text-[11px] text-blue-600 hover:text-blue-800 font-semibold cursor-pointer underline"
+    >
+      View Public Holidays
+    </button>
+  </div>
+        <div class="grid grid-cols-2 md:flex md:flex-wrap gap-4 items-end">
+          <div class="input-group flex-1 min-w-[140px]">
+            <label>Selection Date</label
+            ><input
+              type="text"
+              id="attDate"
+              placeholder="Select Date"
+              class="input-field bg-[#eff6ff] border-[#1d4ed8]/20"
+            />
+           
+          </div>
+          <div class="input-group flex-1 min-w-[120px]">
+            <label>Status</label>
+            <select id="attStatus" class="input-field font-semibold">
+              <option value="PRESENT" selected>PRESENT</option>
+              <option value="ABSENT">ABSENT</option>
+              <option value="OTHERS">OTHERS</option>
+            </select>
+          </div>
+          <div class="input-group flex-[2] min-w-[180px]">
+            <label>PROJECT NAME</label
+            ><select id="sideName" class="input-field font-bold">
+              <option value="">Loading Projects...</option>
+            </select>
+          </div>
+          <div class="input-group flex-1 min-w-[80px]">
+            <label>OT Hours</label
+            ><input
+              type="number"
+              id="dailyOt"
+              placeholder="0"
+              class="input-field"
+            />
+          </div>
+          <div class="input-group flex-1 min-w-[110px]">
+            <label>Holiday</label
+            ><input
+              type="text"
+              id="holidayWork"
+              placeholder="0"
+              class="input-field bg-slate-100 font-bold"
+              readonly
+            />
+          </div>
+          <div class="input-group flex-1 min-w-[110px]">
+            <label>Sunday</label
+            ><input
+              type="text"
+              id="sundayWork"
+              placeholder="0"
+              class="input-field bg-slate-100 font-bold"
+              readonly
+            />
+          </div>
+          <div class="input-group flex-1 min-w-[110px] hidden" id="amountGroup">
+            <label>Amount</label
+            ><input
+              type="number"
+              id="amountInput"
+              placeholder="0"
+              class="input-field"
+              step="0.01"
+            />
+          </div>
+          <input type="hidden" id="attRemark" value="NORMAL WORK" />
+          <button
+            id="addBtn"
+            onclick="requestAddEntry()"
+            class="bg-[#1e3a5f] hover:bg-slate-800 text-white font-bold py-2.5 px-8 rounded-lg text-sm uppercase"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Display -->
+      <div class="card overflow-hidden mb-10 border border-slate-200">
+        <div
+          class="p-4 bg-[#1e3a5f] text-white flex justify-between items-center"
+        >
+          <h2 class="font-bold text-sm tracking-wide uppercase">
+            Entry Preview List
+          </h2>
+          <div class="flex gap-2">
+            <button
+              onclick="openFullPreview()"
+              class="text-[10px] bg-[#f1c40f] text-[#1e3a5f] px-4 py-2 rounded-lg font-black uppercase"
+            >
+              Full Preview
+            </button>
+            <button
+              id="saveBtn"
+              onclick="saveAllToFirestore()"
+              class="text-[10px] bg-white text-[#1e3a5f] px-5 py-2 rounded-lg font-black uppercase hover:bg-green-600 hover:text-white transition-all shadow-lg active:scale-95"
+            >
+              Save 
+            </button>
+            <button
+              onclick="clearTable()" 
+              class="text-[10px] bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold uppercase">
+              Clear All
+            </button>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-50 border-b">
+              <tr>
+                <th class="p-3 font-bold text-slate-600">SL</th>
+                <th class="p-3 font-bold text-slate-600">DATE</th>
+                <th class="p-3 font-bold text-slate-600">ID</th>
+                <th class="p-3 font-bold text-slate-600">NAME</th>
+                <th class="p-3 font-bold text-slate-600 text-center">OT</th>
+                <th class="p-3 font-bold text-slate-600 text-center">HOLI</th>
+                <th class="p-3 font-bold text-slate-600 text-center">SUN</th>
+                <th class="p-3 font-bold text-slate-600">SIDE NAME</th>
+                <th class="p-3 font-bold text-green-600 text-center">OTHERS</th>
+                <th class="p-3 font-bold text-slate-600">STATUS</th>
+                <th class="p-3 font-bold text-slate-600">REMARK</th>
+                <th class="p-3 font-bold text-slate-600 text-center no-print">
+                  ACTION
+                </th>
+              </tr>
+            </thead>
+            <tbody
+              id="attendanceBody"
+              class="divide-y divide-slate-100"
+            ></tbody>
+            <tfoot class="bg-[#1e3a5f]/5 font-black">
+              <tr>
+                <td colspan="4" class="p-3 text-right uppercase">
+                  Page Totals:
+                </td>
+                <td class="p-3 text-center text-[#1e3a5f]" id="totalHrs">0</td>
+                <td class="p-3 text-center text-orange-600" id="totalHoli">
+                  0
+                </td>
+                <td class="p-3 text-center text-orange-600" id="totalSun">0</td>
+                <td colspan="4"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+      console.log("Script started");
+      try {
+        // --- ?????????? ---
+        const firebaseConfig = {
+          apiKey: "AIzaSyBtfTOvbGyPWyAs2vSdy6Om5iayr-QzxQg",
+          authDomain: "munna-new-dataentry-save-8966f.firebaseapp.com",
+          databaseURL:
+            "https://munna-new-dataentry-save-8966f-default-rtdb.europe-west1.firebasedatabase.app",
+          projectId: "munna-new-dataentry-save-8966f",
+          storageBucket: "munna-new-dataentry-save-8966f.firebasestorage.app",
+          messagingSenderId: "319544862119",
+          appId: "1:319544862119:web:69826c2f53db88c361c282",
+          measurementId: "G-JSS51KT16B",
+        };
+
+        // Google Apps Script Web App URL (????? URL ?? ????? ????)
+        const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+
+        // Firebase initialization (Explicit URL)
+        let db = null;
+        let firestoreDb = null;
+        let isFirebaseAvailable = false;
+        try {
+          if (typeof firebase !== "undefined") {
+            if (!firebase.apps.length) {
+              firebase.initializeApp(firebaseConfig);
+            }
+            // সরাসরি ইউআরএল ব্যবহার করা হচ্ছে যাতে কানেকশন মিস না হয়
+            db = firebase.database();
+            firestoreDb = firebase.firestore();
+            isFirebaseAvailable = true;
+            console.log("✅ Firebase initialized successfully");
+          }
+        } catch (error) {
+          console.error("❌ Firebase Error:", error);
+        }
+
+        // Test Firestore connection
+        if (firestoreDb) {
+          console.log("🔍 Testing Firestore connection...");
+          firestoreDb
+            .collection("test")
+            .doc("connection_test")
+            .set({
+              test: true,
+              timestamp: new Date().toISOString(),
+            })
+            .then(() => {
+              console.log("✅ Firestore connection test successful");
+            })
+            .catch((error) => {
+              console.error(
+                "❌ Firestore connection test failed:",
+                error.message,
+              );
+            });
+        }
+
+        // --- ??????? ????????????? ---
+        let attendanceData = [],
+          employees = [
+            {
+              id: "0001",
+              name: "John Doe",
+              designation: "Cook",
+              salary: "1500",
+              passport: "P123456",
+              joining: "2023-01-01",
+              period: "Monthly",
+              otRate: "10",
+              workingAs: "Cook",
+            },
+            {
+              id: "0002",
+              name: "Jane Smith",
+              designation: "Waiter",
+              salary: "1200",
+              passport: "P234567",
+              joining: "2023-02-01",
+              period: "Monthly",
+              otRate: "8",
+              workingAs: "Waiter",
+            },
+            {
+              id: "0003",
+              name: "Bob Johnson",
+              designation: "Cook",
+              salary: "1400",
+              passport: "P345678",
+              joining: "2023-03-01",
+              period: "Monthly",
+              otRate: "9",
+              workingAs: "Cook",
+            },
+          ],
+          currentSites = ["Restaurant", "Kitchen", "Bar"],
+          serverEditData = [],
+          slCount = 1;
+        let isEmployeeLoaded = true,
+          isSitesLoaded = true;
+        let datePicker, editQueryPicker;
+
+
+        function clearTable() {
+    // টেবিলের বডি সিলেক্ট করা হচ্ছে
+    const tableBody = document.getElementById("attendanceBody");
+    
+    if (tableBody) {
+        // টেবিলের ভেতরের সব রো (Rows) খালি করে দেওয়া হচ্ছে
+        tableBody.innerHTML = ""; 
+        
+        // ইউজারকে জানানোর জন্য একটি ছোট টোস্ট মেসেজ
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'info',
+            title: 'Table cleared from view',
+            showConfirmButton: false,
+            timer: 1500
+        });
+    } else {
+        console.warn("Table body with id 'attendanceBody' not found!");
+    }
+}
+
+        /**
+         * বাল্ক এন্ট্রি ফাংশন: সকল এমপ্লয়িকে একসাথে লিস্টে যোগ করার জন্য
+         */
+        async function bulkEntry() {
+  console.log("bulkEntry called, employees:", employees.length);
+  try {
+    if (!employees || employees.length === 0) {
+      return Swal.fire({
+        title: "No Employees",
+        text: "Employee list is not loaded yet.",
+        icon: "error",
+        width: "320px",
+      });
+    }
+
+    const initialDate = document.getElementById("attDate").value || "";
+    const initialSite = document.getElementById("sideName").value || "";
+    const initialStatus = document.getElementById("attStatus").value || "PRESENT";
+
+    // Check if there are any cook employees
+    const hasCooks = employees.some((emp) =>
+      (emp.designation || "").toLowerCase().includes("cook"),
+    );
+
+    // Include Kitchen in site options if there are cooks
+    const availableSites = [...currentSites];
+    if (hasCooks && !availableSites.includes("Kitchen")) {
+      availableSites.push("Kitchen");
+    }
+
+    // --- পরিবর্তন ১: ডিফল্টভাবে "Select Site" সিলেক্টেড থাকবে ---
+    const siteOptions = availableSites.length
+      ? availableSites
+          .map(
+            (s) => `<option value="${s}">${s}</option>`,
+          )
+          .join("")
+      : `<option value="" disabled>No sites loaded</option>`;
+
+    const buildEmployeeRows = (selectedDate, filterText = "") => {
+      const filteredEmployees = employees.filter((emp) => {
+        if (!filterText) return true;
+        const searchText = filterText.toLowerCase();
+        return (
+          emp.id.toLowerCase().includes(searchText) ||
+          emp.name.toLowerCase().includes(searchText) ||
+          (emp.designation || "").toLowerCase().includes(searchText)
+        );
+      });
+
+      const rows = filteredEmployees
+        .map((emp, index) => {
+          const fId = normalizeEmpId(emp.id);
+          const isAlreadyExists = selectedDate
+            ? attendanceData.some(
+                (d) =>
+                  normalizeEmpId(d.empId) === fId &&
+                  d.date === selectedDate,
+              ) ||
+              currentMonthAttendance.some(
+                (s) =>
+                  normalizeEmpId(s.ID || s.empId) === fId &&
+                  s.DATE === selectedDate,
+              )
+            : false;
+
+          if (isAlreadyExists) {
+            return "";
+          }
+
+          // মূল ইনডেক্স ধরে রাখার জন্য
+          const actualIndex = employees.indexOf(emp);
+
+          return `
+            <div class="bulk-row" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 10px 8px; border-radius: 8px; transition: background-color 0.2s ease; background: rgba(0, 33, 71, 0.05); border: 1px solid rgba(255, 215, 0, 0.1); cursor: default;" onclick="event.stopPropagation();">
+              <input type="checkbox" class="emp-checkbox" id="emp_${actualIndex}" value="${actualIndex}" style="margin: 0; flex-shrink: 0; width: 20px; height: 20px; accent-color: #002147;" onclick="event.stopPropagation();" />
+              <label style="flex: 1; min-width: 0; font-size: 15px; line-height: 1.6; text-align: left; color: #ffffff; cursor: default;">
+                ${fId} - ${emp.name} ${emp.designation ? `(${emp.designation})` : ""}
+              </label>
+            </div>
+          `;
+        })
+        .join("");
+      const container = document.getElementById("employeeCheckboxes");
+      if (container) {
+        container.innerHTML = rows;
+        attachCheckboxHighlightHandlers();
+      }
+    };
+
+    const updateBulkRowHighlight = (checkbox) => {
+      const row = checkbox.closest(".bulk-row");
+      if (!row) return;
+      row.style.backgroundColor = checkbox.checked
+        ? "rgba(255, 215, 0, 0.15)"
+        : "rgba(0, 33, 71, 0.05)";
+    };
+
+    const attachCheckboxHighlightHandlers = () => {
+      document
+        .querySelectorAll('#employeeCheckboxes input[type="checkbox"]')
+        .forEach((checkbox) => {
+          checkbox.addEventListener("change", () => {
+            updateBulkRowHighlight(checkbox);
+            
+            // --- পরিবর্তন ২: একা কেউ সিলেক্ট হলে এবং সে কুক হলে অটো কিচেন সিলেক্ট হবে ---
+            const checkedBoxes = document.querySelectorAll('.emp-checkbox:checked');
+            if (checkedBoxes.length === 1) {
+                const empIndex = checkedBoxes[0].value;
+                const emp = employees[empIndex];
+                if ((emp.designation || "").toLowerCase().includes("cook")) {
+                    const siteSelect = document.getElementById("bulkSideName");
+                    if (siteSelect) siteSelect.value = "Kitchen";
+                }
+            }
+          });
+          updateBulkRowHighlight(checkbox);
+        });
+    };
+
+    const modalHtml = `
+      <div style="font-family: Inter, sans-serif; text-align: left; background: linear-gradient(135deg, #002147 0%, #001a38 100%); color: #ffffff; padding: 20px; border-radius: 12px;">
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">Selection Date</label>
+            <input type="text" id="bulkAttDate" placeholder="Select Date" class="input-field" style="width: 100%; height: 42px; background: rgba(255, 255, 255, 0.9); color: #002147; border: 1px solid #ffd700; font-size: 0.8rem; padding: 0.4rem 0.5rem; border-radius: 0.375rem; outline: none;" value="${initialDate}" />
+          </div>
+          <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">Status</label>
+            <select id="bulkStatus" class="input-field font-semibold" style="width: 100%; height: 42px; background: rgba(255, 255, 255, 0.9); color: #002147; border: 1px solid #ffd700;">
+              <option value="PRESENT"${initialStatus === "PRESENT" ? " selected" : ""}>PRESENT</option>
+              <option value="ABSENT"${initialStatus === "ABSENT" ? " selected" : ""}>ABSENT</option>
+              <option value="OTHERS"${initialStatus === "OTHERS" ? " selected" : ""}>OTHERS</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">PROJECT NAME</label>
+            <select id="bulkSideName" class="input-field font-bold" style="width: 100%; height: 42px; background: rgba(255, 255, 255, 0.9); color: #002147; border: 1px solid #ffd700;">
+              <option value="" disabled selected>SELECT PROJECT</option>
+              ${siteOptions}
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">Filter Employees</label>
+          <input type="text" id="bulkFilterInput" placeholder="Search by ID, Name, or Designation..." style="width: 100%; padding: 10px 12px; border: 1px solid #ffd700; border-radius: 8px; background: rgba(255, 255, 255, 0.9); color: #002147; font-size: 14px;" />
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <button type="button" id="selectAllBtn" style="background: #002147; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">All Select</button>
+            <button type="button" id="unselectAllBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">Unselect All</button>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+            <button type="button" id="confirmBulkBtn" style="background: #002147; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;"> + Add </button>
+            <button type="button" id="cancelBulkBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.55rem 0.9rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; transition: all 0.2s ease;">Cancel</button>
+          </div>
+        </div>
+        <div id="employeeCheckboxes" style="max-height: 400px; overflow-y: auto; text-align: left; background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 8px; border: 1px solid rgba(255, 215, 0, 0.2);"></div>
+      </div>
+    `;
+
+    const result = await Swal.fire({
+      title: "ALL EMPLOYEES ENTRY & SELECTION FORM ",
+      html: modalHtml,
+      width: 750,
+      showConfirmButton: false,
+      showCancelButton: false,
+      background: "linear-gradient(135deg, #002147 0%, #001a38 100%)",
+      color: "#ffffff",
+      customClass: {
+        popup: "bulk-modal-popup",
+        title: "bulk-modal-title",
+      },
+      didOpen: () => {
+        buildEmployeeRows(initialDate);
+
+        const dateInput = document.getElementById("bulkAttDate");
+        const filterInput = document.getElementById("bulkFilterInput");
+        const selectAllBtn = document.getElementById("selectAllBtn");
+        const unselectAllBtn = document.getElementById("unselectAllBtn");
+        const confirmBulkBtn = document.getElementById("confirmBulkBtn");
+        const cancelBulkBtn = document.getElementById("cancelBulkBtn");
+
+        if (dateInput) {
+          flatpickr(dateInput, {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
+            defaultDate: initialDate || null,
+            onChange: (selectedDates, dateStr) => {
+              const currentFilter = filterInput ? filterInput.value : "";
+              buildEmployeeRows(dateStr, currentFilter);
+            },
+          });
+        }
+
+        if (filterInput) {
+          filterInput.addEventListener("input", (event) => {
+            const currentDate = dateInput ? dateInput.value : "";
+            buildEmployeeRows(currentDate, event.target.value);
+          });
+        }
+
+        if (selectAllBtn) {
+          selectAllBtn.addEventListener("click", () => {
+            document
+              .querySelectorAll('#employeeCheckboxes input[type="checkbox"]:not(:disabled)')
+              .forEach((cb) => {
+                cb.checked = true;
+                updateBulkRowHighlight(cb);
+              });
+          });
+        }
+
+        if (unselectAllBtn) {
+          unselectAllBtn.addEventListener("click", () => {
+            document
+              .querySelectorAll('#employeeCheckboxes input[type="checkbox"]')
+              .forEach((cb) => {
+                cb.checked = false;
+                updateBulkRowHighlight(cb);
+              });
+          });
+        }
+
+        if (confirmBulkBtn) {
+          confirmBulkBtn.addEventListener("click", () => {
+            Swal.clickConfirm();
+          });
+        }
+
+        if (cancelBulkBtn) {
+          cancelBulkBtn.addEventListener("click", () => {
+            Swal.close();
+          });
+        }
+      },
+      preConfirm: () => {
+        const selectedDate = document.getElementById("bulkAttDate").value;
+        const selectedSite = document.getElementById("bulkSideName").value;
+        const selectedStatus = document.getElementById("bulkStatus").value;
+
+        if (!selectedDate || !selectedSite) {
+          Swal.showValidationMessage("Please select Selection Date and Assigned Project.");
+          return false;
+        }
+
+        return {
+          date: selectedDate,
+          site: selectedSite,
+          status: selectedStatus,
+        };
+      },
+    });
+
+    if (!result.isConfirmed || !result.value) return;
+
+    const {
+      date: selectedDate,
+      site: selectedSite,
+      status: selectedStatus,
+    } = result.value;
+    const selectedIndexes = Array.from(
+      document.querySelectorAll('#employeeCheckboxes input[type="checkbox"]:checked:not(:disabled)'),
+    ).map((cb) => parseInt(cb.value, 10));
+
+    if (selectedIndexes.length === 0) {
+      return Swal.fire({
+        title: "No Selection",
+        text: "Please select at least one employee.",
+        icon: "warning",
+        width: "320px",
+      });
+    }
+
+    let added = 0;
+    let skipped = 0;
+    const dateObj = new Date(selectedDate);
+    const isSunday = dateObj.getDay() === 0;
+    const isInHoli = HOLIDAY_LIST.includes(selectedDate);
+
+    selectedIndexes.forEach((index) => {
+      const emp = employees[index];
+      const fId = normalizeEmpId(emp.id);
+
+      const isLocal = attendanceData.some(
+        (d) => normalizeEmpId(d.empId) === fId && d.date === selectedDate,
+      );
+      const isServer = currentMonthAttendance.some(
+        (s) =>
+          normalizeEmpId(s.ID || s.empId) === fId &&
+          s.DATE === selectedDate,
+      );
+
+      if (isLocal || isServer) {
+        skipped++;
+        return;
+      }
+
+      const salary = parseFloat(emp.salary) || 0;
+      const designation = (emp.designation || "").toLowerCase();
+      let hWork = "";
+      let sWork = "";
+      let rem = "NORMAL WORK";
+      let statusValue = selectedStatus;
+
+      if (selectedStatus === "ABSENT") {
+        rem = "ABSENT";
+        hWork = 0;
+        sWork = 0;
+      } else if (selectedStatus === "PRESENT") {
+        if (designation.includes("cook")) {
+          rem = "NORMAL WORK";
+          hWork = 0;
+          sWork = 0;
+        } else if (isSunday) {
+          rem = "Sunday";
+          sWork = salary > 0 ? parseFloat(((salary / 26) * 1.5).toFixed(2)) : 0;
+        } else if (isInHoli) {
+          rem = "Public Holiday";
+          hWork = salary > 0 ? parseFloat(((salary / 26) * 1.5).toFixed(2)) : 0;
+        } else {
+          rem = "NORMAL WORK";
+          hWork = 0;
+          sWork = 0;
+        }
+      } else {
+        rem = "NORMAL WORK";
+        hWork = 0;
+        sWork = 0;
+      }
+
+      // --- পরিবর্তন ৩: ডাটা সেভ করার সময় কুকদের জন্য কিচেন নিশ্চিত করা ---
+      const siteValue = designation.includes("cook") ? "Kitchen" : selectedSite;
+
+      attendanceData.push({
+        id: Date.now() + Math.random(),
+        slNo: slCount++,
+        date: selectedDate,
+        empId: fId,
+        empName: emp.name,
+        period: emp.period || "",
+        designation: emp.designation,
+        workingAs: emp.workingAs || emp.designation,
+        joiningDate: emp.joining || "",
+        passport: emp.passport || "",
+        salary: emp.salary || 0,
+        otRate: emp.otRate || 0,
+        ot: 0,
+        site: siteValue,
+        status: statusValue,
+        holidayWork: hWork,
+        sundayWork: sWork,
+        amount: 0,
+        remark: rem,
+      });
+      added++;
+    });
+
+    renderTable();
+    Swal.fire({
+      title: "Done!",
+      text: `${added} employee(s) added${skipped > 0 ? `, ${skipped} already existed` : ""}।`,
+      icon: "success",
+      timer: 2500,
+    });
+  } catch (error) {
+    console.error("Error in bulkEntry:", error);
+    Swal.fire("Error", error.message, "error");
+  }
+}
+        let editModeId = null;
+        let currentMonthAttendance = [];
+
+        let HOLIDAY_LIST = []; // const ?? ???? let ??????? ???? ??? ??????? ???? ?????
+        window.onload = () => {
+          datePicker = flatpickr("#attDate", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
+            onChange: (d, dateStr) => handleDateChange(dateStr),
+            // ????? ??? ????? ??? ???? ????
+            onDayCreate: (dObj, dStr, fp, dayElem) => {
+              const dateProp = dayElem.dateObj;
+              const year = dateProp.getFullYear();
+              const month = String(dateProp.getMonth() + 1).padStart(2, "0");
+              const day = String(dateProp.getDate()).padStart(2, "0");
+              const formattedDate = `${year}-${month}-${day}`;
+
+              const isSunday = dateProp.getDay() === 0;
+              const isPublicHoliday = HOLIDAY_LIST.includes(formattedDate);
+
+              if (isPublicHoliday) {
+                dayElem.classList.add("holiday-date");
+
+                // SVG ????? ??? ???
+                dayElem.innerHTML += `
+                              <svg viewBox="0 0 100 100" class="holiday-label-svg">
+                                  <circle cx="50" cy="50" r="45" fill="rgba(239, 68, 68, 0.05)" stroke="#ef4444" stroke-width="5" />
+                                  <path id="curve${dayElem.dateObj.getDate()}" d="M 12,55 A 38,38 0 0,1 88,55" fill="transparent" />
+                                  <text style="fill: #ef4444; font-weight: 800; font-size: 10px;"><textPath xlink:href="#curve${dayElem.dateObj.getDate()}" startOffset="50%" text-anchor="middle">PUBLIC HOLIDAY</textPath></text>
+                                  <text x="50" y="62" style="fill: #ef4444; font-weight: bold; text-anchor: middle; font-size: 38px;">${dayElem.dateObj.getDate()}</text>
+                              </svg>
+                          `;
+              } else if (isSunday) {
+                dayElem.classList.add("sunday-date");
+              }
+            },
+          });
+
+          editQueryPicker = flatpickr("#editQueryDate", {
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
+          });
+
+          // ????? ?????? ? ??????? ?? ????? ???? ??? (??? ???? ??? ?? ??)
+          setTimeout(() => {
+            const overlay = document.getElementById("loadingOverlay");
+            const mainContent = document.getElementById("mainContent");
+            if (overlay && !overlay.classList.contains("fade-out")) {
+              overlay.classList.add("fade-out");
+              if (mainContent) mainContent.classList.remove("opacity-0");
+              console.warn("Loading timeout: Forced to show main content");
+            }
+          }, 5000);
+
+          refreshAllData(false);
+        };
+        
+
+        // --- ???? ??????? ???? ---
+        async function refreshAllData(isManual) {
+          const btn = document.getElementById("refreshBtn");
+          const mainContent = document.getElementById("mainContent");
+          const overlay = document.getElementById("loadingOverlay");
+
+          try {
+            if (isManual && btn) {
+              btn.innerHTML = `<span class="spinner"></span> Updating...`;
+              btn.disabled = true;
+              if (mainContent) mainContent.classList.add("screen-lock-blur");
+            }
+
+            const now = new Date();
+            const currentMonthName =
+              now.toLocaleString("en-US", { month: "long" }) +
+              "-" +
+              now.getFullYear();
+
+            if (!isFirebaseAvailable || !db) {
+              // Firebase unavailable, use default/empty data
+              console.warn("Firebase not available, using offline mode");
+              HOLIDAY_LIST = [];
+              // Dummy employees for testing
+              employees = [
+                {
+                  id: "0001",
+                  name: "????? ???",
+                  salary: "25000",
+                  designation: "Supervisor",
+                  passport: "PP12345",
+                  joining: "2020-01-15",
+                  period: "4 Years",
+                  otRate: "100",
+                  workingAs: "Supervisor",
+                },
+                {
+                  id: "0002",
+                  name: "?????? ???",
+                  salary: "20000",
+                  designation: "Worker",
+                  passport: "PP12346",
+                  joining: "2021-05-20",
+                  period: "3 Years",
+                  otRate: "80",
+                  workingAs: "Worker",
+                },
+                {
+                  id: "0003",
+                  name: "???? ???",
+                  salary: "22000",
+                  designation: "Operator",
+                  passport: "PP12347",
+                  joining: "2020-08-10",
+                  period: "4 Years",
+                  otRate: "90",
+                  workingAs: "Operator",
+                },
+                {
+                  id: "0004",
+                  name: "????? ????",
+                  salary: "18000",
+                  designation: "Cook",
+                  passport: "PP12348",
+                  joining: "2021-10-01",
+                  period: "2 Years",
+                  otRate: "70",
+                  workingAs: "Cook",
+                },
+                {
+                  id: "0005",
+                  name: "?????? ?????",
+                  salary: "24000",
+                  designation: "Supervisor",
+                  passport: "PP12349",
+                  joining: "2019-06-15",
+                  period: "5 Years",
+                  otRate: "100",
+                  workingAs: "Supervisor",
+                },
+                {
+                  id: "0006",
+                  name: "????? ??????",
+                  salary: "19000",
+                  designation: "Mason Grade 11",
+                  passport: "PP12350",
+                  joining: "2021-12-01",
+                  period: "2 Years",
+                  otRate: "75",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0007",
+                  name: "????? ?????",
+                  salary: "21000",
+                  designation: "Steel Fixer Grade 11",
+                  passport: "PP12351",
+                  joining: "2020-03-20",
+                  period: "4 Years",
+                  otRate: "85",
+                  workingAs: "Steel Fixer",
+                },
+                {
+                  id: "0008",
+                  name: "?????? ?????",
+                  salary: "17000",
+                  designation: "Mason Grade 11",
+                  passport: "PP12352",
+                  joining: "2022-01-10",
+                  period: "1 Year",
+                  otRate: "65",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0010",
+                  name: "???? ???",
+                  salary: "20000",
+                  designation: "Carpenter Grade II",
+                  passport: "PP12353",
+                  joining: "2021-06-05",
+                  period: "3 Years",
+                  otRate: "80",
+                  workingAs: "Carpenter",
+                },
+                {
+                  id: "0011",
+                  name: "??????? ???",
+                  salary: "19500",
+                  designation: "Mason Grade 11",
+                  passport: "PP12354",
+                  joining: "2021-08-12",
+                  period: "2 Years",
+                  otRate: "77",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0012",
+                  name: "???????? ????",
+                  salary: "21500",
+                  designation: "Carpenter Grade II",
+                  passport: "PP12355",
+                  joining: "2020-11-15",
+                  period: "4 Years",
+                  otRate: "87",
+                  workingAs: "Carpenter",
+                },
+                {
+                  id: "0013",
+                  name: "???? ???",
+                  salary: "18500",
+                  designation: "Mason Grade 11",
+                  passport: "PP12356",
+                  joining: "2021-09-22",
+                  period: "2 Years",
+                  otRate: "73",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0014",
+                  name: "?????? ?????",
+                  salary: "20500",
+                  designation: "Steel Fixer Grade 2",
+                  passport: "PP12357",
+                  joining: "2021-04-18",
+                  period: "3 Years",
+                  otRate: "82",
+                  workingAs: "Steel Fixer",
+                },
+                {
+                  id: "0015",
+                  name: "???? ??????????",
+                  salary: "19000",
+                  designation: "Mason Grade 2",
+                  passport: "PP12358",
+                  joining: "2021-10-30",
+                  period: "2 Years",
+                  otRate: "75",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0016",
+                  name: "???? ????",
+                  salary: "20000",
+                  designation: "Mason Grade 2",
+                  passport: "PP12359",
+                  joining: "2021-07-14",
+                  period: "3 Years",
+                  otRate: "80",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0017",
+                  name: "??????? ????",
+                  salary: "18900",
+                  designation: "Mason Grade 2",
+                  passport: "PP12360",
+                  joining: "2021-11-08",
+                  period: "2 Years",
+                  otRate: "75",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0018",
+                  name: "????? ???",
+                  salary: "20800",
+                  designation: "Steel Fixer Grade 2",
+                  passport: "PP12361",
+                  joining: "2021-05-25",
+                  period: "3 Years",
+                  otRate: "83",
+                  workingAs: "Steel Fixer",
+                },
+                {
+                  id: "0019",
+                  name: "???? ???????",
+                  salary: "19200",
+                  designation: "Mason Grade 2",
+                  passport: "PP12362",
+                  joining: "2021-09-09",
+                  period: "2 Years",
+                  otRate: "76",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0020",
+                  name: "?????? ??????",
+                  salary: "20600",
+                  designation: "Steel Fixer Grade 2",
+                  passport: "PP12363",
+                  joining: "2021-06-11",
+                  period: "3 Years",
+                  otRate: "82",
+                  workingAs: "Steel Fixer",
+                },
+                {
+                  id: "0021",
+                  name: "????? ?????",
+                  salary: "19400",
+                  designation: "Tile Mason Grade 2",
+                  passport: "PP12364",
+                  joining: "2021-08-20",
+                  period: "2 Years",
+                  otRate: "77",
+                  workingAs: "Tile Mason",
+                },
+                {
+                  id: "0022",
+                  name: "???? ?????????",
+                  salary: "19700",
+                  designation: "Mason Grade 2",
+                  passport: "PP12365",
+                  joining: "2021-10-03",
+                  period: "2 Years",
+                  otRate: "78",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0023",
+                  name: "???? ????????",
+                  salary: "20700",
+                  designation: "Steel Fixer Grade 2",
+                  passport: "PP12366",
+                  joining: "2021-05-31",
+                  period: "3 Years",
+                  otRate: "82",
+                  workingAs: "Steel Fixer",
+                },
+                {
+                  id: "0024",
+                  name: "?????? ???",
+                  salary: "19300",
+                  designation: "Mason Grade 2",
+                  passport: "PP12367",
+                  joining: "2021-09-16",
+                  period: "2 Years",
+                  otRate: "77",
+                  workingAs: "Mason",
+                },
+                {
+                  id: "0025",
+                  name: "??? ??????",
+                  salary: "20900",
+                  designation: "Steel Fixer Grade 2",
+                  passport: "PP12368",
+                  joining: "2021-06-27",
+                  period: "3 Years",
+                  otRate: "83",
+                  workingAs: "Steel Fixer",
+                },
+                {
+                  id: "0026",
+                  name: "??????? ?????",
+                  salary: "20400",
+                  designation: "Steel Fixer Grade 2",
+                  passport: "PP12369",
+                  joining: "2021-07-10",
+                  period: "3 Years",
+                  otRate: "81",
+                  workingAs: "Steel Fixer",
+                },
+              ];
+              currentMonthAttendance = [];
+              currentSites = ["Site A", "Site B", "Site C", "KITCHEN"]; // Default sites
+
+              // ???? ???????? ?????
+              const siteSelect = document.getElementById("sideName");
+              if (siteSelect) {
+                siteSelect.innerHTML =
+                  '<option value="" selected disabled>Select Site</option>' +
+                  currentSites
+                    .map((s) => `<option value="${s}">${s}</option>`)
+                    .join("");
+              }
+
+              // ????? ????? ????? ???
+              isEmployeeLoaded = true;
+              isSitesLoaded = true;
+              if (datePicker && typeof datePicker.redraw === "function") {
+                datePicker.redraw();
+              }
+              if (overlay) overlay.classList.add("fade-out");
+              if (mainContent)
+                mainContent.classList.remove("opacity-0", "screen-lock-blur");
+
+              if (isManual && btn) {
+                btn.innerHTML = `Refresh Database`;
+                btn.disabled = false;
+                Swal.fire({
+                  title: "Offline Mode",
+                  text: "Firebase not available. Using default data.",
+                  icon: "warning",
+                  width: "300px",
+                  timer: 2000,
+                  showConfirmButton: false,
+                });
+              }
+              renderHolidayInfo();
+              return;
+            }
+
+            // ?. ??????? ???? ??? ???? ??? ??? ?????
+            const [empSnap, siteSnap, attSnap, holSnap] = await Promise.all([
+              db.ref("EMPLOYEE_LIST").once("value"),
+              db.ref("PROJECT_NAME").once("value"),
+              db.ref("ATTENDANCE/" + currentMonthName).once("value"),
+              db.ref("HOLIDAY_LIST").once("value"), // ????? ????????? ??????? ????????????? ???
+            ]);
+
+            // ?. ????? ????? ???????? (????? ????????? ??????? ???????)
+            const holRawData = holSnap.val() || {};
+            HOLIDAY_LIST = Object.values(holRawData)
+              .map((item) => {
+                if (!item.DATE) return null;
+                const parts = item.DATE.split("/");
+                if (parts.length === 3) {
+                  const day = parts[0].padStart(2, "0");
+                  const month = parts[1].padStart(2, "0");
+                  const year = parts[2];
+                  return `${year}-${month}-${day}`;
+                }
+                return null;
+              })
+              .filter((d) => d);
+
+            console.log("Loaded Firebase holidays:", HOLIDAY_LIST);
+            renderHolidayInfo();
+
+            // ?. ???? ???? ???????? (??????? ? ????)
+            const empRawData = empSnap.val() || {};
+            employees = Object.keys(empRawData).map((key) => {
+              const emp = empRawData[key];
+              const nameValue =
+                emp["EMPLOYEE NAME"] ||
+                emp.EMPLOYEE_NAME ||
+                emp.NAME ||
+                emp.Name ||
+                emp.name ||
+                emp.EmployeeName ||
+                "";
+              return {
+                id: String(emp.ID || emp.id || key || "").padStart(4, "0"),
+                name: nameValue,
+                salary:
+                  emp["BASIC SALARY"] ||
+                  emp.BASIC_SALARY ||
+                  emp.Salary ||
+                  emp.salary ||
+                  "0",
+                designation:
+                  emp["DESIGNATION"] ||
+                  emp.DESIGNATION ||
+                  emp.Designation ||
+                  emp.designation ||
+                  "",
+                passport:
+                  emp["PASSPORT NO"] ||
+                  emp.PASSPORT_NO ||
+                  emp.PassportNo ||
+                  emp.passport_no ||
+                  emp.passport ||
+                  "",
+                joining:
+                  emp["JOINING DATE"] ||
+                  emp.JOINING_DATE ||
+                  emp.JoiningDate ||
+                  emp.joining_date ||
+                  "",
+                period: emp.PERIOD || emp.Period || emp.period || "",
+                otRate:
+                  emp["OT RATE (PER HOUR)"] ||
+                  emp.OT_RATE__PER_HOUR_ ||
+                  emp.OTRate ||
+                  emp.ot_rate ||
+                  "0",
+                workingAs:
+                  emp["WARKING AS"] ||
+                  emp.WARKING_AS ||
+                  emp.WorkingAs ||
+                  emp.WORKING_AS ||
+                  emp.DESIGNATION ||
+                  emp.Designation ||
+                  emp.designation ||
+                  "",
+              };
+            });
+
+            currentMonthAttendance = attSnap.val()
+              ? Object.values(attSnap.val())
+              : [];
+            const siteRawData = siteSnap.val() || {};
+            currentSites = Object.keys(siteRawData)
+              .map((key) => {
+                const project = siteRawData[key] || {};
+                return project.NAME || project.Name || project.name || key;
+              })
+              .filter((name) => name);
+
+            // ???????? ???????? ?????
+            const siteSelect = document.getElementById("sideName");
+            if (siteSelect) {
+              siteSelect.innerHTML =
+                '<option value="" selected disabled>Select Project</option>' +
+                currentSites
+                  .map((s) => `<option value="${s}">${s}</option>`)
+                  .join("");
+            }
+
+            // Re-init custom select for site name after data loads
+            initCustomSelect("sideName");
+            initCustomSelect("attStatus");
+
+            // ????? ????? ????? ???
+            isEmployeeLoaded = true;
+            isSitesLoaded = true;
+            if (datePicker && typeof datePicker.redraw === "function") {
+              datePicker.redraw();
+            }
+            if (overlay) overlay.classList.add("fade-out");
+            if (mainContent)
+              mainContent.classList.remove("opacity-0", "screen-lock-blur");
+
+            if (isManual && btn) {
+              btn.innerHTML = `Refresh Database`;
+              btn.disabled = false;
+              Swal.fire({
+                title: "Synced!",
+                text: "Server Data Updated",
+                icon: "success",
+                width: "300px",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+            }
+if (isManual && btn) {
+        btn.innerHTML = `Refresh Database`;
+        btn.disabled = false;
+        
+        // সিঙ্ক সাকসেস মেসেজ দেখাবে
+        await Swal.fire({
+          title: "Synced & Refreshing!",
+          text: "Server Data Updated. Page will reload now.",
+          icon: "success",
+          width: "300px",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+
+        // এই লাইনটি পুরো পেজকে রিফ্রেশ করে দিবে
+        window.location.reload(); 
+      }
+            renderHolidayInfo();
+          } catch (err) {
+            console.error("Critical Sync Error:", err);
+            if (btn) {
+              btn.innerHTML = `Refresh Database`;
+              btn.disabled = false;
+            }
+            if (overlay) overlay.classList.add("fade-out");
+            Swal.fire({
+              title: "Sync Failed",
+              text: err.message,
+              icon: "error",
+              width: "350px",
+            });
+          }
+        }
+        // ??????? ????
+        function updateClock() {
+          const now = new Date();
+          let hours = now.getHours();
+          const minutes = String(now.getMinutes()).padStart(2, "0");
+          const seconds = String(now.getSeconds()).padStart(2, "0");
+          const ampm = hours >= 12 ? "PM" : "AM";
+          hours = hours % 12 || 12;
+
+          const ids = {
+            clockHH: String(hours).padStart(2, "0"),
+            clockMM: minutes,
+            clockSS: seconds,
+            clockAP: ampm,
+          };
+          for (let id in ids) {
+            let el = document.getElementById(id);
+            if (el) el.innerText = ids[id];
+          }
+          if (document.getElementById("digitalDate"))
+            document.getElementById("digitalDate").innerText =
+              now.toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // --- Custom Dropdown Logic ---
+        function initCustomSelect(id) {
+          const select = document.getElementById(id);
+          if (!select) return;
+
+          select.style.display = "none";
+          let wrapper = select.parentElement.querySelector(
+            ".custom-select-wrapper",
+          );
+          if (wrapper) wrapper.remove();
+
+          wrapper = document.createElement("div");
+          wrapper.className = "custom-select-wrapper";
+
+          // সংশোধিত অংশ: trigger একবারই ডিক্লেয়ার করা হয়েছে
+          const trigger = document.createElement("div");
+          trigger.className = "custom-select-trigger";
+
+          // ডিজেবলড স্ট্যাটাস চেক এবং স্টাইল সেট করা
+          if (select.disabled) {
+            trigger.classList.add("disabled-custom-select");
+            trigger.style.pointerEvents = "none"; // ক্লিক বন্ধ করবে
+            trigger.style.opacity = "0.7"; // আবছা দেখাবে
+          } else {
+            trigger.classList.remove("disabled-custom-select");
+            trigger.style.pointerEvents = "auto";
+            trigger.style.opacity = "1";
+          }
+
+          // গোল্ডেন কালার অ্যারো সহ ট্রিগার টেক্সট
+          trigger.innerHTML = `<span>${select.options[select.selectedIndex]?.text || "Select"}</span><i style="color:var(--brand-gold)">▼</i>`;
+
+          const optionsContainer = document.createElement("div");
+          optionsContainer.className = "custom-select-options";
+
+          // অপশনগুলো তৈরি করা
+          Array.from(select.options).forEach((opt) => {
+            if (opt.disabled && !opt.value) return;
+            const item = document.createElement("div");
+            item.className = "custom-select-option";
+            item.innerText = opt.text;
+            item.onclick = (e) => {
+              e.stopPropagation();
+              select.value = opt.value;
+              trigger.querySelector("span").innerText = opt.text;
+              optionsContainer.style.display = "none";
+              select.dispatchEvent(new Event("change"));
+            };
+            optionsContainer.appendChild(item);
+          });
+
+          // ট্রিগার ক্লিক লজিক
+          trigger.onclick = (e) => {
+            if (!select.disabled) {
+              e.stopPropagation();
+              const isVisible = optionsContainer.style.display === "block";
+              // অন্য সব ড্রপডাউন বন্ধ করে শুধু এটি খোলা
+              document
+                .querySelectorAll(".custom-select-options")
+                .forEach((el) => (el.style.display = "none"));
+              optionsContainer.style.display = isVisible ? "none" : "block";
+            }
+          };
+
+          wrapper.appendChild(trigger);
+          wrapper.appendChild(optionsContainer);
+          select.parentElement.appendChild(wrapper);
+        }
+
+        // স্ক্রিনের অন্য কোথাও ক্লিক করলে ড্রপডাউন বন্ধ হওয়া
+        document.addEventListener("click", () => {
+          document
+            .querySelectorAll(".custom-select-options")
+            .forEach((el) => (el.style.display = "none"));
+        });
+        function setAbsentMode() {
+          const sideSelect = document.getElementById("sideName");
+          const sunEl = document.getElementById("sundayWork");
+          const holEl = document.getElementById("holidayWork");
+          const otEl = document.getElementById("dailyOt");
+          const amountGroup = document.getElementById("amountGroup");
+          const remarkEl = document.getElementById("attRemark");
+          const attDateEl = document.getElementById("attDate");
+
+          // Add No Work option if needed
+          let exists = Array.from(sideSelect.options).some(
+            (opt) => opt.value === "No Work",
+          );
+          if (!exists) {
+            const newOpt = document.createElement("option");
+            newOpt.value = "No Work";
+            newOpt.text = "No Work";
+            // Ensure the option is added to the original select element
+            // before re-initializing the custom select
+            sideSelect.add(newOpt);
+          }
+          sideSelect.value = "No Work";
+          sideSelect.disabled = true;
+
+          if (sunEl) {
+            sunEl.value = "";
+            sunEl.readOnly = true;
+            sunEl.parentElement.classList.remove("hidden"); // Show Sunday field
+            // sunEl.parentElement.classList.remove("hidden"); // Keep hidden state as per previous logic
+          }
+          if (holEl) {
+            holEl.value = "";
+            holEl.readOnly = true;
+            holEl.parentElement.classList.remove("hidden"); // Show Holiday field
+            // holEl.parentElement.classList.remove("hidden"); // Keep hidden state as per previous logic
+          }
+          if (otEl) {
+            otEl.parentElement.classList.remove("hidden"); // Show OT Hours field
+          }
+          if (amountGroup) amountGroup.classList.add("hidden"); // Hide Amount field
+          if (remarkEl) remarkEl.value = "ABSENT";
+          if (amountGroup) amountGroup.classList.add("hidden"); // Hide Amount field (for OTHERS status)
+
+          if (remarkEl) {
+            remarkEl.value = "ABSENT";
+            remarkEl.readOnly = true; // Make remark read-only
+          }
+
+          const wrapper = sideSelect.parentElement.querySelector(
+            ".custom-select-wrapper",
+          );
+          if (wrapper) {
+            const trigger = wrapper.querySelector(".custom-select-trigger");
+            if (trigger) {
+              trigger.style.pointerEvents = "none";
+              trigger.style.opacity = "0.5";
+            }
+          }
+          initCustomSelect("sideName"); // Re-initialize custom select to update its UI
+        }
+
+        function setPresentMode() {
+          const sideSelect = document.getElementById("sideName");
+          const sunEl = document.getElementById("sundayWork");
+          const holEl = document.getElementById("holidayWork");
+          const otEl = document.getElementById("dailyOt");
+          const amountGroup = document.getElementById("amountGroup");
+          const remarkEl = document.getElementById("attRemark");
+
+          sideSelect.disabled = false;
+          if (sunEl) {
+            sunEl.readOnly = true;
+            sunEl.readOnly = false; // Make editable
+            sunEl.parentElement.classList.remove("hidden"); // Show Sunday field
+          }
+          if (holEl) {
+            holEl.readOnly = true;
+            holEl.readOnly = false; // Make editable
+            holEl.parentElement.classList.remove("hidden"); // Show Holiday field
+          }
+          if (otEl) {
+            otEl.parentElement.classList.remove("hidden"); // Show OT Hours field
+          }
+          if (amountGroup) amountGroup.classList.add("hidden"); // Hide Amount field
+          if (remarkEl) remarkEl.readOnly = false; // Make remark editable
+
+          const wrapper = sideSelect.parentElement.querySelector(
+            ".custom-select-wrapper",
+          );
+          if (wrapper) {
+            const trigger = wrapper.querySelector(".custom-select-trigger");
+            if (trigger) {
+              trigger.style.pointerEvents = "auto";
+              trigger.style.opacity = "1";
+            }
+          }
+          initCustomSelect("sideName"); // Re-initialize custom select to update its UI
+
+          const dateStr = document.getElementById("attDate").value;
+          if (dateStr) {
+            handleDateChange(dateStr);
+          }
+        }
+
+        function setOthersMode() {
+          const sideSelect = document.getElementById("sideName");
+          const sunEl = document.getElementById("sundayWork");
+          const holEl = document.getElementById("holidayWork");
+          const otEl = document.getElementById("dailyOt");
+          const amountGroup = document.getElementById("amountGroup");
+          const remarkEl = document.getElementById("attRemark");
+          const attDateEl = document.getElementById("attDate");
+
+          sideSelect.disabled = false;
+          if (sunEl) {
+            sunEl.readOnly = false;
+            sunEl.value = "";
+            sunEl.parentElement.classList.add("hidden"); // Hide Sunday field
+          }
+          if (holEl) {
+            holEl.readOnly = false;
+            holEl.value = "0";
+            holEl.parentElement.classList.add("hidden"); // Hide Holiday field
+          }
+          if (otEl) {
+            otEl.value = "0";
+            otEl.parentElement.classList.add("hidden"); // Hide OT Hours field
+          }
+          if (amountGroup) amountGroup.classList.remove("hidden"); // Show Amount field
+          if (remarkEl) remarkEl.value = "half day";
+          remarkEl.readOnly = false; // Make remark editable
+
+          const wrapper = sideSelect.parentElement.querySelector(
+            ".custom-select-wrapper",
+          );
+          if (wrapper) {
+            const trigger = wrapper.querySelector(".custom-select-trigger");
+            if (trigger) {
+              trigger.style.pointerEvents = "auto";
+              trigger.style.opacity = "1";
+            }
+          }
+          initCustomSelect("sideName"); // Re-initialize custom select to update its UI
+        }
+
+        // Status change listener to switch modes for ABSENT, PRESENT, and OTHERS
+        document
+          .getElementById("attStatus")
+          .addEventListener("change", function () {
+            if (this.value === "ABSENT") {
+              setAbsentMode();
+            } else if (this.value === "OTHERS") {
+              setOthersMode();
+            } else {
+              setPresentMode();
+            }
+          });
+
+        // Initialize status mode on load
+        const initialStatus = document.getElementById("attStatus").value;
+        if (initialStatus === "ABSENT") {
+          setAbsentMode();
+        } else if (initialStatus === "OTHERS") {
+          setOthersMode();
+        } else {
+          setPresentMode();
+        }
+
+        function renderHolidayInfo() {
+          const el = document.getElementById("holidayDatesInfo");
+          if (!el) return;
+          if (!HOLIDAY_LIST || HOLIDAY_LIST.length === 0) {
+            el.innerText =
+              "Holiday dates are not loaded yet or no public holidays found.";
+            return;
+          }
+
+          const formatted = HOLIDAY_LIST.slice(0, 15)
+            .map((date) => {
+              const d = new Date(date);
+              if (isNaN(d.getTime())) return date;
+              return d.toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              });
+            })
+            .join(", ");
+
+          el.innerText = `Public Holidays: ${formatted}`;
+        }
+       function toggleHolidayList() {
+  // HOLIDAY_LIST অ্যারে থেকে তারিখগুলোকে সুন্দরভাবে সাজিয়ে নিচ্ছি
+  const holidayContent = HOLIDAY_LIST.length > 0 
+    ? `<ul style="text-align: left; list-style: none; padding: 0;">
+        ${HOLIDAY_LIST.map(date => 
+          `<li style="padding: 8px; border-bottom: 1px solid #eee; color: #333;">
+            📅 ${new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </li>`
+        ).join('')}
+       </ul>`
+    : '<p style="color: #666;">No holidays listed.</p>';
+
+  Swal.fire({
+    title: '<span style="color: #002147;">Public Holiday List</span>',
+    html: `<div style="max-height: 300px; overflow-y: auto;">${holidayContent}</div>`,
+    icon: 'info',
+    confirmButtonText: 'Close',
+    confirmButtonColor: '#002147',
+    width: '400px',
+    customClass: {
+      popup: 'rounded-xl'
+    }
+  });
+}
+
+        // --- ???? ? ???? ????? ---
+        async function fetchDataForEdit() {
+          const date = document.getElementById("editQueryDate").value;
+          if (!date)
+            return Swal.fire({
+              title: "Error",
+              text: "Select a date!",
+              icon: "warning",
+              width: "300px",
+            });
+
+          const btn = document.getElementById("fetchDataBtn");
+          const tbody = document.getElementById("editSheetBody");
+
+          btn.innerHTML = `<span class="spinner"></span> Loading...`;
+          btn.disabled = true;
+          tbody.innerHTML = `<tr><td colspan="8" class="p-10 text-center"><span class="loader-circle inline-block"></span><p class="mt-2 text-slate-500 font-bold">Fetching from Firebase...</p></td></tr>`;
+
+          try {
+            const dateObj = new Date(date);
+            const monthName =
+              dateObj.toLocaleString("en-US", { month: "long" }) +
+              "-" +
+              dateObj.getFullYear();
+            const snapshot = await db
+              .ref("ATTENDANCE/" + monthName)
+              .once("value");
+            const allData = snapshot.val() || {};
+
+            serverEditData = Object.keys(allData)
+              .map((key) => ({ ...allData[key], firebaseKey: key }))
+              .filter((item) => item.DATE === date);
+
+            if (serverEditData.length === 0) {
+              tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-red-500 font-bold">No records found.</td></tr>`;
+            } else {
+              renderEditTable();
+            }
+          } catch (err) {
+            Swal.fire({
+              title: "Error",
+              text: "Fetch failed",
+              icon: "error",
+              width: "300px",
+            });
+          } finally {
+            btn.innerHTML = `Load Data`;
+            btn.disabled = false;
+          }
+        }
+
+        function renderEditTable() {
+          const tbody = document.getElementById("editSheetBody");
+          tbody.innerHTML = serverEditData
+            .map((item, idx) => {
+              const siteOptions = currentSites
+                .map(
+                  (s) =>
+                    `<option value="${s}" ${item.SITE_NAME === s ? "selected" : ""}>${s}</option>`,
+                )
+                .join("");
+              return `
+                                  <tr class="hover:bg-slate-50 transition-colors">
+                                      <td class="p-3 border font-bold text-slate-700">${item.ID}</td>
+                                      <td class="p-3 border uppercase font-medium text-slate-600">${item.EMPLOYEE_NAME}</td>
+                                      <td class="p-3 border text-slate-50">${item.DATE}</td>
+                                      <td class="p-3 border text-center text-green-600 font-bold">${item.AMOUNT || 0}</td>
+                                      <td class="p-3 border">
+                                          <select onchange="updateLocalServerData(${idx}, 'SITE_NAME', this.value)" class="w-full bg-orange-50 border-orange-200 text-[#1e3a5f] p-1.5 rounded font-bold text-xs outline-none">
+                                              ${siteOptions}
+                                          </select>
+                                      </td>
+                                      <td class="p-3 border">
+                                          <input type="number" step="0.5" value="${item.DAILY_OT}" onchange="updateLocalServerData(${idx}, 'DAILY_OT', parseFloat(this.value))" class="w-full bg-orange-50 border-orange-200 p-1.5 rounded text-center font-bold text-xs outline-none">
+                                      </td>
+                                      <td class="p-3 border text-center text-slate-500 font-bold">${item.HOLIDAY_WORK || 0}</td>
+                                      <td class="p-3 border text-center text-slate-500 font-bold">${item.SUNDAY_WORK || 0}</td>
+                                      <td class="p-3 italic text-slate-400">${item.REMARK || ""}</td>
+                                  </tr>`;
+            })
+            .join("");
+        }
+
+        function updateLocalServerData(idx, field, val) {
+          serverEditData[idx][field] = val;
+        }
+
+        async function updateServerRecords() {
+          if (serverEditData.length === 0) return;
+          const btn = document.getElementById("updateRecordsBtn");
+          const overlay = document.getElementById("loadingOverlay");
+
+          btn.innerHTML = `<span class="spinner"></span> Updating...`;
+          btn.disabled = true;
+          overlay.classList.remove("fade-out");
+
+          try {
+            const dateObj = new Date(serverEditData[0].DATE);
+            const monthName =
+              dateObj.toLocaleString("en-US", { month: "long" }) +
+              "-" +
+              dateObj.getFullYear();
+            const updates = {};
+            serverEditData.forEach((item) => {
+              const key = item.firebaseKey;
+              const record = { ...item };
+              delete record.firebaseKey;
+              updates[`/ATTENDANCE/${monthName}/${key}`] = record;
+            });
+
+            await db.ref().update(updates);
+            showTransparentAlert("Success", "Firebase updated!", "success");
+            if (typeof closeEditModal === "function") closeEditModal();
+            refreshAllData(false);
+          } catch (err) {
+            console.error("Update Error:", err);
+            showCustomAlert(
+              "Update Failed",
+              "Error saving to Firebase.",
+              "error",
+            );
+          } finally {
+            btn.innerHTML = `Update Records`;
+            btn.disabled = false;
+            overlay.classList.add("fade-out");
+          }
+        }
+
+        console.log("Before handleDateChange");
+        // --- ??? ???? ---
+        function handleDateChange(dateStr) {
+          if (!dateStr) return;
+          const status = document.getElementById("attStatus").value;
+          const dateObj = new Date(dateStr);
+          const remarkEl = document.getElementById("attRemark"),
+            sunEl = document.getElementById("sundayWork"),
+            holEl = document.getElementById("holidayWork");
+          const salary =
+            parseFloat(document.getElementById("basicSalary").value) || 0;
+          const designation = (
+            document.getElementById("designation").value || ""
+          ).toLowerCase();
+          const isSunday = dateObj.getDay() === 0,
+            isInHoli = HOLIDAY_LIST.includes(dateStr);
+
+          if (status === "ABSENT") {
+            if (sunEl) sunEl.value = "";
+            if (holEl) holEl.value = "";
+            if (remarkEl) remarkEl.value = "ABSENT";
+            return;
+          }
+
+          // Only calculate Sunday/Holiday if status is PRESENT
+          if (status === "PRESENT") {
+            if (sunEl) sunEl.value = 0;
+            if (holEl) holEl.value = 0;
+
+            // Cook always gets normal work, no holiday/Sunday pay
+            if (designation.includes("cook")) {
+              if (remarkEl) remarkEl.value = "NORMAL WORK";
+            } else if (isSunday) {
+              if (remarkEl) remarkEl.value = "Sunday";
+              if (salary > 0 && sunEl)
+                sunEl.value = ((salary / 26) * 1.5).toFixed(2);
+            } else if (isInHoli) {
+              if (remarkEl) remarkEl.value = "Public Holiday";
+              if (salary > 0 && holEl)
+                holEl.value = ((salary / 26) * 1.5).toFixed(2);
+            } else {
+              if (remarkEl) remarkEl.value = "NORMAL WORK";
+            }
+          } else {
+            // For OTHERS and any other status, leave Sunday/Holiday fields empty
+            if (sunEl) sunEl.value = "";
+            if (holEl) holEl.value = "";
+            if (remarkEl) remarkEl.value = "NORMAL WORK";
+          }
+        }
+
+        function normalizeEmpId(value) {
+          const raw = String(value || "").trim();
+          if (!raw) return "";
+          const upper = raw.toUpperCase();
+          if (/^ACL-\d+$/.test(upper)) return upper;
+          if (/^\d+$/.test(raw)) return `ACL-${String(raw).padStart(4, "0")}`;
+          return upper;
+        }
+
+        function handleIdInput(input) {
+          const suggestions = document.getElementById("idSuggestions");
+          if (!suggestions || !isEmployeeLoaded) return;
+
+          const query = String(input.value || "")
+            .trim()
+            .toLowerCase();
+
+          // ১. ফিল্টার লজিক: যারা অলরেডি আজকের এটেনডেন্স লিস্টে নেই শুধু তাদের দেখাবে
+          const availableEmployees = employees.filter((emp) => {
+            const isAlreadyAdded = attendanceData.some(
+              (entry) => String(entry.empId) === String(emp.id),
+            );
+            return !isAlreadyAdded;
+          });
+
+          // ২. সার্চ কুয়েরি অনুযায়ী ফিল্টার করা
+          const filteredEmployees = query
+            ? availableEmployees.filter((emp) => {
+                return (
+                  (emp.id || "").toLowerCase().includes(query) ||
+                  (emp.name || "").toLowerCase().includes(query)
+                );
+              })
+            : availableEmployees;
+
+          // ৩. সাজেস্টশন লিস্ট তৈরি (সর্বোচ্চ ১২ থেকে ১৫টি দেখাবে)
+          window.lastEmployeeSuggestions = filteredEmployees.slice(0, 15);
+
+          if (window.lastEmployeeSuggestions.length === 0) {
+            suggestions.style.display = "none";
+            suggestions.innerHTML = "";
+            return;
+          }
+
+          // ৪. UI-তে সাজেশন দেখানো
+          suggestions.innerHTML = window.lastEmployeeSuggestions
+            .map(
+              (emp, idx) =>
+                `<div class="suggestion-item" onclick="selectEmployee(${idx})">${emp.id} - ${emp.name}</div>`,
+            )
+            .join("");
+
+          suggestions.style.display = "block";
+        }
+
+        function selectEmployee(index) {
+          const emp = window.lastEmployeeSuggestions?.[index];
+          if (!emp) return;
+
+          document.getElementById("empId").value = normalizeEmpId(emp.id);
+          document.getElementById("empName").value = emp.name;
+          document.getElementById("passport").value = emp.passport || "";
+          const desig = (emp.designation || "").trim();
+          document.getElementById("designation").value = desig;
+
+          const siteSelect = document.getElementById("sideName");
+          siteSelect.disabled = false; // Reset disabled state first
+          if (desig.toLowerCase() === "cook") {
+            siteSelect.value = "KITCHEN";
+            siteSelect.disabled = true;
+          } else {
+            siteSelect.disabled = false;
+          }
+          initCustomSelect("sideName"); // Re-initialize custom select to reflect the disabled state and value
+
+          window.currentWorkingAs = emp.workingAs || "";
+          document.getElementById("joiningDate").value = emp.joining || "";
+          document.getElementById("period").value = emp.period || "";
+          document.getElementById("basicSalary").value = emp.salary || "0";
+          document.getElementById("globalOtRate").value = emp.otRate || "0";
+          document.getElementById("idSuggestions").style.display = "none";
+
+          if (document.getElementById("attDate").value)
+            handleDateChange(document.getElementById("attDate").value);
+        }
+
+        function handleIdInputKeydown(event) {
+          const suggestions = document.getElementById("idSuggestions");
+          if (!suggestions || suggestions.style.display !== "block") return;
+          const items = Array.from(
+            suggestions.querySelectorAll(".suggestion-item"),
+          );
+          if (!items.length) return;
+          let activeIndex = items.findIndex((item) =>
+            item.classList.contains("active"),
+          );
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            activeIndex = activeIndex < items.length - 1 ? activeIndex + 1 : 0;
+          } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            activeIndex = activeIndex > 0 ? activeIndex - 1 : items.length - 1;
+          } else if (event.key === "Enter") {
+            event.preventDefault();
+            const idx = activeIndex >= 0 ? activeIndex : 0;
+            items[idx]?.click();
+            return;
+          } else {
+            return;
+          }
+
+          items.forEach((item, idx) => {
+            item.classList.toggle("active", idx === activeIndex);
+          });
+        }
+
+        function resetAllInputs() {
+          const ids = [
+            "dailyOt",
+            "holidayWork",
+            "sundayWork",
+            "amountInput",
+            "empId",
+            "empName",
+            "passport",
+            "designation",
+            "joiningDate",
+            "period",
+            "basicSalary",
+            "globalOtRate",
+          ];
+          ids.forEach((id) => {
+            if (document.getElementById(id))
+              document.getElementById(id).value = "";
+          });
+          const site = document.getElementById("sideName");
+          if (site) {
+            site.disabled = false;
+            site.classList.remove("bg-gray-100");
+            // Don't clear sideName to keep the selected site
+            // site.value = "";
+          }
+          // Don't clear datePicker to keep the selected date
+          // if (datePicker) datePicker.clear();
+          if (document.getElementById("attRemark"))
+            document.getElementById("attRemark").value = "NORMAL WORK";
+        }
+
+        function renderTable() {
+          const tbody = document.getElementById("attendanceBody");
+          if (!tbody) return;
+          tbody.innerHTML = "";
+          let tOt = 0,
+            tHol = 0,
+            tSun = 0;
+
+          attendanceData.forEach((item, index) => {
+            // ??? item.id ?? ???? ??? ????????? ???? ?????? ??????? ???? (??????? ??????)
+            const rowId = item.id || index;
+            const holidayWork = parseFloat(item.holidayWork) || 0;
+            const sundayWork = parseFloat(item.sundayWork) || 0;
+
+            tOt += parseFloat(item.ot || 0);
+            tHol += holidayWork;
+            tSun += sundayWork;
+
+            tbody.innerHTML += `
+                              <tr class="hover:bg-slate-50 border-b">
+                                  <td class="p-3">${item.slNo}</td>
+                                  <td class="p-3 font-bold">${item.date}</td>
+                                  <td class="p-3 font-black text-[#1e3a5f]">${normalizeEmpId(item.empId)}</td>
+                                  <td class="p-3 uppercase font-medium">${item.empName}</td>
+                                  <td class="p-3 text-center">${item.ot}</td>
+                                  <td class="p-3 text-center text-orange-600 font-bold">${holidayWork.toFixed(2)}</td>
+                                  <td class="p-3 text-center text-orange-600 font-bold">${sundayWork.toFixed(2)}</td>
+                                  <td class="p-3 text-[10px] uppercase">${item.site}</td>
+                                  <td class="p-3 text-center text-green-600 font-bold">${(item.amount || 0).toFixed(2)}</td>
+                                  <td class="p-3">
+                                      <span class="bg-green-100 text-green-700 px-2 py-0.5 rounded-full text-[9px] font-black">${item.status}</span>
+                                  </td>
+                                  <td class="p-3 italic text-slate-500 font-bold">${item.remark}</td>
+                                  <td class="p-3 text-center no-print flex gap-2 justify-center">
+
+                  <button onclick="editEntry('${rowId}')" class="text-blue-600 font-bold px-2 py-1 hover:bg-blue-50 rounded">Edit</button>
+                  <button onclick="confirmDelete('${rowId}')" class="text-red-500 font-bold px-2 py-1 hover:bg-red-50 rounded">Del</button>
+                                  </td>
+                              </tr>`;
+          });
+
+          if (document.getElementById("totalHrs"))
+            document.getElementById("totalHrs").innerText = tOt.toFixed(1);
+          if (document.getElementById("totalHoli"))
+            document.getElementById("totalHoli").innerText = tHol.toFixed(2);
+          if (document.getElementById("totalSun"))
+            document.getElementById("totalSun").innerText = tSun.toFixed(2);
+        }
+
+        function editEntry(id) {
+          const item = attendanceData.find((i) => String(i.id) === String(id));
+          if (!item) return;
+
+          // ???? ???? ???? ?????? ?????? ????? (??????????)
+          const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val || "";
+          };
+
+          setVal("empId", normalizeEmpId(item.empId));
+          setVal("empName", item.empName);
+          setVal("sideName", item.site);
+          setVal("dailyOt", item.ot);
+          setVal("holidayWork", item.holidayWork);
+          setVal("sundayWork", item.sundayWork);
+          setVal("attRemark", item.remark);
+
+          // ????????? ???? ??????? ???? (??? ????? ????)
+          setVal("passport", item.passport);
+          setVal("designation", item.designation);
+          setVal("basicSalary", item.salary);
+          setVal("globalOtRate", item.otRate);
+
+          // ????? ??? ???
+          if (datePicker) {
+            datePicker.setDate(item.date);
+          } else if (document.getElementById("attDate")) {
+            document.getElementById("attDate").value = item.date;
+          }
+
+          // ???? ????? ???? ???? ????? ???? (???? ????????? ?? ??)
+          attendanceData = attendanceData.filter(
+            (i) => String(i.id) !== String(id),
+          );
+
+          // ??????? ??????? ??? ???
+          attendanceData.forEach((item, index) => {
+            item.slNo = index + 1;
+          });
+          slCount = attendanceData.length + 1;
+          renderTable();
+
+          // ????? ?????? 'Update' ????? ???????? ???
+          const addBtn = document.getElementById("addBtn");
+          if (addBtn) {
+            addBtn.innerText = "Update Now";
+            addBtn.classList.replace("bg-[#1e3a5f]", "bg-orange-600");
+          }
+
+          // ????? ???? ???? ???? ????? ???? ????? ???? ???? ????
+          window.scrollTo({ top: 0, behavior: "smooth" });
+
+          // ??? ???? ????? ??????
+          Swal.fire({
+            title: "Editing...",
+            text: "The data was sent above; please modify and re-Update it.",
+            icon: "info",
+            width: "320px",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        }
+        // --- ???? ????? ---
+        function requestAddEntry() {
+          let rawEmpId = document.getElementById("empId").value.trim();
+          const attDate = document.getElementById("attDate").value;
+          const site = document.getElementById("sideName").value;
+
+          // ?. ?????????? (??? ???????? ???? ?????????)
+          if (!rawEmpId) {
+            return Swal.fire({
+              title: "Missing ID",
+              text: "Please select an employee!",
+              icon: "warning",
+              width: "320px",
+              confirmButtonColor: "#3b82f6",
+            });
+          }
+
+          if (!attDate || !site) {
+            return Swal.fire({
+              title: "Input Error",
+              text: "Date and Site are required!",
+              icon: "error",
+              width: "320px",
+              confirmButtonColor: "#ef4444",
+            });
+          }
+
+          let formattedId = normalizeEmpId(rawEmpId);
+
+          const normalizeCheck = (value) => {
+            const raw = String(value || "").trim();
+            if (/^ACL-\d+$/i.test(raw)) return raw.toUpperCase();
+            if (/^\d+$/i.test(raw)) return normalizeEmpId(raw);
+            return raw.toUpperCase();
+          };
+
+          // ?. ????????? ??? (????? ? ???????)
+          const isLocalDuplicate = attendanceData.some(
+            (e) =>
+              normalizeCheck(e.empId) === normalizeCheck(formattedId) &&
+              e.date === attDate,
+          );
+          if (isLocalDuplicate) {
+            return Swal.fire({
+              title: "Duplicate Found",
+              text: "Already in your current list!",
+              icon: "warning",
+              width: "320px",
+              confirmButtonColor: "#f59e0b",
+            });
+          }
+
+          const isServerDuplicate = currentMonthAttendance.some(
+            (s) =>
+              normalizeCheck(s.ID || s.empId) === normalizeCheck(formattedId) &&
+              s.DATE === attDate,
+          );
+          if (isServerDuplicate) {
+            return Swal.fire({
+              title: "Already Exists",
+              text: `ID: ${formattedId} is already in database!`,
+              icon: "error",
+              width: "320px",
+              confirmButtonColor: "#ef4444",
+            });
+          }
+
+          // ?. ???? ??????? ????
+          const selectedStatus = document.getElementById("attStatus").value;
+          const newEntry = {
+            id: Date.now(),
+            slNo: slCount++,
+            date: attDate,
+            empId: formattedId,
+            empName: document.getElementById("empName").value,
+            period: document.getElementById("period").value || "",
+            designation: document.getElementById("designation").value,
+            workingAs:
+              window.currentWorkingAs ||
+              document.getElementById("designation").value,
+            joiningDate: document.getElementById("joiningDate").value || "",
+            passport: document.getElementById("passport").value || "",
+            salary: document.getElementById("basicSalary").value || 0,
+            otRate: document.getElementById("globalOtRate").value || 0,
+            ot: parseFloat(document.getElementById("dailyOt").value) || 0,
+            site: site,
+            status: selectedStatus === "OTHERS" ? "PRESENT" : selectedStatus,
+            holidayWork:
+              parseFloat(document.getElementById("holidayWork").value) || 0,
+            sundayWork:
+              parseFloat(document.getElementById("sundayWork").value) || 0,
+            amount:
+              selectedStatus === "OTHERS"
+                ? parseFloat(document.getElementById("amountInput").value) || 0
+                : 0,
+            remark:
+              selectedStatus === "OTHERS"
+                ? "half day"
+                : document.getElementById("attRemark").value,
+          };
+
+          // ?. ?????? ???? ??? ???
+          attendanceData.push(newEntry);
+
+          // ?. ???? ?????
+          const addBtn = document.getElementById("addBtn");
+          if (addBtn) {
+            addBtn.innerText = "Add";
+            addBtn.classList.remove("bg-orange-600");
+            addBtn.classList.add("bg-[#1e3a5f]");
+          }
+
+          // ?. ?????? ????? (???? ????? ??? ???? ????? ?????, ?? ??? ??? ?????? ?????)
+          // Swal.fire({ icon: 'success', title: 'Added', width: '200px', timer: 800, showConfirmButton: false });
+
+          // ?. ????? ??-??????? ??? ????? ????????
+          renderTable();
+          resetAllInputs();
+        }
+
+        // --- ????? ????? ---
+        let deleteTargetId = null; // ??? ???? ????? ??? ?? ??? ????? ????
+
+        function confirmDelete(id) {
+          Swal.fire({
+            title: "Are you sure?",
+            text: "You want to delete this record?",
+            icon: "warning",
+            width: "320px",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#3b82f6",
+            confirmButtonText: "Yes, Delete",
+            cancelButtonText: "Cancel",
+          }).then((result) => {
+            if (result.isConfirmed) {
+              attendanceData = attendanceData.filter(
+                (i) => String(i.id) !== String(id),
+              );
+              attendanceData.forEach((item, index) => {
+                item.slNo = index + 1;
+              });
+              slCount = attendanceData.length + 1;
+              renderTable();
+              Swal.fire({
+                title: "Deleted!",
+                icon: "success",
+                width: "300px",
+                timer: 1000,
+                showConfirmButton: false,
+              });
+            }
+          });
+        }
+
+        function executeDelete() {
+          if (deleteTargetId !== null) {
+            // ???? ??????? ??? ????? ???
+            attendanceData = attendanceData.filter(
+              (i) => String(i.id) !== String(deleteTargetId),
+            );
+
+            // ??????? ??? ???
+            attendanceData.forEach((item, index) => {
+              item.slNo = index + 1;
+            });
+            slCount = attendanceData.length + 1;
+
+            renderTable(); // ????? ???????
+
+            // ???? ???? ??????? ?????? ?????
+            resetAlertButtons();
+
+            // ?????? ????? ??????
+            showTransparentAlert(
+              "Deleted!",
+              "Record has been removed.",
+              "success",
+            );
+          }
+        }
+
+        // ????????? ???????? ???? ?????? ??????? ?????? ?????
+        function resetAlertButtons() {
+          closeAlert();
+          const cancelBtn = document.getElementById("alertCancelBtn");
+          const okBtn = document.getElementById("alertOkBtn");
+
+          if (cancelBtn && okBtn) {
+            setTimeout(() => {
+              cancelBtn.classList.add("hidden");
+              okBtn.innerText = "OK";
+              okBtn.classList.replace("bg-red-600", "bg-[#1e3a5f]");
+              okBtn.onclick = closeAlert; // ?????? ???? ?????? ???? ?????
+            }, 500);
+          }
+        }
+        function openFullPreview() {
+    const body = document.getElementById("fullPreviewBody"),
+          foot = document.getElementById("fullPreviewFoot");
+
+    // ১. চেক করুন ডেটা আছে কি না
+    if (!attendanceData || attendanceData.length === 0) {
+        Swal.fire("No Data", "Server is not available.", "warning");
+        return;
+    }
+
+    let tOt = 0, tHol = 0, tSun = 0;
+
+    body.innerHTML = attendanceData.map((item) => {
+        // ডেটা যদি অবজেক্টে না থাকে তবে ব্ল্যাঙ্ক দেখাবে, তাই সুরক্ষা নিশ্চিত করা
+        const otVal = Number(item.ot) || 0;
+        const holVal = Number(item.holidayWork) || 0;
+        const sunVal = Number(item.sundayWork) || 0;
+        const empName = item.empName || "N/A";
+        const designation = item.workingAs || item.designation || "N/A"; // আপনার কি-এর নাম অনুযায়ী
+
+        tOt += otVal;
+        tHol += holVal;
+        tSun += sunVal;
+
+        return `<tr>
+            <td class="p-4 border">${item.slNo || ""}</td>
+            <td class="p-4 border font-bold">${item.date || ""}</td>
+            <td class="p-4 border font-black">${normalizeEmpId(item.empId)}</td>
+            <td class="p-4 border uppercase">${empName}</td>
+            <td class="p-4 border">${designation}</td>
+            <td class="p-4 border text-center font-bold">${otVal}</td>
+            <td class="p-4 border text-center text-orange-600 font-bold">${holVal}</td>
+            <td class="p-4 border text-center text-orange-600 font-bold">${sunVal}</td>
+            <td class="p-4 border uppercase text-[10px]">${item.site || ""}</td>
+            <td class="p-4 border text-center font-bold">${item.status || ""}</td>
+            <td class="p-4 border italic font-bold text-slate-500">${item.remark || ""}</td>
+        </tr>`;
+    }).join("");
+
+    foot.innerHTML = `
+        <tr class="bg-slate-50 font-black">
+            <td colspan="5" class="p-4 border text-right uppercase">Total:</td>
+            <td class="p-4 border text-center">${tOt.toFixed(1)}</td>
+            <td class="p-4 border text-center">${tHol.toFixed(2)}</td>
+            <td class="p-4 border text-center">${tSun.toFixed(2)}</td>
+            <td colspan="3" class="border"></td>
+        </tr>`;
+
+    document.getElementById("printReportDate").innerText = "Reported: " + new Date().toLocaleString();
+    document.getElementById("fullPreviewModal").style.display = "flex";
+}
+        function closeFullPreview() {
+          document.getElementById("fullPreviewModal").style.display = "none";
+        }
+
+        // Firebase CDN ????????? (???? ?????? ??????? ??? ?????)
+
+        function promiseWithTimeout(promise, ms) {
+          let timeoutId;
+          const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = setTimeout(
+              () => reject(new Error(`Firebase save timed out after ${ms}ms`)),
+              ms,
+            );
+          });
+          return Promise.race([promise, timeoutPromise]).finally(() => {
+            clearTimeout(timeoutId);
+          });
+        }
+
+        const FIREBASE_SAVE_TIMEOUT_MS = 10000;
+
+        /**
+         * Firestore-এ ডাটা সেভ করার ফাংশন
+         */
+        async function saveAllToFirestore() {
+  if (!isFirebaseAvailable || !db) {
+    return Swal.fire("Error", "Server is not available.", "error");
+  }
+
+  if (!attendanceData || attendanceData.length === 0) {
+    return Swal.fire("Empty", "No data to save.", "warning");
+  }
+
+  try {
+    // লোডিং দেখানো
+    Swal.fire({
+      title: "Processing...",
+      text: "Checking duplicates and preparing data",
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    // ১. সার্ভার থেকে ডাটা একবারেই নিয়ে আসা (অপ্টিমাইজড)
+    const snapshot = await db.ref("Daily Attendance").once("value");
+    const serverData = snapshot.val() || {};
+    const serverEntries = Object.values(serverData);
+
+    let finalDataToSave = [];
+    let duplicates = attendanceData.filter(entry => 
+      serverEntries.some(s => (s.ID === entry.empId || s.empId === entry.empId) && s.DATE === entry.date)
+    );
+
+    Swal.close();
+
+    // ডুপ্লিকেট কনফার্মেশন (যদি থাকে)
+    if (duplicates.length > 0) {
+      const confirmResult = await Swal.fire({
+        title: "Duplicate Found!",
+        html: `<b>${duplicates.length}</b> entries already exist. Save anyway?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Yes, Save All",
+        cancelButtonText: "Skip Duplicates",
+      });
+
+      if (confirmResult.isConfirmed) {
+        finalDataToSave = attendanceData;
+      } else if (confirmResult.dismiss === Swal.DismissReason.cancel) {
+        finalDataToSave = attendanceData.filter(entry => !duplicates.includes(entry));
+      } else {
+        return;
+      }
+    } else {
+      finalDataToSave = attendanceData;
+    }
+
+    if (finalDataToSave.length === 0) return;
+
+    // ২. ডাটা রাইটিং শুরু (সবচেয়ে ফাস্ট পদ্ধতি)
+    Swal.fire({
+      title: "Saving Data...",
+      text: `Uploading ${finalDataToSave.length} records. Please wait...`,
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading(),
+    });
+
+    const updates = {};
+    const now = new Date();
+    const issueDate = now.toLocaleDateString("en-GB");
+    const issueTime = now.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    
+    // প্রি-রেফারেন্স তৈরি করা (স্পিড বাড়াতে সাহায্য করে)
+    const attendanceRef = db.ref("Daily Attendance");
+
+    finalDataToSave.forEach((entry) => {
+      // দ্রুত কী জেনারেট করা
+      const newKey = attendanceRef.push().key;
+      
+      updates[`Daily Attendance/${newKey}`] = {
+        ID: entry.empId,
+        EMPLOYEE_NAME: entry.empName,
+        DATE: entry.date,
+        STATUS: entry.status || "PRESENT",
+        BASIC_SALARY: Number(entry.salary) || 0,
+        DESIGNATION: entry.designation || "",
+        JOINING_DATE: entry.joiningDate || "",
+        PASSPORT_NO: entry.passport || "",
+        SIDE_NAME: entry.site || "",
+        TOTAL_OT_HOURS: Number(entry.ot) || 0,
+        OT_RATE__PER_HOUR_: Number(entry.otRate) || 0,
+        PERIOD: entry.period || "",
+        REMARK: entry.remark || "",
+        ISSUE_DATE: issueDate,
+        ISSUE_TIME: issueTime,
+        HOLIDAY: Number(entry.holidayWork) || 0,
+        SUNDAY_WORK: Number(entry.sundayWork) || 0,
+        AMOUNT: Number(entry.amount) || 0,
+      };
+    });
+
+    // ৩. এক ক্লিকে সব ডাটা পুশ (Atomic Update)
+    await db.ref().update(updates);
+
+    Swal.close();
+    await Swal.fire({
+      title: "Success!",
+      text: `${finalDataToSave.length} records saved instantly.`,
+      icon: "success",
+      timer: 2000,
+    });
+
+    attendanceData = [];
+    renderTable();
+
+  } catch (error) {
+    Swal.close();
+    Swal.fire("Error", "Upload failed: " + error.message, "error");
+  }
+}
+
+        if (typeof bulkEntry === "function") window.bulkEntry = bulkEntry;
+        if (typeof refreshAllData === "function")
+          window.refreshAllData = refreshAllData;
+        if (typeof toggleHolidayList === "function")
+          window.toggleHolidayList = toggleHolidayList;
+        if (typeof requestAddEntry === "function")
+          window.requestAddEntry = requestAddEntry;
+        if (typeof openFullPreview === "function")
+          window.openFullPreview = openFullPreview;
+        if (typeof saveAllToFirestore === "function")
+          window.saveAllToFirestore = saveAllToFirestore;
+        if (typeof clearTable === "function") window.clearTable = clearTable;
+        if (typeof selectEmployee === "function")
+          window.selectEmployee = selectEmployee;
+        if (typeof editEntry === "function") window.editEntry = editEntry;
+        if (typeof confirmDelete === "function")
+          window.confirmDelete = confirmDelete;
+        if (typeof closeAlert === "function") window.closeAlert = closeAlert;
+        if (typeof closeEditModal === "function")
+          window.closeEditModal = closeEditModal;
+        if (typeof fetchDataForEdit === "function")
+          window.fetchDataForEdit = fetchDataForEdit;
+        if (typeof updateServerRecords === "function")
+          window.updateServerRecords = updateServerRecords;
+        if (typeof openEditModal === "function") {
+          window.openEditModal = openEditModal;
+        } else {
+          window.openEditModal = () =>
+            Swal.fire({
+              title: "Coming Soon",
+              text: "Edit Server Data is not available yet.",
+              icon: "info",
+            });
+        }
+
+        function showCustomAlert(title, msg, type = "error") {
+          const overlay = document.getElementById("customAlert");
+          const box = overlay.querySelector("div.bg-white"); // ????? ???? ??????
+
+          if (!overlay || !box) return;
+
+          // ???? ??? ???
+          document.getElementById("alertTitle").innerText = title;
+          document.getElementById("alertMessage").innerText = msg;
+
+          // ???? ??? ???
+          const container = document.getElementById("alertIconContainer");
+          container.innerHTML =
+            type === "success" ? "?" : type === "warning" ? "??" : "??";
+
+          // ?????? ????????????? ?????
+          container.className = `flex items-center justify-center w-16 h-16 mx-auto rounded-full mb-6 text-2xl ${
+            type === "success"
+              ? "bg-green-100"
+              : type === "warning"
+                ? "bg-amber-100"
+                : "bg-red-100"
+          }`;
+
+          // ?. ?????? ???????? (?????)
+          overlay.style.display = "flex";
+
+          // ?. ?????? ??? ?????? ?????? ? ??????? ????? ??? ???
+          box.classList.add("glass-effect", "modern-alert");
+
+          // ??? ???? ???? 'show' ????? ??? ??? ???? ????????? ??????? ??
+          setTimeout(() => {
+            box.classList.add("show");
+          }, 10);
+        }
+
+        function closeAlert() {
+          const overlay = document.getElementById("customAlert");
+          const box = overlay.querySelector("div.bg-white");
+
+          if (!overlay || !box) return;
+
+          // ??????? ????? ?????
+          box.classList.remove("show");
+
+          // ??????? ??? ????? ?? ???????? ???? ???
+          setTimeout(() => {
+            overlay.style.display = "none";
+            box.classList.remove("glass-effect", "modern-alert");
+          }, 150); // CSS transition 0.4s ?? ???? ??? ????
+        }
+
+        // ??? ????? ????????? (?????? ?? ???? ??????? ????)
+        function showTransparentAlert(title, msg, type) {
+          showCustomAlert(title, msg, type);
+          if (type === "success" || type === "warning") {
+            setTimeout(closeAlert, 2500); // ?.? ??????? ?? ??? ??? ????
+          }
+        }
+      } catch (error) {
+        console.error("Fatal script error:", error);
+      }
+    </script>
+  </body>
+</html>
