@@ -385,7 +385,7 @@
           style="background-color: #f1c40f; color: #002147"
           onclick="bulkUpdateOT()"
         >
-           OT UPDATE
+          OT UPDATE
         </button>
         <input
           type="text"
@@ -475,54 +475,75 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<script>
-  // ১. ফায়ারবেস কনফিগারেশন
-  const firebaseConfig = {
-    apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
-    authDomain: "munna-acl-fda7c.firebaseapp.com",
-    projectId: "munna-acl-fda7c",
-    storageBucket: "munna-acl-fda7c.firebasestorage.app",
-    messagingSenderId: "371130316468",
-    appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
-  };
+    <script>
+      // ১. ফায়ারবেস কনফিগারেশন
+      const firebaseConfig = {
+        apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+        authDomain: "munna-acl-fda7c.firebaseapp.com",
+        projectId: "munna-acl-fda7c",
+        storageBucket: "munna-acl-fda7c.firebasestorage.app",
+        messagingSenderId: "371130316468",
+        appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+      };
 
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  let cachedRows = [];
-  let currentEditKey = null;
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      let cachedRows = [];
+      let currentEditKey = null;
 
-  // ২. পিরিয়ড ক্যালকুলেশন
-  function calculatePeriod(joinDateStr) {
-    if (!joinDateStr || joinDateStr === "-") return "-";
-    try {
-      const parts = joinDateStr.split("/");
-      const joinDate = new Date(parts[2], parts[1] - 1, parts[0]);
-      const today = new Date();
-      if (isNaN(joinDate.getTime())) return "-";
-      let years = today.getFullYear() - joinDate.getFullYear();
-      let months = today.getMonth() - joinDate.getMonth();
-      if (months < 0 || (months === 0 && today.getDate() < joinDate.getDate())) {
-        years--;
-        months += 12;
+      // ২. পিরিয়ড ক্যালকুলেশন
+      function calculatePeriod(joinDateStr) {
+        if (!joinDateStr || joinDateStr === "-") return "-";
+        try {
+          const parts = joinDateStr.split("/");
+          const joinDate = new Date(parts[2], parts[1] - 1, parts[0]);
+          const today = new Date();
+          if (isNaN(joinDate.getTime())) return "-";
+          let years = today.getFullYear() - joinDate.getFullYear();
+          let months = today.getMonth() - joinDate.getMonth();
+          if (
+            months < 0 ||
+            (months === 0 && today.getDate() < joinDate.getDate())
+          ) {
+            years--;
+            months += 12;
+          }
+          return years > 0 || months > 0
+            ? `${years * 12 + months} Month ( ${years} Year ${months} Month )`
+            : "New Join";
+        } catch (e) {
+          return "-";
+        }
       }
-      return years > 0 || months > 0 ? `${years * 12 + months} Mo (${years}Y ${months}M)` : "New Join";
-    } catch (e) { return "-"; }
-  }
 
-  // ৩. টেবিল রেন্ডার ফাংশন
-  function renderTable(dataRows) {
-    const head = document.getElementById("table-head");
-    const body = document.getElementById("table-body");
-    document.getElementById("loader").style.display = "none";
-    document.getElementById("table-display").style.display = "block";
+      // ৩. টেবিল রেন্ডার ফাংশন
+      function renderTable(dataRows) {
+        const head = document.getElementById("table-head");
+        const body = document.getElementById("table-body");
+        document.getElementById("loader").style.display = "none";
+        document.getElementById("table-display").style.display = "block";
 
-    const headers = ["SL", "ID", "Name", "Period", "Post", "Join Date", "Work As", "Passport", "Salary", "OT", "Action"];
-    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+        const headers = [
+          "SL",
+          "ID",
+          "Name",
+          "Period",
+          "Post",
+          "Join Date",
+          "Work As",
+          "Passport",
+          "Salary",
+          "OT",
+          "Action",
+        ];
+        head.innerHTML = `<tr>${headers.map((h) => `<th>${h.toUpperCase()}</th>`).join("")}</tr>`;
 
-    body.innerHTML = dataRows.map(item => `
+        body.innerHTML = dataRows
+          .map(
+            (item) => `
       <tr>
         <td>${item.row[0]}</td>
         <td>${item.row[1]}</td>
@@ -539,169 +560,244 @@
           <button class="add-btn" style="padding:5px 10px; font-size:11px; background:#f1c40f; color:#000;" onclick="viewEditHistory('${item.key}')">History</button>
         </td>
       </tr>
-    `).join("");
-  }
-
-  // ৪. ডাটা লোড (রিয়েল-টাইম)
-  function loadData() {
-    db.collection("EMPLOYEE_LIST").onSnapshot((snapshot) => {
-      const rows = snapshot.docs.map((doc, index) => {
-        const d = doc.data();
-        return {
-          key: doc.id,
-          row: [index + 1, d.id || "-", d.name || "-", "", d.designation || "-", d.joining || "-", d.workingAs || "-", d.passport || "-", d.salary || "0", d.otRate || "0"]
-        };
-      });
-      rows.sort((a, b) => String(a.row[1]).localeCompare(String(b.row[1]), undefined, { numeric: true }));
-      rows.forEach((item, i) => (item.row[0] = i + 1));
-      cachedRows = rows;
-      renderTable(cachedRows);
-    });
-  }
-
-  // ৫. Add New Employee মোডাল ওপেন
-  function openModal() {
-    currentEditKey = null;
-    document.getElementById("employeeForm").reset();
-    document.querySelector("#entryModal h3").innerText = "ADD NEW EMPLOYEE FORM";
-    document.getElementById("saveBtn").innerText = "SAVE";
-
-    let maxNum = 0;
-    cachedRows.forEach(item => {
-      const num = parseInt(String(item.row[1]).split("-")[1]);
-      if (!isNaN(num) && num > maxNum) maxNum = num;
-    });
-    
-    document.getElementById("regSL").value = cachedRows.length + 1;
-    document.getElementById("regID").value = "ACL-" + String(maxNum + 1).padStart(4, "0");
-    document.getElementById("entryModal").style.display = "block";
-  }
-
-  // ৬. Edit মোডাল ওপেন
-  function openEditModal(key) {
-    currentEditKey = key;
-    const item = cachedRows.find(r => r.key === key);
-    if (!item) return;
-
-    document.querySelector("#entryModal h3").innerText = "EDIT EMPLOYEE FORM";
-    document.getElementById("saveBtn").innerText = "UPDATE RECORD";
-    document.getElementById("regSL").value = item.row[0];
-    document.getElementById("regID").value = item.row[1];
-    document.getElementById("regName").value = item.row[2];
-    document.getElementById("regJoinDate").value = item.row[5];
-    document.getElementById("regPost").value = item.row[4];
-    document.getElementById("regWorkAs").value = item.row[6];
-    document.getElementById("regPassport").value = item.row[7];
-    document.getElementById("regSalary").value = item.row[8];
-    document.getElementById("regOT").value = item.row[9];
-    document.getElementById("entryModal").style.display = "block";
-  }
-
-  // ৭. ডাটা সেভ এবং আপডেট
-  document.getElementById("employeeForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById("saveBtn");
-    btn.disabled = true;
-    btn.innerText = "Processing...";
-
-    const payload = {
-      id: document.getElementById("regID").value,
-      name: document.getElementById("regName").value,
-      joining: document.getElementById("regJoinDate").value,
-      designation: document.getElementById("regPost").value,
-      workingAs: document.getElementById("regWorkAs").value,
-      passport: document.getElementById("regPassport").value,
-      salary: document.getElementById("regSalary").value,
-      otRate: document.getElementById("regOT").value
-    };
-
-    try {
-      const docRef = db.collection("EMPLOYEE_LIST").doc(currentEditKey || payload.id);
-      if (currentEditKey) {
-        const oldDoc = await docRef.get();
-        const oldData = oldDoc.data();
-        const historyEntry = { ...oldData, editedAt: new Date().toLocaleString() };
-        delete historyEntry.history;
-        await docRef.update({ ...payload, history: firebase.firestore.FieldValue.arrayUnion(historyEntry) });
-      } else {
-        await docRef.set({ ...payload, history: [] });
+    `,
+          )
+          .join("");
       }
-      Swal.fire("Success!", "Record Saved", "success");
-      closeModal();
-    } catch (err) { Swal.fire("Error", err.message, "error"); }
-    btn.disabled = false;
-    btn.innerText = "SAVE";
-  });
 
-  // ৮. OT Update (Bulk Update)
-  async function bulkUpdateOT() {
-    const { value: newRate } = await Swal.fire({
-      title: "ALL OT RATES UPDATE",
-      input: "number",
-      inputLabel: "Enter New OT Rate for All:",
-      confirmButtonColor: "#002147",
-      showCancelButton: true
-    });
+      // ৪. ডাটা লোড (রিয়েল-টাইম)
+      function loadData() {
+        db.collection("EMPLOYEE_LIST").onSnapshot((snapshot) => {
+          const rows = snapshot.docs.map((doc, index) => {
+            const d = doc.data();
+            return {
+              key: doc.id,
+              row: [
+                index + 1,
+                d.id || "-",
+                d.name || "-",
+                "",
+                d.designation || "-",
+                d.joining || "-",
+                d.workingAs || "-",
+                d.passport || "-",
+                d.salary || "0",
+                d.otRate || "0",
+              ],
+            };
+          });
+          rows.sort((a, b) =>
+            String(a.row[1]).localeCompare(String(b.row[1]), undefined, {
+              numeric: true,
+            }),
+          );
+          rows.forEach((item, i) => (item.row[0] = i + 1));
+          cachedRows = rows;
+          renderTable(cachedRows);
+        });
+      }
 
-    if (newRate) {
-      Swal.fire({ title: "Updating...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-      const batch = db.batch();
-      const snapshot = await db.collection("EMPLOYEE_LIST").get();
-      snapshot.forEach(doc => batch.update(db.collection("EMPLOYEE_LIST").doc(doc.id), { otRate: newRate }));
-      await batch.commit();
-      Swal.fire("Updated!", "All OT Rates Updated", "success");
-    }
-  }
+      // ৫. Add New Employee মোডাল ওপেন
+      function openModal() {
+        currentEditKey = null;
+        document.getElementById("employeeForm").reset();
+        document.querySelector("#entryModal h3").innerText =
+          "ADD NEW EMPLOYEE FORM";
+        document.getElementById("saveBtn").innerText = "SAVE";
 
-  // ৯. History দেখা
-  async function viewEditHistory(key) {
-    const doc = await db.collection("EMPLOYEE_LIST").doc(key).get();
-    const history = doc.data().history || [];
-    if (history.length === 0) return Swal.fire("No History", "No previous records found.", "info");
+        let maxNum = 0;
+        cachedRows.forEach((item) => {
+          const num = parseInt(String(item.row[1]).split("-")[1]);
+          if (!isNaN(num) && num > maxNum) maxNum = num;
+        });
 
-    const html = history.reverse().map(h => `
+        document.getElementById("regSL").value = cachedRows.length + 1;
+        document.getElementById("regID").value =
+          "ACL-" + String(maxNum + 1).padStart(4, "0");
+        document.getElementById("entryModal").style.display = "block";
+      }
+
+      // ৬. Edit মোডাল ওপেন
+      function openEditModal(key) {
+        currentEditKey = key;
+        const item = cachedRows.find((r) => r.key === key);
+        if (!item) return;
+
+        document.querySelector("#entryModal h3").innerText =
+          "EDIT EMPLOYEE FORM";
+        document.getElementById("saveBtn").innerText = "UPDATE RECORD";
+        document.getElementById("regSL").value = item.row[0];
+        document.getElementById("regID").value = item.row[1];
+        document.getElementById("regName").value = item.row[2];
+        document.getElementById("regJoinDate").value = item.row[5];
+        document.getElementById("regPost").value = item.row[4];
+        document.getElementById("regWorkAs").value = item.row[6];
+        document.getElementById("regPassport").value = item.row[7];
+        document.getElementById("regSalary").value = item.row[8];
+        document.getElementById("regOT").value = item.row[9];
+        document.getElementById("entryModal").style.display = "block";
+      }
+
+      // ৭. ডাটা সেভ এবং আপডেট
+      document
+        .getElementById("employeeForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const btn = document.getElementById("saveBtn");
+          btn.disabled = true;
+          btn.innerText = "Processing...";
+
+          const payload = {
+            id: document.getElementById("regID").value,
+            name: document.getElementById("regName").value,
+            joining: document.getElementById("regJoinDate").value,
+            designation: document.getElementById("regPost").value,
+            workingAs: document.getElementById("regWorkAs").value,
+            passport: document.getElementById("regPassport").value,
+            salary: document.getElementById("regSalary").value,
+            otRate: document.getElementById("regOT").value,
+          };
+
+          try {
+            const docRef = db
+              .collection("EMPLOYEE_LIST")
+              .doc(currentEditKey || payload.id);
+            if (currentEditKey) {
+              const oldDoc = await docRef.get();
+              const oldData = oldDoc.data();
+              const historyEntry = {
+                ...oldData,
+                editedAt: new Date().toLocaleString(),
+              };
+              delete historyEntry.history;
+              await docRef.update({
+                ...payload,
+                history: firebase.firestore.FieldValue.arrayUnion(historyEntry),
+              });
+            } else {
+              await docRef.set({ ...payload, history: [] });
+            }
+            Swal.fire("Success!", "Record Saved", "success");
+            closeModal();
+          } catch (err) {
+            Swal.fire("Error", err.message, "error");
+          }
+          btn.disabled = false;
+          btn.innerText = "SAVE";
+        });
+
+      // ৮. OT Update (Bulk Update)
+      async function bulkUpdateOT() {
+        const { value: newRate } = await Swal.fire({
+          title: "ALL OT RATES UPDATE",
+          input: "number",
+          inputLabel: "Enter New OT Rate for All:",
+          confirmButtonColor: "#002147",
+          showCancelButton: true,
+        });
+
+        if (newRate) {
+          Swal.fire({
+            title: "Updating...",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+          });
+          const batch = db.batch();
+          const snapshot = await db.collection("EMPLOYEE_LIST").get();
+          snapshot.forEach((doc) =>
+            batch.update(db.collection("EMPLOYEE_LIST").doc(doc.id), {
+              otRate: newRate,
+            }),
+          );
+          await batch.commit();
+          Swal.fire("Updated!", "All OT Rates Updated", "success");
+        }
+      }
+
+      // ৯. History দেখা
+      async function viewEditHistory(key) {
+        const doc = await db.collection("EMPLOYEE_LIST").doc(key).get();
+        const history = doc.data().history || [];
+        if (history.length === 0)
+          return Swal.fire("No History", "No previous records found.", "info");
+
+        const html = history
+          .reverse()
+          .map(
+            (h) => `
       <div style="border-bottom:1px solid #ddd; padding:8px; text-align:left; font-size:12px;">
         <b>Edited: ${h.editedAt}</b><br>
         Name: ${h.name} | Salary: ${h.salary} | OT: ${h.otRate}
       </div>
-    `).join("");
+    `,
+          )
+          .join("");
 
-    Swal.fire({ title: "Update History", html: `<div style="max-height:300px; overflow-y:auto;">${html}</div>`, width: '500px' });
-  }
+        Swal.fire({
+          title: "Update History",
+          html: `<div style="max-height:300px; overflow-y:auto;">${html}</div>`,
+          width: "500px",
+        });
+      }
 
-  function closeModal() { document.getElementById("entryModal").style.display = "none"; }
+      function closeModal() {
+        document.getElementById("entryModal").style.display = "none";
+      }
 
-  // সার্চ ফাংশন
-  document.getElementById("searchInput").addEventListener("keyup", function() {
-    const val = this.value.toUpperCase();
-    document.querySelectorAll("#table-body tr").forEach(tr => {
-      tr.style.display = tr.innerText.toUpperCase().includes(val) ? "" : "none";
-    });
-  });
+      // সার্চ ফাংশন
+      document
+        .getElementById("searchInput")
+        .addEventListener("keyup", function () {
+          const val = this.value.toUpperCase();
+          document.querySelectorAll("#table-body tr").forEach((tr) => {
+            tr.style.display = tr.innerText.toUpperCase().includes(val)
+              ? ""
+              : "none";
+          });
+        });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    loadData();
-    flatpickr("#regJoinDate", { dateFormat: "d/m/Y" });
-  });
+      document.addEventListener("DOMContentLoaded", () => {
+        loadData();
+        flatpickr("#regJoinDate", { dateFormat: "d/m/Y" });
+      });
 
-  // Excel ডাউনলোড
-  function downloadExcel() {
-    const headers = ["SL", "ID", "Name", "Period", "Post", "Join Date", "Work As", "Passport", "Salary", "OT"];
-    const data = [headers, ...cachedRows.map(item => item.row)];
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Employees");
-    XLSX.writeFile(wb, "Employee_List.xlsx");
-  }
+      // Excel ডাউনলোড
+      function downloadExcel() {
+        const headers = [
+          "SL",
+          "ID",
+          "Name",
+          "Period",
+          "Post",
+          "Join Date",
+          "Work As",
+          "Passport",
+          "Salary",
+          "OT",
+        ];
+        const data = [headers, ...cachedRows.map((item) => item.row)];
+        const ws = XLSX.utils.aoa_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Employees");
+        XLSX.writeFile(wb, "Employee_List.xlsx");
+      }
 
-  // PDF ডাউনলোড
-  function downloadPDF() {
-    const element = document.getElementById("printableContent");
-    document.getElementById("pdf-date-time").innerText = "Printed on: " + new Date().toLocaleString();
-    document.body.classList.add("pdf-mode-active");
-    html2pdf().set({ margin: 10, filename: 'Employee_List.pdf', jsPDF: { orientation: 'landscape' } })
-      .from(element).save().then(() => document.body.classList.remove("pdf-mode-active"));
-  }
-</script>
+      // PDF ডাউনলোড
+      function downloadPDF() {
+        const element = document.getElementById("printableContent");
+        document.getElementById("pdf-date-time").innerText =
+          "Printed on: " + new Date().toLocaleString();
+        document.body.classList.add("pdf-mode-active");
+        html2pdf()
+          .set({
+            margin: 10,
+            filename: "Employee_List.pdf",
+            jsPDF: { orientation: "landscape" },
+          })
+          .from(element)
+          .save()
+          .then(() => document.body.classList.remove("pdf-mode-active"));
+      }
+    </script>
   </body>
 </html>
