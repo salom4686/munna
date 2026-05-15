@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee List</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Roboto", sans-serif;
+        margin: 0;
+        padding: 20px 0;
+        background: linear-gradient(135deg, #002147 0%, #001a38 100%);
+        color: #ffffff;
+        min-height: 100vh;
+      }
+
+      .search-container {
+        max-width: 1600px;
+        margin: 0 auto 20px;
+        padding: 0 30px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+      }
+      .brand-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex: 1;
+      }
+      .logo-img {
+        height: 70px;
+        width: auto;
+        object-fit: contain;
+      }
+      .list-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #ffd700;
+        text-transform: uppercase;
+        border-bottom: 3px solid #ffd700;
+        margin: 0;
+        padding-bottom: 5px;
+        white-space: nowrap;
+      }
+
+      .action-section {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        justify-content: flex-end;
+        flex: 1;
+      }
+      .add-btn {
+        background-color: #002147;
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+        white-space: nowrap;
+        border: 1px solid #ffd700;
+      }
+      .add-btn:hover {
+        background-color: #28a745;
+      }
+      .search-box {
+        width: 300px;
+        padding: 10px 15px;
+        border: 2px solid #ffd700;
+        background-color: #ffffff;
+        border-radius: 8px;
+        outline: none;
+      }
+
+      .container {
+        padding: 0 30px 40px;
+        max-width: 1600px;
+        margin: auto;
+      }
+      .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        overflow: auto;
+        max-height: 70vh;
+        border: 1px solid #eee;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 1000px;
+        table-layout: auto;
+      }
+
+      thead th {
+        position: sticky;
+        top: 0;
+        background-color: #002147;
+        color: #ffd700;
+        padding: 12px 10px;
+        text-align: left;
+        z-index: 10;
+        border-bottom: 2px solid #ffd700;
+        font-size: 13px;
+      }
+
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 14px;
+        vertical-align: middle;
+        color: #002147;
+      }
+      tr:hover {
+        background-color: #f8fbff;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+      }
+      .modal-content {
+        background: white;
+        margin: 2% auto;
+        padding: 30px;
+        border-radius: 15px;
+        width: 550px;
+        position: relative;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        color: #333333;
+      }
+      .close-modal {
+        position: absolute;
+        right: 25px;
+        top: 20px;
+        font-size: 28px;
+        cursor: pointer;
+        color: #999;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 20px;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+      }
+      .form-group label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #555;
+        margin-bottom: 4px;
+      }
+      .required::after {
+        content: " *";
+        color: red;
+      }
+      .form-group input {
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        outline: none;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+      .submit-btn {
+        grid-column: span 2;
+        background: #002147;
+        color: #ffd700;
+        padding: 14px;
+        border: 1px solid #ffd700;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+        margin-top: 10px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      #loader {
+        text-align: center;
+        padding: 100px;
+        font-weight: bold;
+        font-size: 18px;
+        color: #002147;
+      }
+
+      /* PDF Styles */
+      .pdf-mode-active {
+        background-color: white !important;
+        padding: 0 !important;
+      }
+      .pdf-header-print {
+        display: none;
+        text-align: center;
+        padding-bottom: 15px;
+      }
+      .pdf-mode-active .pdf-header-print {
+        display: block !important;
+      }
+      .pdf-header-print h1 {
+        font-size: 24px;
+        color: black;
+        margin: 0;
+        text-transform: uppercase;
+      }
+      .pdf-header-print .pdf-timestamp {
+        font-size: 10px;
+        color: #333;
+        margin-top: 5px;
+        font-weight: 500;
+      }
+      .pdf-mode-active .table-card {
+        overflow: visible !important;
+        max-height: none !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .pdf-mode-active table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        table-layout: auto !important;
+      }
+      .pdf-mode-active thead {
+        display: table-header-group !important;
+      }
+      .pdf-mode-active th {
+        background-color: #f2f2f2 !important;
+        color: black !important;
+        border: 0.2pt solid black !important;
+        font-size: 10px !important;
+        padding: 8px 4px !important;
+        text-align: left !important;
+      }
+      .pdf-mode-active td {
+        border: 0.2pt solid black !important;
+        color: black !important;
+        font-size: 9px !important;
+        padding: 5px 6px !important;
+        white-space: nowrap !important;
+        text-align: left !important;
+      }
+      .pdf-mode-active .action-section,
+      .pdf-mode-active .add-btn,
+      .pdf-mode-active .search-box,
+      .pdf-mode-active .logo-img {
+        display: none !important;
+      }
+      .pdf-mode-active tr {
+        page-break-inside: avoid !important;
+      }
+
+      /* Flatpickr Custom Theme: Navy Blue (#002147) & Golden (#ffd700) */
+      .flatpickr-calendar {
+        background: #ffffff;
+        border: 2px solid #ffd700 !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+      .flatpickr-months {
+        background: #002147 !important;
+        color: #ffd700 !important;
+      }
+      .flatpickr-month {
+        background: #002147 !important;
+        color: #ffd700 !important;
+      }
+      .flatpickr-current-month .flatpickr-monthDropdown-months {
+        background: #002147 !important;
+        color: #ffd700 !important;
+      }
+      .flatpickr-current-month .numInputWrapper span.arrowUp:after {
+        border-bottom-color: #ffd700 !important;
+      }
+      .flatpickr-current-month .numInputWrapper span.arrowDown:after {
+        border-top-color: #ffd700 !important;
+      }
+      .flatpickr-months .flatpickr-prev-month,
+      .flatpickr-months .flatpickr-next-month {
+        color: #ffd700 !important;
+        fill: #ffd700 !important;
+      }
+      .flatpickr-weekdays {
+        background: #002147 !important;
+      }
+      span.flatpickr-weekday {
+        background: #002147 !important;
+        color: #ffd700 !important;
+        font-weight: bold;
+      }
+      .flatpickr-day.selected,
+      .flatpickr-day.startRange,
+      .flatpickr-day.endRange,
+      .flatpickr-day.selected:hover,
+      .flatpickr-day.selected:focus {
+        background: #002147 !important;
+        border-color: #ffd700 !important;
+        color: #ffd700 !important;
+      }
+      .flatpickr-day:hover {
+        background: #ffd700 !important;
+        color: #002147 !important;
+        border-color: #002147 !important;
+      }
+      .flatpickr-day.today {
+        border-color: #002147 !important;
+        color: #002147 !important;
+        font-weight: bold;
+      }
+      .flatpickr-day.today:hover {
+        background: #002147 !important;
+        color: #ffd700 !important;
+      }
+      .flatpickr-day {
+        color: #002147 !important;
+      }
+      .flatpickr-calendar.arrowTop:after,
+      .flatpickr-calendar.arrowTop:before {
+        border-bottom-color: #002147 !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="search-container">
+      <div class="brand-section">
+        <img
+          src="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+          alt="Logo"
+          class="logo-img"
+          onerror="this.src = 'https://via.placeholder.com/80?text=ALAMHOW'"
+        />
+        <h2 class="list-title">EMPLOYEE LIST</h2>
+      </div>
+      <div class="action-section">
+        <button class="add-btn" onclick="openModal()">
+          + ADD NEW EMPLOYEE
+        </button>
+        <button
+          class="add-btn"
+          style="background-color: #f1c40f; color: #002147"
+          onclick="bulkUpdateOT()"
+        >
+           OT UPDATE
+        </button>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-box"
+          placeholder="Search ID, Name..."
+        />
+        <button
+          class="add-btn"
+          style="background-color: #28a745"
+          onclick="downloadExcel()"
+        >
+          DOWNLOAD EXCEL
+        </button>
+        <button
+          class="add-btn"
+          style="background-color: #d9534f"
+          onclick="downloadPDF()"
+        >
+          DOWNLOAD PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="entryModal" class="modal">
+      <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">×</span>
+        <h3 style="margin: 0; color: #002147">ADD NEW EMPLOYEE FORM</h3>
+        <form id="employeeForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>SL NO</label><input type="text" id="regSL" readonly />
+            </div>
+            <div class="form-group">
+              <label>EMPLOYEE ID</label
+              ><input type="text" id="regID" readonly />
+            </div>
+            <div class="form-group full-width">
+              <label class="required">EMPLOYEE NAME</label
+              ><input type="text" id="regName" required />
+            </div>
+            <div class="form-group">
+              <label class="required">DATE JOINED</label
+              ><input type="text" id="regJoinDate" required />
+            </div>
+            <div class="form-group">
+              <label class="required">POST / DESIGNATION</label
+              ><input type="text" id="regPost" required />
+            </div>
+            <div class="form-group">
+              <label class="required">WORKING AS</label
+              ><input type="text" id="regWorkAs" required />
+            </div>
+            <div class="form-group">
+              <label class="required">PASSPORT NO</label
+              ><input type="text" id="regPassport" required />
+            </div>
+            <div class="form-group">
+              <label class="required">BASIC SALARY</label
+              ><input type="number" id="regSalary" required />
+            </div>
+            <div class="form-group">
+              <label class="required">OT RATE (HOUR)</label
+              ><input type="number" id="regOT" step="0.01" required />
+            </div>
+            <button type="submit" class="submit-btn" id="saveBtn">SAVE</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="container" id="printableContent">
+      <div id="loader">Data Loading, Please Wait...</div>
+
+      <div class="pdf-header-print">
+        <h1>EMPLOYEE LIST</h1>
+        <div id="pdf-date-time" class="pdf-timestamp"></div>
+      </div>
+
+      <div class="table-card" id="table-display" style="display: none">
+        <table id="employeeTable">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // ১. ফায়ারবেস কনফিগারেশন
+  const firebaseConfig = {
+    apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+    authDomain: "munna-acl-fda7c.firebaseapp.com",
+    projectId: "munna-acl-fda7c",
+    storageBucket: "munna-acl-fda7c.firebasestorage.app",
+    messagingSenderId: "371130316468",
+    appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  let cachedRows = [];
+  let currentEditKey = null;
+
+  // ২. পিরিয়ড ক্যালকুলেশন
+  function calculatePeriod(joinDateStr) {
+    if (!joinDateStr || joinDateStr === "-") return "-";
+    try {
+      const parts = joinDateStr.split("/");
+      const joinDate = new Date(parts[2], parts[1] - 1, parts[0]);
+      const today = new Date();
+      if (isNaN(joinDate.getTime())) return "-";
+      let years = today.getFullYear() - joinDate.getFullYear();
+      let months = today.getMonth() - joinDate.getMonth();
+      if (months < 0 || (months === 0 && today.getDate() < joinDate.getDate())) {
+        years--;
+        months += 12;
+      }
+      return years > 0 || months > 0 ? `${years * 12 + months} Mo (${years}Y ${months}M)` : "New Join";
+    } catch (e) { return "-"; }
+  }
+
+  // ৩. টেবিল রেন্ডার ফাংশন
+  function renderTable(dataRows) {
+    const head = document.getElementById("table-head");
+    const body = document.getElementById("table-body");
+    document.getElementById("loader").style.display = "none";
+    document.getElementById("table-display").style.display = "block";
+
+    const headers = ["SL", "ID", "Name", "Period", "Post", "Join Date", "Work As", "Passport", "Salary", "OT", "Action"];
+    head.innerHTML = `<tr>${headers.map(h => `<th>${h}</th>`).join("")}</tr>`;
+
+    body.innerHTML = dataRows.map(item => `
+      <tr>
+        <td>${item.row[0]}</td>
+        <td>${item.row[1]}</td>
+        <td>${item.row[2]}</td>
+        <td>${calculatePeriod(item.row[5])}</td>
+        <td>${item.row[4]}</td>
+        <td>${item.row[5]}</td>
+        <td>${item.row[6]}</td>
+        <td>${item.row[7]}</td>
+        <td>${item.row[8]}</td>
+        <td>${item.row[9]}</td>
+        <td>
+          <button class="add-btn" style="padding:5px 10px; font-size:11px; margin-right:5px;" onclick="openEditModal('${item.key}')">Edit</button>
+          <button class="add-btn" style="padding:5px 10px; font-size:11px; background:#f1c40f; color:#000;" onclick="viewEditHistory('${item.key}')">History</button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  // ৪. ডাটা লোড (রিয়েল-টাইম)
+  function loadData() {
+    db.collection("EMPLOYEE_LIST").onSnapshot((snapshot) => {
+      const rows = snapshot.docs.map((doc, index) => {
+        const d = doc.data();
+        return {
+          key: doc.id,
+          row: [index + 1, d.id || "-", d.name || "-", "", d.designation || "-", d.joining || "-", d.workingAs || "-", d.passport || "-", d.salary || "0", d.otRate || "0"]
+        };
+      });
+      rows.sort((a, b) => String(a.row[1]).localeCompare(String(b.row[1]), undefined, { numeric: true }));
+      rows.forEach((item, i) => (item.row[0] = i + 1));
+      cachedRows = rows;
+      renderTable(cachedRows);
+    });
+  }
+
+  // ৫. Add New Employee মোডাল ওপেন
+  function openModal() {
+    currentEditKey = null;
+    document.getElementById("employeeForm").reset();
+    document.querySelector("#entryModal h3").innerText = "ADD NEW EMPLOYEE FORM";
+    document.getElementById("saveBtn").innerText = "SAVE";
+
+    let maxNum = 0;
+    cachedRows.forEach(item => {
+      const num = parseInt(String(item.row[1]).split("-")[1]);
+      if (!isNaN(num) && num > maxNum) maxNum = num;
+    });
+    
+    document.getElementById("regSL").value = cachedRows.length + 1;
+    document.getElementById("regID").value = "ACL-" + String(maxNum + 1).padStart(4, "0");
+    document.getElementById("entryModal").style.display = "block";
+  }
+
+  // ৬. Edit মোডাল ওপেন
+  function openEditModal(key) {
+    currentEditKey = key;
+    const item = cachedRows.find(r => r.key === key);
+    if (!item) return;
+
+    document.querySelector("#entryModal h3").innerText = "EDIT EMPLOYEE FORM";
+    document.getElementById("saveBtn").innerText = "UPDATE RECORD";
+    document.getElementById("regSL").value = item.row[0];
+    document.getElementById("regID").value = item.row[1];
+    document.getElementById("regName").value = item.row[2];
+    document.getElementById("regJoinDate").value = item.row[5];
+    document.getElementById("regPost").value = item.row[4];
+    document.getElementById("regWorkAs").value = item.row[6];
+    document.getElementById("regPassport").value = item.row[7];
+    document.getElementById("regSalary").value = item.row[8];
+    document.getElementById("regOT").value = item.row[9];
+    document.getElementById("entryModal").style.display = "block";
+  }
+
+  // ৭. ডাটা সেভ এবং আপডেট
+  document.getElementById("employeeForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById("saveBtn");
+    btn.disabled = true;
+    btn.innerText = "Processing...";
+
+    const payload = {
+      id: document.getElementById("regID").value,
+      name: document.getElementById("regName").value,
+      joining: document.getElementById("regJoinDate").value,
+      designation: document.getElementById("regPost").value,
+      workingAs: document.getElementById("regWorkAs").value,
+      passport: document.getElementById("regPassport").value,
+      salary: document.getElementById("regSalary").value,
+      otRate: document.getElementById("regOT").value
+    };
+
+    try {
+      const docRef = db.collection("EMPLOYEE_LIST").doc(currentEditKey || payload.id);
+      if (currentEditKey) {
+        const oldDoc = await docRef.get();
+        const oldData = oldDoc.data();
+        const historyEntry = { ...oldData, editedAt: new Date().toLocaleString() };
+        delete historyEntry.history;
+        await docRef.update({ ...payload, history: firebase.firestore.FieldValue.arrayUnion(historyEntry) });
+      } else {
+        await docRef.set({ ...payload, history: [] });
+      }
+      Swal.fire("Success!", "Record Saved", "success");
+      closeModal();
+    } catch (err) { Swal.fire("Error", err.message, "error"); }
+    btn.disabled = false;
+    btn.innerText = "SAVE";
+  });
+
+  // ৮. OT Update (Bulk Update)
+  async function bulkUpdateOT() {
+    const { value: newRate } = await Swal.fire({
+      title: "ALL OT RATES UPDATE",
+      input: "number",
+      inputLabel: "Enter New OT Rate for All:",
+      confirmButtonColor: "#002147",
+      showCancelButton: true
+    });
+
+    if (newRate) {
+      Swal.fire({ title: "Updating...", allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+      const batch = db.batch();
+      const snapshot = await db.collection("EMPLOYEE_LIST").get();
+      snapshot.forEach(doc => batch.update(db.collection("EMPLOYEE_LIST").doc(doc.id), { otRate: newRate }));
+      await batch.commit();
+      Swal.fire("Updated!", "All OT Rates Updated", "success");
+    }
+  }
+
+  // ৯. History দেখা
+  async function viewEditHistory(key) {
+    const doc = await db.collection("EMPLOYEE_LIST").doc(key).get();
+    const history = doc.data().history || [];
+    if (history.length === 0) return Swal.fire("No History", "No previous records found.", "info");
+
+    const html = history.reverse().map(h => `
+      <div style="border-bottom:1px solid #ddd; padding:8px; text-align:left; font-size:12px;">
+        <b>Edited: ${h.editedAt}</b><br>
+        Name: ${h.name} | Salary: ${h.salary} | OT: ${h.otRate}
+      </div>
+    `).join("");
+
+    Swal.fire({ title: "Update History", html: `<div style="max-height:300px; overflow-y:auto;">${html}</div>`, width: '500px' });
+  }
+
+  function closeModal() { document.getElementById("entryModal").style.display = "none"; }
+
+  // সার্চ ফাংশন
+  document.getElementById("searchInput").addEventListener("keyup", function() {
+    const val = this.value.toUpperCase();
+    document.querySelectorAll("#table-body tr").forEach(tr => {
+      tr.style.display = tr.innerText.toUpperCase().includes(val) ? "" : "none";
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadData();
+    flatpickr("#regJoinDate", { dateFormat: "d/m/Y" });
+  });
+
+  // Excel ডাউনলোড
+  function downloadExcel() {
+    const headers = ["SL", "ID", "Name", "Period", "Post", "Join Date", "Work As", "Passport", "Salary", "OT"];
+    const data = [headers, ...cachedRows.map(item => item.row)];
+    const ws = XLSX.utils.aoa_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Employees");
+    XLSX.writeFile(wb, "Employee_List.xlsx");
+  }
+
+  // PDF ডাউনলোড
+  function downloadPDF() {
+    const element = document.getElementById("printableContent");
+    document.getElementById("pdf-date-time").innerText = "Printed on: " + new Date().toLocaleString();
+    document.body.classList.add("pdf-mode-active");
+    html2pdf().set({ margin: 10, filename: 'Employee_List.pdf', jsPDF: { orientation: 'landscape' } })
+      .from(element).save().then(() => document.body.classList.remove("pdf-mode-active"));
+  }
+</script>
+  </body>
+</html>
