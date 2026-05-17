@@ -1,568 +1,1237 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OVER TIME POSTING</title>
-    <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo">
+    <link
+      rel="icon"
+      type="image/png"
+      href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        
-        .worker-row.selected { background-color: #f0f7ff; border-left: 4px solid #1e3a5f; }
-        .ot-input { width: 80px; text-align: center; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px; font-weight: bold; transition: all 0.2s; }
-        .ot-input:focus { border-color: #3b82f6; ring: 2px; ring-color: #3b82f6; outline: none; }
-        
-        .input-hidden { opacity: 0; pointer-events: none; visibility: hidden; }
-        .input-visible { opacity: 1; pointer-events: auto; visibility: visible; }
-        
-        .checkbox-custom { width: 22px; height: 22px; cursor: pointer; accent-color: #1e3a5f; }
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
 
-        .loader {
-            border: 3px solid #f3f3f3; border-top: 3px solid #1e3a5f;
-            border-radius: 50%; width: 20px; height: 20px;
-            animation: spin 1s linear infinite; display: inline-block;
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #f8fafc;
+      }
+
+      .worker-row.selected {
+        background-color: #f0f7ff;
+        border-left: 4px solid #1e3a5f;
+      }
+      .ot-input {
+        width: 80px;
+        text-align: center;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 6px;
+        font-weight: bold;
+        transition: all 0.2s;
+      }
+      .ot-input:focus {
+        border-color: #3b82f6;
+        ring: 2px;
+        ring-color: #3b82f6;
+        outline: none;
+      }
+
+      :root {
+        --brand-blue: #002147;
+        --brand-gold: #ffd700;
+      }
+      .input-hidden {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+      }
+      .input-visible {
+        opacity: 1;
+        pointer-events: auto;
+        visibility: visible;
+      }
+
+      .checkbox-custom {
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        accent-color: #1e3a5f;
+      }
+
+      .loader {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #1e3a5f;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .suggestion-box {
-            position: absolute; top: 100%; left: 0; right: 0;
-            background: white; border: 1px solid #e2e8f0;
-            border-radius: 0 0 12px 12px; max-height: 300px;
-            overflow-y: auto; z-index: 100; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            display: none;
+        100% {
+          transform: rotate(360deg);
         }
-        .suggestion-item { padding: 12px 15px; cursor: pointer; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
-        .suggestion-item:hover { background-color: #f0f7ff; }
+      }
 
-        #previewModal, #messageModal {
-            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7);
-            display: none; align-items: center; justify-content: center; z-index: 1000;
-            backdrop-filter: blur(4px);
+      .suggestion-box {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-radius: 0 0 12px 12px;
+        max-height: 300px;
+        overflow-y: auto;
+        z-index: 100;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+      .suggestion-item {
+        padding: 12px 15px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #ffffff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .suggestion-item:hover {
+        background-color: var(--brand-gold);
+        color: var(--brand-blue);
+      }
+
+      /* Custom Dropdown Styling for Golden Hover */
+      .custom-select-wrapper {
+        position: relative;
+        width: 100%;
+      }
+      .custom-select-trigger {
+        background-color: var(--brand-blue);
+        color: var(--brand-gold);
+        border: 2px solid var(--brand-gold);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+        transition: all 0.3s ease;
+      }
+      .custom-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        z-index: 1000;
+        display: none;
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      .custom-select-option {
+        padding: 10px 15px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .custom-select-option:hover {
+        background-color: var(--brand-gold);
+        color: var(--brand-blue);
+        font-weight: bold;
+      }
+
+      #previewModal,
+      #messageModal {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.7);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        backdrop-filter: blur(4px);
+      }
+      #loadingOverlay {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(135deg, var(--brand-blue) 0%, #001a38 100%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1100;
+        transition: opacity 0.5s;
+      }
+      .fade-out {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .section-hidden {
+        display: none;
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.4s ease;
+      }
+      .section-visible {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+      }
+      #targetDate {
+  color: #1e3a5f !important; /* নেভি ব্লু কালার */
+  font-weight: 600;
+  background-color: white !important;
+}
+/* ফোকাস অবস্থায় বা সিলেক্ট করার পর স্টাইল */
+#targetDate:focus {
+  border-color: #1e3a5f;
+  outline: none;
+}
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 10mm;
         }
-
-        #loadingOverlay {
-            position: fixed; inset: 0; background: rgba(255,255,255,0.95);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 1100; transition: opacity 0.5s;
+        body {
+          background: white !important;
+          padding: 0 !important;
         }
-        .fade-out { opacity: 0; pointer-events: none; }
-
-        .section-hidden { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
-        .section-visible { display: flex; opacity: 1; transform: translateY(0); }
-
-        @media print {
-            @page { size: A4 landscape; margin: 10mm; }
-            body { background: white !important; padding: 0 !important; }
-            .no-print { display: none !important; }
-            #previewModal { position: static; display: block; background: white; backdrop-filter: none; z-index: auto; }
-            .bg-white { box-shadow: none !important; border: none !important; width: 100% !important; max-width: none !important; margin: 0 !important; }
-            .print-header { display: block !important; margin-bottom: 20px; text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; }
-            .print-title { font-size: 18pt; font-weight: bold; text-transform: uppercase; }
-            table { width: 100%; border-collapse: collapse !important; margin-top: 10px; table-layout: fixed; }
-            th { background-color: #f2f2f2 !important; color: black !important; border: 1pt solid #000 !important; font-weight: bold !important; padding: 8px !important; text-transform: uppercase; font-size: 8pt; }
-            td { border: 1pt solid #000 !important; padding: 6px !important; font-size: 8pt; color: black !important; word-wrap: break-word; vertical-align: middle; }
-            .signature-section { display: flex !important; justify-content: space-between; margin-top: 70px; padding: 0 20px; }
-            .sig-box { border-top: 1.5pt solid #000; width: 180px; text-align: center; font-size: 9pt; padding-top: 5px; font-weight: bold; }
+        .no-print {
+          display: none !important;
         }
-    </style>
-</head>
-<body class="p-2 md:p-6">
+        #previewModal {
+          position: static;
+          display: block;
+          background: white;
+          backdrop-filter: none;
+          z-index: auto;
+        }
+        .bg-white {
+          box-shadow: none !important;
+          border: none !important;
+          width: 100% !important;
+          max-width: none !important;
+          margin: 0 !important;
+        }
+        .print-header {
+          display: block !important;
+          margin-bottom: 20px;
+          text-align: center;
+          border-bottom: 2px solid #000;
+          padding-bottom: 10px;
+        }
+        .print-title {
+          font-size: 18pt;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse !important;
+          margin-top: 10px;
+          table-layout: fixed;
+        }
+        th {
+          background-color: #f2f2f2 !important;
+          color: black !important;
+          border: 1pt solid #000 !important;
+          font-weight: bold !important;
+          padding: 8px !important;
+          text-transform: uppercase;
+          font-size: 8pt;
+        }
+        td {
+          border: 1pt solid #000 !important;
+          padding: 6px !important;
+          font-size: 8pt;
+          color: black !important;
+          word-wrap: break-word;
+          vertical-align: middle;
+        }
+        .signature-section {
+          display: flex !important;
+          justify-content: space-between;
+          margin-top: 70px;
+          padding: 0 20px;
+        }
+        .sig-box {
+          border-top: 1.5pt solid #000;
+          width: 180px;
+          text-align: center;
+          font-size: 9pt;
+          padding-top: 5px;
+          font-weight: bold;
+        }
+      }
+      @media print {
+    /* ১. প্রিন্ট করার সময় মেইন পেজের সব কিছু হাইড করা */
+    body * {
+      visibility: hidden;
+      color: black !important; /* সব লেখা কালো ফন্ট করা হলো */
+    }
+    
+    /* ২. প্রিন্ট এরিয়া দৃশ্যমান করা */
+    #printArea, #printArea * {
+      visibility: visible;
+    }
+    /* টেবিলের ফন্ট সাইজ কমানো যাতে সব কলাম ধরে */
+    #previewBody tr td {
+        font-size: 10px !important;
+        padding: 4px !important;
+        white-space: normal !important; /* লেখা বেশি হলে নিচের লাইনে যাবে, ঢেকে যাবে না */
+        word-break: break-word;
+    }
 
-    <!-- লোডিং স্ক্রিন -->
-    <div id="loadingOverlay">
-        <div class="loader mb-4" style="width: 50px; height: 50px; border-width: 5px;"></div>
-        <p class="font-bold text-[#1e3a5f]">Logging in, please wait....</p>
+    /* নির্দিষ্ট কলামের উইডথ ঠিক করা */
+    .designation-col { width: 120px; }
+    .passport-col { width: 100px; }
+
+    /* টেবিলটি যেন পুরো পাতা জুড়ে থাকে */
+    table {
+        width: 100% !important;
+        table-layout: auto !important;
+    }
+    
+    #printArea {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      background: white !important;
+    }
+
+    /* ৩. লেখা সাদা হওয়া বন্ধ করে শতভাগ কালো (Solid Black) করা */
+    #printArea span, #printArea td, #printArea th, #printArea div {
+      color: #000000 !important;
+    }
+
+    /* ৪. ফিক্স: ওটি রেট (OT Rate) কলামটি প্রিন্ট থেকে গায়েব করা */
+    .hide-on-print {
+      display: none !important;
+    }
+
+    /* ৫. কলাম কমে যাওয়ার কারণে গ্র্যান্ড টোটালের স্পেসিং এডজাস্ট করা */
+    .grand-total-label {
+      /* জাভাস্ক্রিপ্ট বা এইচটিএমএলের colspan প্রিন্টে ৫ কলামের সমান কাজ করবে */
+      colspan: 5 !important; 
+    }
+
+    /* ৬. টেবিল স্ক্রোলবার ভেঙে পুরো ডাটা প্রিন্ট করা */
+    .max-h-\[55vh\] {
+      max-height: none !important;
+      overflow: visible !important;
+    }
+    
+    /* ৭. হেডার বর্ডার এবং প্রিন্ট মার্জিন */
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    th, td {
+      border: 1px solid #000000 !important;
+      padding: 6px !important;
+    }
+    @page {
+      margin: 15mm 10mm 15mm 10mm;
+    }
+  }
+
+  /* Flatpickr Custom Theme: Navy Blue (#002147) & Golden (#ffd700) */
+  .flatpickr-calendar {
+    background: #ffffff;
+    border: 2px solid var(--brand-gold) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+  .flatpickr-months {
+    background: var(--brand-blue) !important;
+    color: var(--brand-gold) !important;
+  }
+  .flatpickr-month {
+    background: var(--brand-blue) !important;
+    color: var(--brand-gold) !important;
+  }
+  .flatpickr-current-month .flatpickr-monthDropdown-months {
+    background: var(--brand-blue) !important;
+    color: var(--brand-gold) !important;
+  }
+  .flatpickr-current-month .numInputWrapper span.arrowUp:after {
+    border-bottom-color: var(--brand-gold) !important;
+  }
+  .flatpickr-current-month .numInputWrapper span.arrowDown:after {
+    border-top-color: var(--brand-gold) !important;
+  }
+  .flatpickr-months .flatpickr-prev-month,
+  .flatpickr-months .flatpickr-next-month {
+    color: var(--brand-gold) !important;
+    fill: var(--brand-gold) !important;
+  }
+  .flatpickr-weekdays {
+    background: var(--brand-blue) !important;
+  }
+  span.flatpickr-weekday {
+    background: var(--brand-blue) !important;
+    color: var(--brand-gold) !important;
+    font-weight: bold;
+  }
+  .flatpickr-day.selected,
+  .flatpickr-day.startRange,
+  .flatpickr-day.endRange,
+  .flatpickr-day.selected:hover,
+  .flatpickr-day.selected:focus {
+    background: var(--brand-blue) !important;
+    border-color: var(--brand-gold) !important;
+    color: var(--brand-gold) !important;
+  }
+  .flatpickr-day:hover {
+    background: var(--brand-gold) !important;
+    color: var(--brand-blue) !important;
+    border-color: var(--brand-blue) !important;
+  }
+  .flatpickr-day.today {
+    border-color: var(--brand-blue) !important;
+    color: var(--brand-blue) !important;
+    font-weight: bold;
+  }
+  .flatpickr-day.today:hover {
+    background: var(--brand-blue) !important;
+    color: var(--brand-gold) !important;
+  }
+  .flatpickr-day {
+    color: var(--brand-blue) !important;
+  }
+  .flatpickr-calendar.arrowTop:after,
+  .flatpickr-calendar.arrowTop:before {
+    border-bottom-color: var(--brand-blue) !important;
+  }
+
+  /* Custom Scrollbar for Suggestion Box */
+  .suggestion-box::-webkit-scrollbar {
+    width: 6px;
+  }
+  .suggestion-box::-webkit-scrollbar-thumb {
+    background: var(--brand-gold);
+    border-radius: 10px;
+  }
+  </style>
+
+  <script>
+    // প্রিন্ট ডায়ালগ ওপেন এবং ক্লোজ হওয়ার সময় ডাইনামিকলি ফুটারের colspan হ্যান্ডেল করা
+    window.onbeforeprint = function() {
+      const grandTotalCell = document.getElementById("grandTotalLabelCell");
+      if (grandTotalCell) {
+        grandTotalCell.setAttribute("colspan", "5");
+      }
+    };
+    window.onafterprint = function() {
+      const grandTotalCell = document.getElementById("grandTotalLabelCell");
+      if (grandTotalCell) {
+        grandTotalCell.setAttribute("colspan", "6");
+      }
+    };
+  </script>
+
+  <div id="loadingOverlay">
+    <div class="mb-6 bg-white p-3 rounded-xl">
+        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="h-20 w-auto">
     </div>
+    <div class="loader mb-4" style="width: 50px; height: 50px; border-width: 5px"></div>
+    <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+      <span class="text-white">ALAMHOW</span>
+      <span class="text-yellow-400">CO LTD</span>
+    </h2>
+    <p class="text-sm text-white mt-2 font-medium">Logging in, please wait....</p>
+  </div>
 
-    <!-- কাস্টম মেসেজ বক্স -->
-    <div id="messageModal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);">
-    <!-- max-sm এর বদলে max-w-[340px] ব্যবহার করা হয়েছে যাতে সাইজটি মার্জিত দেখায় -->
+  <div id="messageModal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);">
     <div class="bg-white rounded-2xl w-full max-w-[340px] mx-4 overflow-hidden shadow-2xl p-6 text-center transform transition-all scale-100">
-        <div id="msgIcon" class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"></div>
-        <h3 id="msgTitle" class="text-xl font-bold text-slate-800 mb-2">Notice</h3>
-        <p id="msgBody" class="text-slate-500 text-sm mb-6 leading-relaxed"></p>
-        <button onclick="closeMessage()" class="w-full py-3 rounded-xl bg-[#1e3a5f] text-white font-bold text-sm uppercase shadow-lg hover:bg-slate-800 transition-all">
-            Dismiss
-        </button>
+      <div id="msgIcon" class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"></div>
+      <h3 id="msgTitle" class="text-xl font-bold text-slate-800 mb-2">Notice</h3>
+      <p id="msgBody" class="text-slate-500 text-sm mb-6 leading-relaxed"></p>
+      <button onclick="closeMessage()" class="w-full py-3 rounded-xl bg-[#1e3a5f] text-white font-bold text-sm uppercase shadow-lg hover:bg-slate-800 transition-all">
+       OK
+      </button>
     </div>
+  </div>
+
+  <div id="previewModal">
+    <div class="bg-white rounded-2xl w-full max-w-7xl mx-4 overflow-hidden shadow-2xl transition-all">
+      <div class="bg-[#1e3a5f] p-4 text-white flex justify-between items-center no-print">
+        <h2 class="font-bold uppercase text-sm tracking-wider">PREVIEW REPORT</h2>
+        <div class="flex gap-2">
+          <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 text-xs font-bold uppercase">
+            Print
+          </button>
+          <button onclick="closePreview()" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 md:p-10" id="printArea">
+        <div class="hidden print-header">
+          <div class="print-title">DAILY OVERTIME REPORT</div>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-between mb-6 gap-4 print:flex-row print:justify-between print:mb-4 print:text-black">
+          <div class="flex flex-row gap-2 items-baseline">
+            <span class="text-[10px] uppercase font-bold text-slate-400 print:text-[10pt] print:text-black">PROJECT:</span>
+            <span id="printSite" class="text-xl font-bold text-[#1e3a5f] print:text-[11pt] print:text-black uppercase">-</span>
+          </div>
+          <div class="flex flex-row gap-2 items-baseline md:justify-end">
+            <span class="text-[10px] uppercase font-bold text-slate-400 print:text-[10pt] print:text-black">DATE:</span>
+            <span id="printDate" class="text-xl font-bold text-slate-700 print:text-[11pt] print:text-black uppercase">-</span>
+          </div>
+        </div>
+
+        <div class="max-h-[55vh] overflow-y-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-[#1e3a5f] text-white">
+                <th class="w-10 text-center p-3 text-[10px] font-bold border border-slate-700">SL</th>
+                <th class="w-24 p-3 text-[10px] font-bold border border-slate-700 uppercase">ID</th>
+                <th class="w-48 p-3 text-[10px] font-bold border border-slate-700 uppercase">Name</th>
+                <th class="w-32 p-3 text-[10px] font-bold border border-slate-700 uppercase">Designation</th>
+                <th class="w-32 p-3 text-[10px] font-bold border border-slate-700 uppercase">Passport</th>
+                <th class="w-24 p-3 text-[10px] font-bold border border-slate-700 uppercase text-center hide-on-print">OT Rate</th>
+                <th class="w-20 text-center p-3 text-[10px] font-bold border border-slate-700 uppercase">OT Hours</th>
+                <th class="w-28 text-center p-3 text-[10px] font-bold border border-slate-700 uppercase">Total Taka</th>
+                <th class="p-3 text-[10px] font-bold border border-slate-700 uppercase">Remark</th>
+              </tr>
+            </thead>
+            <tbody id="previewBody"></tbody>
+            <tfoot>
+              <tr class="bg-slate-50 font-bold border-t-2 border-slate-800">
+                <td id="grandTotalLabelCell" colspan="6" class="p-4 text-right uppercase font-bold">Grand Total:</td>
+                <td id="totalOTCell" class="p-4 text-center text-blue-600 print:text-black">0</td>
+                <td id="totalTakaCell" class="p-4 text-center text-green-600 print:text-black">0.00</td>
+                <td class="p-4 uppercase text-[10px] text-slate-500 print:text-black"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="hidden signature-section">
+          <div class="sig-box">Prepared By</div>
+          <div class="sig-box">Verified By</div>
+          <div class="sig-box">Approved By</div>
+        </div>
+      </div>
+
+      <div class="p-6 bg-slate-50 border-t flex justify-end gap-3 no-print">
+        <button onclick="closePreview()" class="px-6 py-2 rounded-lg font-bold text-slate-500 hover:bg-slate-200 text-xs uppercase transition-all">
+          Back
+        </button>
+        <button onclick="confirmAndSave()" id="finalSaveBtn" class="bg-green-600 text-white px-8 py-2 rounded-lg font-bold text-sm uppercase shadow-lg hover:bg-green-700 transition-all">
+          Confirm Save
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto no-print">
+ <div class="max-w-7xl mx-auto no-print pt-6">
+  <div class="bg-[#1e3a5f] rounded-3xl p-6 mb-8 shadow-2xl border-b-4 border-yellow-500 relative overflow-hidden">
+    
+    <div class="flex items-center justify-center relative min-h-[120px]">
+      
+      <div class="absolute left-4">
+        <div class="bg-white p-2 rounded-xl shadow-lg border border-slate-100">
+           <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" 
+                alt="ALAMHOW Logo" 
+                class="h-14 w-auto">
+        </div>
+      </div>
+
+      <div class="text-center px-24">
+        <h1 class="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white drop-shadow-md">
+          ALOMHOW <span class="text-yellow-400">COMPANY</span> LTD
+        </h1>
+        <div class="flex justify-center items-center gap-3 mt-3">
+          <div class="h-[1px] w-12 bg-yellow-500/50"></div>
+          <p class="text-blue-100 text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] opacity-90">
+            OVER TIME ENTRY FORM
+          </p>
+          <div class="h-[1px] w-12 bg-yellow-500/50"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
-    <!-- প্রিভিউ এবং প্রিন্ট মোডাল -->
-    <div id="previewModal">
-        <div class="bg-white rounded-2xl w-full max-w-7xl mx-4 overflow-hidden shadow-2xl transition-all">
-            <div class="bg-[#1e3a5f] p-4 text-white flex justify-between items-center no-print">
-                <h2 class="font-bold uppercase text-sm tracking-wider">PREVIEW REPORT</h2>
-                <div class="flex gap-2">
-                    <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-lg flex items-center gap-2 text-xs font-bold uppercase">
-                        Print 
-                    </button>
-                    <button onclick="closePreview()" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path></svg>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="p-6 md:p-10" id="printArea">
-                <div class="hidden print-header">
-                    <div class="print-title">DAILY OVERTIME REPORT</div>
-                </div>
-
-                <div class="flex flex-col md:flex-row justify-between mb-6 gap-4 print:flex-row print:justify-between print:mb-4 print:text-black">
-                    <div class="flex flex-row gap-2 items-baseline">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 print:text-[10pt] print:text-black">PROJECT:</span>
-                        <span id="printSite" class="text-xl font-bold text-[#1e3a5f] print:text-[11pt] print:text-black uppercase">-</span>
-                    </div>
-                    <div class="flex flex-row gap-2 items-baseline md:justify-end">
-                        <span class="text-[10px] uppercase font-bold text-slate-400 print:text-[10pt] print:text-black">DATE:</span>
-                        <span id="printDate" class="text-xl font-bold text-slate-700 print:text-[11pt] print:text-black uppercase">-</span>
-                    </div>
-                </div>
-
-                <div class="max-h-[55vh] overflow-y-auto">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="bg-[#1e3a5f] text-white print:bg-[#1e3a5f] print:text-white">
-                                <th class="w-10 text-center p-3 text-[10px] font-bold border border-slate-700">SL</th>
-                                <th class="w-24 p-3 text-[10px] font-bold border border-slate-700 uppercase">ID</th>
-                                <th class="w-48 p-3 text-[10px] font-bold border border-slate-700 uppercase">Name</th>
-                                <th class="w-32 p-3 text-[10px] font-bold border border-slate-700 uppercase">Designation</th>
-                                <th class="w-32 p-3 text-[10px] font-bold border border-slate-700 uppercase">Passport</th>
-                                <th class="w-24 p-3 text-[10px] font-bold border border-slate-700 uppercase text-center">OT Rate</th>
-                                <th class="w-20 text-center p-3 text-[10px] font-bold border border-slate-700 uppercase">OT Hours</th>
-                                <th class="w-28 text-center p-3 text-[10px] font-bold border border-slate-700 uppercase">Total Taka</th>
-                                <th class="p-3 text-[10px] font-bold border border-slate-700 uppercase">Remark</th>
-                            </tr>
-                        </thead>
-                        <tbody id="previewBody" class="divide-y divide-slate-100 print:divide-black"></tbody>
-                        <tfoot>
-                            <tr class="bg-slate-50 font-bold print:bg-white border-t-2 border-slate-800">
-                                <td colspan="6" class="p-4 text-right uppercase font-bold">Grand Total:</td>
-                                <td id="totalOTCell" class="p-4 text-center text-blue-600 print:text-black">0</td>
-                                <td id="totalTakaCell" class="p-4 text-center text-green-600 print:text-black">0.00</td>
-                                <td class="p-4 uppercase text-[10px]">Staff Count: <span id="previewCount">0</span></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-
-                <div class="hidden signature-section">
-                    <div class="sig-box">Prepared By </div>
-                    <div class="sig-box">Verified By </div>
-                    <div class="sig-box">Approved By</div>
-                </div>
-            </div>
-
-            <div class="p-6 bg-slate-50 border-t flex justify-end gap-3 no-print">
-                <button onclick="closePreview()" class="px-6 py-2 rounded-lg font-bold text-slate-500 hover:bg-slate-200 text-xs uppercase transition-all">Back</button>
-                <button onclick="confirmAndSave()" id="finalSaveBtn" class="bg-green-600 text-white px-8 py-2 rounded-lg font-bold text-sm uppercase shadow-lg hover:bg-green-700 transition-all">Confirm Save</button>
-            </div>
+  <div class="bg-white rounded-2xl p-6 mb-8 shadow-lg border border-slate-100">
+    <div class="flex flex-wrap justify-center items-end gap-6">
+      
+      <div class="flex flex-col w-full md:w-auto">
+        <label class="text-[10px] font-black uppercase mb-2 text-slate-400 tracking-wider ml-1">OT Date</label>
+        <div class="relative">
+          <input type="text" id="targetDate" placeholder="Select Date" 
+                 class="bg-slate-50 text-slate-900 border border-slate-200 rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[200px] focus:ring-2 ring-blue-500/20" 
+                 readonly>
         </div>
+      </div>
+
+      <div class="flex flex-col w-full md:w-auto">
+        <label class="text-[10px] font-black uppercase mb-2 text-slate-400 tracking-wider ml-1">Project Location</label>
+        <select id="targetSite" class="bg-[#002147] text-[#ffd700] px-4 py- rounded-xl font-bold text-sm min-w-[280px] outline-none border-2 border-[#ffd700] focus:ring-4 ring-yellow-500/20 transition-all duration-300 cursor-pointer">
+          <option value="">Choose Project</option>
+          </select>
+      </div>
+
+      <div class="flex items-end w-full md:w-auto">
+        <button onclick="fetchWorkersFromDatabase()" id="loadBtn" 
+                class="w-full md:w-auto bg-[#1e3a5f] text-yellow-400 px-10 py-3 rounded-xl font-black text-sm uppercase hover:bg-blue-900 hover:shadow-blue-500/20 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          Load List
+        </button>
+      </div>
+
+      <div class="flex items-end w-full md:w-auto">
+        <button onclick="window.location.reload()" 
+                class="w-full md:w-auto bg-slate-600 text-white px-8 py-3 rounded-xl font-bold text-sm uppercase hover:bg-slate-700 active:scale-95 transition-all shadow-xl flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          Reload
+        </button>
+      </div>
+
+    </div>
+  </div>
+  </header>
+
+    <div id="mainContentSection" class="section-hidden grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+      <div class="md:col-span-12 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="relative w-full md:w-96">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2"></path>
+            </svg>
+          </span>
+          <input type="text" id="searchInput" onfocus="handleSearchInput(this)" onclick="handleSearchInput(this)" onkeyup="handleSearchInput(this)" onkeydown="handleSearchEnter(event)" placeholder="ID, Name অথবা Passport দিয়ে খুঁজুন..." class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl w-full text-sm outline-none focus:border-blue-500 transition-all" autocomplete="off" />
+          <div id="suggestionBox" class="suggestion-box"></div>
+        </div>
+
+        <div id="actionBar" class="opacity-0 pointer-events-none transition-all flex items-center gap-6">
+          <div class="text-right">
+            <p class="text-[10px] font-bold text-slate-400 uppercase">Selected</p>
+            <p id="selectedCount" class="text-2xl font-black text-blue-600 leading-none">0</p>
+          </div>
+          <button onclick="openPreview()" id="saveBtn" class="bg-[#1e3a5f] text-white px-10 py-3 rounded-xl font-bold text-sm uppercase shadow-xl hover:bg-blue-900 transition-all flex items-center gap-2">
+            PREVIEW
+          </button>
+        </div>
+      </div>
+
+      <div class="md:col-span-12 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table id="workerTable" class="w-full text-left border-collapse">
+            <thead class="bg-[#1e3a5f] border-b border-slate-200">
+              <tr>
+                <th class="p-4 w-16 text-center">
+                  <input type="checkbox" id="selectAll" onclick="toggleAll(this)" class="checkbox-custom" />
+                </th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">ID & Name</th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Designation</th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Passport</th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Rate (P/H)</th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Hours</th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">Total Taka</th>
+                <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Remark</th>
+              </tr>
+            </thead>
+            <tbody id="workerTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
-    <!-- মেইন ইন্টারফেস -->
-    <div class="max-w-7xl mx-auto no-print">
-        <header class="bg-[#1e3a5f] rounded-2xl p-6 mb-6 shadow-xl text-white">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                <div>
-                    <h1 class="text-3xl font-black tracking-tight uppercase">OVERTIME MANAGEMENT SYSTEM</h1>
-                    <p class="text-blue-200 text-xs font-bold uppercase tracking-widest mt-1 opacity-80">Efficiency in Employee Management</p>
-                </div>
-                
-                <div class="flex flex-wrap gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm">
-                    <div class="flex flex-col">
-                        <label class="text-[10px] font-bold uppercase mb-1 text-white/50">OT Date</label>
-                        <input type="text" id="targetDate" placeholder="Select Date" class="bg-white text-slate-900 px-3 py-2 rounded-lg font-bold text-sm w-40 outline-none focus:ring-2 ring-yellow-400">
-                    </div>
-                    <div class="flex flex-col">
-                        <label class="text-[10px] font-bold uppercase mb-1 text-white/50">Project Location</label>
-                        <select id="targetSite" class="bg-white text-slate-900 px-3 py-2 rounded-lg font-bold text-sm w-48 outline-none focus:ring-2 ring-yellow-400">
-                            <option value="">Choose Project</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="fetchWorkersFromDatabase()" id="loadBtn" class="bg-yellow-400 text-[#1e3a5f] px-6 py-2 rounded-lg font-black text-sm uppercase hover:bg-yellow-300 transition-all shadow-lg">
-                            Load List
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
-
-        <div id="mainContentSection" class="section-hidden grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-            <div class="md:col-span-12 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div class="relative w-full md:w-96">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2"></path></svg>
-                    </span>
-                    <input type="text" id="searchInput" 
-                        onfocus="handleSearchInput(this)" 
-                        onclick="handleSearchInput(this)"
-                        onkeyup="handleSearchInput(this)" 
-                        placeholder="ID, Name অথবা Passport দিয়ে খুঁজুন..." 
-                        class="pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl w-full text-sm outline-none focus:border-blue-500 transition-all" 
-                        autocomplete="off">
-                    <div id="suggestionBox" class="suggestion-box"></div>
-                </div>
-                
-                <div id="actionBar" class="opacity-0 pointer-events-none transition-all flex items-center gap-6">
-                    <div class="text-right">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase">Selected</p>
-                        <p id="selectedCount" class="text-2xl font-black text-blue-600 leading-none">0</p>
-                    </div>
-                    <button onclick="openPreview()" id="saveBtn" class="bg-[#1e3a5f] text-white px-10 py-3 rounded-xl font-bold text-sm uppercase shadow-xl hover:bg-blue-900 transition-all flex items-center gap-2">
-                        PREVIEW
-                    </button>
-                </div>
-            </div>
-
-            <div class="md:col-span-12 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table id="workerTable" class="w-full text-left border-collapse">
-                        <thead class="bg-slate-50/80 border-b border-slate-200">
-                            <tr>
-                                <th class="p-4 w-16 text-center">
-                                    <input type="checkbox" id="selectAll" onclick="toggleAll(this)" class="checkbox-custom">
-                                </th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">ID & Name</th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Designation</th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Passport</th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">OT Rate (P/H)</th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">OT Hours</th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Total Taka</th>
-                                <th class="p-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Remark</th>
-                            </tr>
-                        </thead>
-                        <tbody id="workerTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div id="initialPlaceholder" class="bg-white rounded-2xl p-20 border border-dashed border-slate-300 flex flex-col items-center justify-center gap-4 text-center">
-            <div class="p-4 bg-slate-50 rounded-full">
-                <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="1.5"></path></svg>
-            </div>
-            <div>
-                <p class="text-slate-400 font-medium">First select the date and project, then click the "Load List" button.</p>
-                <p id="lastUpdateDisplay" class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mt-2">Connecting...</p>
-            </div>
-        </div>
+    <div id="initialPlaceholder" class="bg-white rounded-2xl p-20 border border-dashed border-slate-300 flex flex-col items-center justify-center gap-4 text-center">
+      <div class="p-4 bg-slate-50 rounded-full">
+        <svg class="w-12 h-12 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="1.5"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="text-slate-400 font-medium">First select the date and project, then click the "Load List" button.</p>
+        <p id="lastUpdateDisplay" class="text-blue-500 text-[10px] font-bold uppercase tracking-widest mt-2">Connecting...</p>
+      </div>
     </div>
+  </div>
 
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl opacity-0 transition-all transform translate-y-4 pointer-events-none z-[2000]"></div>
+  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl opacity-0 transition-all transform translate-y-4 pointer-events-none z-[2000]"></div>
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-   <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3tnMiKNH9Vap8WD0oj0Y_Ywu_Gr4jLtQpaxx9trB3SI6OXCzucYoDgeJnM3EALYn2/exec";
-        let employees = [], currentSites = [], preparedData = [];
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 
-        // মেসেজ বা পপ-আপ দেখানোর ফাংশন
-        function showMessage(title, body, type = 'info') {
-            const modal = document.getElementById('messageModal');
-            const iconBox = document.getElementById('msgIcon');
-            const titleEl = document.getElementById('msgTitle');
-            const bodyEl = document.getElementById('msgBody');
-            titleEl.innerText = title;
-            bodyEl.innerText = body;
-            if(type === 'error') {
-                iconBox.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-red-100 text-red-600";
-                iconBox.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"></path></svg>`;
-            } else if(type === 'success') {
-                iconBox.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-green-100 text-green-600";
-                iconBox.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-width="2"></path></svg>`;
-            } else {
-                iconBox.className = "mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-blue-100 text-blue-600";
-                iconBox.innerHTML = `<svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2"></path></svg>`;
-            }
-            modal.style.display = 'flex';
-        }
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-        // মেসেজ বক্স বন্ধ করার ফাংশন
-        function closeMessage() { document.getElementById('messageModal').style.display = 'none'; }
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+     // ১. ফায়ারবেস কনফিগারেশন 
+const firebaseConfig = {
+  apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+  authDomain: "munna-acl-fda7c.firebaseapp.com",
+  projectId: "munna-acl-fda7c",
+  storageBucket: "munna-acl-fda7c.firebasestorage.app",
+  // নিচের লাইনটি কনসোলের ওয়ার্নিং অনুযায়ী আপডেট করা হয়েছে
+  databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app"
+};
 
-        // পেজ লোড হওয়ার সময় প্রয়োজনীয় ডাটা ফেচ করা
-        window.onload = async () => {
-            flatpickr("#targetDate", { dateFormat: "Y-m-d", placeholder: "Select Date" });
-            fetchLastUpdate(); 
-            try {
-                const [empRes, siteRes] = await Promise.all([
-                    fetch(`${SCRIPT_URL}?action=getEmployeeData`),
-                    fetch(`${SCRIPT_URL}?action=getSideNames`)
-                ]);
-                employees = await empRes.json();
-                currentSites = await siteRes.json();
-                
-                const siteSelect = document.getElementById('targetSite');
-                siteSelect.innerHTML = '<option value="">Choose Site</option>' + 
-                    currentSites.map(s => `<option value="${s}">${s}</option>`).join('');
-                document.getElementById('loadingOverlay').classList.add('fade-out');
-            } catch (err) {
-                console.error("Load Error:", err);
-                document.getElementById('loadingOverlay').innerHTML = `<p class='text-red-500 font-bold'>Server connection lost.</p>`;
-            }
-        };
+// ফায়ারবেস ইনিশিয়ালাইজ
+firebase.initializeApp(firebaseConfig);
 
-        // সর্বশেষ আপডেট বা এন্ট্রি চেক করার ফাংশন
-        async function fetchLastUpdate() {
-            const display = document.getElementById('lastUpdateDisplay');
-            try {
-                const response = await fetch(`${SCRIPT_URL}?action=getLastUpdate`);
-                const text = await response.text();
-                try {
-                    const data = JSON.parse(text);
-                    if (data.date && data.date !== "-") {
-                        display.innerHTML = `Last Entry: <span class="text-[#1e3a5f]">${data.date}</span> Time <span class="text-[#1e3a5f]">${data.time}</span>`;
-                    } else { display.innerText = "No previous records found"; }
-                } catch (jsonErr) { display.innerText = "Ready to Load"; }
-            } catch (err) { display.innerText = "Connection Error"; }
-        }
+// ভেরিয়েবল সেটআপ
+const db = firebase.firestore();           // Firestore এর জন্য
+const rtdb = firebase.database();         // Realtime Database এর জন্য (নতুন)
 
-        // সার্চ ইনপুটের ভিত্তিতে সাজেশন দেখানোর ফাংশন
-        function handleSearchInput(input) {
-            const query = input.value.trim().toLowerCase();
-            const box = document.getElementById('suggestionBox');
-            if (employees.length === 0) return;
-            const filtered = query === "" ? employees.slice(0, 15) : employees.filter(e => 
-                String(e.id).includes(query) || 
-                e.name.toLowerCase().includes(query) || 
-                (e.passport && String(e.passport).toLowerCase().includes(query))
-            ).slice(0, 10);
-            
-            if (filtered.length > 0) {
-                box.innerHTML = filtered.map(e => `
-                    <div class="suggestion-item" onclick="selectFromSuggestion('${e.id}')">
-                        <div>
-                            <div class="font-bold text-slate-800">ID: ${e.id}</div>
-                            <div class="text-[10px] text-slate-500 uppercase font-bold">${e.name}</div>
-                        </div>
-                        <div class="text-[9px] text-blue-500 font-black border border-blue-200 px-2 py-1 rounded">SELECT</div>
-                    </div>`).join('');
-                box.style.display = 'block';
-            } else { box.style.display = 'none'; }
-            if (query !== "") filterTable(query);
-        }
+let employees = [],
+  currentSites = [],
+  preparedData = [];
 
-        // সাজেশন বক্স থেকে কর্মী সিলেক্ট করার ফাংশন
-        function selectFromSuggestion(id) {
-            document.getElementById('searchInput').value = '';
-            document.getElementById('suggestionBox').style.display = 'none';
-            const row = document.getElementById(`row-${id}`);
-            if (row) {
-                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                const checkbox = row.querySelector('.worker-check');
-                if(!checkbox.checked) { checkbox.checked = true; toggleRow(id, true); }
-                else { document.getElementById(`ot-${id}`).focus(); }
-            }
-        }
+// ২. পেজ লোড হওয়ার সময় Cloud Firestore থেকে ডাটা আনা
+window.onload = async () => {
+  if (typeof flatpickr !== "undefined") {
+    flatpickr("#targetDate", {
+      dateFormat: "Y-m-d",
+      placeholder: "Select Date",
+      allowInput: false,      // হাতে লেখা বন্ধ রাখবে
+      clickOpens: true,       // ক্লিক করলে ক্যালেন্ডার খুলবে
+      // defaultDate সরিয়ে দেওয়া হয়েছে যাতে ফিল্ডটি ফাঁকা থাকে
+    });
+    console.log("Flatpickr initialized empty.");
+  }
 
-        // টেবিলের ডাটা ফিল্টার করার ফাংশন
-        function filterTable(q) {
-            document.querySelectorAll('.worker-row').forEach(r => { r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none"; });
-        }
+  fetchLastUpdate();
 
-        // ডাটাবেস থেকে কর্মীদের তালিকা নিয়ে টেবিল তৈরি করার ফাংশন
-        function fetchWorkersFromDatabase() {
-            const date = document.getElementById('targetDate').value;
-            const site = document.getElementById('targetSite').value;
-            if(!date || !site) return showMessage("Warning", "Please select Date and Project.", "error");
-            
-            document.getElementById('initialPlaceholder').style.display = 'none';
-            const mainContent = document.getElementById('mainContentSection');
-            mainContent.classList.remove('section-hidden');
-            mainContent.classList.add('section-visible');
+  try {
+    const [empSnap, siteSnap] = await Promise.all([
+      db.collection("EMPLOYEE_LIST").get(),
+      db.collection("PROJECT_NAME").get(),
+    ]);
 
-            const tbody = document.getElementById('workerTableBody');
-            tbody.innerHTML = '';
-            
-            employees.forEach(w => {
-                const pass = w.passport || "-"; 
-                const rate = parseFloat(w.otRate) || 0; 
-                const desig = w.designation || "-";
+    employees = []; // ক্লিয়ার করে নেওয়া ভালো
+    empSnap.forEach(doc => {
+      employees.push({ docId: doc.id, ...doc.data() });
+    });
 
-                const row = document.createElement('tr');
-                row.className = 'worker-row transition-all hover:bg-slate-50';
-                row.id = `row-${w.id}`;
-                row.innerHTML = `
-                    <td class="p-4 text-center"><input type="checkbox" class="checkbox-custom worker-check" onchange="toggleRow('${w.id}', true)"></td>
-                    <td class="p-4">
-                        <div class="font-bold text-sm text-slate-800">${w.name}</div>
-                        <div class="text-[10px] text-slate-400 font-bold tracking-tighter uppercase">ID: ${w.id}</div>
-                    </td>
-                    <td class="p-4">
-                        <span class="text-xs text-slate-500 font-bold uppercase">${desig}</span>
-                    </td>
-                    <td class="p-4">
-                        <span class="text-xs text-slate-500 font-bold uppercase">${pass}</span>
-                    </td>
-                    <td class="p-4 text-center">
-                        <span id="rate-display-${w.id}" class="text-xs text-slate-600 font-black">${rate.toFixed(2)}</span>
-                        <input type="hidden" id="rate-${w.id}" value="${rate}">
-                    </td>
-                    <td class="p-4 text-center">
-                        <input type="number" step="0.5" id="ot-${w.id}" 
-                               oninput="calculateTaka('${w.id}')" 
-                               class="ot-input text-sm input-hidden outline-none bg-white" placeholder="0.0">
-                    </td>
-                    <td class="p-4 text-center">
-                        <span id="taka-${w.id}" class="font-black text-slate-400 text-xs">0.00</span>
-                    </td>
-                    <td class="p-4">
-                        <input type="text" id="remark-${w.id}" placeholder="Note..." class="bg-transparent border-b border-slate-100 text-xs w-full input-hidden outline-none">
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-            updateSelectedCount();
-        }
+    currentSites = [];
+    siteSnap.forEach(doc => {
+      currentSites.push({ docId: doc.id, ...doc.data() });
+    });
 
-        // OT ঘণ্টার উপর ভিত্তি করে টাকা হিসাব করার ফাংশন
-        function calculateTaka(id) {
-            const rate = parseFloat(document.getElementById(`rate-${id}`).value) || 0;
-            const hours = parseFloat(document.getElementById(`ot-${id}`).value) || 0;
-            const takaEl = document.getElementById(`taka-${id}`);
-            const total = (rate * hours).toFixed(2);
-            takaEl.innerText = total;
-            takaEl.className = total > 0 ? "font-black text-green-600 text-xs" : "font-black text-slate-400 text-xs";
-        }
+    const siteSelect = document.getElementById("targetSite");
+    if(siteSelect) {
+        siteSelect.innerHTML = '<option value="">Choose Site</option>';
+        currentSites.forEach((s) => {
+          const sName = s.NAME || s.docId.replace(/%20/g, " "); 
+          const option = document.createElement("option");
+          option.value = sName;
+          option.textContent = sName;
+          siteSelect.appendChild(option);
+        });
+        initCustomSelect("targetSite");
+    }
 
-        // টেবিলের রো সিলেক্ট বা ডি-সিলেক্ট করার ফাংশন
-        function toggleRow(id, shouldFocus = false) {
-            const row = document.getElementById(`row-${id}`);
-            const checkbox = row.querySelector('.worker-check');
-            const otInput = document.getElementById(`ot-${id}`);
-            const remarkInput = document.getElementById(`remark-${id}`);
-            
-            if(checkbox.checked) {
-                row.classList.add('selected'); 
-                otInput.classList.replace('input-hidden', 'input-visible');
-                remarkInput.classList.replace('input-hidden', 'input-visible');
-                if(shouldFocus) setTimeout(() => otInput.focus(), 50);
-            } else {
-                row.classList.remove('selected'); 
-                otInput.classList.replace('input-visible', 'input-hidden');
-                remarkInput.classList.replace('input-visible', 'input-hidden');
-                otInput.value = ''; 
-                remarkInput.value = '';
-                document.getElementById(`taka-${id}`).innerText = '0.00';
-            }
-            updateSelectedCount();
-        }
+    const loader = document.getElementById("loadingOverlay");
+    if(loader) loader.classList.add("fade-out");
 
-        // একসাথে সব রো সিলেক্ট করার ফাংশন
-        function toggleAll(master) {
-            document.querySelectorAll('.worker-check').forEach(c => { 
-                c.checked = master.checked; 
-                toggleRow(c.closest('tr').id.replace('row-', ''), false);
-            });
-        }
+  } catch (err) {
+    console.error("Firestore Load Error:", err);
+    const loader = document.getElementById("loadingOverlay");
+    if(loader) loader.innerHTML = `<p class='text-red-500 font-bold'>Database connection lost.</p>`;
+  }
+};
 
-        // কতজন কর্মী সিলেক্ট হয়েছে তার সংখ্যা আপডেট করার ফাংশন
-        function updateSelectedCount() {
-            const count = document.querySelectorAll('.worker-check:checked').length;
-            document.getElementById('selectedCount').innerText = count;
-            const actionBar = document.getElementById('actionBar');
-            if (count > 0) { actionBar.classList.replace('opacity-0', 'opacity-100'); actionBar.classList.remove('pointer-events-none'); } 
-            else { actionBar.classList.replace('opacity-100', 'opacity-0'); actionBar.classList.add('pointer-events-none'); }
-        }
+/* Custom Dropdown Logic to enable Golden Hover */
+function initCustomSelect(id) {
+  const select = document.getElementById(id);
+  if (!select) return;
 
-        // সেভ করার আগে ডাটা প্রিভিউ দেখার ফাংশন
-        function openPreview() {
-            const selectedChecks = document.querySelectorAll('.worker-check:checked');
-            if(selectedChecks.length === 0) return showMessage("Error", "No workers selected.", "error");
-            
-            const date = document.getElementById('targetDate').value;
-            const site = document.getElementById('targetSite').value;
-            const previewBody = document.getElementById('previewBody');
-            previewBody.innerHTML = '';
-            preparedData = [];
-            let totalOT = 0;
-            let totalTaka = 0;
-            let count = 0;
+  select.style.display = "none";
+  let wrapper = select.parentElement.querySelector(".custom-select-wrapper");
+  if (wrapper) wrapper.remove();
 
-            selectedChecks.forEach((check) => {
-                const id = check.closest('tr').id.replace('row-', '');
-                const otRaw = document.getElementById(`ot-${id}`).value;
-                const rate = parseFloat(document.getElementById(`rate-${id}`).value) || 0;
-                
-                if(otRaw === "" || parseFloat(otRaw) <= 0) return;
-                
-                const emp = employees.find(e => String(e.id) === String(id));
-                const ot = parseFloat(otRaw);
-                const taka = ot * rate;
-                const remark = document.getElementById(`remark-${id}`).value || "-";
-                const pass = emp.passport || "-";
-                const desig = emp.designation || "-";
-                
-                totalOT += ot;
-                totalTaka += taka;
-                count++;
-                
-                preparedData.push({
-                    date: date, empId: id, empName: emp.name, site: site, ot: ot, rate: rate, taka: taka, remark: remark, passport: pass, designation: desig
-                });
-                
-                previewBody.innerHTML += `
-                    <tr>
-                        <td class="text-center">${count}</td>
-                        <td class="font-bold uppercase">${id}</td>
-                        <td class="font-bold">${emp.name}</td>
-                        <td class="uppercase font-medium text-[9px]">${desig}</td>
-                        <td class="uppercase font-medium text-[9px]">${pass}</td>
-                        <td class="text-center">${rate.toFixed(2)}</td>
-                        <td class="text-center font-bold">${ot}</td>
-                        <td class="text-center font-black text-green-700">${taka.toFixed(2)}</td>
-                        <td>${remark}</td>
-                    </tr>`;
-            });
+  wrapper = document.createElement("div");
+  wrapper.className = "custom-select-wrapper";
 
-            if(preparedData.length === 0) return showMessage("Input Error", "Please provide OT hours for selected workers.", "error");
-            
-            document.getElementById('printDate').innerText = date;
-            document.getElementById('printSite').innerText = site;
-            document.getElementById('previewCount').innerText = preparedData.length;
-            document.getElementById('totalOTCell').innerText = totalOT.toFixed(1);
-            document.getElementById('totalTakaCell').innerText = totalTaka.toFixed(2);
-            document.getElementById('previewModal').style.display = 'flex';
-        }
+  const trigger = document.createElement("div");
+  trigger.className = "custom-select-trigger";
+  trigger.innerHTML = `<span>${select.options[select.selectedIndex]?.text || "Select"}</span><i style="color:var(--brand-gold); font-style:normal; margin-left:10px;">▼</i>`;
 
-        // প্রিভিউ বক্স বন্ধ করার ফাংশন
-        function closePreview() { document.getElementById('previewModal').style.display = 'none'; }
+  const optionsContainer = document.createElement("div");
+  optionsContainer.className = "custom-select-options";
 
-        // ডাটাবেসে তথ্য পাঠানোর এবং সেভ করার ফাইনাল ফাংশন
-        async function confirmAndSave() {
-            const saveBtn = document.getElementById('finalSaveBtn');
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = `<span class="loader"></span> Saving...`;
-            try {
-                await fetch(SCRIPT_URL, { 
-                    method: 'POST', 
-                    mode: 'no-cors', 
-                    body: JSON.stringify({ action: "dualUpdate", data: preparedData }) 
-                });
-                
-                showToast(`${preparedData.length} records saved!`, "success");
-                fetchLastUpdate();
-                document.querySelectorAll('.worker-check:checked').forEach(c => {
-                    c.checked = false; toggleRow(c.closest('tr').id.replace('row-', ''), false);
-                });
-                closePreview();
-                showMessage("Success", "Records have been successfully updated in the database.", "success");
-            } catch (err) { 
-                showMessage("Failed", "Problem sending data to server.", "error");
-            } 
-            finally { saveBtn.disabled = false; saveBtn.innerText = "Confirm Save"; }
-        }
+  Array.from(select.options).forEach((opt) => {
+    const item = document.createElement("div");
+    item.className = "custom-select-option";
+    item.innerText = opt.text;
+    item.onclick = (e) => {
+      e.stopPropagation();
+      select.value = opt.value;
+      trigger.querySelector("span").innerText = opt.text;
+      optionsContainer.style.display = "none";
+      select.dispatchEvent(new Event("change"));
+    };
+    optionsContainer.appendChild(item);
+  });
 
-        // ছোট টোস্ট মেসেজ দেখানোর ফাংশন
-       function showToast(msg, type) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl transition-all z-[2000] ${type === 'success' ? 'bg-green-600' : 'bg-slate-900'} text-white opacity-100`;
-            setTimeout(() => { toast.style.opacity = '0'; }, 3000);
-        }
+  trigger.onclick = (e) => {
+    e.stopPropagation();
+    document.querySelectorAll(".custom-select-options").forEach(el => el !== optionsContainer && (el.style.display = "none"));
+    optionsContainer.style.display = optionsContainer.style.display === "block" ? "none" : "block";
+  };
+
+  wrapper.appendChild(trigger);
+  wrapper.appendChild(optionsContainer);
+  select.parentElement.appendChild(wrapper);
+}
+
+document.addEventListener("click", () => {
+  document.querySelectorAll(".custom-select-options").forEach(el => el.style.display = "none");
+  const suggestionBox = document.getElementById("suggestionBox");
+  if(suggestionBox) suggestionBox.style.display = "none";
+});
+
+// ৩. সর্বশেষ এন্ট্রি দেখানো (Realtime Database থেকে)
+async function fetchLastUpdate() {
+  const display = document.getElementById("lastUpdateDisplay");
+  if(!display) return;
+
+  const now = new Date();
+  const monthYear = now.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
+
+  rtdb.ref(`OVER_TIME/${monthYear}`)
+    .limitToLast(1) // এই মাসের সর্বশেষ তারিখের ফোল্ডারটি নিবে
+    .once("value")
+    .then((snapshot) => {
+      if (snapshot.exists()) {
+        const monthData = snapshot.val();
+        const dateKeys = Object.keys(monthData);
+        const lastDateKey = dateKeys[dateKeys.length - 1]; // সর্বশেষ তারিখ (যেমন: 2026-04-01)
+        const dayData = monthData[lastDateKey];
+
+        // ওই তারিখের ভেতরে থাকা সর্বশেষ এমপ্লয়ি রেকর্ড বের করা
+        const workerKeys = Object.keys(dayData);
+        const lastWorkerEntry = dayData[workerKeys[workerKeys.length - 1]];
+
+        display.innerHTML = `Last Entry (${monthYear}): <span class="text-[#1e3a5f] font-bold">${lastWorkerEntry.OT_Date || "N/A"}</span> (ID: ${lastWorkerEntry.ID || "N/A"})`;
+      } else {
+        display.innerText = `No records found for ${monthYear}`;
+      }
+    })
+    .catch(err => {
+      console.log("Last update fetch error:", err);
+      display.innerText = "Error loading last update";
+    });
+}
+
+// ৪. টেবিল তৈরি ফাংশন
+function fetchWorkersFromDatabase() {
+  const date = document.getElementById("targetDate").value;
+  const site = document.getElementById("targetSite").value;
+  if (!date || !site)
+    return showMessage(
+      "Warning",
+      "Please select Date and Project.",
+      "error",
+    );
+
+  document.getElementById("initialPlaceholder").style.display = "none";
+  const mainContent = document.getElementById("mainContentSection");
+  mainContent.classList.remove("section-hidden");
+  mainContent.classList.add("section-visible");
+
+  const tbody = document.getElementById("workerTableBody");
+  tbody.innerHTML = "";
+
+  employees.forEach((w) => {
+    const id = w.id || w.docId || "N/A";
+    const name = w.name || "Unknown";
+    const designation = w.designation || "-";
+    const passport = w.passport || "-";
+    const rate = parseFloat(w.otRate) || 0;
+
+    const row = document.createElement("tr");
+    row.className = "worker-row transition-all hover:bg-slate-50";
+    row.id = `row-${id}`;
+    
+    row.innerHTML = `
+        <td class="p-4 text-center"><input type="checkbox" class="checkbox-custom worker-check" onchange="toggleRow('${id}', true)"></td>
+        <td class="p-4">
+            <div class="font-bold text-sm text-slate-800">${name}</div>
+            <div class="text-[10px] text-slate-400 font-bold tracking-tighter uppercase">ID: ${id}</div>
+        </td>
+        <td class="p-4"><span class="text-xs text-slate-500 font-bold uppercase">${designation}</span></td>
+        <td class="p-4"><span class="text-xs text-slate-500 font-bold uppercase">${passport}</span></td>
+        <td class="p-4 text-center">
+            <span id="rate-display-${id}" class="text-xs text-slate-600 font-black">${rate.toFixed(2)}</span>
+            <input type="hidden" id="rate-${id}" value="${rate}">
+        </td>
+        <td class="p-4 text-center">
+            <input type="number" step="0.5" id="ot-${id}" oninput="calculateTaka('${id}')" onkeydown="handleOtEnter(event, '${id}')" class="ot-input text-sm input-hidden outline-none bg-white" placeholder="0.0">
+        </td>
+        <td class="p-4 text-center"><span id="taka-${id}" class="font-black text-slate-400 text-xs">0.00</span></td>
+        <td class="p-4"><input type="text" id="remark-${id}" placeholder="Note..." class="bg-transparent border-b border-slate-100 text-xs w-full input-hidden outline-none"></td>
+    `;
+    tbody.appendChild(row);
+  });
+  updateSelectedCount();
+}
+
+// ৫. ডাটা সেভ ফাংশন (Realtime Database এ)
+async function confirmAndSave() {
+  const saveBtn = document.getElementById("finalSaveBtn");
+  if(!saveBtn || preparedData.length === 0) return;
+  
+  saveBtn.disabled = true;
+  saveBtn.innerHTML = `Saving...`;
+
+  try {
+    const updates = {};
+    const rootRef = rtdb.ref();
+    
+    // ১. প্রথম আইটেম থেকে তারিখ নেওয়া (যেমন: "2026-06-01")
+    const firstItem = preparedData[0];
+    const otDateStr = firstItem.date; 
+
+    // ২. স্মার্টলি তারিখ চেনা এবং অবজেক্ট তৈরি
+    let selectedDate;
+    const parts = otDateStr.includes("-") ? otDateStr.split("-") : otDateStr.split("/");
+
+    if (parts[0].length === 4) {
+      // যদি ফরম্যাট YYYY-MM-DD হয় (আপনার স্ক্রিনশটে যা দেখা যাচ্ছে)
+      selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+    } else {
+      // যদি ফরম্যাট DD-MM-YYYY হয়
+      selectedDate = new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    // ৩. সঠিক মাসের নাম ও বছর বের করা (যেমন: June-2026)
+    const monthYear = selectedDate.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
+
+    // ডুপ্লিকেট চেকিং পাথ (তারিখ সহ নতুন লেভেল)
+    const checkKey = `${firstItem.empId}_${firstItem.date}`;
+    const snapshot = await rootRef.child(`OVER_TIME/${monthYear}/${firstItem.date}/${checkKey}`).once('value');
+    const isUpdate = snapshot.exists();
+
+    preparedData.forEach((item) => {
+      const customKey = `${item.empId}_${item.date}`; 
+      
+      updates[`OVER_TIME/${monthYear}/${item.date}/${customKey}`] = {
+        ID: item.empId,
+        Name: item.empName,
+        Designation: item.designation,
+        Passport: item.passport,
+        Site: item.site,
+        OT_Date: item.date,
+        OT_Rate: item.rate.toString(),
+        TOTAL_OT_HOURS: item.ot.toString(),
+        Total_Taka: item.taka.toString(),
+        Remark: item.remark || "-",
+        // এন্ট্রি নেওয়ার বর্তমান সময় (Full Date String)
+        Entry_Date: new Date().toString(),
+        Entry_Time: new Date().toString(),
+      };
+    });
+
+    // Realtime Database এ সেভ করা
+    await rootRef.update(updates);
+
+    const successTitle = isUpdate ? "Updated" : "Success";
+    const successMsg = `Records ${isUpdate ? 'updated' : 'saved'} in ${monthYear} successfully.`;
+    
+    showToast(isUpdate ? "Data Updated!" : "Data Saved!", "success");
+    
+    // UI রিসেট করা
+    document.querySelectorAll(".worker-check:checked").forEach((c) => {
+      const row = c.closest("tr");
+      if(row) {
+          const id = row.id.replace("row-", "");
+          c.checked = false;
+          toggleRow(id, false);
+      }
+    });
+
+    closePreview();
+    fetchLastUpdate(); 
+    showMessage(successTitle, successMsg, "success");
+
+  } catch (err) {
+    console.error("Save Error:", err);
+    showMessage("Failed", "Error saving to Database: " + err.message, "error");
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.innerText = "Confirm Save";
+  }
+}
+
+function toggleAll(masterCheckbox) {
+  const checkboxes = document.querySelectorAll(".worker-check");
+  checkboxes.forEach((cb) => {
+    cb.checked = masterCheckbox.checked;
+    const id = cb.closest("tr").id.replace("row-", "");
+    toggleRow(id, false); 
+  });
+}
+
+// ৬. প্রিভিউ রিপোর্ট ফাংশন (ফিক্সড)
+function openPreview() {
+  const selectedChecks = document.querySelectorAll(".worker-check:checked");
+  if (selectedChecks.length === 0) return;
+
+  const dateInput = document.getElementById("targetDate");
+  const siteInput = document.getElementById("targetSite");
+
+  const date = dateInput ? dateInput.value : "-";
+  let site = "-";
+  
+  if (siteInput && siteInput.selectedIndex >= 0) {
+    site = siteInput.options[siteInput.selectedIndex].text;
+    if (siteInput.value === "") site = "-";
+  }
+
+  const previewBody = document.getElementById("previewBody");
+
+  if (document.getElementById("printSite")) {
+    document.getElementById("printSite").innerText = site;
+  }
+  if (document.getElementById("printDate")) {
+    document.getElementById("printDate").innerText = date;
+  }
+
+  previewBody.innerHTML = "";
+  preparedData = [];
+  let grandTotalHours = 0;
+  let grandTotalTaka = 0;
+  let visibleIndex = 1;
+
+  selectedChecks.forEach((check) => {
+    const id = check.closest("tr").id.replace("row-", "");
+    const otRaw = document.getElementById(`ot-${id}`).value;
+
+    if (otRaw === "" || parseFloat(otRaw) <= 0) return;
+
+    const emp = employees.find((e) => {
+      const wId = String(e.id || e.docId || "").trim().toLowerCase();
+      return wId === String(id).trim().toLowerCase();
+    });
+
+    const empName = emp ? (emp.name || "Unknown") : "Unknown";
+    const designation = emp ? (emp.designation || "-") : "-";
+    const passport = emp ? (emp.passport || "-") : "-";
+
+    const ot = parseFloat(otRaw);
+    const rate = parseFloat(document.getElementById(`rate-${id}`).value) || 0;
+    const taka = ot * rate;
+    const remark = document.getElementById(`remark-${id}`).value || "-";
+
+    grandTotalHours += ot;
+    grandTotalTaka += taka;
+
+    preparedData.push({
+      date,
+      empId: id,
+      empName: empName,
+      site,
+      ot,
+      rate,
+      taka,
+      remark,
+      passport: passport,
+      designation: designation,
+    });
+
+    // ফিক্স: OT Rate কলামের <td> তে 'hide-on-print' ক্লাস যোগ করা হয়েছে
+    // ফিক্সড HTML টেমপ্লেট (openPreview ফাংশনের ভেতরে)
+// openPreview ফাংশনের ভেতরের লুপে এই পরিবর্তন করুন
+previewBody.innerHTML += `
+    <tr class="border border-black text-sm">
+        <td class="p-1 text-center border-r border-black">${visibleIndex++}</td>
+        <td class="p-1 border-r border-black font-bold">${id}</td>
+        <td class="p-1 border-r border-black">${empName}</td>
+        <td class="p-1 border-r border-black text-xs designation-col">${designation}</td>
+        <td class="p-1 border-r border-black text-xs passport-col">${passport}</td>
+        <td class="p-1 text-center border-r border-black hide-on-print">${rate.toFixed(2)}</td>
+        <td class="p-1 text-center border-r border-black font-bold">${ot}</td>
+        <td class="p-1 text-center border-r border-black font-bold">${taka.toFixed(2)}</td>
+        <td class="p-1 text-xs">${remark}</td>
+    </tr>`;
+  });
+
+  const totalHoursEl = document.getElementById("totalOTCell");
+  const totalTakaEl = document.getElementById("totalTakaCell");
+  const staffCountEl = document.getElementById("previewCount");
+
+  if (totalHoursEl) totalHoursEl.innerText = grandTotalHours;
+  if (totalTakaEl) totalTakaEl.innerText = grandTotalTaka.toFixed(2);
+  if (staffCountEl) staffCountEl.innerText = preparedData.length;
+
+  if (preparedData.length === 0) {
+    return showMessage("Error", "Enter valid OT hours.", "error");
+  }
+  
+  document.getElementById("previewModal").style.display = "flex";
+}
+function calculateTaka(id) {
+  const rate = parseFloat(document.getElementById(`rate-${id}`).value) || 0;
+  const hours = parseFloat(document.getElementById(`ot-${id}`).value) || 0;
+  const takaEl = document.getElementById(`taka-${id}`);
+  const total = (rate * hours).toFixed(2);
+  takaEl.innerText = total;
+  takaEl.className = total > 0 ? "font-black text-green-600 text-xs" : "font-black text-slate-400 text-xs";
+}
+
+function toggleRow(id, shouldFocus = false) {
+  const row = document.getElementById(`row-${id}`);
+  const checkbox = row.querySelector(".worker-check");
+  const otInput = document.getElementById(`ot-${id}`);
+  const remarkInput = document.getElementById(`remark-${id}`);
+
+  if (checkbox.checked) {
+    row.classList.add("selected");
+    otInput.classList.replace("input-hidden", "input-visible");
+    remarkInput.classList.replace("input-hidden", "input-visible");
+    if (shouldFocus) setTimeout(() => otInput.focus(), 50);
+  } else {
+    row.classList.remove("selected");
+    otInput.classList.replace("input-visible", "input-hidden");
+    remarkInput.classList.replace("input-visible", "input-hidden");
+    otInput.value = "";
+    remarkInput.value = "";
+    document.getElementById(`taka-${id}`).innerText = "0.00";
+  }
+  updateSelectedCount();
+}
+
+function updateSelectedCount() {
+  const count = document.querySelectorAll(".worker-check:checked").length;
+  document.getElementById("selectedCount").innerText = count;
+  const actionBar = document.getElementById("actionBar");
+  if (count > 0) {
+    actionBar.classList.replace("opacity-0", "opacity-100");
+    actionBar.classList.remove("pointer-events-none");
+  } else {
+    actionBar.classList.replace("opacity-100", "opacity-0");
+    actionBar.classList.add("pointer-events-none");
+  }
+}
+
+function showMessage(title, body, type = "info") {
+  const modal = document.getElementById("messageModal");
+  document.getElementById("msgTitle").innerText = title;
+  document.getElementById("msgBody").innerText = body;
+  modal.style.display = "flex";
+}
+
+function closeMessage() { document.getElementById("messageModal").style.display = "none"; }
+// ফিক্স: প্রজেক্ট এবং ডেট ক্লিয়ার করা যাতে পরবর্তী প্রিভিউ ফ্রেশ আসে
+function closePreview() { 
+  document.getElementById("previewModal").style.display = "none"; 
+}
+
+function showToast(msg, type) {
+  const toast = document.getElementById("toast");
+  toast.innerText = msg;
+  toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl transition-all z-[2000] ${type === "success" ? "bg-green-600" : "bg-slate-900"} text-white opacity-100`;
+  setTimeout(() => { toast.style.opacity = "0"; }, 3000);
+}
+
+function handleSearchInput(input) {
+  const query = input.value.trim().toLowerCase();
+  const box = document.getElementById("suggestionBox");
+  if (employees.length === 0) return;
+  const filtered = employees
+    .filter((e) => String(e.id || e.docId).toLowerCase().includes(query) || (e.name && e.name.toLowerCase().includes(query)))
+    .slice(0, 10);
+
+  if (filtered.length > 0 && query !== "") {
+    box.innerHTML = filtered
+      .map((e) => `
+          <div class="suggestion-item" onclick="selectFromSuggestion('${e.id || e.docId}')">
+              <div>
+                  <div class="font-bold text-white">ID: ${e.id || e.docId}</div>
+                  <div class="text-[10px] text-slate-300 uppercase font-bold">${e.name || "Unknown"}</div>
+              </div>
+          </div>`)
+      .join("");
+    box.style.display = "block";
+  } else {
+    box.style.display = "none";
+  }
+}
+
+function selectFromSuggestion(id) {
+  document.getElementById("searchInput").value = "";
+  document.getElementById("suggestionBox").style.display = "none";
+  const row = document.getElementById(`row-${id}`);
+  if (row) {
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+    const checkbox = row.querySelector(".worker-check");
+    if (!checkbox.checked) {
+      checkbox.checked = true;
+      toggleRow(id, false); 
+    }
+    
+    setTimeout(() => {
+      const otInput = document.getElementById(`ot-${id}`);
+      if (otInput) {
+        otInput.focus();
+        otInput.select(); 
+      }
+    }, 180); 
+  }
+}
+
+function handleSearchEnter(event) {
+  if (event.key === "Enter") {
+    event.preventDefault(); 
+    const suggestionBox = document.getElementById("suggestionBox");
+    const firstItem = suggestionBox.querySelector(".suggestion-item");
+    if (firstItem) {
+      firstItem.click(); 
+    }
+  }
+}
+
+function handleOtEnter(event, id) {
+  if (event.key === "Enter") {
+    event.preventDefault(); 
+    const searchInput = document.getElementById("searchInput");
+    if (searchInput) {
+      searchInput.focus();
+      searchInput.select(); 
+    }
+  }
+}
 </script>
-</body>
+  </body>
 </html>
