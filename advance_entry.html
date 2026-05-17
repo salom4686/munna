@@ -1,1799 +1,514 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OVER TIME POSTING</title>
-    <link
-      rel="icon"
-      type="image/png"
-      href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advance Entry</title>
+     <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <style>
-      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
-
-      :root {
-        --brand-blue: #002147;
-        --brand-gold: #ffd700;
-        --brand-gold-dark: #d4af37;
-      }
-
-      body {
-        font-family: "Inter", sans-serif;
-        background-color: #f8fafc;
-        color: var(--brand-blue); /* ডিফল্ট লেখা নেভি ব্লু */
-      }
-
-      .worker-row.selected {
-        background-color: #f0f7ff;
-        border-left: 4px solid var(--brand-blue);
-      }
-      .ot-input {
-        width: 80px;
-        text-align: center;
-        border: 1px solid rgba(0, 33, 71, 0.2);
-        border-radius: 6px;
-        padding: 6px;
-        font-weight: bold;
-        color: var(--brand-blue);
-        transition: all 0.2s;
-      }
-      .ot-input:focus {
-        border-color: var(--brand-blue);
-        ring: 2px;
-        ring-color: var(--brand-blue);
-        outline: none;
-      }
-
-      .input-hidden {
-        opacity: 0;
-        pointer-events: none;
-        visibility: hidden;
-      }
-      .input-visible {
-        opacity: 1;
-        pointer-events: auto;
-        visibility: visible;
-      }
-
-      .checkbox-custom {
-        width: 22px;
-        height: 22px;
-        cursor: pointer;
-        accent-color: var(--brand-blue);
-      }
-
-      .loader {
-        border: 3px solid #f3f3f3;
-        border-top: 3px solid var(--brand-blue);
-        border-radius: 50%;
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-        display: inline-block;
-      }
-      @keyframes spin {
-        0% {
-          transform: rotate(0deg);
-        }
-        100% {
-          transform: rotate(360deg);
-        }
-      }
-
-      .suggestion-box {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        right: 0;
-        background: var(--brand-blue);
-        border: 2px solid var(--brand-gold);
-        border-radius: 0 0 12px 12px;
-        max-height: 300px;
-        overflow-y: auto;
-        z-index: 100;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        display: none;
-      }
-      .suggestion-item {
-        padding: 12px 15px;
-        cursor: pointer;
-        border-bottom: 1px solid rgba(255, 215, 0, 0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: #ffffff;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      /* মাউস হোভার করলে লেখার রঙ কালো হবে */
-      .suggestion-item:hover,
-      .suggestion-item:hover * {
-        background-color: var(--brand-gold);
-        color: #000000 !important;
-      }
-
-      /* কাস্টম ড্রপডাউন স্টাইলিং */
-      .custom-select-wrapper {
-        position: relative;
-        width: 100%;
-      }
-      .custom-select-trigger {
-        background-color: var(--brand-blue);
-        color: var(--brand-gold);
-        border: 2px solid var(--brand-gold);
-        border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.875rem;
-        transition: all 0.3s ease;
-      }
-      .custom-select-options {
-        position: absolute;
-        top: 100%;
-        left: 0;
-        min-width: 100%;
-        width: max-content;
-        background-color: var(--brand-blue);
-        border: 2px solid var(--brand-gold);
-        border-top: none;
-        border-radius: 0 0 12px 12px;
-        z-index: 1000;
-        display: none;
-        max-height: none;
-        overflow-y: visible;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      }
-      .custom-select-option {
-        padding: 12px 15px;
-        color: white;
-        cursor: pointer;
-        font-size: 14px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        transition: all 0.2s ease;
-        white-space: nowrap !important;
-        display: block;
-      }
-      .custom-select-option:hover {
-        background-color: var(--brand-gold);
-        color: var(--brand-blue);
-        font-weight: bold;
-      }
-
-      #previewModal,
-      #messageModal {
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.7);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-        backdrop-filter: blur(4px);
-      }
-      #loadingOverlay {
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(135deg, var(--brand-blue) 0%, #001a38 100%);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 1100;
-        transition: opacity 0.5s;
-      }
-      .fade-out {
-        opacity: 0;
-        pointer-events: none;
-      }
-      .section-hidden {
-        display: none;
-        opacity: 0;
-        transform: translateY(10px);
-        transition: all 0.4s ease;
-      }
-      .section-visible {
-        display: flex;
-        opacity: 1;
-        transform: translateY(0);
-      }
-      /* ওটি ইনপুট ফিল্ড ও ডেটপিকার স্টাইল */
-      #targetDate, #startDateRange, #endDateRange {
-        color: var(--brand-gold) !important;
-        font-weight: 600;
-        background-color: var(--brand-blue) !important;
-        border: 2px solid var(--brand-gold) !important;
-      }
-      #targetDate::placeholder, #startDateRange::placeholder, #endDateRange::placeholder {
-        color: rgba(255, 215, 0, 0.6) !important;
-      }
-      #targetDate:focus, #startDateRange:focus, #endDateRange:focus {
-        border-color: var(--brand-gold) !important;
-        outline: none;
-      }
-
-      @media print {
-        @page {
-          size: A4 landscape;
-          margin: 10mm;
-        }
-        body {
-          background: white !important;
-          padding: 0 !important;
-        }
-        .no-print {
-          display: none !important;
-        }
-        #previewModal {
-          position: static;
-          display: block;
-          background: white;
-          backdrop-filter: none;
-          z-index: auto;
-        }
-        .bg-white {
-          box-shadow: none !important;
-          border: none !important;
-          width: 100% !important;
-          max-width: none !important;
-          margin: 0 !important;
-        }
-        .print-header {
-          display: block !important;
-          margin-bottom: 20px;
-          text-align: center;
-          border-bottom: 2px solid #000;
-          padding-bottom: 10px;
-        }
-        .print-title {
-          font-size: 18pt;
-          font-weight: bold;
-          text-transform: uppercase;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse !important;
-          margin-top: 10px;
-          table-layout: fixed;
-        }
-        th {
-          background-color: #f2f2f2 !important;
-          color: black !important;
-          border: 1pt solid #000 !important;
-          font-weight: bold !important;
-          padding: 8px !important;
-          text-transform: uppercase;
-          font-size: 8pt;
-        }
-        td {
-          border: 1pt solid #000 !important;
-          padding: 6px !important;
-          font-size: 8pt;
-          color: black !important;
-          word-wrap: break-word;
-          vertical-align: middle;
-        }
-        .signature-section {
-          display: flex !important;
-          justify-content: space-between;
-          margin-top: 70px;
-          padding: 0 20px;
-        }
-        .sig-box {
-          border-top: 1.5pt solid #000;
-          width: 180px;
-          text-align: center;
-          font-size: 9pt;
-          padding-top: 5px;
-          font-weight: bold;
-        }
-      }
-
-      @media print {
-        body * {
-          visibility: hidden;
-          color: black !important;
-        }
-        
-        #printArea, #printArea * {
-          visibility: visible;
-        }
-        #previewBody tr td {
-            font-size: 10px !important;
-            padding: 4px !important;
-            white-space: normal !important;
-            word-break: break-word;
-        }
-
-        .designation-col { width: 120px; }
-        .passport-col { width: 100px; }
-
-        table {
-            width: 100% !important;
-            table-layout: auto !important;
-        }
-        
-        #printArea {
-          position: absolute;
-          left: 0;
-          top: 0;
-          width: 100%;
-          margin: 0;
-          padding: 0;
-          background: white !important;
-        }
-
-        #printArea span, #printArea td, #printArea th, #printArea div {
-          color: #000000 !important;
-        }
-
-        .hide-on-print {
-          display: none !important;
-        }
-
-        .grand-total-label {
-          colspan: 6 !important; 
-        }
-
-        .max-h-\[55vh\] {
-          max-height: none !important;
-          overflow: visible !important;
-        }
-        
-        table {
-          border-collapse: collapse;
-          width: 100%;
-        }
-        th, td {
-          border: 1px solid #000000 !important;
-          padding: 6px !important;
-        }
-        @page {
-          margin: 15mm 10mm 15mm 10mm;
-        }
-      }
-
-      /* Flatpickr কাস্টম থিম */
-      .flatpickr-calendar {
-        background: #ffffff;
-        border: 2px solid var(--brand-gold) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      }
-      .flatpickr-months {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-month {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-current-month .flatpickr-monthDropdown-months {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-current-month .numInputWrapper span.arrowUp:after {
-        border-bottom-color: var(--brand-gold) !important;
-      }
-      .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-        border-top-color: var(--brand-gold) !important;
-      }
-      .flatpickr-months .flatpickr-prev-month,
-      .flatpickr-months .flatpickr-next-month {
-        color: var(--brand-gold) !important;
-        fill: var(--brand-gold) !important;
-      }
-      .flatpickr-weekdays {
-        background: var(--brand-blue) !important;
-      }
-      span.flatpickr-weekday {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-        font-weight: bold;
-      }
-      .flatpickr-day.selected,
-      .flatpickr-day.startRange,
-      .flatpickr-day.endRange,
-      .flatpickr-day.selected:hover,
-      .flatpickr-day.selected:focus {
-        background: var(--brand-blue) !important;
-        border-color: var(--brand-gold) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-day:hover {
-        background: var(--brand-gold) !important;
-        color: var(--brand-blue) !important;
-        border-color: var(--brand-blue) !important;
-      }
-      .flatpickr-day.today {
-        border-color: var(--brand-blue) !important;
-        color: var(--brand-blue) !important;
-        font-weight: bold;
-      }
-      .flatpickr-day.today:hover {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-day {
-        color: var(--brand-blue) !important;
-      }
-      .flatpickr-calendar.arrowTop:after,
-      .flatpickr-calendar.arrowTop:before {
-        border-bottom-color: var(--brand-blue) !important;
-      }
-
-      /* স্ক্রোলবার স্টাইল */
-      .suggestion-box::-webkit-scrollbar {
-        width: 6px;
-      }
-      .suggestion-box::-webkit-scrollbar-thumb {
-        background: var(--brand-gold);
-        border-radius: 10px;
-      }
-
-      /* অন্যান্য মাসের তারিখ ব্লার এবং ডিজেবল করার স্টাইল */
-      .flatpickr-day.prevMonthDay,
-      .flatpickr-day.nextMonthDay {
-        opacity: 0.1 !important;
-        filter: blur(1.5px);
-        pointer-events: none;
-      }
-    </style>
-
-    <script>
-      // প্রিন্ট করার পূর্বে এবং পরে গ্র্যান্ড টোটাল কলামের ফুটার উইডথ ডাইনামিকলি নিয়ন্ত্রণ
-      window.onbeforeprint = function() {
-        const grandTotalCell = document.getElementById("grandTotalLabelCell");
-        if (grandTotalCell) {
-          grandTotalCell.setAttribute("colspan", "6");
-        }
-      };
-      window.onafterprint = function() {
-        const grandTotalCell = document.getElementById("grandTotalLabelCell");
-        if (grandTotalCell) {
-          grandTotalCell.setAttribute("colspan", "7");
-        }
-      };
-    </script>
-  </head>
-  <body>
-
-    <!-- লোডিং ওভারলে স্ক্রিন -->
-    <div id="loadingOverlay">
-      <div class="mb-6 bg-white p-3 rounded-xl">
-          <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="h-20 w-auto">
-      </div>
-      <div class="loader mb-4" style="width: 50px; height: 50px; border-width: 5px"></div>
-      <h2 class="text-xl font-bold text-slate-800 tracking-tight">
-        <span class="text-white">ALAMHOW</span>
-        <span class="text-yellow-400">CO LTD</span>
-      </h2>
-      <p class="text-sm text-white mt-2 font-medium">Logging in, please wait....</p>
-    </div>
-
-    <!-- অ্যালার্ট ও নোটিশ মোডাল উইন্ডো -->
-    <div id="messageModal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);">
-      <div class="bg-white rounded-2xl w-full max-w-[340px] mx-4 overflow-hidden shadow-2xl p-6 text-center transform transition-all scale-100 border border-[#ffd700]">
-        <div id="msgIcon" class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-blue-50"></div>
-        <h3 id="msgTitle" class="text-xl font-bold text-[#002147] mb-2">Notice</h3>
-        <p id="msgBody" class="text-[#002147]/80 text-sm mb-6 leading-relaxed"></p>
-        <button onclick="closeMessage()" class="w-full py-3 rounded-xl bg-[#002147] text-[#ffd700] font-bold text-sm uppercase shadow-lg hover:bg-slate-800 transition-all border border-[#ffd700]">
-         OK
-        </button>
-      </div>
-    </div>
-
-    <!-- ওটি প্রিভিউ রিপোর্ট ও প্রিন্ট মোডাল -->
-    <div id="previewModal">
-      <div class="bg-white rounded-2xl w-full max-w-7xl mx-4 overflow-hidden shadow-2xl transition-all border-2 border-[#ffd700]">
-        <div class="bg-[#002147] p-4 text-[#ffd700] flex justify-between items-center no-print border-b border-[#ffd700]">
-          <h2 class="font-bold uppercase text-sm tracking-wider">PREVIEW REPORT</h2>
-          <div class="flex gap-2">
-            <button onclick="window.print()" class="bg-[#ffd700] text-[#002147] hover:bg-yellow-400 px-4 py-2 rounded-lg flex items-center gap-2 text-xs font-bold uppercase">
-              Print
-            </button>
-            <button onclick="closePreview()" class="bg-white/10 hover:bg-white/20 p-2 rounded-lg text-[#ffd700]">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M6 18L18 6M6 6l12 12" stroke-width="2"></path>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="p-6 md:p-10" id="printArea">
-          <div class="hidden print-header">
-            <div class="print-title text-[#002147]">DAILY OVERTIME REPORT</div>
-          </div>
-
-          <div class="flex flex-col md:flex-row justify-between mb-6 gap-4 print:flex-row print:justify-between print:mb-4 print:text-black">
-            <div class="flex flex-row gap-2 items-baseline">
-              <span class="text-[10px] uppercase font-bold text-[#002147]/60 print:text-[10pt] print:text-black">PROJECT:</span>
-              <span id="printSite" class="text-xl font-bold text-[#002147] print:text-[11pt] print:text-black uppercase">-</span>
-            </div>
-            <div class="flex flex-row gap-2 items-baseline md:justify-end">
-              <span class="text-[10px] uppercase font-bold text-[#002147]/60 print:text-[10pt] print:text-black">DATE:</span>
-              <span id="printDate" class="text-xl font-bold text-[#002147] print:text-[11pt] print:text-black uppercase">-</span>
-            </div>
-          </div>
-
-          <div class="max-h-[55vh] overflow-y-auto">
-            <table class="w-full text-left">
-              <thead>
-                <tr class="bg-[#002147] text-[#ffd700] border border-[#ffd700]">
-                  <th class="w-10 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30">SL</th>
-                  <th class="w-24 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">ID & DATE</th>
-                  <th class="w-48 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Name</th>
-                  <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Designation</th>
-                  <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Passport</th>
-                  <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Project</th>
-                  <th class="w-24 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase text-center hide-on-print">OT Rate</th>
-                  <th class="w-20 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">OT Hours</th>
-                  <th class="w-28 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Total Taka</th>
-                  <th class="p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Remark</th>
-                </tr>
-              </thead>
-              <tbody id="previewBody"></tbody>
-              <tfoot>
-                <tr class="bg-slate-50 font-bold border-t-2 border-[#002147]">
-                  <td id="grandTotalLabelCell" colspan="7" class="p-4 text-right uppercase font-bold text-[#002147]">Grand Total:</td>
-                  <td id="totalOTCell" class="p-4 text-center text-[#d4af37] print:text-black">0</td>
-                  <td id="totalTakaCell" class="p-4 text-center text-[#d4af37] print:text-black">0.00</td>
-                  <td class="p-4 uppercase text-[10px] text-slate-500 print:text-black"></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-
-          <div class="hidden signature-section">
-            <div class="sig-box border-[#002147] text-[#002147]">Prepared By</div>
-            <div class="sig-box border-[#002147] text-[#002147]">Verified By</div>
-            <div class="sig-box border-[#002147] text-[#002147]">Approved By</div>
-          </div>
-        </div>
-
-        <div class="p-6 bg-slate-50 border-t flex justify-end gap-3 no-print">
-          <button onclick="closePreview()" class="px-6 py-2 rounded-lg font-bold text-[#002147]/60 hover:bg-slate-200 text-xs uppercase transition-all">
-            Back
-          </button>
-          <button onclick="confirmAndSave()" id="finalSaveBtn" class="bg-green-600 text-white px-8 py-2 rounded-lg font-bold text-sm uppercase shadow-lg hover:bg-green-700 transition-all border border-green-500">
-            Confirm Save
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- মূল অ্যাপ্লিকেশন কন্টেন্ট -->
-    <div class="max-w-7xl mx-auto no-print">
-      <div class="max-w-7xl mx-auto no-print pt-6">
-        <div class="bg-[#002147] rounded-3xl p-6 mb-8 shadow-2xl border-b-4 border-yellow-500 relative overflow-hidden">
-          
-          <div class="flex items-center justify-center relative min-h-[120px]">
-            
-            <div class="absolute left-4">
-              <div class="bg-white p-2 rounded-xl shadow-lg border border-slate-100">
-                 <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" 
-                      alt="ALAMHOW Logo" 
-                      class="h-14 w-auto">
-              </div>
-            </div>
-
-            <div class="text-center px-24">
-              <h1 class="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white drop-shadow-md">
-                ALOMHOW <span class="text-yellow-400">COMPANY</span> LTD
-              </h1>
-              <div class="flex justify-center items-center gap-3 mt-3">
-                <div class="h-[1px] w-12 bg-yellow-500/50"></div>
-                <p id="currentModeBadge" class="text-blue-100 text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] opacity-90">
-                  OVER TIME ENTRY FORM
-                </p>
-                <div class="h-[1px] w-12 bg-yellow-500/50"></div>
-              </div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- সিলেকশন এবং বাটন প্যানেল -->
-      <div class="bg-white rounded-2xl p-6 mb-4 shadow-lg border border-slate-100 transition-all duration-300">
-        <div class="flex flex-wrap justify-center items-end gap-6">
-          
-          <!-- ওটি ডেট ফিল্ড (সিঙ্গেল এন্ট্রি মোডে দৃশ্যমান) -->
-          <div id="singleDateGroup" class="flex flex-col w-full md:w-auto transition-all duration-300">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">OT Date</label>
-            <div class="relative">
-              <input type="text" id="targetDate" placeholder="Select Date" 
-                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[200px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
-                     readonly>
-            </div>
-          </div>
-
-          <!-- শুরুর তারিখ (রেঞ্জ মোডে দৃশ্যমান) -->
-          <div id="startDateGroup" class="hidden flex flex-col w-full md:w-auto transition-all duration-300">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">Start Date</label>
-            <div class="relative">
-              <input type="text" id="startDateRange" placeholder="Start Date" 
-                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
-                     readonly>
-            </div>
-          </div>
-
-          <!-- শেষ তারিখ (রেঞ্জ মোডে দৃশ্যমান) -->
-          <div id="endDateGroup" class="hidden flex flex-col w-full md:w-auto transition-all duration-300">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">End Date</label>
-            <div class="relative">
-              <input type="text" id="endDateRange" placeholder="End Date" 
-                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
-                     readonly>
-            </div>
-          </div>
-
-          <!-- প্রজেক্ট লোকেশন ফিল্ড (সর্বদা দৃশ্যমান) -->
-          <div class="flex flex-col w-full md:w-auto">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">Project Location</label>
-            <select id="targetSite" class="bg-[#002147] text-[#ffd700] px-4 py-3 rounded-xl font-bold text-sm min-w-[280px] outline-none border-2 border-[#ffd700] focus:ring-4 ring-yellow-500/20 transition-all duration-300 cursor-pointer">
-              <option value="">Choose Project</option>
-            </select>
-          </div>
-
-          <!-- এন্ট্রি মোড অ্যাকশন বাটনসমূহ -->
-          <div id="singleActionBtns" class="flex flex-wrap items-end gap-3 w-full md:w-auto transition-all duration-300">
-            <div class="flex items-end w-full md:w-auto">
-              <button onclick="fetchWorkersFromDatabase()" id="loadBtn" 
-                      class="w-full md:w-auto bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-blue-900 hover:shadow-blue-500/20 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                Search
-              </button>
-            </div>
-
-            <div class="flex items-end w-full md:w-auto">
-              <button onclick="window.location.reload()" 
-                      class="w-full md:w-auto bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-blue-900 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-               Refresh
-              </button>
-            </div>
-          </div>
-
-          <!-- রেঞ্জ মোড অ্যাকশন বাটনসমূহ -->
-          <div id="rangeActionBtns" class="hidden flex flex-wrap items-end gap-3 w-full md:w-auto transition-all duration-300">
-            <div class="flex items-end w-full md:w-auto">
-              <button onclick="fetchRangeDataFromDatabase()" 
-                      class="w-full md:w-auto bg-green-600 text-white border-2 border-green-500 px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-green-700 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                SEARCH
-              </button>
-            </div>
-          </div>
-
-          <!-- মোড টগল বাটন -->
-          <div class="flex items-end w-full md:w-auto">
-            <button onclick="toggleRangeHistoryPanel()" id="historyToggleBtn"
-                    class="w-full md:w-auto bg-[#d4af37] text-[#002147] border-2 border-[#002147] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-yellow-400 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              View History
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- সার্চ বক্স এবং টেবিল এলাকা -->
-      <div id="mainContentSection" class="section-hidden grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        <div class="md:col-span-12 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div class="relative w-full md:w-96">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-[#002147]/60">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2"></path>
-              </svg>
-            </span>
-            <input type="text" id="searchInput" onfocus="handleSearchInput(this)" onclick="handleSearchInput(this)" onkeyup="handleSearchInput(this)" onkeydown="handleSearchEnter(event)" placeholder="Type Here ID, Name & Passport ..." class="pl-10 pr-4 py-2.5 border border-[#002147]/20 text-[#002147] placeholder-[#002147]/50 rounded-xl w-full text-sm outline-none focus:border-[#002147] transition-all" autocomplete="off" />
-            <div id="suggestionBox" class="suggestion-box"></div>
-          </div>
-
-          <!-- প্রিভিউ বার (শুধুমাত্র সিঙ্গেল মোডে দৃশ্যমান) -->
-          <div id="actionBar" class="opacity-0 pointer-events-none transition-all flex items-center gap-6">
-            <div class="text-right">
-              <p class="text-[10px] font-bold text-[#002147]/60 uppercase">Selected</p>
-              <p id="selectedCount" class="text-2xl font-black text-[#d4af37] leading-none">0</p>
-            </div>
-            <button onclick="openPreview()" id="saveBtn" class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] px-10 py-3 rounded-xl font-bold text-sm uppercase shadow-xl hover:bg-blue-900 transition-all flex items-center gap-2">
-              PREVIEW
-            </button>
-          </div>
-        </div>
-
-        <div class="md:col-span-12 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div class="overflow-x-auto">
-            <table id="workerTable" class="w-full text-left border-collapse">
-              <thead class="bg-[#002147] border-b border-[#ffd700]/30">
-                <!-- হেডারসমূহ ডাইনামিকলি স্ক্রিপ্ট দিয়ে লোড হবে -->
-                <tr></tr>
-              </thead>
-              <tbody id="workerTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- প্রথম ফাঁকা প্লেসহোল্ডার কার্ড -->
-      <div id="initialPlaceholder" class="bg-white rounded-2xl p-20 border border-dashed border-[#002147]/20 flex flex-col items-center justify-center gap-4 text-center">
-        <div class="p-4 bg-slate-50 rounded-full">
-          <svg class="w-12 h-12 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="1.5"></path>
-          </svg>
-        </div>
-        <div>
-          <p id="placeholderText" class="text-[#002147] font-semibold">Please select OT Date and Project Location, then click the "Search" button.</p>
-          <p id="lastUpdateDisplay" class="text-[#d4af37] text-[10px] font-bold uppercase tracking-widest mt-2">Connecting...</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- সিস্টেম টোস্ট বার -->
-    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl opacity-0 transition-all transform translate-y-4 pointer-events-none z-[2000] border border-[#ffd700]"></div>
-
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <style>
+        :root {
+            --brand-blue: #1e3a5f;
+            --brand-gold: #d4af37;
+        }
+
+        .page-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding-left: 1.5rem;
+            padding-right: 1.5rem;
+        }
+
+        /* Flatpickr Custom Navy Blue Theme */
+        .flatpickr-calendar {
+            background: #fff;
+            border: 1px solid var(--brand-blue);
+            box-shadow: 0 10px 25px -5px rgba(30, 58, 95, 0.2);
+            border-radius: 12px;
+        }
+        .flatpickr-day.selected, 
+        .flatpickr-day.today {
+            background: var(--brand-blue) !important;
+            border-color: var(--brand-blue) !important;
+            color: #fff !important;
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border-left-color: var(--brand-blue);
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .search-results {
+            max-height: 250px;
+            overflow-y: auto;
+            position: absolute;
+            width: 100%;
+            z-index: 50;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.75rem;
+            display: none;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            margin-top: 5px;
+        }
+        .search-item {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+        }
+        .search-item:hover {
+            background-color: #fef9c3; 
+            border-left: 4px solid var(--brand-gold);
+        }
+        .id-badge {
+            background-color: #f1f5f9;
+            color: var(--brand-blue);
+            font-weight: 900;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-right: 12px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        @media print {
+            @page { size: A4 landscape; margin: 5mm; }
+            body * { visibility: hidden; }
+            #receipt-print-area, #receipt-print-area * { 
+                visibility: visible; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
+            #receipt-print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
+            .no-print { display: none !important; }
+        }
+
+        .receipt-slip {
+            width: 47%; height: 680px; padding: 25px; border: 2px solid #1e3a5f; 
+            position: relative; background: white !important; box-sizing: border-box;
+            display: flex; flex-direction: column;
+        }
+        .dual-receipt-wrapper {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%; padding: 10px; background: white !important;
+        }
+        
+        .input-label {
+            font-size: 10px;
+            font-weight: 900;
+            color: #1e3a5f;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            display: block;
+            letter-spacing: 0.05em;
+        }
+
+        /* Initial Loader Overlay */
+        #page-init-loader {
+            position: fixed;
+            inset: 0;
+            background: #1e3a5f;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            transition: opacity 0.5s ease;
+        }
+
+        .refresh-btn {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .refresh-btn:hover {
+            color: var(--brand-gold);
+            transform: rotate(180deg);
+        }
+        .refresh-btn.spinning {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-[#f0f2f5] min-h-screen py-6">
+
+    <!-- Page Initialization Loader -->
+    <div id="page-init-loader">
+        <div class="mb-6 bg-white p-3 rounded-2xl">
+            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-16 w-auto">
+        </div>
+        <div class="loading-spinner border-left-color-white mb-4" style="border-left-color: white;"></div>
+        <h2 class="text-lg font-black uppercase tracking-[0.2em]">Loading Data Please Wait...</h2>
+        <p class="text-[10px] mt-2 opacity-70">Synchronizing Please Wait</p>
+    </div>
+
+    <header class="page-wrapper mb-6 no-print">
+        <div class="bg-[#1e3a5f] rounded-2xl shadow-lg border-b-4 border-[#d4af37]">
+            <div class="px-6 py-4 flex justify-between items-center text-white">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-white p-1 rounded-lg">
+                        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-10 w-auto">
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-black uppercase tracking-tight">ALAMHOW <span class="text-[#d4af37]">CO LTD</span></h1>
+                        <p class="text-[9px] font-bold opacity-60 tracking-[0.2em] mt-1">ADVANCE MANAGEMENT SYSTEM</p>
+                    </div>
+                </div>
+                <div id="header-date" class="font-mono font-bold uppercase" style="font-size: 20px;"></div>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-wrapper no-print">
+        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="bg-slate-50/50 px-8 py-5 border-b flex justify-between items-center">
+                <h2 class="font-black text-[#1e3a5f] uppercase text-sm">New Advance Entry</h2>
+                <div class="flex items-center space-x-3">
+                    <!-- Refresh Button Added Here -->
+                    <button type="button" onclick="refreshSystemData()" title="Refresh Data" class="refresh-btn text-[#1e3a5f] hover:text-[#d4af37]">
+                        <i id="refresh-icon" class="fas fa-sync-alt text-sm"></i>
+                    </button>
+                    <span class="text-[10px] font-bold text-[#1e3a5f] uppercase ml-2">Voucher:</span>
+                    <span id="next-adv-no" class="text-xs font-mono font-black text-[#1e3a5f] bg-slate-100 px-2 py-1 rounded">Syncing...</span>
+                </div>
+            </div>
+
+            <form id="advance-form" onsubmit="return false;" class="p-8 lg:p-10">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <div class="md:col-span-3 relative">
+                        <label class="input-label">Search Employee ID</label>
+                        <input type="text" id="emp-search" autocomplete="off" placeholder="Type ID or Name..." class="w-full p-2 rounded-lg border-2 bg-slate-50 font-bold outline-none border-slate-100 focus:border-[#d4af37]">
+                        <div id="search-results" class="search-results"></div>
+                        <input type="hidden" id="selected-emp-id">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="input-label">Employee  Name</label>
+                        <input type="text" id="display-name" readonly class="w-full p-2 rounded-lg border bg-slate-100 font-bold text-slate-500 uppercase">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="input-label">Passport No</label>
+                        <input type="text" id="auto-passport" readonly class="w-full p-2 rounded-lg border bg-slate-100 font-mono text-slate-500">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="input-label">Designation</label>
+                        <input type="text" id="display-desig" readonly class="w-full p-2 rounded-lg border bg-slate-100 font-bold text-slate-500 uppercase">
+                    </div>
+
+                    <div class="md:col-span-3 relative">
+                        <label class="input-label">Received Date</label>
+                        <div class="relative">
+                            <input type="text" id="record-date" placeholder="Select Date" readonly class="w-full p-2 rounded-lg border-2 bg-white font-bold outline-none cursor-pointer border-slate-200">
+                            <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-[#1e3a5f] pointer-events-none"></i>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="input-label">Advance Amount</label>
+                        <input type="number" id="advance-amount" class="w-full p-2 rounded-lg border-2 font-black text-[#1e3a5f] text-lg border-slate-200 focus:border-[#1e3a5f]">
+                    </div>
+
+                    <div class="md:col-span-3">
+                        <label class="input-label">Reference</label>
+                        <input type="text" id="reference" class="w-full p-2 rounded-lg border-2 border-slate-200">
+                    </div>
+                    <div class="md:col-span-3">
+                        <label class="input-label">Remark</label>
+                        <input type="text" id="remark" class="w-full p-2 rounded-lg border-2 border-slate-200">
+                    </div>
+
+                    <div class="md:col-span-12 mt-4">
+                        <button type="button" onclick="directSaveToSheet()" class="w-full bg-[#1e3a5f] text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm hover:bg-[#162a44] transition-all transform active:scale-[0.99]">
+                            Confirm & Save Advance
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-[60]">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-[#d4af37]">
+            <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h3 class="text-xl font-black text-[#1e3a5f] mb-2 uppercase">Entry Saved!</h3>
+            <p class="text-slate-500 text-[11px] font-bold mb-6 uppercase">Syncing to cloud successful</p>
+            <div class="grid grid-cols-2 gap-3 w-full">
+                <button onclick="prepareAndPrint()" class="bg-[#1e3a5f] text-white font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">Print Receipt</button>
+                <button onclick="resetEntry()" class="bg-slate-100 text-slate-600 font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">New Entry</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="fixed inset-0 bg-slate-900/60 hidden flex items-center justify-center z-[70]">
+        <div class="bg-white rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-red-500 shadow-2xl">
+            <div class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h3 class="text-lg font-black text-[#1e3a5f] mb-2 uppercase">Attention!</h3>
+            <p id="alert-msg" class="text-slate-600 text-[11px] font-bold mb-6 uppercase tracking-wider leading-relaxed">Required fields are missing.</p>
+            <button onclick="closeAlert()" class="w-full bg-[#1e3a5f] text-white font-black py-3 rounded-xl uppercase text-[11px] tracking-widest hover:bg-[#162a44]">
+                Got It
+            </button>
+        </div>
+    </div>
+    
+    <div id="loader" class="fixed inset-0 bg-slate-900/80 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-8 rounded-3xl flex flex-col items-center">
+            <div class="loading-spinner mb-4"></div>
+            <p id="loader-text" class="text-[#1e3a5f] font-black uppercase text-xs tracking-widest">Saving to Cloud...</p>
+        </div>
+    </div>
+
+    <div id="receipt-print-area" class="hidden"></div>
 
     <script>
-      // ১. ফায়ারবেস কনফিগারেশন সেটআপ
-      const firebaseConfig = {
-        apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
-        authDomain: "munna-acl-fda7c.firebaseapp.com",
-        projectId: "munna-acl-fda7c",
-        storageBucket: "munna-acl-fda7c.firebasestorage.app",
-        databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app"
-      };
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhmAYu0RWFiAo0U_1cqtUy1OwrVM2cBIf9Dw-yO8EEYblsLt4bYoxPqF1mesCobrmXJA/exec";
+        let employees = [];
+        let lastSavedEntries = [];
 
-      // ফায়ারবেস ইনিশিয়ালাইজ করা
-      firebase.initializeApp(firebaseConfig);
+        window.onload = async () => {
+            const now = new Date();
+            document.getElementById('header-date').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+            
+            flatpickr("#record-date", {
+                dateFormat: "d/m/Y",
+                defaultDate: null, 
+                allowInput: true
+            });
 
-      const db = firebase.firestore();
-      const rtdb = firebase.database();
+            // Initial load
+            await refreshSystemData(true);
 
-      let employees = [],
-        currentSites = [],
-        preparedData = [],
-        existingDbRecordsMap = {}, // ডুপ্লিকেট ফিল্টারিং ম্যাপ
-        currentViewMode = "SINGLE"; // মোড ট্র্যাকিং
-
-      // ডাটাবেস এরর হলে বিকল্প প্রজেক্ট লিস্ট
-      const defaultProjectFallbackList = [
-        "All Projects",
-        "ALAM HOUS",
-        "CASTEL",
-        "FLIC EN FLAC",
-        "GAMA, TROU AUX BICHES",
-        "GAMMA, MAGENTA",
-        "HIGHLAND",
-        "MALL DE FLACQ",
-        "MESNIL",
-        "PAMPLEMOUSSES",
-        "PLAISANCE SHOPPING VILLAGE",
-        "QUATRE BORNES",
-        "ST PAUL",
-        "TAMARIN",
-        "YESH HOUSE"
-      ];
-
-      // ২. পেজ লোডে ফায়ারস্টোর কানেকশন
-      window.onload = async () => {
-        updateTableHeader();
-
-        if (typeof flatpickr !== "undefined") {
-          flatpickr("#targetDate", {
-            dateFormat: "Y-m-d",
-            placeholder: "Select Date",
-            allowInput: false,
-            clickOpens: true,
-          });
-
-          flatpickr("#startDateRange", {
-            dateFormat: "Y-m-d",
-            placeholder: "Start Date",
-            allowInput: false,
-            clickOpens: true,
-          });
-
-          flatpickr("#endDateRange", {
-            dateFormat: "Y-m-d",
-            placeholder: "End Date",
-            allowInput: false,
-            clickOpens: true,
-          });
-          console.log("Calendars active.");
-        }
-
-        fetchLastUpdate();
-
-        try {
-          const [empSnap, siteSnap] = await Promise.all([
-            db.collection("EMPLOYEE_LIST").get(),
-            db.collection("PROJECT_NAME").get(),
-          ]);
-
-          employees = [];
-          empSnap.forEach(doc => {
-            employees.push({ docId: doc.id, ...doc.data() });
-          });
-
-          currentSites = [];
-          siteSnap.forEach(doc => {
-            currentSites.push({ docId: doc.id, ...doc.data() });
-          });
-
-          populateProjectSelect();
-
-          const loader = document.getElementById("loadingOverlay");
-          if(loader) loader.classList.add("fade-out");
-
-        } catch (err) {
-          console.error("Connection error, backup values applied.", err);
-          populateProjectSelect(true);
-          const loader = document.getElementById("loadingOverlay");
-          if(loader) loader.classList.add("fade-out");
-        }
-      };
-
-      // প্রজেক্ট সিলেকশন ড্রপডাউন পপুলেট করা
-      function populateProjectSelect(useFallback = false) {
-        const siteSelect = document.getElementById("targetSite");
-        if (!siteSelect) return;
-
-        siteSelect.innerHTML = "";
-
-        if (useFallback || currentSites.length === 0) {
-          defaultProjectFallbackList.forEach(sName => {
-            const option = document.createElement("option");
-            option.value = sName === "All Projects" ? "" : sName;
-            option.textContent = sName;
-            siteSelect.appendChild(option);
-          });
-        } else {
-          const defaultOpt = document.createElement("option");
-          defaultOpt.value = "";
-          defaultOpt.textContent = "All Projects";
-          siteSelect.appendChild(defaultOpt);
-
-          currentSites.forEach((s) => {
-            const sName = s.NAME || s.docId.replace(/%20/g, " "); 
-            const option = document.createElement("option");
-            option.value = sName;
-            option.textContent = sName;
-            siteSelect.appendChild(option);
-          });
-        }
-        initCustomSelect("targetSite");
-      }
-
-      // টেবিল হেডার ডাইনামিক রেন্ডারিং
-      function updateTableHeader() {
-        const theadRow = document.querySelector("#workerTable thead tr");
-        if (!theadRow) return;
-
-        if (currentViewMode === "SINGLE") {
-          theadRow.innerHTML = `
-            <th class="p-4 w-16 text-center">
-              <input type="checkbox" id="selectAll" onclick="toggleAll(this)" class="checkbox-custom" />
-            </th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">ID & Name</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Designation</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Passport</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Rate (P/H)</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Hours</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">Total Taka</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Remark</th>
-          `;
-        } else {
-          // পাসপোর্ট এবং প্রজেক্ট সম্পূর্ণ আলাদা কলামে বিভক্ত
-          theadRow.innerHTML = `
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">ID, Name & Date</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Designation</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Passport</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Project</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Rate</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Hours</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">Total Taka</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Remark</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">Action</th>
-          `;
-        }
-      }
-
-      /* ড্রপডাউন ট্র্রিগার ইনিশিয়ালি */
-      function initCustomSelect(id) {
-        const select = document.getElementById(id);
-        if (!select) return;
-
-        select.style.display = "none";
-        let wrapper = select.parentElement.querySelector(".custom-select-wrapper");
-        if (wrapper) wrapper.remove();
-
-        wrapper = document.createElement("div");
-        wrapper.className = "custom-select-wrapper";
-        wrapper.style.position = "relative";
-
-        const trigger = document.createElement("div");
-        trigger.className = "custom-select-trigger";
-        trigger.innerHTML = `<span>${select.options[select.selectedIndex]?.text || "All Projects"}</span><i style="color:var(--brand-gold); font-style:normal; margin-left:10px;">▼</i>`;
-
-        const optionsContainer = document.createElement("div");
-        optionsContainer.className = "custom-select-options";
-
-        Array.from(select.options).forEach((opt) => {
-          const item = document.createElement("div");
-          item.className = "custom-select-option";
-          item.innerText = opt.text;
-          item.onclick = (e) => {
-            e.stopPropagation();
-            select.value = opt.value;
-            trigger.querySelector("span").innerText = opt.text;
-            optionsContainer.style.display = "none";
-            select.dispatchEvent(new Event("change"));
-          };
-          optionsContainer.appendChild(item);
-        });
-
-        trigger.onclick = (e) => {
-          e.stopPropagation();
-          const isOpen = optionsContainer.style.display === "block";
-          document.querySelectorAll(".custom-select-options").forEach(el => el.style.display = "none");
-          optionsContainer.style.display = isOpen ? "none" : "block";
+            setupSearch();
+            
+            // Hide Initial Loader
+            setTimeout(() => {
+                document.getElementById('page-init-loader').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('page-init-loader').style.display = 'none';
+                }, 500);
+            }, 800);
         };
 
-        wrapper.appendChild(trigger);
-        wrapper.appendChild(optionsContainer);
-        select.parentElement.appendChild(wrapper);
-      }
-
-      document.addEventListener("click", () => {
-        document.querySelectorAll(".custom-select-options").forEach(el => el.style.display = "none");
-        const suggestionBox = document.getElementById("suggestionBox");
-        if(suggestionBox) suggestionBox.style.display = "none";
-      });
-
-      // ৩. ডাটাবেস থেকে সর্বশেষ আপডেট ইনফো আনা
-      async function fetchLastUpdate() {
-        const display = document.getElementById("lastUpdateDisplay");
-        if(!display) return;
-
-        const now = new Date();
-        const monthYear = now.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
-
-        rtdb.ref(`OVER_TIME/${monthYear}`)
-          .limitToLast(1)
-          .once("value")
-          .then((snapshot) => {
-            if (snapshot.exists()) {
-              const monthData = snapshot.val();
-              const dateKeys = Object.keys(monthData);
-              const lastDateKey = dateKeys[dateKeys.length - 1];
-              const dayData = monthData[lastDateKey];
-
-              const workerKeys = Object.keys(dayData);
-              const lastWorkerEntry = dayData[workerKeys[workerKeys.length - 1]];
-
-              display.innerHTML = `Last Entry (${monthYear}): <span class="text-[#002147] font-bold">${lastWorkerEntry.OT_Date || "N/A"}</span> (ID: <span class="text-[#d4af37] font-bold">${lastWorkerEntry.ID || "N/A"}</span>)`;
-            } else {
-              display.innerText = `No previous records found for ${monthYear}.`;
+        // Added Refresh Logic
+        async function refreshSystemData(silent = false) {
+            const icon = document.getElementById('refresh-icon');
+            if(!silent) icon.classList.add('spinning');
+            
+            try {
+                await Promise.all([
+                    fetchEmployees(),
+                    fetchNextVoucher()
+                ]);
+            } finally {
+                if(!silent) {
+                    setTimeout(() => icon.classList.remove('spinning'), 500);
+                }
             }
-          })
-          .catch(err => {
-            console.log("Last update fetch error:", err);
-            display.innerText = "Error loading last update info";
-          });
-      }
-
-      // ইনপুট এবং ড্রপডাউনগুলো ক্লিয়ার করার ফাংশন
-      function clearAllInputsAndDropdowns() {
-        document.getElementById("targetDate").value = "";
-        document.getElementById("startDateRange").value = "";
-        document.getElementById("endDateRange").value = "";
-        
-        const siteSelect = document.getElementById("targetSite");
-        if (siteSelect) {
-          siteSelect.value = "";
-          const selectTriggerSpan = document.querySelector(".custom-select-trigger span");
-          if (selectTriggerSpan) {
-            selectTriggerSpan.innerText = "Choose Project";
-          }
-        }
-        
-        document.getElementById("initialPlaceholder").style.display = "flex";
-        document.getElementById("mainContentSection").classList.replace("section-visible", "section-hidden");
-        existingDbRecordsMap = {};
-      }
-
-      // ৪. মোড চেঞ্জ ট্র্যাকিং ও ক্লিয়ার লজিক
-      function toggleRangeHistoryPanel() {
-        const btn = document.getElementById("historyToggleBtn");
-        
-        const singleDateGroup = document.getElementById("singleDateGroup");
-        const startDateGroup = document.getElementById("startDateGroup");
-        const endDateGroup = document.getElementById("endDateGroup");
-        
-        const singleActionBtns = document.getElementById("singleActionBtns");
-        const rangeActionBtns = document.getElementById("rangeActionBtns");
-        
-        const modeBadge = document.getElementById("currentModeBadge");
-        
-        clearAllInputsAndDropdowns();
-        
-        if (currentViewMode === "SINGLE") {
-          currentViewMode = "RANGE";
-          
-          singleDateGroup.classList.add("hidden");
-          singleActionBtns.classList.add("hidden");
-          
-          startDateGroup.classList.remove("hidden");
-          endDateGroup.classList.remove("hidden");
-          rangeActionBtns.classList.remove("hidden");
-          
-          btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>  NEW ENTRY`;
-          btn.classList.replace("bg-[#d4af37]", "bg-red-500");
-          btn.classList.replace("text-[#002147]", "text-white");
-          
-          modeBadge.innerText = "OVER TIME HISTORY VIEW MODE";
-          document.getElementById("placeholderText").innerText = "Select Start Date, End Date, and Project Name, then click 'SEARCH'.";
-        } else {
-          currentViewMode = "SINGLE";
-          
-          startDateGroup.classList.add("hidden");
-          endDateGroup.classList.add("hidden");
-          rangeActionBtns.classList.add("hidden");
-          
-          singleDateGroup.classList.remove("hidden");
-          singleActionBtns.classList.remove("hidden");
-          
-          btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> View History`;
-          btn.classList.replace("bg-red-500", "bg-[#d4af37]");
-          btn.classList.replace("text-white", "text-[#002147]");
-          
-          modeBadge.innerText = "OVER TIME ENTRY FORM";
-          document.getElementById("placeholderText").innerText = "Please select OT Date and Project Location, then click the 'Search' button.";
-        }
-        
-        updateTableHeader();
-        updateSelectedCount();
-      }
-
-      // এন্ট্রি ভ্যালিডেশনের জন্য পূর্বে এন্ট্রি করা ম্যাপ লোড করা
-      async function loadExistingRecordsForValidation(date, site) {
-        existingDbRecordsMap = {};
-        try {
-          const parts = date.split("-");
-          const selectedDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-          const monthYear = selectedDateObj.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
-          
-          const snap = await rtdb.ref(`OVER_TIME/${monthYear}/${date}`).once("value");
-          if (snap.exists()) {
-            const data = snap.val();
-            Object.keys(data).forEach(key => {
-              const entry = data[key];
-              if (entry.Site === site) {
-                existingDbRecordsMap[entry.ID] = true;
-              }
-            });
-          }
-        } catch (e) {
-          console.error("Error validation logs:", e);
-        }
-      }
-
-      // ৫. ওটি এন্ট্রি সার্চ তালিকা লোড
-      async function fetchWorkersFromDatabase() {
-        const date = document.getElementById("targetDate").value;
-        const site = document.getElementById("targetSite").value;
-        
-        if (!date || !site) {
-          return showMessage(
-            "Validation Failed",
-            "Please select both OT Date and Project Name first before searching.",
-            "error"
-          );
         }
 
-        showToast("Loading active session...", "info");
-        
-        await loadExistingRecordsForValidation(date, site);
-
-        currentViewMode = "SINGLE";
-        updateTableHeader();
-
-        document.getElementById("initialPlaceholder").style.display = "none";
-        const mainContent = document.getElementById("mainContentSection");
-        mainContent.classList.remove("section-hidden");
-        mainContent.classList.add("section-visible");
-
-        const tbody = document.getElementById("workerTableBody");
-        tbody.innerHTML = "";
-
-        let visibleCount = 0;
-
-        employees.forEach((w) => {
-          const id = w.id || w.docId || "N/A";
-          
-          if (existingDbRecordsMap[id] === true) {
-            return; 
-          }
-
-          visibleCount++;
-          const name = w.name || "Unknown";
-          const designation = w.designation || "-";
-          const passport = w.passport || "-";
-          const rate = parseFloat(w.otRate) || 0;
-          const rowKey = `${id}_${date}`;
-
-          const row = document.createElement("tr");
-          row.className = "worker-row transition-all hover:bg-slate-50";
-          row.id = `row-${rowKey}`;
-          
-          row.innerHTML = `
-              <td class="p-4 text-center"><input type="checkbox" class="checkbox-custom worker-check" onchange="toggleRow('${rowKey}', true)"></td>
-              <td class="p-4">
-                  <div class="font-bold text-sm text-[#002147]">${name}</div>
-                  <div class="text-[10px] text-[#d4af37] font-bold tracking-tighter uppercase">ID: ${id}</div>
-              </td>
-              <td class="p-4"><span class="text-xs text-[#002147] font-bold uppercase">${designation}</span></td>
-              <td class="p-4"><span class="text-xs text-[#002147] font-bold uppercase">${passport}</span></td>
-              <td class="p-4 text-center">
-                  <span id="rate-display-${rowKey}" class="text-xs text-[#002147] font-black">${rate.toFixed(2)}</span>
-                  <input type="hidden" id="rate-${rowKey}" value="${rate}">
-              </td>
-              <td class="p-4 text-center">
-                  <input type="number" step="0.5" id="ot-${rowKey}" oninput="calculateTaka('${rowKey}')" onkeydown="handleOtEnter(event, '${rowKey}')" class="ot-input text-sm input-hidden outline-none bg-white text-[#002147]" placeholder="0.0">
-              </td>
-              <td class="p-4 text-center"><span id="taka-${rowKey}" class="font-black text-[#002147]/40 text-xs">0.00</span></td>
-              <td class="p-4">
-                  <input type="text" id="remark-${rowKey}" placeholder="Write comment..." class="bg-slate-100 border border-[#002147]/10 rounded-lg px-3 py-1.5 text-xs w-full input-hidden outline-none text-[#002147] placeholder-[#002147]/40 focus:bg-white focus:border-[#002147]/30 transition-all">
-              </td>
-          `;
-          tbody.appendChild(row);
-        });
-
-        if (visibleCount === 0) {
-          tbody.innerHTML = `
-            <tr>
-              <td colspan="8" class="p-10 text-center text-slate-500 font-bold">
-                All registered employees already have OT entries recorded for this project on the selected date.
-              </td>
-            </tr>`;
+        function showAlert(msg) {
+            document.getElementById('alert-msg').innerText = msg;
+            document.getElementById('alert-modal').classList.remove('hidden');
         }
 
-        updateSelectedCount();
-      }
-
-      // ৬. ইতিহাস রেকর্ড খোঁজা এবং টেবিলে পাসপোর্ট ও প্রজেক্ট আলাদা করা
-      async function fetchRangeDataFromDatabase() {
-        const start = document.getElementById("startDateRange").value;
-        const end = document.getElementById("endDateRange").value;
-        const site = document.getElementById("targetSite").value;
-
-        if (!start || !end) {
-          return showMessage("Warning", "Please select both Start Date and End Date.", "error");
+        function closeAlert() {
+            document.getElementById('alert-modal').classList.add('hidden');
         }
 
-        currentViewMode = "RANGE";
-        updateTableHeader();
-
-        showToast("Fetching records...", "info");
-
-        document.getElementById("initialPlaceholder").style.display = "none";
-        const mainContent = document.getElementById("mainContentSection");
-        mainContent.classList.remove("section-hidden");
-        mainContent.classList.add("section-visible");
-
-        const tbody = document.getElementById("workerTableBody");
-        tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-slate-500 font-bold">Please wait, loading data from database...</td></tr>`;
-
-        try {
-          const monthsToFetch = getMonthsBetweenDates(start, end);
-          let rawDataList = [];
-
-          const fetchPromises = monthsToFetch.map(async (mYear) => {
-            const snap = await rtdb.ref(`OVER_TIME/${mYear}`).once("value");
-            if (snap.exists()) {
-              return snap.val();
+        async function fetchNextVoucher() {
+            const voucherSpan = document.getElementById('next-adv-no');
+            try {
+                const r = await fetch(`${SCRIPT_URL}?action=getNextVoucher`);
+                const data = await r.json();
+                if (data.nextVoucher) {
+                    voucherSpan.innerText = data.nextVoucher;
+                    return data.nextVoucher;
+                }
+            } catch (e) {
+                voucherSpan.innerText = "VOUCHER-ERR";
             }
             return null;
-          });
+        }
 
-          const results = await Promise.all(fetchPromises);
-          tbody.innerHTML = ""; 
+        async function fetchEmployees() {
+            try { 
+                const r = await fetch(`${SCRIPT_URL}?action=getEmployees`); 
+                const data = await r.json();
+                employees = Array.isArray(data) ? data : [];
+            } catch(e) {
+                showAlert("Critical: Could not load employee data.");
+            }
+        }
 
-          const startDateObj = new Date(start);
-          const endDateObj = new Date(end);
-
-          results.forEach((monthData) => {
-            if (!monthData) return;
-
-            Object.keys(monthData).forEach((dateKey) => {
-              const currentRecordDate = new Date(dateKey);
-              if (currentRecordDate >= startDateObj && currentRecordDate <= endDateObj) {
-                const dayEntries = monthData[dateKey];
-                
-                Object.keys(dayEntries).forEach((itemKey) => {
-                  const entry = dayEntries[itemKey];
-                  if (!site || entry.Site === site) {
-                    rawDataList.push(entry);
-                  }
-                });
-              }
+        function setupSearch() {
+            const input = document.getElementById('emp-search');
+            const res = document.getElementById('search-results');
+            input.addEventListener('focus', () => showFilteredResults(input.value));
+            input.addEventListener('input', (e) => showFilteredResults(e.target.value));
+            document.addEventListener('click', (e) => {
+                if (!input.contains(e.target) && !res.contains(e.target)) res.style.display = 'none';
             });
-          });
-
-          if (rawDataList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-red-500 font-bold">No overtime records found matching the criteria.</td></tr>`;
-            updateSelectedCount();
-            return;
-          }
-
-          updateSelectedCount();
-          showToast(`Loaded ${rawDataList.length} records successfully.`, "success");
-
-          // টেবিলে পাসপোর্ট এবং প্রজেক্টকে সম্পূর্ণ আলাদা কলামে জেনারেট করা হচ্ছে
-          rawDataList.forEach((entry) => {
-            const id = entry.ID;
-            const name = entry.Name;
-            const designation = entry.Designation || "-";
-            const passport = entry.Passport || "-";
-            const otDate = entry.OT_Date;
-            const rate = parseFloat(entry.OT_Rate) || 0;
-            const otHours = parseFloat(entry.TOTAL_OT_HOURS) || 0;
-            const totalTaka = parseFloat(entry.Total_Taka) || 0;
-            const remark = entry.Remark && entry.Remark !== "-" ? entry.Remark : "";
-            const currentSiteName = entry.Site || "-";
-
-            const rowKey = `${id}_${otDate}`;
-
-            const row = document.createElement("tr");
-            row.className = "worker-row transition-all hover:bg-slate-50";
-            row.id = `row-${rowKey}`;
-
-            // প্রজেক্ট পরিবর্তনের জন্য কাস্টম অপশন সিলেকশন তালিকা তৈরি
-            const activeSites = currentSites.length > 0 
-              ? currentSites.map(s => s.NAME || s.docId.replace(/%20/g, " "))
-              : defaultProjectFallbackList.filter(p => p !== "All Projects");
-
-            let siteOptionsHtml = "";
-            activeSites.forEach(sName => {
-              siteOptionsHtml += `<option value="${sName}" ${sName === currentSiteName ? 'selected' : ''}>${sName}</option>`;
-            });
-
-            row.innerHTML = `
-                <td class="p-4">
-                    <div class="font-bold text-sm text-[#002147]">${name}</div>
-                    <div class="text-[10px] text-[#d4af37] font-bold tracking-tighter uppercase">ID: ${id} | Date: ${otDate}</div>
-                </td>
-                <td class="p-4"><span class="text-xs text-[#002147] font-bold uppercase">${designation}</span></td>
-                <td class="p-4"><span class="text-xs text-[#002147] font-bold uppercase">${passport}</span></td>
-                <!-- এডিটেবল প্রজেক্ট লোকেশন ড্রপডাউন কলাম -->
-                <td class="p-4">
-                    <select id="site-select-${rowKey}" class="bg-slate-100 border border-[#002147]/10 rounded-lg px-2 py-1.5 text-xs w-full outline-none text-[#002147] font-semibold transition-all" disabled>
-                        ${siteOptionsHtml}
-                    </select>
-                </td>
-                <td class="p-4 text-center">
-                    <span id="rate-display-${rowKey}" class="text-xs text-[#002147] font-black">${rate.toFixed(2)}</span>
-                    <input type="hidden" id="rate-${rowKey}" value="${rate}">
-                </td>
-                <td class="p-4 text-center">
-                    <input type="number" step="0.5" id="ot-${rowKey}" value="${otHours}" oninput="calculateTaka('${rowKey}')" class="ot-input text-sm outline-none bg-slate-100 text-[#002147] border border-slate-300 rounded" readonly>
-                </td>
-                <td class="p-4 text-center"><span id="taka-${rowKey}" class="font-black text-[#d4af37] text-xs">${totalTaka.toFixed(2)}</span></td>
-                <td class="p-4">
-                    <input type="text" id="remark-${rowKey}" value="${remark}" placeholder="No comment" class="bg-slate-100 border border-[#002147]/10 rounded-lg px-3 py-1.5 text-xs w-full outline-none text-[#002147]" readonly>
-                </td>
-                <td class="p-4 text-center">
-                    <button onclick="toggleRowEdit('${rowKey}')" id="btn-edit-${rowKey}" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase hover:bg-blue-700 transition-all flex items-center justify-center mx-auto gap-1">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
-                        Edit
-                    </button>
-                </td>
-            `;
-            tbody.appendChild(row);
-          });
-
-        } catch (err) {
-          console.error("Fetch Range Error:", err);
-          tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-red-500 font-bold">Failed to load range logs. Please try again.</td></tr>`;
         }
-      }
 
-      // ৭. প্রজেক্ট লোকেশন, ওটি ঘণ্টা এবং মন্তব্য এডিট করার সুযোগ প্রদান
-      function toggleRowEdit(rowKey) {
-        const btn = document.getElementById(`btn-edit-${rowKey}`);
-        const otInput = document.getElementById(`ot-${rowKey}`);
-        const remarkInput = document.getElementById(`remark-${rowKey}`);
-        const siteSelect = document.getElementById(`site-select-${rowKey}`);
-
-        if (otInput.hasAttribute("readonly")) {
-          // ইনপুট এবং ড্রপডাউনগুলো আনলক করা হচ্ছে
-          otInput.removeAttribute("readonly");
-          remarkInput.removeAttribute("readonly");
-          if (siteSelect) siteSelect.removeAttribute("disabled");
-
-          otInput.classList.replace("bg-slate-100", "bg-white");
-          otInput.classList.add("border-blue-500", "ring-2", "ring-blue-100");
-          remarkInput.classList.replace("bg-slate-100", "bg-white");
-          remarkInput.classList.add("border-blue-500", "ring-2", "ring-blue-100");
-          if (siteSelect) {
-            siteSelect.classList.replace("bg-slate-100", "bg-white");
-            siteSelect.classList.add("border-blue-500", "ring-2", "ring-blue-100");
-          }
-          
-          btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Save`;
-          btn.classList.replace("bg-blue-600", "bg-green-600");
-          btn.classList.replace("hover:bg-blue-700", "hover:bg-green-700");
-          
-          otInput.focus();
-        } else {
-          saveSingleRowToDatabase(rowKey);
-        }
-      }
-
-      // ওটি রেকর্ড ডাটাবেসে রিয়েল-টাইমে আপডেট করার ফাংশন
-      async function saveSingleRowToDatabase(rowKey) {
-        const btn = document.getElementById(`btn-edit-${rowKey}`);
-        const otInput = document.getElementById(`ot-${rowKey}`);
-        const remarkInput = document.getElementById(`remark-${rowKey}`);
-        const siteSelect = document.getElementById(`site-select-${rowKey}`);
-
-        const [id, date] = rowKey.split("_");
-        const ot = parseFloat(otInput.value) || 0;
-        const rate = parseFloat(document.getElementById(`rate-${rowKey}`).value) || 0;
-        const remark = remarkInput.value || "-";
-        const totalTaka = (ot * rate).toFixed(2);
-        const site = siteSelect ? siteSelect.value : "-";
-
-        const emp = employees.find(e => String(e.id || e.docId) === id);
-        const name = emp ? (emp.name || "Unknown") : "Unknown";
-        const designation = emp ? (emp.designation || "-") : "-";
-        const passport = emp ? (emp.passport || "-") : "-";
-
-        btn.disabled = true;
-        btn.innerHTML = `Saving...`;
-
-        const parts = date.split("-");
-        const selectedDateObj = new Date(parts[0], parts[1] - 1, parts[2]);
-        const monthYear = selectedDateObj.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
-
-        try {
-          await rtdb.ref(`OVER_TIME/${monthYear}/${date}/${id}_${date}`).update({
-            ID: id,
-            Name: name,
-            Designation: designation,
-            Passport: passport,
-            Site: site,
-            OT_Date: date,
-            OT_Rate: rate.toString(),
-            TOTAL_OT_HOURS: ot.toString(),
-            Total_Taka: totalTaka,
-            Remark: remark,
-            Entry_Date: new Date().toString(),
-            Entry_Time: new Date().toString(),
-          });
-
-          otInput.setAttribute("readonly", true);
-          remarkInput.setAttribute("readonly", true);
-          if (siteSelect) siteSelect.setAttribute("disabled", true);
-
-          otInput.classList.replace("bg-white", "bg-slate-100");
-          otInput.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
-          remarkInput.classList.replace("bg-white", "bg-slate-100");
-          remarkInput.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
-          if (siteSelect) {
-            siteSelect.classList.replace("bg-white", "bg-slate-100");
-            siteSelect.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
-          }
-
-          btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> Edit`;
-          btn.classList.replace("bg-green-600", "bg-blue-600");
-          btn.classList.replace("hover:bg-green-700", "hover:bg-blue-700");
-
-          document.getElementById(`taka-${rowKey}`).innerText = totalTaka;
-          showToast("Data updated in real-time!", "success");
-        } catch (err) {
-          console.error("Single row save error:", err);
-          showToast("Failed to update record!", "error");
-          btn.innerHTML = `Error`;
-        } finally {
-          btn.disabled = false;
-        }
-      }
-
-      // তারিখের রেঞ্জ থেকে মাসের নাম তৈরির হেল্পার
-      function getMonthsBetweenDates(startDateStr, endDateStr) {
-        const start = new Date(startDateStr);
-        const end = new Date(endDateStr);
-        const months = [];
-        let current = new Date(start.getFullYear(), start.getMonth(), 1);
-
-        while (current <= end) {
-          const mName = current.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
-          if (!months.includes(mName)) {
-            months.push(mName);
-          }
-          current.setMonth(current.getMonth() + 1);
-        }
-        return months;
-      }
-
-      // ডাটাবেস ব্যাচ পোস্টিং
-      async function confirmAndSave() {
-        const saveBtn = document.getElementById("finalSaveBtn");
-        if(!saveBtn || preparedData.length === 0) return;
-        
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = `Saving...`;
-
-        try {
-          const updates = {};
-          const rootRef = rtdb.ref();
-          
-          preparedData.forEach((item) => {
-            const otDateStr = item.date;
-            let selectedDate;
-            const parts = otDateStr.includes("-") ? otDateStr.split("-") : otDateStr.split("/");
-
-            if (parts[0].length === 4) {
-              selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
-            } else {
-              selectedDate = new Date(parts[2], parts[1] - 1, parts[0]);
-            }
-
-            const monthYear = selectedDate.toLocaleString('en-GB', { month: 'long', year: 'numeric' }).replace(" ", "-");
-            const customKey = `${item.empId}_${item.date}`; 
+        function showFilteredResults(val) {
+            const res = document.getElementById('search-results');
+            const lowerVal = val.trim().toLowerCase();
             
-            updates[`OVER_TIME/${monthYear}/${item.date}/${customKey}`] = {
-              ID: item.empId,
-              Name: item.empName,
-              Designation: item.designation,
-              Passport: item.passport,
-              Site: item.site,
-              OT_Date: item.date,
-              OT_Rate: item.rate.toString(),
-              TOTAL_OT_HOURS: item.ot.toString(),
-              Total_Taka: item.taka.toString(),
-              Remark: item.remark || "-",
-              Entry_Date: new Date().toString(),
-              Entry_Time: new Date().toString(),
-            };
-          });
+            const filtered = employees.filter(emp => {
+                const name = (emp.name || emp['employee name'] || "").toString().toLowerCase();
+                const id = (emp.id || "").toString().toLowerCase();
+                return name.includes(lowerVal) || id.includes(lowerVal);
+            }).slice(0, 20);
 
-          await rootRef.update(updates);
-
-          showToast("Database updated successfully!", "success");
-          
-          document.querySelectorAll(".worker-check:checked").forEach((c) => {
-            const row = c.closest("tr");
-            if(row) {
-                const rowKey = row.id.replace("row-", "");
-                c.checked = false;
-                toggleRow(rowKey, false);
-            }
-          });
-
-          closePreview();
-          fetchLastUpdate(); 
-          showMessage("Success", "All overtime records have been  successfully.", "success");
-
-        } catch (err) {
-          console.error("Save Error:", err);
-          showMessage("Failed", "Error saving to Database: " + err.message, "error");
-        } finally {
-          saveBtn.disabled = false;
-          saveBtn.innerText = "Confirm Save";
-        }
-      }
-
-      function toggleAll(masterCheckbox) {
-        const checkboxes = document.querySelectorAll(".worker-check");
-        checkboxes.forEach((cb) => {
-          cb.checked = masterCheckbox.checked;
-          const rowKey = cb.closest("tr").id.replace("row-", "");
-          toggleRow(rowKey, false); 
-        });
-      }
-
-      // ৮. প্রিভিউ উইন্ডো তৈরি (পাসপোর্ট এবং প্রজেক্ট কলাম আলাদা রেন্ডার)
-      function openPreview() {
-        const selectedChecks = document.querySelectorAll(".worker-check:checked");
-        if (selectedChecks.length === 0) return;
-
-        const dateInput = document.getElementById("targetDate");
-        const siteInput = document.getElementById("targetSite");
-
-        const singleDate = dateInput ? dateInput.value : "-";
-        let defaultSite = "-";
-        
-        if (siteInput && siteInput.selectedIndex >= 0) {
-          defaultSite = siteInput.options[siteInput.selectedIndex].text;
-          if (siteInput.value === "") defaultSite = "ALL PROJECTS";
-        }
-
-        const previewBody = document.getElementById("previewBody");
-
-        if (document.getElementById("printSite")) {
-          document.getElementById("printSite").innerText = currentViewMode === "RANGE" ? "MULTIPLE PROJECTS" : defaultSite;
-        }
-        if (document.getElementById("printDate")) {
-          if (currentViewMode === "RANGE") {
-            const start = document.getElementById("startDateRange").value;
-            const end = document.getElementById("endDateRange").value;
-            document.getElementById("printDate").innerText = `${start} to ${end}`;
-          } else {
-            document.getElementById("printDate").innerText = singleDate;
-          }
-        }
-
-        previewBody.innerHTML = "";
-        preparedData = [];
-        let grandTotalHours = 0;
-        let grandTotalTaka = 0;
-        let visibleIndex = 1;
-
-        selectedChecks.forEach((check) => {
-          const rowKey = check.closest("tr").id.replace("row-", "");
-          const [id, recordDate] = rowKey.split("_");
-          const otRaw = document.getElementById(`ot-${rowKey}`).value;
-
-          if (otRaw === "" || parseFloat(otRaw) <= 0) return;
-
-          const emp = employees.find((e) => {
-            const wId = String(e.id || e.docId || "").trim().toLowerCase();
-            return wId === String(id).trim().toLowerCase();
-          });
-
-          const empName = emp ? (emp.name || "Unknown") : "Unknown";
-          const designation = emp ? (emp.designation || "-") : "-";
-          const passport = emp ? (emp.passport || "-") : "-";
-
-          const ot = parseFloat(otRaw);
-          const rate = parseFloat(document.getElementById(`rate-${rowKey}`).value) || 0;
-          const taka = ot * rate;
-          const remark = document.getElementById(`remark-${rowKey}`).value || "-";
-
-          let rowSite = defaultSite;
-          const siteSelectField = document.getElementById(`site-select-${rowKey}`);
-          if (siteSelectField && siteSelectField.value) {
-            rowSite = siteSelectField.value;
-          }
-
-          grandTotalHours += ot;
-          grandTotalTaka += taka;
-
-          preparedData.push({
-            date: currentViewMode === "RANGE" ? recordDate : singleDate,
-            empId: id,
-            empName: empName,
-            site: rowSite,
-            ot,
-            rate,
-            taka,
-            remark,
-            passport: passport,
-            designation: designation,
-          });
-
-          // পাসপোর্ট এবং প্রজেক্ট আলাদা আলাদা টিডি (TD) বক্সে বিভক্ত
-          previewBody.innerHTML += `
-              <tr class="border border-[#002147] text-sm text-[#002147]">
-                  <td class="p-1 text-center border-r border-[#002147]">${visibleIndex++}</td>
-                  <td class="p-1 border-r border-[#002147] font-bold text-[#002147]">
-                      <div>${id}</div>
-                      <div class="text-[8px] text-[#d4af37] font-bold">${currentViewMode === "RANGE" ? recordDate : ""}</div>
-                  </td>
-                  <td class="p-1 border-r border-[#002147] text-[#002147]">${empName}</td>
-                  <td class="p-1 border-r border-[#002147] text-xs designation-col text-[#002147]">${designation}</td>
-                  <td class="p-1 border-r border-[#002147] text-xs passport-col text-[#002147]">${passport}</td>
-                  <td class="p-1 border-r border-[#002147] text-xs font-bold uppercase text-[#002147]">${rowSite}</td>
-                  <td class="p-1 text-center border-r border-[#002147] hide-on-print text-[#002147]">${rate.toFixed(2)}</td>
-                  <td class="p-1 text-center border-r border-[#002147] font-bold text-[#002147]">${ot}</td>
-                  <td class="p-1 text-center border-r border-[#002147] font-bold text-[#d4af37]">${taka.toFixed(2)}</td>
-                  <td class="p-1 text-xs text-[#002147]">${remark}</td>
-              </tr>`;
-        });
-
-        const totalHoursEl = document.getElementById("totalOTCell");
-        const totalTakaEl = document.getElementById("totalTakaCell");
-
-        if (totalHoursEl) totalHoursEl.innerText = grandTotalHours;
-        if (totalTakaEl) totalTakaEl.innerText = grandTotalTaka.toFixed(2);
-
-        if (preparedData.length === 0) {
-          return showMessage("Error", "Enter valid OT hours first.", "error");
-        }
-        
-        document.getElementById("previewModal").style.display = "flex";
-      }
-
-      function calculateTaka(rowKey) {
-        const rate = parseFloat(document.getElementById(`rate-${rowKey}`).value) || 0;
-        const hours = parseFloat(document.getElementById(`ot-${rowKey}`).value) || 0;
-        const takaEl = document.getElementById(`taka-${rowKey}`);
-        const total = (rate * hours).toFixed(2);
-        takaEl.innerText = total;
-        takaEl.className = total > 0 ? "font-black text-[#d4af37] text-xs" : "font-black text-[#002147]/40 text-xs";
-      }
-
-      function toggleRow(rowKey, shouldFocus = false) {
-        const row = document.getElementById(`row-${rowKey}`);
-        if (!row) return;
-        const checkbox = row.querySelector(".worker-check");
-        const otInput = document.getElementById(`ot-${rowKey}`);
-        const remarkInput = document.getElementById(`remark-${rowKey}`);
-
-        if (checkbox && checkbox.checked) {
-          row.classList.add("selected");
-          otInput.classList.replace("input-hidden", "input-visible");
-          remarkInput.classList.replace("input-hidden", "input-visible");
-          if (shouldFocus) setTimeout(() => otInput.focus(), 50);
-        } else {
-          row.classList.remove("selected");
-          if (otInput.classList.contains("input-visible")) {
-            otInput.classList.replace("input-visible", "input-hidden");
-          }
-          if (remarkInput.classList.contains("input-visible")) {
-            remarkInput.classList.replace("input-visible", "input-hidden");
-          }
-          otInput.value = "";
-          remarkInput.value = "";
-          document.getElementById(`taka-${rowKey}`).innerText = "0.00";
-          document.getElementById(`taka-${rowKey}`).className = "font-black text-[#002147]/40 text-xs";
-        }
-        updateSelectedCount();
-      }
-
-      // এন্ট্রি কাউন্টিং এবং অ্যাকশন বার শো লজিক
-      function updateSelectedCount() {
-        const count = document.querySelectorAll(".worker-check:checked").length;
-        document.getElementById("selectedCount").innerText = count;
-        const actionBar = document.getElementById("actionBar");
-
-        if (currentViewMode === "RANGE") {
-          actionBar.classList.replace("opacity-100", "opacity-0");
-          actionBar.classList.add("pointer-events-none");
-          return;
-        }
-
-        if (count > 0) {
-          actionBar.classList.replace("opacity-0", "opacity-100");
-          actionBar.classList.remove("pointer-events-none");
-        } else {
-          actionBar.classList.replace("opacity-100", "opacity-0");
-          actionBar.classList.add("pointer-events-none");
-        }
-      }
-
-      function showMessage(title, body, type = "info") {
-        const modal = document.getElementById("messageModal");
-        document.getElementById("msgTitle").innerText = title;
-        document.getElementById("msgBody").innerText = body;
-        modal.style.display = "flex";
-      }
-
-      function closeMessage() { document.getElementById("messageModal").style.display = "none"; }
-      
-      function closePreview() { 
-        document.getElementById("previewModal").style.display = "none"; 
-      }
-
-      function showToast(msg, type) {
-        const toast = document.getElementById("toast");
-        toast.innerText = msg;
-        toast.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl transition-all z-[2000] ${type === "success" ? "bg-green-600" : "bg-[#002147]"} text-white opacity-100 border border-[#ffd700]`;
-        setTimeout(() => { toast.style.opacity = "0"; }, 3000);
-      }
-
-      // ডাইনামিকলি নতুন এন্ট্রি করা ম্যাপ ফিল্টার করে সাজেশনে আনা
-      function handleSearchInput(input) {
-        const query = input.value.trim().toLowerCase();
-        const box = document.getElementById("suggestionBox");
-        if (employees.length === 0) return;
-        
-        const filtered = employees
-          .filter((e) => {
-            const empId = String(e.id || e.docId);
-            const matchesQuery = empId.toLowerCase().includes(query) || (e.name && e.name.toLowerCase().includes(query));
-            
-            if (currentViewMode === "SINGLE") {
-              const isAlreadyEntered = existingDbRecordsMap[empId] === true;
-              return matchesQuery && !isAlreadyEntered;
-            }
-            return matchesQuery;
-          })
-          .slice(0, 10);
-
-        if (filtered.length > 0 && query !== "") {
-          box.innerHTML = filtered
-            .map((e) => `
-                <div class="suggestion-item" onclick="selectFromSuggestion('${e.id || e.docId}')">
-                    <div>
-                        <div class="font-bold text-white">ID: ${e.id || e.docId}</div>
-                        <div class="text-[10px] text-slate-300 uppercase font-bold">${e.name || "Unknown"}</div>
+            if (filtered.length > 0) {
+                res.innerHTML = filtered.map(emp => `
+                    <div class="search-item" onclick="selectEmployee('${emp.id}')">
+                        <span class="id-badge">${emp.id}</span>
+                        ${(emp.name || emp['employee name'] || 'Unknown').toUpperCase()}
                     </div>
-                </div>`)
-            .join("");
-          box.style.display = "block";
-        } else {
-          box.style.display = "none";
-        }
-      }
-
-      function selectFromSuggestion(id) {
-        document.getElementById("searchInput").value = "";
-        document.getElementById("suggestionBox").style.display = "none";
-
-        let targetRowKey = "";
-        if (currentViewMode === "SINGLE") {
-          const currentDate = document.getElementById("targetDate").value;
-          targetRowKey = `${id}_${currentDate}`;
-        } else {
-          const firstMatchedRow = document.querySelector(`[id^="row-${id}_"]`);
-          if (firstMatchedRow) {
-            targetRowKey = firstMatchedRow.id.replace("row-", "");
-          }
+                `).join('');
+                res.style.display = 'block';
+            } else res.style.display = 'none';
         }
 
-        const row = document.getElementById(`row-${targetRowKey}`);
-        if (row) {
-          row.scrollIntoView({ behavior: "smooth", block: "center" });
-          const checkbox = row.querySelector(".worker-check");
-          if (checkbox && !checkbox.checked) {
-            checkbox.checked = true;
-            toggleRow(targetRowKey, false); 
-          }
-          
-          setTimeout(() => {
-            const otInput = document.getElementById(`ot-${targetRowKey}`);
-            if (otInput) {
-              otInput.focus();
-              otInput.select(); 
+        function selectEmployee(id) {
+            const emp = employees.find(e => e.id == id);
+            if(emp) {
+                document.getElementById('emp-search').value = id;
+                document.getElementById('selected-emp-id').value = id;
+                document.getElementById('display-name').value = (emp.name || emp['employee name'] || "No Employee Name").toString().toUpperCase();
+                document.getElementById('auto-passport').value = (emp.passport || emp['passport no'] || "---").toString();
+                document.getElementById('display-desig').value = (emp.designation || emp.desig || "---").toString().toUpperCase();
+                document.getElementById('search-results').style.display = 'none';
+                document.getElementById('advance-amount').focus();
             }
-          }, 180); 
-        } else {
-          showToast("Worker not found in loaded table view.", "error");
         }
-      }
 
-      function handleSearchEnter(event) {
-        if (event.key === "Enter") {
-          event.preventDefault(); 
-          const suggestionBox = document.getElementById("suggestionBox");
-          const firstItem = suggestionBox.querySelector(".suggestion-item");
-          if (firstItem) {
-            firstItem.click(); 
-          }
+        async function directSaveToSheet() {
+            const id = document.getElementById('selected-emp-id').value;
+            const amt = document.getElementById('advance-amount').value;
+            const rDate = document.getElementById('record-date').value;
+            
+            // Validation with Custom Alert
+            if(!id) return showAlert("Please select an employee first.");
+            if(!rDate) return showAlert("Please select a record date.");
+            if(!amt || amt <= 0) return showAlert("Please enter a valid advance amount.");
+            
+            document.getElementById('loader').classList.remove('hidden');
+            const entry = {
+                advanceNo: document.getElementById('next-adv-no').innerText,
+                tsDate: new Date().toLocaleDateString('en-GB'),
+                tsTime: new Date().toLocaleTimeString('en-GB'),
+                recordDate: rDate, id: id,
+                name: document.getElementById('display-name').value,
+                desig: document.getElementById('display-desig').value,
+                passport: document.getElementById('auto-passport').value,
+                amount: amt, amountWords: numberToWords(amt),
+                reference: document.getElementById('reference').value,
+                remark: document.getElementById('remark').value
+            };
+            lastSavedEntries = [entry];
+            try {
+                await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", body: JSON.stringify([entry]) });
+                document.getElementById('loader').classList.add('hidden');
+                document.getElementById('success-modal').classList.remove('hidden');
+            } catch(e) { 
+                document.getElementById('loader').classList.add('hidden'); 
+                showAlert("Sync failed! Check internet connection.");
+            }
         }
-      }
 
-      function handleOtEnter(event, rowKey) {
-        if (event.key === "Enter") {
-          event.preventDefault(); 
-          const searchInput = document.getElementById("searchInput");
-          if (searchInput) {
-            searchInput.focus();
-            searchInput.select(); 
-          }
+        function resetEntry() {
+            document.getElementById('advance-form').reset();
+            document.getElementById('selected-emp-id').value = "";
+            document.getElementById('display-name').value = "";
+            document.getElementById('auto-passport').value = "";
+            document.getElementById('display-desig').value = "";
+            document.getElementById('success-modal').classList.add('hidden');
+            refreshSystemData(true); 
         }
-      }
+
+        function numberToWords(num) {
+            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
+            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+            const numStr = num.toString();
+            if (numStr.length > 9) return 'Amount too large';
+            let n = ('000000000' + numStr).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+            if (!n) return ''; 
+            let str = '';
+            str += (Number(n[1]) != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
+            str += (Number(n[2]) != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
+            str += (Number(n[3]) != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
+            str += (Number(n[4]) != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
+            str += (Number(n[5]) != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
+            return str ? str + 'Taka Only' : 'Zero Taka Only';
+        }
+
+        function getReceiptHTML(item, copyType) {
+            return `
+                <div class="receipt-slip">
+                    <div style="position: absolute; top: 15px; right: 15px; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 1px solid #1e3a5f; padding: 2px 8px; border-radius: 4px; background: white !important; color: #1e3a5f !important;">${copyType} Copy</div>
+                    <div style="display: flex; align-items: center; justify-content: center; border-bottom: 2.5px solid #1e3a5f; padding-bottom: 12px; margin-bottom: 15px; gap: 10px;">
+                        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="height: 35px;">
+                        <div style="text-align: left;">
+                            <h2 style="margin: 0; font-size: 22px; font-weight: 900; color: #1e3a5f !important;">ALAMHOW <span style="color: #d4af37 !important;">CO LTD</span></h2>
+                            <p style="margin: 0; font-size: 9px; text-transform: uppercase; font-weight: 800; color: #333 !important; text-align: center;">Money Advance Receipt</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 15px; font-weight: 900; color: #1e3a5f !important;">
+                        <span>VOUCHER: ${item.advanceNo}</span>
+                        <span>DATE: ${item.recordDate}</span>
+                    </div>
+                    <div style="font-size: 13px; line-height: 2.2;">
+                        <div style="display: flex; border-bottom: 1px dashed #ccc;"><span style="width: 100px; font-weight: 800; color: #555 !important;">ID</span>: <strong style="color: #000 !important;">${item.id}</strong></div>
+                        <div style="display: flex; border-bottom: 1px dashed #ccc;"><span style="width: 100px; font-weight: 800; color: #555 !important;">NAME</span>: <strong style="color: #000 !important;">${item.name}</strong></div>
+                        <div style="display: flex; border-bottom: 1px dashed #ccc;"><span style="width: 100px; font-weight: 800; color: #555 !important;">DESIG</span>: <span style="color: #000 !important;">${item.desig}</span></div>
+                        <div style="display: flex; border-bottom: 1px dashed #ccc;"><span style="width: 100px; font-weight: 800; color: #555 !important;">PASSPORT</span>: <span style="color: #000 !important;">${item.passport}</span></div>
+                        <div style="margin-top: 15px; background: #1e3a5f !important; color: white !important; padding: 12px; border: 2.5px solid #d4af37 !important; text-align: center; border-radius: 6px; -webkit-print-color-adjust: exact;"><span style="font-size: 18px; font-weight: 900;">AMOUNT: ${Number(item.amount).toLocaleString()} /-</span></div>
+                        <div style="font-size: 11px; font-weight: bold; text-transform: uppercase; color: #444; margin: 8px 0; font-style: italic; border-left: 3px solid #d4af37 !important; padding-left: 8px;">In Words: ${item.amountWords}</div>
+                    </div>
+                    <div style="flex-grow: 1; margin-top: 15px;">
+                        <div style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">REFERENCE: ${item.reference || 'No Reference Entry'}</div>
+                        <div style="font-size: 9px; font-weight: 900; margin-top: 5px; color: #1e3a5f !important;">REMARKS: ${item.remark || 'No Remarks Entry'}</div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: auto; padding-bottom: 30px;">
+                        <div style="text-align: center; width: 100px;"><div style="border-top: 1px solid #1e3a5f !important;"></div><span style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">RECEIVER</span></div>
+                        <div style="text-align: center; width: 100px;"><div style="border-top: 1px solid #1e3a5f !important;"></div><span style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">ACCOUNTS</span></div>
+                        <div style="text-align: center; width: 100px;"><div style="border-top: 1px solid #1e3a5f !important;"></div><span style="font-size: 9px; font-weight: 900; color: #1e3a5f !important;">AUTHORIZED</span></div>
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 8px; color: #888 !important;">OFFICIAL SYSTEM RECORD • ${item.tsDate} | ${item.tsTime}</div>
+                </div>
+            `;
+        }
+
+        function prepareAndPrint() {
+            const printArea = document.getElementById('receipt-print-area');
+            let htmlContent = '';
+            lastSavedEntries.forEach((item) => {
+                htmlContent += `<div class="dual-receipt-wrapper">${getReceiptHTML(item, 'Office')}<div style="width: 5%; height: 680px; position: relative;"><div style="border-left: 2px dotted #1e3a5f; height: 100%; position: absolute; left: 50%;"></div></div>${getReceiptHTML(item, 'Employee')}</div>`;
+            });
+            printArea.innerHTML = htmlContent;
+            printArea.classList.remove('hidden');
+            setTimeout(() => { window.print(); printArea.classList.add('hidden'); }, 500);
+        }
     </script>
-  </body>
+</body>
 </html>
