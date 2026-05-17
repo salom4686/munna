@@ -3627,14 +3627,24 @@ async function saveAllToFirestore() {
 
     // ৪. প্যারালাল চেকিং এবং ফিল্টারিং
     const checkPromises = attendanceData.map(async (entry) => {
-      const dateDocId = entry.date.replace(/[\/\s]/g, "-"); 
+      // ১. তারিখ থেকে মাসের নাম এবং বছর বের করা (যেমন: APRIL_2026)
+      const dateParts = entry.date.split("-"); // YYYY-MM-DD
+      const year = dateParts[0];
+      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      const monthName = monthNames[parseInt(dateParts[1]) - 1];
+      const monthYear = `${monthName}_${year}`;
+
+      // ২. তারিখের ডক আইডি (যেমন: DATE_2026-04-01)
+      const dateDocId = "DATE_" + entry.date.replace(/[\/\s]/g, "-"); 
       const projectClean = (entry.site || "No-Project").replace(/[\/\s]/g, "-");
       
       // ক) ওদার্স (OTHERS) হলে সরাসরি "Others" কালেকশনে সেভ (কোনো ডুপ্লিকেট চেক নাই)
       if (entry.status === "OTHERS") {
-        const uniqueDocId = `${entry.empId}_${dateDocId}_${projectClean}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+        const uniqueDocId = `${entry.empId}_${entry.date}_${projectClean}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
         const othersDocRef = firestoreDb
           .collection("DailyAttendance")
+          .doc(monthYear)
+          .collection("DATES")
           .doc(dateDocId)
           .collection("Others") 
           .doc(uniqueDocId);     
@@ -3662,9 +3672,11 @@ async function saveAllToFirestore() {
       }
 
       // খ) সাধারণ হাজিরা (PRESENT/ABSENT) - ডুপ্লিকেট চেক হবে
-      const customDocId = `${entry.empId}_${dateDocId}_${projectClean}`;
+      const customDocId = `${entry.empId}_${entry.date}_${projectClean}`;
       const docRef = firestoreDb
         .collection("DailyAttendance")
+        .doc(monthYear)
+        .collection("DATES")
         .doc(dateDocId)
         .collection("Present_Absent") 
         .doc(customDocId);
