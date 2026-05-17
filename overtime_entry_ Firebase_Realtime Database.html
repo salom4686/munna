@@ -26,7 +26,7 @@
       body {
         font-family: "Inter", sans-serif;
         background-color: #f8fafc;
-        color: var(--brand-blue); /* Default text Navy Blue */
+        color: var(--brand-blue); /* ডিফল্ট লেখা নেভি ব্লু */
       }
 
       .worker-row.selected {
@@ -112,14 +112,14 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      /* Change inner text to black when hovering */
+      /* মাউস হোভার করলে লেখার রঙ কালো হবে */
       .suggestion-item:hover,
       .suggestion-item:hover * {
         background-color: var(--brand-gold);
-        color: #000000 !important; /* All inner text elements will be black */
+        color: #000000 !important;
       }
 
-      /* Custom Dropdown Styling */
+      /* কাস্টম ড্রপডাউন স্টাইলিং */
       .custom-select-wrapper {
         position: relative;
         width: 100%;
@@ -207,7 +207,7 @@
         opacity: 1;
         transform: translateY(0);
       }
-      /* OT Date input fields navy blue and gold theme styling */
+      /* ওটি ইনপুট ফিল্ড ও ডেটপিকার স্টাইল */
       #targetDate, #startDateRange, #endDateRange {
         color: var(--brand-gold) !important;
         font-weight: 600;
@@ -342,7 +342,7 @@
         }
 
         .grand-total-label {
-          colspan: 5 !important; 
+          colspan: 6 !important; 
         }
 
         .max-h-\[55vh\] {
@@ -363,7 +363,7 @@
         }
       }
 
-      /* Flatpickr Custom Theme: Navy Blue (#002147) & Golden (#ffd700) */
+      /* Flatpickr কাস্টম থিম */
       .flatpickr-calendar {
         background: #ffffff;
         border: 2px solid var(--brand-gold) !important;
@@ -431,7 +431,7 @@
         border-bottom-color: var(--brand-blue) !important;
       }
 
-      /* Custom Scrollbar for Suggestion Box */
+      /* স্ক্রোলবার স্টাইল */
       .suggestion-box::-webkit-scrollbar {
         width: 6px;
       }
@@ -440,7 +440,7 @@
         border-radius: 10px;
       }
 
-      /* Blur inactive other month days */
+      /* অন্যান্য মাসের তারিখ ব্লার এবং ডিজেবল করার স্টাইল */
       .flatpickr-day.prevMonthDay,
       .flatpickr-day.nextMonthDay {
         opacity: 0.1 !important;
@@ -450,23 +450,24 @@
     </style>
 
     <script>
-      // Dynamically handle footer colspan during print dialog trigger events
+      // প্রিন্ট করার পূর্বে এবং পরে গ্র্যান্ড টোটাল কলামের ফুটার উইডথ ডাইনামিকলি নিয়ন্ত্রণ
       window.onbeforeprint = function() {
         const grandTotalCell = document.getElementById("grandTotalLabelCell");
         if (grandTotalCell) {
-          grandTotalCell.setAttribute("colspan", "5");
+          grandTotalCell.setAttribute("colspan", "6");
         }
       };
       window.onafterprint = function() {
         const grandTotalCell = document.getElementById("grandTotalLabelCell");
         if (grandTotalCell) {
-          grandTotalCell.setAttribute("colspan", "6");
+          grandTotalCell.setAttribute("colspan", "7");
         }
       };
     </script>
   </head>
   <body>
 
+    <!-- লোডিং ওভারলে স্ক্রিন -->
     <div id="loadingOverlay">
       <div class="mb-6 bg-white p-3 rounded-xl">
           <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW Logo" class="h-20 w-auto">
@@ -479,7 +480,7 @@
       <p class="text-sm text-white mt-2 font-medium">Logging in, please wait....</p>
     </div>
 
-    <!-- Notice Message Modal -->
+    <!-- অ্যালার্ট ও নোটিশ মোডাল উইন্ডো -->
     <div id="messageModal" style="position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); display: none; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(4px);">
       <div class="bg-white rounded-2xl w-full max-w-[340px] mx-4 overflow-hidden shadow-2xl p-6 text-center transform transition-all scale-100 border border-[#ffd700]">
         <div id="msgIcon" class="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4 bg-blue-50"></div>
@@ -491,7 +492,7 @@
       </div>
     </div>
 
-    <!-- Preview Report Modal -->
+    <!-- ওটি প্রিভিউ রিপোর্ট ও প্রিন্ট মোডাল -->
     <div id="previewModal">
       <div class="bg-white rounded-2xl w-full max-w-7xl mx-4 overflow-hidden shadow-2xl transition-all border-2 border-[#ffd700]">
         <div class="bg-[#002147] p-4 text-[#ffd700] flex justify-between items-center no-print border-b border-[#ffd700]">
@@ -532,7 +533,8 @@
                   <th class="w-24 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">ID & DATE</th>
                   <th class="w-48 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Name</th>
                   <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Designation</th>
-                  <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Passport / Project</th>
+                  <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Passport</th>
+                  <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Project</th>
                   <th class="w-24 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase text-center hide-on-print">OT Rate</th>
                   <th class="w-20 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">OT Hours</th>
                   <th class="w-28 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Total Taka</th>
@@ -542,7 +544,7 @@
               <tbody id="previewBody"></tbody>
               <tfoot>
                 <tr class="bg-slate-50 font-bold border-t-2 border-[#002147]">
-                  <td id="grandTotalLabelCell" colspan="6" class="p-4 text-right uppercase font-bold text-[#002147]">Grand Total:</td>
+                  <td id="grandTotalLabelCell" colspan="7" class="p-4 text-right uppercase font-bold text-[#002147]">Grand Total:</td>
                   <td id="totalOTCell" class="p-4 text-center text-[#d4af37] print:text-black">0</td>
                   <td id="totalTakaCell" class="p-4 text-center text-[#d4af37] print:text-black">0.00</td>
                   <td class="p-4 uppercase text-[10px] text-slate-500 print:text-black"></td>
@@ -569,7 +571,7 @@
       </div>
     </div>
 
-    <!-- Main Content Area -->
+    <!-- মূল অ্যাপ্লিকেশন কন্টেন্ট -->
     <div class="max-w-7xl mx-auto no-print">
       <div class="max-w-7xl mx-auto no-print pt-6">
         <div class="bg-[#002147] rounded-3xl p-6 mb-8 shadow-2xl border-b-4 border-yellow-500 relative overflow-hidden">
@@ -601,11 +603,11 @@
         </div>
       </div>
 
-      <!-- Selection & Input Panel (Dynamic Morphing Style) -->
+      <!-- সিলেকশন এবং বাটন প্যানেল -->
       <div class="bg-white rounded-2xl p-6 mb-4 shadow-lg border border-slate-100 transition-all duration-300">
         <div class="flex flex-wrap justify-center items-end gap-6">
           
-          <!-- OT Date (Shown in SINGLE mode) -->
+          <!-- ওটি ডেট ফিল্ড (সিঙ্গেল এন্ট্রি মোডে দৃশ্যমান) -->
           <div id="singleDateGroup" class="flex flex-col w-full md:w-auto transition-all duration-300">
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">OT Date</label>
             <div class="relative">
@@ -615,7 +617,7 @@
             </div>
           </div>
 
-          <!-- Start Date (Shown in RANGE mode - default hidden) -->
+          <!-- শুরুর তারিখ (রেঞ্জ মোডে দৃশ্যমান) -->
           <div id="startDateGroup" class="hidden flex flex-col w-full md:w-auto transition-all duration-300">
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">Start Date</label>
             <div class="relative">
@@ -625,7 +627,7 @@
             </div>
           </div>
 
-          <!-- End Date (Shown in RANGE mode - default hidden) -->
+          <!-- শেষ তারিখ (রেঞ্জ মোডে দৃশ্যমান) -->
           <div id="endDateGroup" class="hidden flex flex-col w-full md:w-auto transition-all duration-300">
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">End Date</label>
             <div class="relative">
@@ -635,7 +637,7 @@
             </div>
           </div>
 
-          <!-- Project Location Field (Always shown) -->
+          <!-- প্রজেক্ট লোকেশন ফিল্ড (সর্বদা দৃশ্যমান) -->
           <div class="flex flex-col w-full md:w-auto">
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">Project Location</label>
             <select id="targetSite" class="bg-[#002147] text-[#ffd700] px-4 py-3 rounded-xl font-bold text-sm min-w-[280px] outline-none border-2 border-[#ffd700] focus:ring-4 ring-yellow-500/20 transition-all duration-300 cursor-pointer">
@@ -643,7 +645,7 @@
             </select>
           </div>
 
-          <!-- Single Mode Action Buttons -->
+          <!-- এন্ট্রি মোড অ্যাকশন বাটনসমূহ -->
           <div id="singleActionBtns" class="flex flex-wrap items-end gap-3 w-full md:w-auto transition-all duration-300">
             <div class="flex items-end w-full md:w-auto">
               <button onclick="fetchWorkersFromDatabase()" id="loadBtn" 
@@ -662,7 +664,7 @@
             </div>
           </div>
 
-          <!-- Range Mode Action Buttons (Hidden) -->
+          <!-- রেঞ্জ মোড অ্যাকশন বাটনসমূহ -->
           <div id="rangeActionBtns" class="hidden flex flex-wrap items-end gap-3 w-full md:w-auto transition-all duration-300">
             <div class="flex items-end w-full md:w-auto">
               <button onclick="fetchRangeDataFromDatabase()" 
@@ -675,21 +677,21 @@
             </div>
           </div>
 
-          <!-- Mode Toggle Button -->
+          <!-- মোড টগল বাটন -->
           <div class="flex items-end w-full md:w-auto">
             <button onclick="toggleRangeHistoryPanel()" id="historyToggleBtn"
                     class="w-full md:w-auto bg-[#d4af37] text-[#002147] border-2 border-[#002147] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-yellow-400 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              VIEW HISTORY
+              View History
             </button>
           </div>
 
         </div>
       </div>
 
-      <!-- Main Table and Search Box -->
+      <!-- সার্চ বক্স এবং টেবিল এলাকা -->
       <div id="mainContentSection" class="section-hidden grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
         <div class="md:col-span-12 bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <div class="relative w-full md:w-96">
@@ -702,7 +704,7 @@
             <div id="suggestionBox" class="suggestion-box"></div>
           </div>
 
-          <!-- Selected Preview Bar (Only visible in SINGLE NEW ENTRY ) -->
+          <!-- প্রিভিউ বার (শুধুমাত্র সিঙ্গেল মোডে দৃশ্যমান) -->
           <div id="actionBar" class="opacity-0 pointer-events-none transition-all flex items-center gap-6">
             <div class="text-right">
               <p class="text-[10px] font-bold text-[#002147]/60 uppercase">Selected</p>
@@ -718,7 +720,7 @@
           <div class="overflow-x-auto">
             <table id="workerTable" class="w-full text-left border-collapse">
               <thead class="bg-[#002147] border-b border-[#ffd700]/30">
-                <!-- Headers rendered dynamically based on chosen view mode -->
+                <!-- হেডারসমূহ ডাইনামিকলি স্ক্রিপ্ট দিয়ে লোড হবে -->
                 <tr></tr>
               </thead>
               <tbody id="workerTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
@@ -727,7 +729,7 @@
         </div>
       </div>
 
-      <!-- Placeholder Card -->
+      <!-- প্রথম ফাঁকা প্লেসহোল্ডার কার্ড -->
       <div id="initialPlaceholder" class="bg-white rounded-2xl p-20 border border-dashed border-[#002147]/20 flex flex-col items-center justify-center gap-4 text-center">
         <div class="p-4 bg-slate-50 rounded-full">
           <svg class="w-12 h-12 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -741,6 +743,7 @@
       </div>
     </div>
 
+    <!-- সিস্টেম টোস্ট বার -->
     <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#002147] text-white px-8 py-4 rounded-2xl text-sm font-bold shadow-2xl opacity-0 transition-all transform translate-y-4 pointer-events-none z-[2000] border border-[#ffd700]"></div>
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -749,7 +752,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-      // 1. Firebase configuration setup
+      // ১. ফায়ারবেস কনফিগারেশন সেটআপ
       const firebaseConfig = {
         apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
         authDomain: "munna-acl-fda7c.firebaseapp.com",
@@ -758,7 +761,7 @@
         databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app"
       };
 
-      // Initialize Firebase services
+      // ফায়ারবেস ইনিশিয়ালাইজ করা
       firebase.initializeApp(firebaseConfig);
 
       const db = firebase.firestore();
@@ -767,10 +770,10 @@
       let employees = [],
         currentSites = [],
         preparedData = [],
-        existingDbRecordsMap = {}, // Store existing DB entries dynamically to filter suggestions
-        currentViewMode = "SINGLE"; // "SINGLE" or "RANGE" mode tracking
+        existingDbRecordsMap = {}, // ডুপ্লিকেট ফিল্টারিং ম্যাপ
+        currentViewMode = "SINGLE"; // মোড ট্র্যাকিং
 
-      // Hardcoded fallback list for UI projects
+      // ডাটাবেস এরর হলে বিকল্প প্রজেক্ট লিস্ট
       const defaultProjectFallbackList = [
         "All Projects",
         "ALAM HOUS",
@@ -789,9 +792,9 @@
         "YESH HOUSE"
       ];
 
-      // 2. Fetch required Firestore configurations on load
+      // ২. পেজ লোডে ফায়ারস্টোর কানেকশন
       window.onload = async () => {
-        updateTableHeader(); // Init default headers
+        updateTableHeader();
 
         if (typeof flatpickr !== "undefined") {
           flatpickr("#targetDate", {
@@ -814,7 +817,7 @@
             allowInput: false,
             clickOpens: true,
           });
-          console.log("Flatpickr calendars loaded.");
+          console.log("Calendars active.");
         }
 
         fetchLastUpdate();
@@ -841,14 +844,14 @@
           if(loader) loader.classList.add("fade-out");
 
         } catch (err) {
-          console.error("Firestore loading error - Fallback lists populated.", err);
+          console.error("Connection error, backup values applied.", err);
           populateProjectSelect(true);
           const loader = document.getElementById("loadingOverlay");
           if(loader) loader.classList.add("fade-out");
         }
       };
 
-      // Build dropdown selections
+      // প্রজেক্ট সিলেকশন ড্রপডাউন পপুলেট করা
       function populateProjectSelect(useFallback = false) {
         const siteSelect = document.getElementById("targetSite");
         if (!siteSelect) return;
@@ -879,7 +882,7 @@
         initCustomSelect("targetSite");
       }
 
-      // Dynamic header mapping
+      // টেবিল হেডার ডাইনামিক রেন্ডারিং
       function updateTableHeader() {
         const theadRow = document.querySelector("#workerTable thead tr");
         if (!theadRow) return;
@@ -898,11 +901,12 @@
             <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Remark</th>
           `;
         } else {
-          // Checkbox column removed for History Range mode
+          // পাসপোর্ট এবং প্রজেক্ট সম্পূর্ণ আলাদা কলামে বিভক্ত
           theadRow.innerHTML = `
             <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">ID, Name & Date</th>
             <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Designation</th>
-            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Passport & Project</th>
+            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Passport</th>
+            <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest">Project</th>
             <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Rate</th>
             <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">OT Hours</th>
             <th class="p-4 text-[11px] font-black text-[#d4af37] uppercase tracking-widest text-center">Total Taka</th>
@@ -912,7 +916,7 @@
         }
       }
 
-      /* Custom Dropdown Trigger */
+      /* ড্রপডাউন ট্র্রিগার ইনিশিয়ালি */
       function initCustomSelect(id) {
         const select = document.getElementById(id);
         if (!select) return;
@@ -964,7 +968,7 @@
         if(suggestionBox) suggestionBox.style.display = "none";
       });
 
-      // 3. Fetch latest active entry from Database
+      // ৩. ডাটাবেস থেকে সর্বশেষ আপডেট ইনফো আনা
       async function fetchLastUpdate() {
         const display = document.getElementById("lastUpdateDisplay");
         if(!display) return;
@@ -996,7 +1000,7 @@
           });
       }
 
-      // Reset all selection variables and clear inputs
+      // ইনপুট এবং ড্রপডাউনগুলো ক্লিয়ার করার ফাংশন
       function clearAllInputsAndDropdowns() {
         document.getElementById("targetDate").value = "";
         document.getElementById("startDateRange").value = "";
@@ -1011,13 +1015,12 @@
           }
         }
         
-        // Hide list section and reset existing entries map
         document.getElementById("initialPlaceholder").style.display = "flex";
         document.getElementById("mainContentSection").classList.replace("section-visible", "section-hidden");
         existingDbRecordsMap = {};
       }
 
-      // 4. Handle Morphing Interface Switch with auto-clear implemented for BOTH toggle states
+      // ৪. মোড চেঞ্জ ট্র্যাকিং ও ক্লিয়ার লজিক
       function toggleRangeHistoryPanel() {
         const btn = document.getElementById("historyToggleBtn");
         
@@ -1030,7 +1033,6 @@
         
         const modeBadge = document.getElementById("currentModeBadge");
         
-        // Always reset and clear inputs before opening any mode
         clearAllInputsAndDropdowns();
         
         if (currentViewMode === "SINGLE") {
@@ -1043,12 +1045,12 @@
           endDateGroup.classList.remove("hidden");
           rangeActionBtns.classList.remove("hidden");
           
-          btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg> NEW ENTRY`;
+          btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>  NEW ENTRY`;
           btn.classList.replace("bg-[#d4af37]", "bg-red-500");
           btn.classList.replace("text-[#002147]", "text-white");
           
           modeBadge.innerText = "OVER TIME HISTORY VIEW MODE";
-          document.getElementById("placeholderText").innerText = "Select Start Date, End Date, and Project Location, then click 'Fetch Data'.";
+          document.getElementById("placeholderText").innerText = "Select Start Date, End Date, and Project Name, then click 'SEARCH'.";
         } else {
           currentViewMode = "SINGLE";
           
@@ -1067,11 +1069,11 @@
           document.getElementById("placeholderText").innerText = "Please select OT Date and Project Location, then click the 'Search' button.";
         }
         
-        updateTableHeader(); // Redraw table header structure
-        updateSelectedCount(); // Hide or show action bar
+        updateTableHeader();
+        updateSelectedCount();
       }
 
-      // Fetch existing DB entries for selected date & project to exclude from suggestions
+      // এন্ট্রি ভ্যালিডেশনের জন্য পূর্বে এন্ট্রি করা ম্যাপ লোড করা
       async function loadExistingRecordsForValidation(date, site) {
         existingDbRecordsMap = {};
         try {
@@ -1084,36 +1086,31 @@
             const data = snap.val();
             Object.keys(data).forEach(key => {
               const entry = data[key];
-              // Map composite key of existing ID & Project combinations
               if (entry.Site === site) {
                 existingDbRecordsMap[entry.ID] = true;
               }
             });
           }
         } catch (e) {
-          console.error("Error checking existing records:", e);
+          console.error("Error validation logs:", e);
         }
       }
 
-      // 5. Build worker search list (Single NEW ENTRY)
-      // Strictly requires both Target Date and Project Location selection
-      // Smart Exclude filters out employees who already have registered entries
+      // ৫. ওটি এন্ট্রি সার্চ তালিকা লোড
       async function fetchWorkersFromDatabase() {
         const date = document.getElementById("targetDate").value;
         const site = document.getElementById("targetSite").value;
         
-        // Force both parameters on clicking Search
         if (!date || !site) {
           return showMessage(
             "Validation Failed",
-            "Please select both OT Date and Project Location first before searching.",
+            "Please select both OT Date and Project Name first before searching.",
             "error"
           );
         }
 
         showToast("Loading active session...", "info");
         
-        // Retrieve and build list of existing entries to exclude from search box autocomplete and table
         await loadExistingRecordsForValidation(date, site);
 
         currentViewMode = "SINGLE";
@@ -1132,9 +1129,8 @@
         employees.forEach((w) => {
           const id = w.id || w.docId || "N/A";
           
-          // Smart exclusion filtering out duplicates in table rendering
           if (existingDbRecordsMap[id] === true) {
-            return; // Skip rendering this employee
+            return; 
           }
 
           visibleCount++;
@@ -1142,7 +1138,7 @@
           const designation = w.designation || "-";
           const passport = w.passport || "-";
           const rate = parseFloat(w.otRate) || 0;
-          const rowKey = `${id}_${date}`; // Unique composite identifier key
+          const rowKey = `${id}_${date}`;
 
           const row = document.createElement("tr");
           row.className = "worker-row transition-all hover:bg-slate-50";
@@ -1171,7 +1167,6 @@
           tbody.appendChild(row);
         });
 
-        // Show elegant notification if all available workers are already recorded
         if (visibleCount === 0) {
           tbody.innerHTML = `
             <tr>
@@ -1184,11 +1179,11 @@
         updateSelectedCount();
       }
 
-      // 6. Fetch Range history logs & build row actions
+      // ৬. ইতিহাস রেকর্ড খোঁজা এবং টেবিলে পাসপোর্ট ও প্রজেক্ট আলাদা করা
       async function fetchRangeDataFromDatabase() {
         const start = document.getElementById("startDateRange").value;
         const end = document.getElementById("endDateRange").value;
-        const site = document.getElementById("targetSite").value; // Default option fetches all projects
+        const site = document.getElementById("targetSite").value;
 
         if (!start || !end) {
           return showMessage("Warning", "Please select both Start Date and End Date.", "error");
@@ -1205,7 +1200,7 @@
         mainContent.classList.add("section-visible");
 
         const tbody = document.getElementById("workerTableBody");
-        tbody.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-slate-500 font-bold">Please wait, loading data from database...</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-slate-500 font-bold">Please wait, loading data from database...</td></tr>`;
 
         try {
           const monthsToFetch = getMonthsBetweenDates(start, end);
@@ -1220,7 +1215,7 @@
           });
 
           const results = await Promise.all(fetchPromises);
-          tbody.innerHTML = ""; // Remove loading fallback
+          tbody.innerHTML = ""; 
 
           const startDateObj = new Date(start);
           const endDateObj = new Date(end);
@@ -1244,16 +1239,15 @@
           });
 
           if (rawDataList.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-red-500 font-bold">No overtime records found matching the criteria.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-red-500 font-bold">No overtime records found matching the criteria.</td></tr>`;
             updateSelectedCount();
             return;
           }
 
-          // RENDER UPDATE: Show success alerts at the top before looping and rendering elements
           updateSelectedCount();
           showToast(`Loaded ${rawDataList.length} records successfully.`, "success");
 
-          // Build edit-enabled table lines (without first checkbox col)
+          // টেবিলে পাসপোর্ট এবং প্রজেক্টকে সম্পূর্ণ আলাদা কলামে জেনারেট করা হচ্ছে
           rawDataList.forEach((entry) => {
             const id = entry.ID;
             const name = entry.Name;
@@ -1266,11 +1260,21 @@
             const remark = entry.Remark && entry.Remark !== "-" ? entry.Remark : "";
             const currentSiteName = entry.Site || "-";
 
-            const rowKey = `${id}_${otDate}`; // Composite target key
+            const rowKey = `${id}_${otDate}`;
 
             const row = document.createElement("tr");
-            row.className = "worker-row transition-all hover:bg-slate-50"; // Standard row highlighting
+            row.className = "worker-row transition-all hover:bg-slate-50";
             row.id = `row-${rowKey}`;
+
+            // প্রজেক্ট পরিবর্তনের জন্য কাস্টম অপশন সিলেকশন তালিকা তৈরি
+            const activeSites = currentSites.length > 0 
+              ? currentSites.map(s => s.NAME || s.docId.replace(/%20/g, " "))
+              : defaultProjectFallbackList.filter(p => p !== "All Projects");
+
+            let siteOptionsHtml = "";
+            activeSites.forEach(sName => {
+              siteOptionsHtml += `<option value="${sName}" ${sName === currentSiteName ? 'selected' : ''}>${sName}</option>`;
+            });
 
             row.innerHTML = `
                 <td class="p-4">
@@ -1278,10 +1282,12 @@
                     <div class="text-[10px] text-[#d4af37] font-bold tracking-tighter uppercase">ID: ${id} | Date: ${otDate}</div>
                 </td>
                 <td class="p-4"><span class="text-xs text-[#002147] font-bold uppercase">${designation}</span></td>
+                <td class="p-4"><span class="text-xs text-[#002147] font-bold uppercase">${passport}</span></td>
+                <!-- এডিটেবল প্রজেক্ট লোকেশন ড্রপডাউন কলাম -->
                 <td class="p-4">
-                    <div class="text-xs text-[#002147] font-bold uppercase">${passport}</div>
-                    <div class="text-[9px] text-blue-600 font-semibold uppercase tracking-tighter">Loc: ${currentSiteName}</div>
-                    <input type="hidden" id="site-${rowKey}" value="${currentSiteName}">
+                    <select id="site-select-${rowKey}" class="bg-slate-100 border border-[#002147]/10 rounded-lg px-2 py-1.5 text-xs w-full outline-none text-[#002147] font-semibold transition-all" disabled>
+                        ${siteOptionsHtml}
+                    </select>
                 </td>
                 <td class="p-4 text-center">
                     <span id="rate-display-${rowKey}" class="text-xs text-[#002147] font-black">${rate.toFixed(2)}</span>
@@ -1292,10 +1298,9 @@
                 </td>
                 <td class="p-4 text-center"><span id="taka-${rowKey}" class="font-black text-[#d4af37] text-xs">${totalTaka.toFixed(2)}</span></td>
                 <td class="p-4">
-                    <input type="text" id="remark-${rowKey}" value="${remark}" placeholder="No comment recorded" class="bg-slate-100 border border-[#002147]/10 rounded-lg px-3 py-1.5 text-xs w-full outline-none text-[#002147]" readonly>
+                    <input type="text" id="remark-${rowKey}" value="${remark}" placeholder="No comment" class="bg-slate-100 border border-[#002147]/10 rounded-lg px-3 py-1.5 text-xs w-full outline-none text-[#002147]" readonly>
                 </td>
                 <td class="p-4 text-center">
-                    <!-- Dynamic inline save button actions -->
                     <button onclick="toggleRowEdit('${rowKey}')" id="btn-edit-${rowKey}" class="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold uppercase hover:bg-blue-700 transition-all flex items-center justify-center mx-auto gap-1">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                         Edit
@@ -1307,24 +1312,31 @@
 
         } catch (err) {
           console.error("Fetch Range Error:", err);
-          tbody.innerHTML = `<tr><td colspan="8" class="p-10 text-center text-red-500 font-bold">Failed to load range logs. Please try again.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" class="p-10 text-center text-red-500 font-bold">Failed to load range logs. Please try again.</td></tr>`;
         }
       }
 
-      // 7. Toggle row locks & update individual values
+      // ৭. প্রজেক্ট লোকেশন, ওটি ঘণ্টা এবং মন্তব্য এডিট করার সুযোগ প্রদান
       function toggleRowEdit(rowKey) {
         const btn = document.getElementById(`btn-edit-${rowKey}`);
         const otInput = document.getElementById(`ot-${rowKey}`);
         const remarkInput = document.getElementById(`remark-${rowKey}`);
+        const siteSelect = document.getElementById(`site-select-${rowKey}`);
 
         if (otInput.hasAttribute("readonly")) {
-          // Unlock row cells
+          // ইনপুট এবং ড্রপডাউনগুলো আনলক করা হচ্ছে
           otInput.removeAttribute("readonly");
           remarkInput.removeAttribute("readonly");
+          if (siteSelect) siteSelect.removeAttribute("disabled");
+
           otInput.classList.replace("bg-slate-100", "bg-white");
           otInput.classList.add("border-blue-500", "ring-2", "ring-blue-100");
           remarkInput.classList.replace("bg-slate-100", "bg-white");
           remarkInput.classList.add("border-blue-500", "ring-2", "ring-blue-100");
+          if (siteSelect) {
+            siteSelect.classList.replace("bg-slate-100", "bg-white");
+            siteSelect.classList.add("border-blue-500", "ring-2", "ring-blue-100");
+          }
           
           btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Save`;
           btn.classList.replace("bg-blue-600", "bg-green-600");
@@ -1332,23 +1344,23 @@
           
           otInput.focus();
         } else {
-          // Lock row cells and commit single update to Database
           saveSingleRowToDatabase(rowKey);
         }
       }
 
-      // Commit changes of a single line to Firebase RTDB
+      // ওটি রেকর্ড ডাটাবেসে রিয়েল-টাইমে আপডেট করার ফাংশন
       async function saveSingleRowToDatabase(rowKey) {
         const btn = document.getElementById(`btn-edit-${rowKey}`);
         const otInput = document.getElementById(`ot-${rowKey}`);
         const remarkInput = document.getElementById(`remark-${rowKey}`);
+        const siteSelect = document.getElementById(`site-select-${rowKey}`);
 
         const [id, date] = rowKey.split("_");
         const ot = parseFloat(otInput.value) || 0;
         const rate = parseFloat(document.getElementById(`rate-${rowKey}`).value) || 0;
         const remark = remarkInput.value || "-";
         const totalTaka = (ot * rate).toFixed(2);
-        const site = document.getElementById(`site-${rowKey}`)?.value || "-";
+        const site = siteSelect ? siteSelect.value : "-";
 
         const emp = employees.find(e => String(e.id || e.docId) === id);
         const name = emp ? (emp.name || "Unknown") : "Unknown";
@@ -1378,13 +1390,18 @@
             Entry_Time: new Date().toString(),
           });
 
-          // Relock row cells
           otInput.setAttribute("readonly", true);
           remarkInput.setAttribute("readonly", true);
+          if (siteSelect) siteSelect.setAttribute("disabled", true);
+
           otInput.classList.replace("bg-white", "bg-slate-100");
           otInput.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
           remarkInput.classList.replace("bg-white", "bg-slate-100");
           remarkInput.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
+          if (siteSelect) {
+            siteSelect.classList.replace("bg-white", "bg-slate-100");
+            siteSelect.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
+          }
 
           btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> Edit`;
           btn.classList.replace("bg-green-600", "bg-blue-600");
@@ -1401,7 +1418,7 @@
         }
       }
 
-      // Helper helper range dates
+      // তারিখের রেঞ্জ থেকে মাসের নাম তৈরির হেল্পার
       function getMonthsBetweenDates(startDateStr, endDateStr) {
         const start = new Date(startDateStr);
         const end = new Date(endDateStr);
@@ -1418,7 +1435,7 @@
         return months;
       }
 
-      // 8. Push batch modifications to database
+      // ডাটাবেস ব্যাচ পোস্টিং
       async function confirmAndSave() {
         const saveBtn = document.getElementById("finalSaveBtn");
         if(!saveBtn || preparedData.length === 0) return;
@@ -1475,7 +1492,7 @@
 
           closePreview();
           fetchLastUpdate(); 
-          showMessage("Success", "All overtime records have been stored/updated successfully.", "success");
+          showMessage("Success", "All overtime records have been  successfully.", "success");
 
         } catch (err) {
           console.error("Save Error:", err);
@@ -1495,7 +1512,7 @@
         });
       }
 
-      // 9. Build batch preview overlay reports
+      // ৮. প্রিভিউ উইন্ডো তৈরি (পাসপোর্ট এবং প্রজেক্ট কলাম আলাদা রেন্ডার)
       function openPreview() {
         const selectedChecks = document.querySelectorAll(".worker-check:checked");
         if (selectedChecks.length === 0) return;
@@ -1554,9 +1571,9 @@
           const remark = document.getElementById(`remark-${rowKey}`).value || "-";
 
           let rowSite = defaultSite;
-          const hiddenSiteField = document.getElementById(`site-${rowKey}`);
-          if (hiddenSiteField && hiddenSiteField.value) {
-            rowSite = hiddenSiteField.value;
+          const siteSelectField = document.getElementById(`site-select-${rowKey}`);
+          if (siteSelectField && siteSelectField.value) {
+            rowSite = siteSelectField.value;
           }
 
           grandTotalHours += ot;
@@ -1575,6 +1592,7 @@
             designation: designation,
           });
 
+          // পাসপোর্ট এবং প্রজেক্ট আলাদা আলাদা টিডি (TD) বক্সে বিভক্ত
           previewBody.innerHTML += `
               <tr class="border border-[#002147] text-sm text-[#002147]">
                   <td class="p-1 text-center border-r border-[#002147]">${visibleIndex++}</td>
@@ -1584,10 +1602,8 @@
                   </td>
                   <td class="p-1 border-r border-[#002147] text-[#002147]">${empName}</td>
                   <td class="p-1 border-r border-[#002147] text-xs designation-col text-[#002147]">${designation}</td>
-                  <td class="p-1 border-r border-[#002147] text-xs passport-col text-[#002147]">
-                      <div>${passport}</div>
-                      <div class="text-[8px] text-blue-600 font-bold uppercase">${rowSite}</div>
-                  </td>
+                  <td class="p-1 border-r border-[#002147] text-xs passport-col text-[#002147]">${passport}</td>
+                  <td class="p-1 border-r border-[#002147] text-xs font-bold uppercase text-[#002147]">${rowSite}</td>
                   <td class="p-1 text-center border-r border-[#002147] hide-on-print text-[#002147]">${rate.toFixed(2)}</td>
                   <td class="p-1 text-center border-r border-[#002147] font-bold text-[#002147]">${ot}</td>
                   <td class="p-1 text-center border-r border-[#002147] font-bold text-[#d4af37]">${taka.toFixed(2)}</td>
@@ -1645,13 +1661,12 @@
         updateSelectedCount();
       }
 
-      // Track selected counts & preview bar visibility
+      // এন্ট্রি কাউন্টিং এবং অ্যাকশন বার শো লজিক
       function updateSelectedCount() {
         const count = document.querySelectorAll(".worker-check:checked").length;
         document.getElementById("selectedCount").innerText = count;
         const actionBar = document.getElementById("actionBar");
 
-        // PREVIEW panel bar must never display in Range History Mode
         if (currentViewMode === "RANGE") {
           actionBar.classList.replace("opacity-100", "opacity-0");
           actionBar.classList.add("pointer-events-none");
@@ -1680,7 +1695,6 @@
         document.getElementById("previewModal").style.display = "none"; 
       }
 
-      // Custom notification toaster UI element
       function showToast(msg, type) {
         const toast = document.getElementById("toast");
         toast.innerText = msg;
@@ -1688,19 +1702,17 @@
         setTimeout(() => { toast.style.opacity = "0"; }, 3000);
       }
 
-      // Live autocomplete search input suggestions filtering out already active DB logs
+      // ডাইনামিকলি নতুন এন্ট্রি করা ম্যাপ ফিল্টার করে সাজেশনে আনা
       function handleSearchInput(input) {
         const query = input.value.trim().toLowerCase();
         const box = document.getElementById("suggestionBox");
         if (employees.length === 0) return;
         
-        // Filter out employees matching search term + ensure they don't already exist on current Date & Project
         const filtered = employees
           .filter((e) => {
             const empId = String(e.id || e.docId);
             const matchesQuery = empId.toLowerCase().includes(query) || (e.name && e.name.toLowerCase().includes(query));
             
-            // Checking: If SINGLE NEW ENTRY, exclude if already added in DB
             if (currentViewMode === "SINGLE") {
               const isAlreadyEntered = existingDbRecordsMap[empId] === true;
               return matchesQuery && !isAlreadyEntered;
@@ -1761,7 +1773,6 @@
         }
       }
 
-      // Handle search input Enter action
       function handleSearchEnter(event) {
         if (event.key === "Enter") {
           event.preventDefault(); 
@@ -1773,7 +1784,6 @@
         }
       }
 
-      // Handle overtime input box Enter action
       function handleOtEnter(event, rowKey) {
         if (event.key === "Enter") {
           event.preventDefault(); 
@@ -1784,10 +1794,6 @@
           }
         }
       }
-    
-      
-      
-  
     </script>
   </body>
 </html>
