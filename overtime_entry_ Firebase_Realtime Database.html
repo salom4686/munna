@@ -25,8 +25,8 @@
 
       body {
         font-family: "Inter", sans-serif;
-        background-color: #f8fafc;
-        color: var(--brand-blue); /* ডিফল্ট লেখা নেভি ব্লু */
+        background-color: var(--brand-blue); /* পেজের ব্যাকগ্রাউন্ড কালার নেভি ব্লু */
+        color: #ffffff; /* ব্যাকগ্রাউন্ডের সাথে ম্যাচ করে লেখার কালার সাদা */
       }
 
       .worker-row.selected {
@@ -573,29 +573,33 @@
 
     <!-- মূল অ্যাপ্লিকেশন কন্টেন্ট -->
     <div class="max-w-7xl mx-auto no-print">
-      <div class="max-w-7xl mx-auto no-print pt-6">
-        <div class="bg-[#002147] rounded-3xl p-6 mb-8 shadow-2xl border-b-4 border-yellow-500 relative overflow-hidden">
+      <div class="max-w-7xl mx-auto no-print pt-4">
+        <!-- p-6 থেকে কমিয়ে p-3.5 এবং mb-8 থেকে কমিয়ে mb-6 করা হয়েছে যাতে জায়গা বাঁচে -->
+        <div class="bg-[#002147] rounded-3xl p-3.5 mb-6 shadow-2xl border-b-2 border-yellow-500 relative overflow-hidden">
           
-          <div class="flex items-center justify-center relative min-h-[120px]">
+          <!-- min-h-[120px] থেকে কমিয়ে min-h-[70px] করা হয়েছে -->
+          <div class="flex items-center justify-center relative min-h-[70px]">
             
             <div class="absolute left-4">
-              <div class="bg-white p-2 rounded-xl shadow-lg border border-slate-100">
+              <!-- লোগোর প্যাডিং এবং সাইজ স্লিম করা হয়েছে -->
+              <div class="bg-white p-1.5 rounded-xl shadow-lg border border-slate-100">
                  <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" 
                       alt="ALAMHOW Logo" 
-                      class="h-14 w-auto">
+                      class="h-10 w-auto">
               </div>
             </div>
 
-            <div class="text-center px-24">
-              <h1 class="text-3xl md:text-5xl font-black tracking-tighter uppercase text-white drop-shadow-md">
+            <!-- টাইটেল ফন্ট সাইজ এবং প্যাডিং অপ্টিমাইজ করা হয়েছে -->
+            <div class="text-center px-16">
+              <h1 class="text-xl md:text-2xl font-black tracking-tight uppercase text-white drop-shadow-md">
                 ALOMHOW <span class="text-yellow-400">COMPANY</span> LTD
               </h1>
-              <div class="flex justify-center items-center gap-3 mt-3">
-                <div class="h-[1px] w-12 bg-yellow-500/50"></div>
-                <p id="currentModeBadge" class="text-blue-100 text-[10px] md:text-xs font-bold uppercase tracking-[0.4em] opacity-90">
+              <div class="flex justify-center items-center gap-2 mt-1.5">
+                <div class="h-[1px] w-8 bg-yellow-500/50"></div>
+                <p id="currentModeBadge" class="text-blue-100 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.3em] opacity-90">
                   OVER TIME ENTRY FORM
                 </p>
-                <div class="h-[1px] w-12 bg-yellow-500/50"></div>
+                <div class="h-[1px] w-8 bg-yellow-500/50"></div>
               </div>
             </div>
 
@@ -609,7 +613,7 @@
           
           <!-- ওটি ডেট ফিল্ড (সিঙ্গেল এন্ট্রি মোডে দৃশ্যমান) -->
           <div id="singleDateGroup" class="flex flex-col w-full md:w-auto transition-all duration-300">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">OT Date</label>
+            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">OT Date</label>
             <div class="relative">
               <input type="text" id="targetDate" placeholder="Select Date" 
                      class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[200px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
@@ -619,7 +623,7 @@
 
           <!-- শুরুর তারিখ (রেঞ্জ মোডে দৃশ্যমান) -->
           <div id="startDateGroup" class="hidden flex flex-col w-full md:w-auto transition-all duration-300">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">Start Date</label>
+            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">Start Date</label>
             <div class="relative">
               <input type="text" id="startDateRange" placeholder="Start Date" 
                      class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
@@ -629,7 +633,7 @@
 
           <!-- শেষ তারিখ (রেঞ্জ মোডে দৃশ্যমান) -->
           <div id="endDateGroup" class="hidden flex flex-col w-full md:w-auto transition-all duration-300">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">End Date</label>
+            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">End Date</label>
             <div class="relative">
               <input type="text" id="endDateRange" placeholder="End Date" 
                      class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
@@ -639,7 +643,7 @@
 
           <!-- প্রজেক্ট লোকেশন ফিল্ড (সর্বদা দৃশ্যমান) -->
           <div class="flex flex-col w-full md:w-auto">
-            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1">Project Location</label>
+            <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">Project Location</label>
             <select id="targetSite" class="bg-[#002147] text-[#ffd700] px-4 py-3 rounded-xl font-bold text-sm min-w-[280px] outline-none border-2 border-[#ffd700] focus:ring-4 ring-yellow-500/20 transition-all duration-300 cursor-pointer">
               <option value="">Choose Project</option>
             </select>
@@ -729,16 +733,17 @@
         </div>
       </div>
 
-      <!-- প্রথম ফাঁকা প্লেসহোল্ডার কার্ড -->
-      <div id="initialPlaceholder" class="bg-white rounded-2xl p-20 border border-dashed border-[#002147]/20 flex flex-col items-center justify-center gap-4 text-center">
-        <div class="p-4 bg-slate-50 rounded-full">
-          <svg class="w-12 h-12 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- প্রথম ফাঁকা প্লেসহোল্ডার কন্টেন্ট (কার্ডের বর্ডার ও সাদা ব্যাকগ্রাউন্ড বাদ দেওয়া হয়েছে) -->
+      <div id="initialPlaceholder" class="p-8 flex flex-col items-center justify-center gap-3 text-center transition-all duration-300">
+        <div class="p-3 bg-white/10 rounded-full border border-white/20">
+          <svg class="w-10 h-10 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-width="1.5"></path>
           </svg>
         </div>
         <div>
-          <p id="placeholderText" class="text-[#002147] font-semibold">Please select OT Date and Project Location, then click the "Search" button.</p>
-          <p id="lastUpdateDisplay" class="text-[#d4af37] text-[10px] font-bold uppercase tracking-widest mt-2">Connecting...</p>
+          <!-- নেভি ব্লু ব্যাকগ্রাউন্ডে ভালো দেখানোর জন্য টেক্সট কালার সাদা/হালকা করা হয়েছে -->
+          <p id="placeholderText" class="text-white font-medium text-sm">Please select OT Date and Project Location, then click the "Search" button.</p>
+          <p id="lastUpdateDisplay" class="text-[#ffd700] text-[10px] font-bold uppercase tracking-widest mt-1.5">Connecting...</p>
         </div>
       </div>
     </div>
@@ -854,7 +859,7 @@
       // প্রজেক্ট সিলেকশন ড্রপডাউন পপুলেট করা
       function populateProjectSelect(useFallback = false) {
         const siteSelect = document.getElementById("targetSite");
-        if (!siteSelect) return;
+        if (!siteSelect) return; // এখানে 'select'-এর বদলে 'siteSelect' ব্যবহার করে ত্রুটি সংশোধন করা হলো
 
         siteSelect.innerHTML = "";
 
@@ -989,7 +994,7 @@
               const workerKeys = Object.keys(dayData);
               const lastWorkerEntry = dayData[workerKeys[workerKeys.length - 1]];
 
-              display.innerHTML = `Last Entry (${monthYear}): <span class="text-[#002147] font-bold">${lastWorkerEntry.OT_Date || "N/A"}</span> (ID: <span class="text-[#d4af37] font-bold">${lastWorkerEntry.ID || "N/A"}</span>)`;
+              display.innerHTML = `Last Entry (${monthYear}): <span class="text-white font-bold">${lastWorkerEntry.OT_Date || "N/A"}</span> (ID: <span class="text-[#ffd700] font-bold">${lastWorkerEntry.ID || "N/A"}</span>)`;
             } else {
               display.innerText = `No previous records found for ${monthYear}.`;
             }
@@ -1179,7 +1184,7 @@
         updateSelectedCount();
       }
 
-      // ৬. ইতিহাস রেকর্ড খোঁজা এবং টেবিলে পাসপোর্ট ও প্রজেক্ট আলাদা করা
+      //6. ইতিহাস রেকর্ড খোঁজা এবং টেবিলে পাসপোর্ট ও প্রজেক্ট আলাদা করা
       async function fetchRangeDataFromDatabase() {
         const start = document.getElementById("startDateRange").value;
         const end = document.getElementById("endDateRange").value;
@@ -1689,12 +1694,15 @@
         modal.style.display = "flex";
       }
 
+      // কাস্টম মোডাল বন্ধ করার ফাংশন
       function closeMessage() { document.getElementById("messageModal").style.display = "none"; }
       
+      // কাস্টম প্রিভিউ রিপোর্ট উইন্ডো বন্ধ করার ফাংশন
       function closePreview() { 
         document.getElementById("previewModal").style.display = "none"; 
       }
 
+      // টোস্ট বার শো করার লজিক
       function showToast(msg, type) {
         const toast = document.getElementById("toast");
         toast.innerText = msg;
