@@ -1734,7 +1734,7 @@
                   sWork = 0;
                 }
               } else {
-                rem = "NORMAL WORK";
+                rem = "OTHERS";
                 hWork = 0;
                 sWork = 0;
               }
@@ -2702,7 +2702,7 @@
             otEl.parentElement.classList.add("hidden"); // Hide OT Hours field
           }
           if (amountGroup) amountGroup.classList.remove("hidden"); // Show Amount field
-          if (remarkEl) remarkEl.value = "half day";
+          if (remarkEl) remarkEl.value = "OTHERS";
           remarkEl.readOnly = false; // Make remark editable
 
           const wrapper = sideSelect.parentElement.querySelector(
@@ -2980,7 +2980,7 @@
             // For OTHERS and any other status, leave Sunday/Holiday fields empty
             if (sunEl) sunEl.value = "";
             if (holEl) holEl.value = "";
-            if (remarkEl) remarkEl.value = "NORMAL WORK";
+            if (remarkEl) remarkEl.value = "OTHERS";
           }
         }
 
@@ -3394,7 +3394,7 @@
             otRate: document.getElementById("globalOtRate").value || 0,
             ot: parseFloat(document.getElementById("dailyOt").value) || 0,
             site: site,
-            status: selectedStatus === "OTHERS" ? "PRESENT" : selectedStatus,
+            status: selectedStatus,
             holidayWork:
               parseFloat(document.getElementById("holidayWork").value) || 0,
             sundayWork:
@@ -3403,10 +3403,7 @@
               selectedStatus === "OTHERS"
                 ? parseFloat(amountInputValue) || 0
                 : 0,
-            remark:
-              selectedStatus === "OTHERS"
-                ? "half day"
-                : document.getElementById("attRemark").value,
+            remark: document.getElementById("attRemark").value,
           };
 
           // ?. ?????? ???? ??? ???
