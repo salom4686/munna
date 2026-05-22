@@ -1,1115 +1,1473 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Advance & Adjustment System</title>
-    <link class="no-print" rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
+    <link
+      class="no-print"
+      rel="icon"
+      type="image/png"
+      href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    
+
     <!-- Firebase SDKs - Cloud Firestore & Realtime Database Compat Libraries -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-        :root {
-            --brand-blue: #1e3a5f;
-            --brand-gold: #d4af37;
-            --brand-blue-hover: #142842;
-            --bg-dark-blue: #0f1e33; 
-        }
+      :root {
+        --brand-blue: #1e3a5f;
+        --brand-gold: #d4af37;
+        --brand-blue-hover: #142842;
+        --bg-dark-blue: #0f1e33;
+      }
 
-        .page-wrapper {
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            padding-left: 1.5rem;
-            padding-right: 1.5rem;
-        }
+      .page-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
 
-        /* Flatpickr Custom Navy Blue Theme with Gold Accents */
-        .flatpickr-calendar {
-            background: #fff;
-            border: 2px solid var(--brand-blue);
-            box-shadow: 0 10px 25px -5px rgba(30, 58, 95, 0.3);
-            border-radius: 12px;
-        }
-        .flatpickr-months .flatpickr-month {
-            background: var(--brand-blue) !important;
-            color: #fff !important;
-        }
-        .flatpickr-current-month .flatpickr-monthDropdown-months {
-            background: var(--brand-blue) !important;
-        }
-        .flatpickr-weekdays {
-            background: var(--brand-blue) !important;
-        }
-        span.flatpickr-weekday {
-            background: var(--brand-blue) !important;
-            color: #fff !important;
-        }
-        .flatpickr-day.selected, 
-        .flatpickr-day.today {
-            background: var(--brand-gold) !important;
-            border-color: var(--brand-gold) !important;
-            color: var(--brand-blue) !important;
-            font-weight: bold !important;
-        }
-        .flatpickr-day:hover {
-            background: rgba(212, 175, 55, 0.2) !important;
-        }
+      /* Flatpickr Custom Navy Blue Theme with Gold Accents */
+      .flatpickr-calendar {
+        background: #fff;
+        border: 2px solid var(--brand-blue);
+        box-shadow: 0 10px 25px -5px rgba(30, 58, 95, 0.3);
+        border-radius: 12px;
+      }
+      .flatpickr-months .flatpickr-month {
+        background: var(--brand-blue) !important;
+        color: #fff !important;
+      }
+      .flatpickr-current-month .flatpickr-monthDropdown-months {
+        background: var(--brand-blue) !important;
+      }
+      .flatpickr-weekdays {
+        background: var(--brand-blue) !important;
+      }
+      span.flatpickr-weekday {
+        background: var(--brand-blue) !important;
+        color: #fff !important;
+      }
+      .flatpickr-day.selected,
+      .flatpickr-day.today {
+        background: var(--brand-gold) !important;
+        border-color: var(--brand-gold) !important;
+        color: var(--brand-blue) !important;
+        font-weight: bold !important;
+      }
+      .flatpickr-day:hover {
+        background: rgba(212, 175, 55, 0.2) !important;
+      }
 
-        .loading-spinner {
-            border: 3px solid rgba(212, 175, 55, 0.2);
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border-left-color: var(--brand-gold);
-            animation: spin 1s linear infinite;
+      .loading-spinner {
+        border: 3px solid rgba(212, 175, 55, 0.2);
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border-left-color: var(--brand-gold);
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Premium Navy Blue Dropdown with Golden Border - Expanded for non-breaking text and floating overhead other fields */
-        .search-results {
-            max-height: 290px;
-            overflow-y: auto;
-            position: absolute;
-            width: 150%; /* Extended width to float nicely over other columns */
-            min-width: 325px; /* Ensures ample space even on small mobile screens */
-            max-width: 500px;
-            z-index: 999; /* Higher priority to lay on top of form fields, datepicker and buttons */
-            background: var(--brand-blue);
-            border: 2px solid var(--brand-gold);
-            border-radius: 0.75rem;
-            display: none;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-            margin-top: 5px;
-        }
-        .search-item {
-            padding: 12px 14px;
-            cursor: pointer;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            transition: all 0.2s ease;
-            color: #ffffff;
-            box-sizing: border-box;
-            width: 100%;
-        }
-        /* Hover Effect: Background Golden & Text Black */
-        .search-item:hover {
-            background-color: var(--brand-gold) !important;
-            color: #000000 !important;
-        }
-        .search-item:hover .id-badge {
-            background-color: var(--brand-blue) !important;
-            color: #ffffff !important;
-        }
-        .search-item:hover .pending-text-badge {
-            color: #000000 !important;
-            border-color: rgba(0, 0, 0, 0.4) !important;
-            background-color: rgba(0, 0, 0, 0.05) !important;
-        }
-        .id-badge {
-            background-color: rgba(255, 255, 255, 0.12);
-            color: var(--brand-gold);
-            font-weight: 900;
-            font-size: 10px;
-            padding: 3px 8px;
-            border-radius: 4px;
-            margin-right: 12px;
-            min-width: 65px;
-            text-align: center;
-            transition: all 0.2s ease;
-            display: inline-block;
-            flex-shrink: 0; 
-        }
+      }
 
-        @media print {
-            @page { size: A4 landscape; margin: 5mm; }
-            body * { visibility: hidden; }
-            #receipt-print-area, #receipt-print-area * { 
-                visibility: visible; 
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important; 
-            }
-            #receipt-print-area { position: absolute; left: 0; top: 0; width: 100%; display: block !important; }
-            .no-print { display: none !important; }
-        }
+      /* Premium Navy Blue Dropdown with Golden Border - Expanded for non-breaking text and floating overhead other fields */
+      .search-results {
+        max-height: 290px;
+        overflow-y: auto;
+        position: absolute;
+        width: 150%; /* Extended width to float nicely over other columns */
+        min-width: 325px; /* Ensures ample space even on small mobile screens */
+        max-width: 500px;
+        z-index: 999; /* Higher priority to lay on top of form fields, datepicker and buttons */
+        background: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-radius: 0.75rem;
+        display: none;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        margin-top: 5px;
+      }
+      .search-item {
+        padding: 12px 14px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        transition: all 0.2s ease;
+        color: #ffffff;
+        box-sizing: border-box;
+        width: 100%;
+      }
+      /* Hover Effect: Background Golden & Text Black */
+      .search-item:hover {
+        background-color: var(--brand-gold) !important;
+        color: #000000 !important;
+      }
+      .search-item:hover .id-badge {
+        background-color: var(--brand-blue) !important;
+        color: #ffffff !important;
+      }
+      .search-item:hover .pending-text-badge {
+        color: #000000 !important;
+        border-color: rgba(0, 0, 0, 0.4) !important;
+        background-color: rgba(0, 0, 0, 0.05) !important;
+      }
+      .id-badge {
+        background-color: rgba(255, 255, 255, 0.12);
+        color: var(--brand-gold);
+        font-weight: 900;
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-right: 12px;
+        min-width: 65px;
+        text-align: center;
+        transition: all 0.2s ease;
+        display: inline-block;
+        flex-shrink: 0;
+      }
 
-        .receipt-slip {
-            width: 47%; height: 680px; padding: 25px; border: 3px solid #1e3a5f; 
-            position: relative; background: white !important; box-sizing: border-box;
-            display: flex; flex-direction: column;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(30, 58, 95, 0.1);
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 5mm;
         }
-        .dual-receipt-wrapper {
-            display: flex; justify-content: space-between; align-items: center;
-            width: 100%; padding: 10px; background: white !important;
+        body * {
+          visibility: hidden;
         }
-        
-        .input-label {
-            font-size: 10px;
-            font-weight: 900;
-            color: #ffffff; 
+        #receipt-print-area,
+        #receipt-print-area * {
+          visibility: visible;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
+        #receipt-print-area {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          display: block !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+      }
 
-        /* Initial Loader Overlay */
-        #page-init-loader {
-            position: fixed;
-            inset: 0;
-            background: #002147;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            transition: opacity 0.5s ease;
-        }
+      .receipt-slip {
+        width: 47%;
+        height: 680px;
+        padding: 25px;
+        border: 3px solid #1e3a5f;
+        position: relative;
+        background: white !important;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(30, 58, 95, 0.1);
+      }
+      .dual-receipt-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 10px;
+        background: white !important;
+      }
 
-        .refresh-btn {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .refresh-btn:hover {
-            color: var(--brand-gold);
-            transform: rotate(180deg);
-        }
-        .refresh-btn.spinning {
-            animation: spin 1s linear infinite;
-        }
+      .input-label {
+        font-size: 10px;
+        font-weight: 900;
+        color: #ffffff;
+      }
 
-        /* Custom Scrollbar for Pending List Table */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: rgba(30, 58, 95, 0.2);
-            border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: var(--brand-gold);
-            border-radius: 10px;
-        }
+      /* Initial Loader Overlay */
+      #page-init-loader {
+        position: fixed;
+        inset: 0;
+        background: #1e3a5f;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        transition: opacity 0.5s ease;
+      }
+
+      .refresh-btn {
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .refresh-btn:hover {
+        color: var(--brand-gold);
+        transform: rotate(180deg);
+      }
+      .refresh-btn.spinning {
+        animation: spin 1s linear infinite;
+      }
+
+      /* Custom Scrollbar for Pending List Table */
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: rgba(30, 58, 95, 0.2);
+        border-radius: 10px;
+      }
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--brand-gold);
+        border-radius: 10px;
+      }
     </style>
-</head>
-<body class="bg-[#0f1e33] min-h-screen py-6 text-white"> 
-
+  </head>
+  <body class="bg-[#0f1e33] min-h-screen py-6 text-white">
     <!-- Page Initialization Loader -->
     <div id="page-init-loader">
-        <div class="mb-6 bg-white p-3 rounded-2xl border-2 border-[#d4af37]">
-            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-16 w-auto">
-        </div>
-        <div class="loading-spinner mb-4"></div>
-        <h2 class="text-lg font-black uppercase tracking-[0.2em] text-[#d4af37]">Loading Data Please Wait...</h2>
-        <p class="text-[10px] mt-2 opacity-70">Synchronizing with Cloud Firestore & Realtime Database</p>
+      <div class="mb-6 bg-white p-3 rounded-2xl border-2 border-[#d4af37]">
+        <img
+          src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+          alt="ALAMHOW"
+          class="h-16 w-auto"
+        />
+      </div>
+      <div class="loading-spinner mb-4"></div>
+      <h2 class="text-lg font-black uppercase tracking-[0.2em] text-[#d4af37]">
+        Loading Data Please Wait...
+      </h2>
+      <p class="text-[10px] mt-2 opacity-70">
+        Synchronizing with Cloud Firestore & Realtime Database
+      </p>
     </div>
 
     <header class="page-wrapper mb-6 no-print">
-        <div class="bg-[#1e3a5f] rounded-2xl shadow-lg border-2 border-[#d4af37]"> 
-            <div class="px-6 py-4 flex justify-between items-center text-white">
-                <div class="flex items-center space-x-4">
-                    <div class="bg-white p-1 rounded-lg border border-[#d4af37]">
-                        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-10 w-auto">
-                    </div>
-                    <div>
-                        <h1 class="text-xl font-black uppercase tracking-tight">ALAMHOW <span class="text-[#d4af37]">CO LTD</span></h1>
-                        <p class="text-[9px] font-bold opacity-60 tracking-[0.2em] mt-1">ADVANCE & ADJUSTMENT SYSTEM</p>
-                    </div>
-                </div>
-                <div id="header-date" class="font-mono font-bold uppercase text-[#d4af37]" style="font-size: 20px;"></div>
+      <div class="bg-[#1e3a5f] rounded-2xl shadow-lg border-2 border-[#d4af37]">
+        <div class="px-6 py-4 flex justify-between items-center text-white">
+          <div class="flex items-center space-x-4">
+            <div class="bg-white p-1 rounded-lg border border-[#d4af37]">
+              <img
+                src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+                alt="ALAMHOW"
+                class="h-10 w-auto"
+              />
             </div>
+            <div>
+              <h1 class="text-xl font-black uppercase tracking-tight">
+                ALAMHOW <span class="text-[#d4af37]">CO LTD</span>
+              </h1>
+              <p class="text-[9px] font-bold opacity-60 tracking-[0.2em] mt-1">
+                ADVANCE & ADJUSTMENT SYSTEM
+              </p>
+            </div>
+          </div>
+          <div
+            id="header-date"
+            class="font-mono font-bold uppercase text-[#d4af37]"
+            style="font-size: 20px"
+          ></div>
         </div>
+      </div>
     </header>
 
     <main class="page-wrapper no-print">
-        <!-- Tab Navigation System (Navy Blue & Gold) with Pending List and History Button -->
-        <div class="flex flex-col md:flex-row gap-2 mb-4">
-            <button id="tab-advance" onclick="switchMode('advance')" class="flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95">
-                <i class="fas fa-hand-holding-usd mr-2 text-[#0f1e33]"></i> New Advance Entry
+      <!-- Tab Navigation System (Navy Blue & Gold) -->
+      <div class="flex flex-col md:flex-row gap-2 mb-4">
+        <button
+          id="tab-advance"
+          onclick="switchMode('advance')"
+          class="flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95"
+        >
+          <i class="fas fa-hand-holding-usd mr-2 text-[#0f1e33]"></i> New
+          Advance Entry
+        </button>
+        <button
+          id="tab-adjustment"
+          onclick="switchMode('adjustment')"
+          class="flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95"
+        >
+          <i class="fas fa-calculator mr-2 text-[#d4af37]"></i> Advance
+          Adjustment
+        </button>
+        <button
+          id="tab-pending-list"
+          onclick="switchMode('pending-list')"
+          class="flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95"
+        >
+          <i class="fas fa-list-ol mr-2 text-[#d4af37]"></i> Pending List
+        </button>
+        <button
+          id="tab-history"
+          onclick="switchMode('history')"
+          class="flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95"
+        >
+          <i class="fas fa-history mr-2 text-[#d4af37]"></i> History
+        </button>
+      </div>
+
+      <!-- Form Wrapper Card (Visible in 'advance' and 'adjustment' modes) -->
+      <div
+        id="form-container-card"
+        class="bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80"
+      >
+        <div
+          class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4"
+        >
+          <!-- Company-wide Grand Totals (Pre-Calculated and Light Weight) -->
+          <div class="flex flex-wrap items-center gap-3">
+            <h2
+              id="form-title"
+              class="font-black text-white uppercase text-sm tracking-wider whitespace-nowrap"
+            >
+              New Advance Entry
+            </h2>
+
+            <!-- Live Header Stats Widget (Pre-calculated and loaded in 1 Read operation) -->
+            <div
+              id="header-stats-widget"
+              class="flex flex-wrap items-center gap-2 bg-[#0f1e33] border border-slate-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wide"
+            >
+              <span class="text-sky-400 uppercase"
+                >TOTAL ADV=<span id="header-stat-total" class="text-white ml-1"
+                  >0</span
+                ></span
+              >
+              <span class="text-slate-600">|</span>
+              <span class="text-emerald-400 uppercase"
+                >ADJUSTED=<span id="header-stat-adj" class="text-white ml-1"
+                  >0</span
+                ></span
+              >
+              <span class="text-slate-600">|</span>
+              <span class="text-[#d4af37] uppercase"
+                >PENDING=<span id="header-stat-pending" class="text-white ml-1"
+                  >0</span
+                ></span
+              >
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 self-end lg:self-auto">
+            <button
+              type="button"
+              onclick="refreshSystemData()"
+              title="Refresh Data"
+              class="refresh-btn text-white hover:text-[#d4af37]"
+            >
+              <i id="refresh-icon" class="fas fa-sync-alt text-sm"></i>
             </button>
-            <button id="tab-adjustment" onclick="switchMode('adjustment')" class="flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
-                <i class="fas fa-calculator mr-2 text-[#d4af37]"></i> Advance Adjustment
-            </button>
-            <button id="tab-pending-list" onclick="switchMode('pending-list')" class="flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
-                <i class="fas fa-list-ol mr-2 text-[#d4af37]"></i> Pending List
-            </button>
-            <button id="tab-history" onclick="switchMode('history')" class="flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
-                <i class="fas fa-history mr-2 text-[#d4af37]"></i> History
-            </button>
+            <span
+              id="voucher-label"
+              class="text-[10px] font-bold text-white uppercase ml-2"
+              >ADVANCE NO:</span
+            >
+            <span
+              id="next-adv-no"
+              class="text-xs font-mono font-black text-white bg-[#0f1e33] border border-[#d4af37] px-2 py-1 rounded"
+              >Select Date</span
+            >
+          </div>
         </div>
 
-        <!-- Form Wrapper Card (Visible in 'advance' and 'adjustment' modes) -->
-        <div id="form-container-card" class="bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80"> 
-            <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-                <!-- Company-wide Grand Totals (All English UI with updated labels) -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <h2 id="form-title" class="font-black text-white uppercase text-sm tracking-wider whitespace-nowrap">New Advance Entry</h2>
-                    
-                    <!-- Live Header Stats Widget (Grand Admin Overview) -->
-                    <div id="header-stats-widget" class="flex flex-wrap items-center gap-2 bg-[#0f1e33] border border-slate-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wide">
-                        <span class="text-sky-400 uppercase">TOTAL ADV=<span id="header-stat-total" class="text-white ml-1">0</span></span>
-                        <span class="text-slate-600">|</span>
-                        <span class="text-emerald-400 uppercase">ADJUSTED=<span id="header-stat-adj" class="text-white ml-1">0</span></span>
-                        <span class="text-slate-600">|</span>
-                        <span class="text-[#d4af37] uppercase">PENDING=<span id="header-stat-pending" class="text-white ml-1">0</span></span>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-3 self-end lg:self-auto">
-                    <button type="button" onclick="refreshSystemData()" title="Refresh Data" class="refresh-btn text-white hover:text-[#d4af37]">
-                        <i id="refresh-icon" class="fas fa-sync-alt text-sm"></i>
-                    </button>
-                    <!-- Active dependent label updated dynamically (ADVANCE NO: or ADJUSTMENT NO:) -->
-                    <span id="voucher-label" class="text-[10px] font-bold text-white uppercase ml-2">ADVANCE NO:</span>
-                    <span id="next-adv-no" class="text-xs font-mono font-black text-white bg-[#0f1e33] border border-[#d4af37] px-2 py-1 rounded">Syncing...</span>
-                </div>
+        <!-- Employee Dynamic Balance & Summary Card (Instant Lifetime Info using Pre-Calculated User Ledger) -->
+        <div
+          id="balance-summary-card"
+          class="hidden px-8 py-5 bg-[#10223b] border-b-2 border-slate-700/50 flex flex-wrap gap-4 justify-around text-center"
+        >
+          <div
+            class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[200px]"
+          >
+            <p
+              class="text-[10px] font-black text-slate-400 uppercase tracking-wider"
+            >
+              TOTAL ADV
+            </p>
+            <p
+              id="summary-lifetime-advance"
+              class="text-lg font-black text-[#d4af37]"
+            >
+              0.00 /-
+            </p>
+            <span class="text-[8px] text-slate-400 block font-bold"
+              >Total advance paid to employee</span
+            >
+          </div>
+          <div
+            class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[200px]"
+          >
+            <p
+              class="text-[10px] font-black text-slate-400 uppercase tracking-wider"
+            >
+              ADJ
+            </p>
+            <p
+              id="summary-lifetime-adjusted"
+              class="text-lg font-black text-green-400"
+            >
+              0.00 /-
+            </p>
+            <span class="text-[8px] text-slate-400 block font-bold"
+              >Total adjustment recovered</span
+            >
+          </div>
+          <div
+            class="px-4 py-2 bg-[#1e3a5f] rounded-xl shadow-md border-2 border-[#d4af37] min-w-[220px]"
+          >
+            <p
+              class="text-[10px] font-black text-amber-200 uppercase tracking-wider"
+            >
+              PENDING
+            </p>
+            <p
+              id="summary-pending-balance"
+              class="text-xl font-black text-[#d4af37]"
+            >
+              0.00 /-
+            </p>
+            <span class="text-[8px] text-amber-100 block font-bold"
+              >Outstanding pending balance</span
+            >
+          </div>
+        </div>
+
+        <form id="advance-form" onsubmit="return false;" class="p-8 lg:p-10">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="md:col-span-3 relative">
+              <label class="input-label">Search Employee ID</label>
+              <input
+                type="text"
+                id="emp-search"
+                autocomplete="off"
+                placeholder="Type ID or Name..."
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none border-slate-600 focus:border-[#d4af37] text-white transition-all"
+              />
+              <div id="search-results" class="search-results"></div>
+              <input type="hidden" id="selected-emp-id" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Employee Name</label>
+              <input
+                type="text"
+                id="display-name"
+                readonly
+                class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase"
+              />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Passport No</label>
+              <input
+                type="text"
+                id="auto-passport"
+                readonly
+                class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-mono text-slate-300"
+              />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Designation</label>
+              <input
+                type="text"
+                id="display-desig"
+                readonly
+                class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase"
+              />
             </div>
 
-            <!-- Employee Dynamic Balance & Summary Card (Selected Employee Lifetime Info) -->
-            <div id="balance-summary-card" class="hidden px-8 py-5 bg-[#10223b] border-b-2 border-slate-700/50 flex flex-wrap gap-4 justify-around text-center">
-                <div class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[200px]">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">TOTAL ADV</p>
-                    <p id="summary-lifetime-advance" class="text-lg font-black text-[#d4af37]">0.00 /-</p>
-                    <span class="text-[8px] text-slate-400 block font-bold">Total advance paid to employee</span>
-                </div>
-                <div class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[200px]">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">ADJ</p>
-                    <p id="summary-lifetime-adjusted" class="text-lg font-black text-green-400">0.00 /-</p>
-                    <span class="text-[8px] text-slate-400 block font-bold">Total adjustment recovered</span>
-                </div>
-                <div class="px-4 py-2 bg-[#1e3a5f] rounded-xl shadow-md border-2 border-[#d4af37] min-w-[220px]">
-                    <p class="text-[10px] font-black text-amber-200 uppercase tracking-wider">PENDING</p>
-                    <p id="summary-pending-balance" class="text-xl font-black text-[#d4af37]">0.00 /-</p>
-                    <span class="text-[8px] text-amber-100 block font-bold">Outstanding pending balance</span>
-                </div>
+            <div class="md:col-span-3 relative">
+              <label id="date-label" class="input-label">Received Date</label>
+              <div class="relative">
+                <!-- Received Date: empty by default and triggers flatpickr on click -->
+                <input
+                  type="text"
+                  id="record-date"
+                  placeholder="Select Date"
+                  readonly
+                  class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none cursor-pointer border-slate-600 text-white focus:border-[#d4af37]"
+                />
+                <i
+                  class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-[#d4af37] pointer-events-none"
+                ></i>
+              </div>
             </div>
 
-            <form id="advance-form" onsubmit="return false;" class="p-8 lg:p-10">
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
-                    <div class="md:col-span-3 relative">
-                        <label class="input-label">Search Employee ID</label>
-                        <input type="text" id="emp-search" autocomplete="off" placeholder="Type ID or Name..." class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none border-slate-600 focus:border-[#d4af37] text-white transition-all">
-                        <div id="search-results" class="search-results"></div>
-                        <input type="hidden" id="selected-emp-id">
-                    </div>
-                    <div class="md:col-span-3">
-                        <label class="input-label">Employee Name</label>
-                        <input type="text" id="display-name" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase">
-                    </div>
-                    <div class="md:col-span-3">
-                        <label class="input-label">Passport No</label>
-                        <input type="text" id="auto-passport" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-mono text-slate-300">
-                    </div>
-                    <div class="md:col-span-3">
-                        <label class="input-label">Designation</label>
-                        <input type="text" id="display-desig" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase">
-                    </div>
-
-                    <div class="md:col-span-3 relative">
-                        <label id="date-label" class="input-label">Received Date</label>
-                        <div class="relative">
-                            <!-- Received Date: empty by default and triggers flatpickr on click -->
-                            <input type="text" id="record-date" placeholder="Select Date" readonly class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none cursor-pointer border-slate-600 text-white focus:border-[#d4af37]">
-                            <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-[#d4af37] pointer-events-none"></i>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-3">
+            <div class="md:col-span-3">
                         <label id="amount-label" class="input-label">Advance Amount</label>
                         <input type="number" id="advance-amount" oninput="updateAmountInWords(this.value)" class="w-full p-2.5 rounded-lg border-2 font-black text-white bg-[#0f1e33] text-lg border-slate-600 focus:border-[#d4af37] outline-none">
                         <p id="amount-in-words" class="text-[9px] text-[#d4af37] font-black mt-1 uppercase italic h-4"></p>
                     </div>
 
-                    <div class="md:col-span-3">
-                        <label class="input-label">Reference</label>
-                        <input type="text" id="reference" class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none">
-                    </div>
-                    <div class="md:col-span-3">
-                        <label class="input-label">Remark</label>
-                        <input type="text" id="remark" class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none">
-                    </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Reference</label>
+              <input
+                type="text"
+                id="reference"
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none"
+              />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Remark</label>
+              <input
+                type="text"
+                id="remark"
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none"
+              />
+            </div>
 
-                    <!-- Submit Button with green hover state (hover:bg-emerald-600) -->
-                    <div class="md:col-span-12 mt-4">
-                        <button type="button" id="submit-btn" onclick="directSaveToSheet()" class="w-full bg-[#1e3a5f] hover:bg-[#142842] text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]">
-                            Confirm & Save Advance
-                        </button>
-                    </div>
-                </div>
-            </form>
+            <!-- Submit Button with green hover state (hover:bg-emerald-600) -->
+            <div class="md:col-span-12 mt-4">
+              <button
+                type="button"
+                id="submit-btn"
+                onclick="directSaveToSheet()"
+                class="w-full bg-[#1e3a5f] hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]"
+              >
+                Confirm & Save Advance
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Pending List Viewer Container -->
+      <div
+        id="pending-list-container-card"
+        class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80"
+      >
+        <div
+          class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col md:flex-row md:justify-between md:items-center gap-4"
+        >
+          <div>
+            <h2 class="font-black text-white uppercase text-sm tracking-wider">
+              Employee Pending Outstandings
+            </h2>
+            <p class="text-[10px] text-slate-400 mt-1 uppercase">
+              Overview of active debtors with remaining balances
+            </p>
+          </div>
+          <div class="relative w-full md:w-80">
+            <input
+              type="text"
+              id="pending-table-search"
+              oninput="filterPendingTable(this.value)"
+              placeholder="Search ID or Name..."
+              class="w-full p-2 pl-9 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-bold text-white outline-none focus:border-[#d4af37]"
+            />
+            <i
+              class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"
+            ></i>
+          </div>
         </div>
 
-        <!-- Pending List Viewer Container (Visible when 'pending-list' is active) -->
-        <div id="pending-list-container-card" class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80">
-            <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <div>
-                    <h2 class="font-black text-white uppercase text-sm tracking-wider">Employee Pending Outstandings</h2>
-                    <p class="text-[10px] text-slate-400 mt-1 uppercase">Overview of active debtors with remaining balances</p>
-                </div>
-                <!-- Search bar for sorting pending lists instantly -->
-                <div class="relative w-full md:w-80">
-                    <input type="text" id="pending-table-search" oninput="filterPendingTable(this.value)" placeholder="Search ID or Name..." class="w-full p-2 pl-9 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-bold text-white outline-none focus:border-[#d4af37]">
-                    <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                </div>
+        <div class="p-6 overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr
+                class="border-b border-slate-700 text-[#d4af37] text-[11px] uppercase tracking-wider font-black"
+              >
+                <th class="py-3 px-4">ID</th>
+                <th class="py-3 px-4">Employee Name</th>
+                <th class="py-3 px-4">Designation</th>
+                <th class="py-3 px-4">Passport No</th>
+                <th class="py-3 px-4">Last Advance Date</th>
+                <th class="py-3 px-4 text-right">Pending Taka</th>
+              </tr>
+            </thead>
+            <tbody
+              id="pending-table-rows"
+              class="text-xs font-semibold divide-y divide-slate-800"
+            >
+              <tr>
+                <td
+                  colspan="6"
+                  class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest"
+                >
+                  <i class="fas fa-spinner fa-spin mr-2"></i> Loading pending
+                  outstandings...
+                </td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr
+                class="bg-[#1c3352]/50 border-t-2 border-[#d4af37] text-white font-black text-xs"
+              >
+                <td
+                  colspan="5"
+                  class="py-4 px-4 text-left uppercase tracking-wider"
+                >
+                  Grand Total Outstanding
+                </td>
+                <td
+                  id="pending-table-grand-total"
+                  class="py-4 px-4 text-right text-base text-[#d4af37] font-mono font-black"
+                >
+                  0 /-
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <!-- History List Viewer Container (Always Limited to Last 50 Transactions for speed & performance) -->
+      <div
+        id="history-container-card"
+        class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80"
+      >
+        <div
+          class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col md:flex-row md:justify-between md:items-center gap-4"
+        >
+          <div>
+            <h2 class="font-black text-white uppercase text-sm tracking-wider">
+              Transaction History (Last 50 Entries)
+            </h2>
+            <p class="text-[10px] text-slate-400 mt-1 uppercase">
+              Track recent historical records and reprint previous receipts
+              instantly
+            </p>
+          </div>
+          <!-- Dropdown filter, Sync Cycle, and Search Bar Container -->
+          <div class="flex items-center gap-2 w-full md:w-auto">
+            <!-- Dropdown to select Type-wise History -->
+            <select
+              id="history-type-filter"
+              onchange="filterHistoryTypeAndSearch()"
+              class="p-2 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-black text-[#d4af37] outline-none cursor-pointer focus:border-[#d4af37]"
+            >
+              <option value="ALL" class="font-bold">ALL TYPES</option>
+              <option value="ADVANCE" class="font-bold">ADVANCE ONLY</option>
+              <option value="ADJUSTMENT" class="font-bold">
+                ADJUSTMENT ONLY
+              </option>
+            </select>
+
+            <!-- ONE-CLICK AUTO SYNC/RECALCULATE BUTTON -->
+            <button
+              type="button"
+              onclick="recalculateAndSyncAllLedger()"
+              title="Recalculate & Sync All History Summaries"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg border border-emerald-500 transition-all font-bold text-xs flex items-center gap-1"
+            >
+              <i class="fas fa-calculator"></i>
+              <span class="hidden md:inline">Sync & Recalculate</span>
+            </button>
+
+            <div class="relative w-full md:w-64">
+              <input
+                type="text"
+                id="history-table-search"
+                oninput="filterHistoryTypeAndSearch()"
+                placeholder="Search Advance No, ID..."
+                class="w-full p-2 pl-9 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-bold text-white outline-none focus:border-[#d4af37]"
+              />
+              <i
+                class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"
+              ></i>
             </div>
-            
-            <!-- Pending Data Responsive Table -->
-            <div class="p-6 overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-700 text-[#d4af37] text-[11px] uppercase tracking-wider font-black">
-                            <th class="py-3 px-4">ID</th>
-                            <th class="py-3 px-4">Employee Name</th>
-                            <th class="py-3 px-4">Designation</th>
-                            <th class="py-3 px-4">Passport No</th>
-                            <th class="py-3 px-4">Last Advance Date</th>
-                            <th class="py-3 px-4 text-right">Pending Taka</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pending-table-rows" class="text-xs font-semibold divide-y divide-slate-800">
-                        <!-- Loaded dynamically in JavaScript -->
-                        <tr>
-                            <td colspan="6" class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest">
-                                <i class="fas fa-spinner fa-spin mr-2"></i> Loading pending outstandings...
-                            </td>
-                        </tr>
-                    </tbody>
-                    <tfoot>
-                        <!-- Grand Total Footer Row -->
-                        <tr class="bg-[#1c3352]/50 border-t-2 border-[#d4af37] text-white font-black text-xs">
-                            <td colspan="5" class="py-4 px-4 text-left uppercase tracking-wider">Grand Total Outstanding</td>
-                            <td id="pending-table-grand-total" class="py-4 px-4 text-right text-base text-[#d4af37] font-mono font-black">0 /-</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
+          </div>
         </div>
 
-        <!-- History List Viewer Container (Visible when 'history' is active) -->
-        <div id="history-container-card" class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80">
-            <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-                <div>
-                    <h2 class="font-black text-white uppercase text-sm tracking-wider">Transaction History</h2>
-                    <p class="text-[10px] text-slate-400 mt-1 uppercase">Track all historical records and reprint any previous receipts</p>
-                </div>
-                <!-- Dropdown filter for Types and Search Bar Container -->
-                <div class="flex items-center gap-2 w-full md:w-auto">
-                    <!-- Dropdown to select Type-wise History -->
-                    <select id="history-type-filter" onchange="filterHistoryTypeAndSearch()" class="p-2 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-black text-[#d4af37] outline-none cursor-pointer focus:border-[#d4af37]">
-                        <option value="ALL" class="font-bold">ALL TYPES</option>
-                        <option value="ADVANCE" class="font-bold">ADVANCE ONLY</option>
-                        <option value="ADJUSTMENT" class="font-bold">ADJUSTMENT ONLY</option>
-                    </select>
-                    
-                    <!-- Search bar for sorting history instantly -->
-                    <div class="relative w-full md:w-80">
-                        <input type="text" id="history-table-search" oninput="filterHistoryTypeAndSearch()" placeholder="Search Voucher, ID or Name..." class="w-full p-2 pl-9 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-bold text-white outline-none focus:border-[#d4af37]">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- History Data Responsive Table -->
-            <div class="p-6 overflow-x-auto custom-scrollbar">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-700 text-[#d4af37] text-[11px] uppercase tracking-wider font-black">
-                            <th class="py-3 px-4">Voucher No</th>
-                            <th class="py-3 px-4">Record Date</th>
-                            <th class="py-3 px-4">ID</th>
-                            <th class="py-3 px-4">Employee Name</th>
-                            <th class="py-3 px-4">Type</th>
-                            <th class="py-3 px-4 text-right">Amount</th>
-                            <th class="py-3 px-4 text-center">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-rows" class="text-xs font-semibold divide-y divide-slate-800">
-                        <tr>
-                            <td colspan="7" class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest">
-                                <i class="fas fa-spinner fa-spin mr-2"></i> Loading transaction history...
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <div class="p-6 overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr
+                class="border-b border-slate-700 text-[#d4af37] text-[11px] uppercase tracking-wider font-black"
+              >
+                <th class="py-3 px-4">Advance No</th>
+                <th class="py-3 px-4">Record Date</th>
+                <th class="py-3 px-4">ID</th>
+                <th class="py-3 px-4">Employee Name</th>
+                <th class="py-3 px-4">Type</th>
+                <th class="py-3 px-4 text-right">Amount</th>
+                <th class="py-3 px-4 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody
+              id="history-table-rows"
+              class="text-xs font-semibold divide-y divide-slate-800"
+            >
+              <tr>
+                <td
+                  colspan="7"
+                  class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest"
+                >
+                  <i class="fas fa-spinner fa-spin mr-2"></i> Loading
+                  transaction history...
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
     </main>
 
     <!-- Success Modal -->
-    <div id="success-modal" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[60] backdrop-blur-sm">
-        <div class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-[#d4af37] shadow-2xl text-white">
-            <div class="w-16 h-16 bg-amber-500/10 text-[#d4af37] rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-[#d4af37]">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <h3 id="success-title" class="text-xl font-black text-white mb-2 uppercase">Entry Saved!</h3>
-            <p id="success-subtitle" class="text-slate-400 text-[11px] font-bold mb-6 uppercase">Syncing to Cloud Realtime Database successful</p>
-            <div class="grid grid-cols-2 gap-3 w-full">
-                <button onclick="prepareAndPrint()" class="bg-[#1e3a5f] hover:bg-[#142842] text-white font-black py-3 rounded-xl uppercase text-[10px] tracking-widest border-b-2 border-[#d4af37]">Print Receipt</button>
-                <button onclick="resetEntry()" class="bg-[#0f1e33] hover:bg-slate-900 text-slate-300 border border-slate-600 font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">New Entry</button>
-            </div>
+    <div
+      id="success-modal"
+      class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[60] backdrop-blur-sm"
+    >
+      <div
+        class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-[#d4af37] shadow-2xl text-white"
+      >
+        <div
+          class="w-16 h-16 bg-amber-500/10 text-[#d4af37] rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-[#d4af37]"
+        >
+          <i class="fas fa-check-circle"></i>
         </div>
+        <h3
+          id="success-title"
+          class="text-xl font-black text-white mb-2 uppercase"
+        >
+          Entry Saved!
+        </h3>
+        <p
+          id="success-subtitle"
+          class="text-slate-400 text-[11px] font-bold mb-6 uppercase"
+        >
+          Syncing to Cloud Realtime Database successful
+        </p>
+        <div class="grid grid-cols-2 gap-3 w-full">
+          <button
+            onclick="prepareAndPrint()"
+            class="bg-[#1e3a5f] hover:bg-[#142842] text-white font-black py-3 rounded-xl uppercase text-[10px] tracking-widest border-b-2 border-[#d4af37]"
+          >
+            Print Receipt
+          </button>
+          <button
+            onclick="resetEntry()"
+            class="bg-[#0f1e33] hover:bg-slate-900 text-slate-300 border border-slate-600 font-black py-3 rounded-xl uppercase text-[10px] tracking-widest"
+          >
+            New Entry
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- Alert Modal -->
-    <div id="alert-modal" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[70] backdrop-blur-sm">
-        <div class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-red-500 shadow-2xl text-white">
-            <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-red-500">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <h3 class="text-lg font-black text-white mb-2 uppercase">Attention!</h3>
-            <p id="alert-msg" class="text-slate-300 text-[11px] font-bold mb-6 uppercase tracking-wider leading-relaxed">Required fields are missing.</p>
-            <button onclick="closeAlert()" class="w-full bg-[#1e3a5f] text-white font-black py-3 rounded-xl uppercase text-[11px] tracking-widest hover:bg-[#142842]">
-                Got It
-            </button>
+    <div
+      id="alert-modal"
+      class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[70] backdrop-blur-sm"
+    >
+      <div
+        class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-red-500 shadow-2xl text-white"
+      >
+        <div
+          class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-red-500"
+        >
+          <i class="fas fa-exclamation-triangle"></i>
         </div>
+        <h3 class="text-lg font-black text-white mb-2 uppercase">Attention!</h3>
+        <p
+          id="alert-msg"
+          class="text-slate-300 text-[11px] font-bold mb-6 uppercase tracking-wider leading-relaxed"
+        >
+          Required fields are missing.
+        </p>
+        <button
+          onclick="closeAlert()"
+          class="w-full bg-[#1e3a5f] text-white font-black py-3 rounded-xl uppercase text-[11px] tracking-widest hover:bg-[#142842]"
+        >
+          Got It
+        </button>
+      </div>
     </div>
-    
-    <div id="loader" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-50 backdrop-blur-sm">
-        <div class="bg-[#142842] p-8 rounded-3xl flex flex-col items-center border-2 border-[#d4af37] text-white">
-            <div class="loading-spinner mb-4"></div>
-            <p id="loader-text" class="text-white font-black uppercase text-xs tracking-widest">Saving to Cloud RTB...</p>
-        </div>
+
+    <div
+      id="loader"
+      class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-50 backdrop-blur-sm"
+    >
+      <div
+        class="bg-[#142842] p-8 rounded-3xl flex flex-col items-center border-2 border-[#d4af37] text-white"
+      >
+        <div class="loading-spinner mb-4"></div>
+        <p
+          id="loader-text"
+          class="text-white font-black uppercase text-xs tracking-widest"
+        >
+          Saving to Cloud RTB...
+        </p>
+      </div>
     </div>
 
     <div id="receipt-print-area" class="hidden"></div>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
-            authDomain: "munna-acl-fda7c.firebaseapp.com",
-            databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "munna-acl-fda7c",
-            storageBucket: "munna-acl-fda7c.firebasestorage.app",
-            messagingSenderId: "371130316468",
-            appId: "1:371130316468:web:61b4cba0dbbd5f027589e1"
-        };
+      // Firebase Configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+        authDomain: "munna-acl-fda7c.firebaseapp.com",
+        databaseURL:
+          "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "munna-acl-fda7c",
+        storageBucket: "munna-acl-fda7c.firebasestorage.app",
+        messagingSenderId: "371130316468",
+        appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+      };
 
-        // Initialize Firebase Compat
-        firebase.initializeApp(firebaseConfig);
-        const firestore = firebase.firestore(); 
-        const rtb = firebase.database();       
+      // Initialize Firebase Compat
+      firebase.initializeApp(firebaseConfig);
+      const firestore = firebase.firestore();
+      const rtb = firebase.database();
 
-        let employees = [];
-        let lastSavedEntries = [];
-        let employeeBalances = {}; // { id: { totalAdvance: X, totalAdjusted: Y, pending: X-Y, lastDate: Z } }
-        let allTransactionsList = []; // Flattened list for the reprint history feature
-        let currentMode = 'advance'; // 'advance', 'adjustment', 'pending-list', 'history'
+      let employees = [];
+      let lastSavedEntries = [];
 
-        window.onload = async () => {
-            const now = new Date();
-            document.getElementById('header-date').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+      // Incremental Pre-Calculated Aggregates State Cache
+      let globalSummary = { totalAdvance: 0, totalAdjusted: 0, pending: 0 };
+      let employeeBalances = {}; // { id: { totalAdvance: X, totalAdjusted: Y, pending: P, lastDate: Z } }
+      let allTransactionsList = []; // Restricted to latest 50 logs for extreme efficiency
+
+      let currentMode = "advance"; // 'advance', 'adjustment', 'pending-list', 'history'
+
+      window.onload = async () => {
+        const now = new Date();
+        document.getElementById("header-date").innerText = now
+          .toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+          })
+          .toUpperCase();
+
+        // Received Date initialized blank by default as requested
+        flatpickr("#record-date", {
+          dateFormat: "d-m-Y",
+          defaultDate: null,
+          allowInput: true,
+          onChange: function (selectedDates, dateStr, instance) {
+            if (dateStr) {
+              calculateDynamicVoucher(dateStr);
+              fetchEmployeeBalance();
+            }
+          },
+        });
+
+        await refreshSystemData(true);
+        setupSearch();
+
+        setTimeout(() => {
+          document.getElementById("page-init-loader").style.opacity = "0";
+          setTimeout(() => {
+            document.getElementById("page-init-loader").style.display = "none";
+          }, 500);
+        }, 800);
+      };
+
+      async function switchMode(mode) {
+        currentMode = mode;
+        const btnAdv = document.getElementById("tab-advance");
+        const btnAdj = document.getElementById("tab-adjustment");
+        const btnPend = document.getElementById("tab-pending-list");
+        const btnHist = document.getElementById("tab-history");
+
+        const formCard = document.getElementById("form-container-card");
+        const pendingCard = document.getElementById(
+          "pending-list-container-card",
+        );
+        const historyCard = document.getElementById("history-container-card");
+
+        btnAdv.className =
+          "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
+        btnAdj.className =
+          "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
+        btnPend.className =
+          "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
+        btnHist.className =
+          "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
+
+        const voucherLabel = document.getElementById("voucher-label");
+
+        if (mode === "advance") {
+          btnAdv.className =
+            "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
+          formCard.classList.remove("hidden");
+          pendingCard.classList.add("hidden");
+          historyCard.classList.add("hidden");
+
+          document.getElementById("form-title").innerText = "New Advance Entry";
+          document.getElementById("date-label").innerText = "Received Date";
+          document.getElementById("amount-label").innerText = "Advance Amount";
+
+          voucherLabel.innerText = "ADVANCE NO:";
+
+          const submitBtn = document.getElementById("submit-btn");
+          submitBtn.innerText = "Confirm & Save Advance";
+          submitBtn.className =
+            "w-full bg-[#1e3a5f] hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]";
+        } else if (mode === "adjustment") {
+          btnAdj.className =
+            "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
+          formCard.classList.remove("hidden");
+          pendingCard.classList.add("hidden");
+          historyCard.classList.add("hidden");
+
+          document.getElementById("form-title").innerText =
+            "Advance Adjustment Entry";
+          document.getElementById("date-label").innerText = "Adjustment Date";
+          document.getElementById("amount-label").innerText = "Adjusted Amount";
+
+          voucherLabel.innerText = "ADJUSTMENT NO:";
+
+          const submitBtn = document.getElementById("submit-btn");
+          submitBtn.innerText = "Confirm & Save Adjustment";
+          submitBtn.className =
+            "w-full bg-green-700 hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]";
+        } else if (mode === "pending-list") {
+          btnPend.className =
+            "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
+          formCard.classList.add("hidden");
+          pendingCard.classList.remove("hidden");
+          historyCard.classList.add("hidden");
+
+          renderPendingTable();
+        } else if (mode === "history") {
+          btnHist.className =
+            "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
+          formCard.classList.add("hidden");
+          pendingCard.classList.add("hidden");
+          historyCard.classList.remove("hidden");
+
+          document.getElementById("history-type-filter").value = "ALL";
+          document.getElementById("history-table-search").value = "";
+          await loadHistoryFromCloud();
+          renderHistoryTable();
+        }
+
+        const selectedDate = document.getElementById("record-date").value;
+        await calculateDynamicVoucher(selectedDate);
+        fetchEmployeeBalance();
+      }
+
+      async function calculateDynamicVoucher(targetDate) {
+        if (!targetDate) {
+          document.getElementById("next-adv-no").innerText = "Select Date";
+          return;
+        }
+        if (currentMode === "advance") {
+          await fetchNextVoucher(targetDate);
+        } else if (currentMode === "adjustment") {
+          await fetchNextAdjustmentVoucher(targetDate);
+        }
+      }
+
+      async function refreshSystemData(silent = false) {
+        const icon = document.getElementById("refresh-icon");
+        if (!silent) icon.classList.add("spinning");
+
+        try {
+          await fetchEmployees();
+          await syncPreCalculatedAggregates();
+          const selectedDate = document.getElementById("record-date").value;
+          await calculateDynamicVoucher(selectedDate);
+          await fetchEmployeeBalance();
+          if (currentMode === "pending-list") {
+            renderPendingTable();
+          } else if (currentMode === "history") {
+            await loadHistoryFromCloud();
+            renderHistoryTable();
+          }
+        } finally {
+          if (!silent) {
+            setTimeout(() => icon.classList.remove("spinning"), 500);
+          }
+        }
+      }
+
+      function showAlert(msg) {
+        document.getElementById("alert-msg").innerText = msg;
+        document.getElementById("alert-modal").classList.remove("hidden");
+      }
+
+      function closeAlert() {
+        document.getElementById("alert-modal").classList.add("hidden");
+      }
+
+      // OPTIMIZED: Synchronizes pre-calculated sums instantly without downloading raw history logs!
+      async function syncPreCalculatedAggregates() {
+        try {
+          const globalSnap = await rtb.ref("ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL").once("value");
+          globalSummary = globalSnap.val() || {
+            totalAdvance: 0,
+            totalAdjusted: 0,
+            pending: 0,
+          };
+
+          const usersSnap = await rtb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
+          employeeBalances = usersSnap.val() || {};
+
+          // Instantly update header widgets
+          document.getElementById("header-stat-total").innerText =
+            (globalSummary.totalAdvance || 0).toLocaleString() + " /-";
+          document.getElementById("header-stat-adj").innerText =
+            (globalSummary.totalAdjusted || 0).toLocaleString() + " /-";
+          document.getElementById("header-stat-pending").innerText =
+            (globalSummary.pending || 0).toLocaleString() + " /-";
+        } catch (e) {
+          console.error("Aggregation failed: ", e);
+        }
+      }
+
+      // OPTIMIZED: Loads only the last 50 transactions log.
+      async function loadHistoryFromCloud() {
+        try {
+          const snap = await rtb
+            .ref("ADVANCE_ADJUSTMENT_TRANSACTIONS")
+            .orderByKey()
+            .limitToLast(50)
+            .once("value");
             
-            // Received Date initialized blank by default as requested
-            flatpickr("#record-date", {
-                dateFormat: "d-m-Y",
-                defaultDate: null, // Empty on load
-                allowInput: true,
-                onChange: function(selectedDates, dateStr, instance) {
-                    if(dateStr) {
-                        calculateDynamicVoucher(dateStr);
-                        aggregateAllLifetimeBalances().then(() => {
-                            fetchEmployeeBalance();
-                        });
-                    }
-                }
+          const data = snap.val() || {};
+          
+          // নেস্টেড ডেটাকে টেবিলের জন্য ফ্ল্যাট লিস্টে রূপান্তর
+          let list = [];
+          snap.forEach(monthSnap => {
+            monthSnap.forEach(dateSnap => {
+              dateSnap.forEach(txSnap => { list.push(txSnap.val()); });
             });
-
-            await refreshSystemData(true);
-            setupSearch();
-            
-            setTimeout(() => {
-                document.getElementById('page-init-loader').style.opacity = '0';
-                setTimeout(() => {
-                    document.getElementById('page-init-loader').style.display = 'none';
-                }, 500);
-            }, 800);
-        };
-
-        // Tab and container visibility control updated to support history reprint tab
-        async function switchMode(mode) {
-            currentMode = mode;
-            const btnAdv = document.getElementById('tab-advance');
-            const btnAdj = document.getElementById('tab-adjustment');
-            const btnPend = document.getElementById('tab-pending-list');
-            const btnHist = document.getElementById('tab-history');
-            
-            const formCard = document.getElementById('form-container-card');
-            const pendingCard = document.getElementById('pending-list-container-card');
-            const historyCard = document.getElementById('history-container-card');
-
-            // Reset tab styles
-            btnAdv.className = "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
-            btnAdj.className = "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
-            btnPend.className = "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
-            btnHist.className = "flex-1 bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
-
-            const voucherLabel = document.getElementById('voucher-label');
-
-            if (mode === 'advance') {
-                btnAdv.className = "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
-                formCard.classList.remove('hidden');
-                pendingCard.classList.add('hidden');
-                historyCard.classList.add('hidden');
-                
-                document.getElementById('form-title').innerText = "New Advance Entry";
-                document.getElementById('date-label').innerText = "Received Date";
-                document.getElementById('amount-label').innerText = "Advance Amount";
-                
-                // Update the voucher label dynamically on tab switch
-                voucherLabel.innerText = "ADVANCE NO:";
-                
-                const submitBtn = document.getElementById('submit-btn');
-                submitBtn.innerText = "Confirm & Save Advance";
-                // Hover state modified to turn emerald green instantly on advance mode
-                submitBtn.className = "w-full bg-[#1e3a5f] hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]";
-            } else if (mode === 'adjustment') {
-                btnAdj.className = "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
-                formCard.classList.remove('hidden');
-                pendingCard.classList.add('hidden');
-                historyCard.classList.add('hidden');
-                
-                document.getElementById('form-title').innerText = "Advance Adjustment Entry";
-                document.getElementById('date-label').innerText = "Adjustment Date";
-                document.getElementById('amount-label').innerText = "Adjusted Amount";
-                
-                // Update the voucher label dynamically on tab switch
-                voucherLabel.innerText = "ADJUSTMENT NO:";
-                
-                const submitBtn = document.getElementById('submit-btn');
-                submitBtn.innerText = "Confirm & Save Adjustment";
-                // Hover state modified to turn emerald green instantly on adjustment mode
-                submitBtn.className = "w-full bg-green-700 hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]";
-            } else if (mode === 'pending-list') {
-                btnPend.className = "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
-                formCard.classList.add('hidden');
-                pendingCard.classList.remove('hidden');
-                historyCard.classList.add('hidden');
-                
-                renderPendingTable();
-            } else if (mode === 'history') {
-                btnHist.className = "flex-1 bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
-                formCard.classList.add('hidden');
-                pendingCard.classList.add('hidden');
-                historyCard.classList.remove('hidden');
-                
-                document.getElementById('history-type-filter').value = 'ALL';
-                document.getElementById('history-table-search').value = '';
-                renderHistoryTable();
-            }
-
-            const selectedDate = document.getElementById('record-date').value;
-            // Immediate wait to generate dynamic voucher instantly upon switching tabs
-            await calculateDynamicVoucher(selectedDate);
-            fetchEmployeeBalance();
+          });
+          allTransactionsList = list;
+          allTransactionsList.sort((a, b) =>
+            b.advanceNo.localeCompare(a.advanceNo),
+          );
+        } catch (e) {
+          console.error("Failed to load limited history logs:", e);
         }
+      }
 
-        async function calculateDynamicVoucher(targetDate) {
-            if (!targetDate) {
-                document.getElementById('next-adv-no').innerText = "Select Date";
-                return;
-            }
-            if (currentMode === 'advance') {
-                await fetchNextVoucher(targetDate);
-            } else if (currentMode === 'adjustment') {
-                await fetchNextAdjustmentVoucher(targetDate);
-            }
+      // Helper to convert "DD-MM-YYYY" string into a Date object
+      function parseDateString(dateStr) {
+        if (!dateStr) return new Date(0);
+        const parts = dateStr.split("-");
+        if (parts.length === 3) {
+          return new Date(parts[2], parts[1] - 1, parts[0]);
         }
+        return new Date(0);
+      }
 
-        async function refreshSystemData(silent = false) {
-            const icon = document.getElementById('refresh-icon');
-            if(!silent) icon.classList.add('spinning');
-            
-            try {
-                const selectedDate = document.getElementById('record-date').value;
-                await fetchEmployees();
-                await aggregateAllLifetimeBalances(); 
-                await calculateDynamicVoucher(selectedDate);
-                await fetchEmployeeBalance();
-                if (currentMode === 'pending-list') {
-                    renderPendingTable();
-                } else if (currentMode === 'history') {
-                    renderHistoryTable();
-                }
-            } finally {
-                if(!silent) {
-                    setTimeout(() => icon.classList.remove('spinning'), 500);
-                }
-            }
-        }
+      async function fetchNextVoucher(targetDate) {
+        const voucherSpan = document.getElementById("next-adv-no");
+        if (!targetDate) return;
 
-        function showAlert(msg) {
-            document.getElementById('alert-msg').innerText = msg;
-            document.getElementById('alert-modal').classList.remove('hidden');
-        }
+        try {
+          const dateParts = targetDate.split("-");
+          if (dateParts.length < 3) return;
 
-        function closeAlert() {
-            document.getElementById('alert-modal').classList.add('hidden');
-        }
+          const year = dateParts[2];
+          const month = dateParts[1].padStart(2, "0");
+          const yearMonthKey = `${year}${month}`;
+          const monthNames = [
+            "JAN",
+            "FEB",
+            "MAR",
+            "APR",
+            "MAY",
+            "JUN",
+            "JUL",
+            "AUG",
+            "SEP",
+            "OCT",
+            "NOV",
+            "DEC",
+          ];
+          const monthName = monthNames[parseInt(month, 10) - 1] || "TEMP";
+          const monthYearFolder = `${monthName}_${year}`;
 
-        // Updated aggregateAllLifetimeBalances: Removed the "PAID THIS MONTH" element calculations entirely
-        async function aggregateAllLifetimeBalances() {
-            employeeBalances = {};
-            allTransactionsList = [];
-            try {
-                const [advSnap, adjSnap] = await Promise.all([
-                    rtb.ref('ADVANCE').once('value'),
-                    rtb.ref('ADJUSTMENT').once('value')
-                ]);
+          const snapshot = await rtb
+            .ref(`ADVANCE/${monthYearFolder}`)
+            .once("value");
+          const monthData = snapshot.val();
 
-                const advData = advSnap.val() || {};
-                const adjData = adjSnap.val() || {};
+          let sequenceNumber = 1;
 
-                let companyTotalAdvance = 0;
-                let companyTotalAdjusted = 0;
-
-                // 1. Advance Aggregation & flatten list
-                Object.keys(advData).forEach(monthYear => {
-                    if (monthYear === 'VOUCHER_TRACKER') return;
-                    const monthObj = advData[monthYear];
-                    if (typeof monthObj === 'object') {
-                        Object.keys(monthObj).forEach(dateKey => {
-                            const dateObj = monthObj[dateKey];
-                            if (typeof dateObj === 'object') {
-                                Object.keys(dateObj).forEach(recKey => {
-                                    const rec = dateObj[recKey];
-                                    if (rec) {
-                                        const amount = parseFloat(rec.amount || 0);
-                                        companyTotalAdvance += amount;
-
-                                        // Put into global history list
-                                        allTransactionsList.push({
-                                            ...rec,
-                                            entryType: 'advance'
-                                        });
-
-                                        if (rec.id) {
-                                            if (!employeeBalances[rec.id]) {
-                                                employeeBalances[rec.id] = { totalAdvance: 0, totalAdjusted: 0, pending: 0, lastDate: 'N/A' };
-                                            }
-                                            employeeBalances[rec.id].totalAdvance += amount;
-                                            
-                                            // Process last transaction date comparison safely
-                                            if (rec.recordDate) {
-                                                if (employeeBalances[rec.id].lastDate === 'N/A') {
-                                                    employeeBalances[rec.id].lastDate = rec.recordDate;
-                                                } else {
-                                                    const currentLast = parseDateString(employeeBalances[rec.id].lastDate);
-                                                    const entryDate = parseDateString(rec.recordDate);
-                                                    if (entryDate > currentLast) {
-                                                        employeeBalances[rec.id].lastDate = rec.recordDate;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        });
+          if (monthData) {
+            let maxSeq = 0;
+            Object.keys(monthData).forEach((dateKey) => {
+              const dateRecords = monthData[dateKey];
+              if (dateRecords) {
+                Object.keys(dateRecords).forEach((recordKey) => {
+                  const record = dateRecords[recordKey];
+                  if (
+                    record &&
+                    record.advanceNo &&
+                    record.advanceNo.startsWith("ACL-ADV-")
+                  ) {
+                    const parts = record.advanceNo.split("-");
+                    if (parts.length >= 4) {
+                      const num = parseInt(parts[3], 10);
+                      if (num > maxSeq) maxSeq = num;
                     }
+                  }
                 });
-
-                // 2. Adjustment Aggregation & flatten list
-                Object.keys(adjData).forEach(monthYear => {
-                    const monthObj = adjData[monthYear];
-                    if (typeof monthObj === 'object') {
-                        Object.keys(monthObj).forEach(dateKey => {
-                            const dateObj = monthObj[dateKey];
-                            if (typeof dateObj === 'object') {
-                                Object.keys(dateObj).forEach(recKey => {
-                                    const rec = dateObj[recKey];
-                                    if (rec) {
-                                        const amount = parseFloat(rec.amount || 0);
-                                        companyTotalAdjusted += amount;
-
-                                        // Put into global history list
-                                        allTransactionsList.push({
-                                            ...rec,
-                                            entryType: 'adjustment'
-                                        });
-
-                                        if (rec.id) {
-                                            if (!employeeBalances[rec.id]) {
-                                                employeeBalances[rec.id] = { totalAdvance: 0, totalAdjusted: 0, pending: 0, lastDate: 'N/A' };
-                                            }
-                                            employeeBalances[rec.id].totalAdjusted += amount;
-                                        }
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-
-                Object.keys(employeeBalances).forEach(id => {
-                    employeeBalances[id].pending = employeeBalances[id].totalAdvance - employeeBalances[id].totalAdjusted;
-                });
-
-                // Sort all historical transactions descending (newest first) based on Date & Time
-                allTransactionsList.sort((a, b) => {
-                    const dateA = parseDateString(a.recordDate);
-                    const dateB = parseDateString(b.recordDate);
-                    if (dateB.getTime() !== dateA.getTime()) {
-                        return dateB.getTime() - dateA.getTime();
-                    }
-                    // If dates are identical, fallback comparison on voucher sequence
-                    return (b.advanceNo || "").localeCompare(a.advanceNo || "");
-                });
-
-                document.getElementById('header-stat-total').innerText = companyTotalAdvance.toLocaleString() + " /-";
-                document.getElementById('header-stat-adj').innerText = companyTotalAdjusted.toLocaleString() + " /-";
-                document.getElementById('header-stat-pending').innerText = (companyTotalAdvance - companyTotalAdjusted).toLocaleString() + " /-";
-
-            } catch (e) {
-                console.error("Aggregation failed: ", e);
-            }
-        }
-
-        // Helper to convert "DD-MM-YYYY" string into a Date object for comparisons
-        function parseDateString(dateStr) {
-            if (!dateStr) return new Date(0);
-            const parts = dateStr.split('-');
-            if (parts.length === 3) {
-                return new Date(parts[2], parts[1] - 1, parts[0]);
-            }
-            return new Date(0);
-        }
-
-        async function fetchNextVoucher(targetDate) {
-            const voucherSpan = document.getElementById('next-adv-no');
-            if (!targetDate) return;
-
-            try {
-                const dateParts = targetDate.split('-');
-                if(dateParts.length < 3) return;
-                
-                const year = dateParts[2];
-                const month = dateParts[1].padStart(2, '0');
-                const yearMonthKey = `${year}${month}`;
-
-                const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-                const monthName = monthNames[parseInt(month, 10) - 1] || "TEMP";
-                const monthYearFolder = `${monthName}_${year}`;
-
-                const snapshot = await rtb.ref(`ADVANCE/${monthYearFolder}`).once('value');
-                const monthData = snapshot.val();
-
-                let sequenceNumber = 1;
-
-                if (monthData) {
-                    let maxSeq = 0;
-                    Object.keys(monthData).forEach(dateKey => {
-                        const dateRecords = monthData[dateKey];
-                        if (dateRecords) {
-                            Object.keys(dateRecords).forEach(recordKey => {
-                                const record = dateRecords[recordKey];
-                                if (record && record.advanceNo && record.advanceNo.startsWith('ACL-ADV-')) {
-                                    const parts = record.advanceNo.split('-');
-                                    if (parts.length >= 4) {
-                                        const num = parseInt(parts[3], 10);
-                                        if (num > maxSeq) maxSeq = num;
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    sequenceNumber = maxSeq + 1;
-                }
-
-                const paddedSeq = String(sequenceNumber).padStart(4, '0');
-                const nextVoucher = `ACL-ADV-${yearMonthKey}-${paddedSeq}`;
-                
-                voucherSpan.innerText = nextVoucher;
-                return nextVoucher;
-            } catch (e) {
-                console.error("Voucher error: ", e);
-                voucherSpan.innerText = "ACL-ADV-TEMP-0001";
-            }
-        }
-
-        async function fetchNextAdjustmentVoucher(targetDate) {
-            const voucherSpan = document.getElementById('next-adv-no');
-            if (!targetDate) return;
-
-            try {
-                const dateParts = targetDate.split('-');
-                if(dateParts.length < 3) return;
-                
-                const year = dateParts[2];
-                const month = dateParts[1].padStart(2, '0');
-                const yearMonthKey = `${year}${month}`;
-
-                const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-                const monthName = monthNames[parseInt(month, 10) - 1] || "TEMP";
-                const monthYearFolder = `${monthName}_${year}`;
-
-                const snapshot = await rtb.ref(`ADJUSTMENT/${monthYearFolder}`).once('value');
-                const monthData = snapshot.val();
-
-                let sequenceNumber = 1;
-
-                if (monthData) {
-                    let maxSeq = 0;
-                    Object.keys(monthData).forEach(dateKey => {
-                        const dateRecords = monthData[dateKey];
-                        if (dateRecords) {
-                            Object.keys(dateRecords).forEach(recordKey => {
-                                const record = dateRecords[recordKey];
-                                if (record && record.advanceNo && record.advanceNo.startsWith('ACL-ADJ-')) {
-                                    const parts = record.advanceNo.split('-');
-                                    if (parts.length >= 4) {
-                                        const num = parseInt(parts[3], 10);
-                                        if (num > maxSeq) maxSeq = num;
-                                    }
-                                }
-                            });
-                        }
-                    });
-                    sequenceNumber = maxSeq + 1;
-                }
-
-                const paddedSeq = String(sequenceNumber).padStart(4, '0');
-                const nextVoucher = `ACL-ADJ-${yearMonthKey}-${paddedSeq}`;
-                
-                voucherSpan.innerText = nextVoucher;
-                return nextVoucher;
-            } catch (e) {
-                console.error("Adjustment voucher error: ", e);
-                voucherSpan.innerText = "ACL-ADJ-TEMP-0001";
-            }
-        }
-
-        async function fetchEmployeeBalance() {
-            const id = document.getElementById('selected-emp-id').value;
-            const rDate = document.getElementById('record-date').value;
-            const summaryCard = document.getElementById('balance-summary-card');
-
-            if (!id || !rDate) {
-                summaryCard.classList.add('hidden');
-                return;
-            }
-
-            try {
-                const lifetimeInfo = employeeBalances[id] || { totalAdvance: 0, totalAdjusted: 0, pending: 0 };
-
-                document.getElementById('summary-lifetime-advance').innerText = lifetimeInfo.totalAdvance.toLocaleString() + " /-";
-                document.getElementById('summary-lifetime-adjusted').innerText = lifetimeInfo.totalAdjusted.toLocaleString() + " /-";
-                document.getElementById('summary-pending-balance').innerText = lifetimeInfo.pending.toLocaleString() + " /-";
-
-                if (lifetimeInfo.pending > 0) {
-                    document.getElementById('summary-pending-balance').className = "text-xl font-black text-[#d4af37]";
-                } else if (lifetimeInfo.pending < 0) {
-                    document.getElementById('summary-pending-balance').className = "text-xl font-black text-green-400";
-                    document.getElementById('summary-pending-balance').innerText = Math.abs(lifetimeInfo.pending).toLocaleString() + " /- (Paid Extra)";
-                } else {
-                    document.getElementById('summary-pending-balance').className = "text-xl font-black text-slate-300";
-                }
-
-                summaryCard.classList.remove('hidden');
-            } catch (e) {
-                console.error("Balance summary fetch error: ", e);
-            }
-        }
-
-        async function fetchEmployees() {
-            try { 
-                const snapshot = await firestore.collection('EMPLOYEE_LIST').get();
-                employees = [];
-                
-                snapshot.forEach(doc => {
-                    const empObj = doc.data();
-                    employees.push({
-                        id: empObj.id || doc.id,
-                        name: empObj.name || empObj['employee name'] || "",
-                        passport: empObj.passport || empObj['passport no'] || "",
-                        designation: empObj.designation || empObj.workingAs || empObj.desig || ""
-                    });
-                });
-                
-                console.log("Employees synced from Firestore: ", employees.length);
-            } catch(e) {
-                console.error("Error loading employee list from Firestore:", e);
-                showAlert("Critical: Could not load employee list from Firestore.");
-            }
-        }
-
-        function setupSearch() {
-            const input = document.getElementById('emp-search');
-            const res = document.getElementById('search-results');
-            input.addEventListener('focus', () => showFilteredResults(input.value));
-            input.addEventListener('input', (e) => showFilteredResults(e.target.value));
-            document.addEventListener('click', (e) => {
-                if (!input.contains(e.target) && !res.contains(e.target)) res.style.display = 'none';
+              }
             });
+            sequenceNumber = maxSeq + 1;
+          }
+
+          const paddedSeq = String(sequenceNumber).padStart(4, "0");
+          const nextVoucher = `ACL-ADV-${yearMonthKey}-${paddedSeq}`;
+
+          voucherSpan.innerText = nextVoucher;
+          return nextVoucher;
+        } catch (e) {
+          console.error("Advance No Error: ", e);
+          voucherSpan.innerText = "ACL-ADV-TEMP-0001";
+        }
+      }
+
+      async function fetchNextAdjustmentVoucher(targetDate) {
+        const voucherSpan = document.getElementById("next-adv-no");
+        if (!targetDate) return;
+
+        try {
+          const dateParts = targetDate.split("-");
+          if (dateParts.length < 3) return;
+
+          const year = dateParts[2];
+          const month = dateParts[1].padStart(2, "0");
+          const yearMonthKey = `${year}${month}`;
+          const monthNames = [
+            "JAN",
+            "FEB",
+            "MAR",
+            "APR",
+            "MAY",
+            "JUN",
+            "JUL",
+            "AUG",
+            "SEP",
+            "OCT",
+            "NOV",
+            "DEC",
+          ];
+          const monthName = monthNames[parseInt(month, 10) - 1] || "TEMP";
+          const monthYearFolder = `${monthName}_${year}`;
+
+          const snapshot = await rtb
+            .ref(`ADJUSTMENT/${monthYearFolder}`)
+            .once("value");
+          const monthData = snapshot.val();
+
+          let sequenceNumber = 1;
+
+          if (monthData) {
+            let maxSeq = 0;
+            Object.keys(monthData).forEach((dateKey) => {
+              const dateRecords = monthData[dateKey];
+              if (dateRecords) {
+                Object.keys(dateRecords).forEach((recordKey) => {
+                  const record = dateRecords[recordKey];
+                  if (
+                    record &&
+                    record.advanceNo &&
+                    record.advanceNo.startsWith("ACL-ADJ-")
+                  ) {
+                    const parts = record.advanceNo.split("-");
+                    if (parts.length >= 4) {
+                      const num = parseInt(parts[3], 10);
+                      if (num > maxSeq) maxSeq = num;
+                    }
+                  }
+                });
+              }
+            });
+            sequenceNumber = maxSeq + 1;
+          }
+
+          const paddedSeq = String(sequenceNumber).padStart(4, "0");
+          const nextVoucher = `ACL-ADJ-${yearMonthKey}-${paddedSeq}`;
+
+          voucherSpan.innerText = nextVoucher;
+          return nextVoucher;
+        } catch (e) {
+          console.error("Adjustment No Error: ", e);
+          voucherSpan.innerText = "ACL-ADJ-TEMP-0001";
+        }
+      }
+
+      // OPTIMIZED: Fetches employee summary aggregate directly.
+      async function fetchEmployeeBalance() {
+        const id = document.getElementById("selected-emp-id").value;
+        const summaryCard = document.getElementById("balance-summary-card");
+
+        if (!id) {
+          summaryCard.classList.add("hidden");
+          return;
         }
 
-        function showFilteredResults(val) {
-            const res = document.getElementById('search-results');
-            const lowerVal = val.trim().toLowerCase();
-            
-            const filtered = employees.filter(emp => {
-                const name = (emp.name || "").toString().toLowerCase();
-                const id = (emp.id || "").toString().toLowerCase();
-                return name.includes(lowerVal) || id.includes(lowerVal);
-            }).slice(0, 20);
+        try {
+          const lifetimeInfo = employeeBalances[id] || {
+            totalAdvance: 0,
+            totalAdjusted: 0,
+            pending: 0,
+          };
 
-            if (filtered.length > 0) {
-                res.innerHTML = filtered.map(emp => {
-                    const balInfo = employeeBalances[emp.id] || { pending: 0 };
-                    let pendingBadge = "";
+          document.getElementById("summary-lifetime-advance").innerText =
+            (lifetimeInfo.totalAdvance || 0).toLocaleString() + " /-";
+          document.getElementById("summary-lifetime-adjusted").innerText =
+            (lifetimeInfo.totalAdjusted || 0).toLocaleString() + " /-";
+          document.getElementById("summary-pending-balance").innerText =
+            (lifetimeInfo.pending || 0).toLocaleString() + " /-";
 
-                    if (balInfo.pending > 0) {
-                        pendingBadge = `<span class="pending-text-badge font-black text-[10px] text-[#d4af37] border border-[#d4af37]/30 px-2 py-0.5 rounded transition-all flex-shrink-0">Adv Pending: ${balInfo.pending.toLocaleString()} /-</span>`;
-                    } else if (balInfo.pending < 0) {
-                        pendingBadge = `<span class="pending-text-badge font-black text-[10px] text-green-400 border border-green-500/30 px-2 py-0.5 rounded transition-all flex-shrink-0">Adv Extra: ${Math.abs(balInfo.pending).toLocaleString()} /-</span>`;
-                    } else {
-                        pendingBadge = `<span class="pending-text-badge font-bold text-[10px] text-slate-400 border border-slate-500/30 px-2 py-0.5 rounded transition-all flex-shrink-0">Adv Pending: Clear</span>`;
-                    }
+          if (lifetimeInfo.pending > 0) {
+            document.getElementById("summary-pending-balance").className =
+              "text-xl font-black text-[#d4af37]";
+          } else if (lifetimeInfo.pending < 0) {
+            document.getElementById("summary-pending-balance").className =
+              "text-xl font-black text-green-400";
+            document.getElementById("summary-pending-balance").innerText =
+              Math.abs(lifetimeInfo.pending).toLocaleString() +
+              " /- (Paid Extra)";
+          } else {
+            document.getElementById("summary-pending-balance").className =
+              "text-xl font-black text-slate-300";
+          }
 
-                    return `
+          summaryCard.classList.remove("hidden");
+        } catch (e) {
+          console.error("Balance summary fetch error: ", e);
+        }
+      }
+
+      async function fetchEmployees() {
+        try {
+          const snapshot = await firestore.collection("EMPLOYEE_LIST").get();
+          employees = [];
+
+          snapshot.forEach((doc) => {
+            const empObj = doc.data();
+            employees.push({
+              id: empObj.id || doc.id,
+              name: empObj.name || empObj["employee name"] || "",
+              passport: empObj.passport || empObj["passport no"] || "",
+              designation:
+                empObj.designation || empObj.workingAs || empObj.desig || "",
+            });
+          });
+
+          console.log("Employees synced from Firestore: ", employees.length);
+        } catch (e) {
+          console.error("Error loading employee list from Firestore:", e);
+          showAlert("Critical: Could not load employee list from Firestore.");
+        }
+      }
+
+      function setupSearch() {
+        const input = document.getElementById("emp-search");
+        const res = document.getElementById("search-results");
+        input.addEventListener("focus", () => showFilteredResults(input.value));
+        input.addEventListener("input", (e) =>
+          showFilteredResults(e.target.value),
+        );
+        document.addEventListener("click", (e) => {
+          if (!input.contains(e.target) && !res.contains(e.target))
+            res.style.display = "none";
+        });
+      }
+
+      function showFilteredResults(val) {
+        const res = document.getElementById("search-results");
+        const lowerVal = val.trim().toLowerCase();
+
+        const filtered = employees
+          .filter((emp) => {
+            const name = (emp.name || "").toString().toLowerCase();
+            const id = (emp.id || "").toString().toLowerCase();
+            return name.includes(lowerVal) || id.includes(lowerVal);
+          })
+          .slice(0, 20);
+
+        if (filtered.length > 0) {
+          res.innerHTML = filtered
+            .map((emp) => {
+              const balInfo = employeeBalances[emp.id] || { pending: 0 };
+              let pendingBadge = "";
+
+              if (balInfo.pending > 0) {
+                pendingBadge = `<span class="pending-text-badge font-black text-[10px] text-[#d4af37] border border-[#d4af37]/30 px-2 py-0.5 rounded transition-all flex-shrink-0">Adv Pending: ${balInfo.pending.toLocaleString()} /-</span>`;
+              } else if (balInfo.pending < 0) {
+                pendingBadge = `<span class="pending-text-badge font-black text-[10px] text-green-400 border border-green-500/30 px-2 py-0.5 rounded transition-all flex-shrink-0">Adv Extra: ${Math.abs(balInfo.pending).toLocaleString()} /-</span>`;
+              } else {
+                pendingBadge = `<span class="pending-text-badge font-bold text-[10px] text-slate-400 border border-slate-500/30 px-2 py-0.5 rounded transition-all flex-shrink-0">Adv Pending: Clear</span>`;
+              }
+
+              return `
                         <div class="search-item" onclick="selectEmployee('${emp.id}')">
                             <div class="flex items-center w-full justify-start whitespace-nowrap overflow-visible">
                                 <span class="id-badge">${emp.id}</span>
-                                <span class="font-black text-xs uppercase tracking-wide inline-block" style="white-space: nowrap !important; overflow: visible !important;">${(emp.name || 'Unknown')}</span>
+                                <span class="font-black text-xs uppercase tracking-wide inline-block" style="white-space: nowrap !important; overflow: visible !important;">${emp.name || "Unknown"}</span>
                             </div>
                             <div class="mt-2 w-full flex justify-between items-center border-t border-white/5 pt-2 whitespace-nowrap overflow-hidden">
-                                <span class="text-[9px] font-black opacity-60 uppercase tracking-wider truncate inline-block mr-2" style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">${emp.designation || '---'}</span>
+                                <span class="text-[9px] font-black opacity-60 uppercase tracking-wider truncate inline-block mr-2" style="white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important;">${emp.designation || "---"}</span>
                                 ${pendingBadge}
                             </div>
                         </div>
                     `;
-                }).join('');
-                res.style.display = 'block';
-            } else {
-                res.style.display = 'none';
+            })
+            .join("");
+          res.style.display = "block";
+        } else {
+          res.style.display = "none";
+        }
+      }
+
+      function selectEmployee(id) {
+        const emp = employees.find((e) => e.id == id);
+        if (emp) {
+          document.getElementById("emp-search").value = id;
+          document.getElementById("selected-emp-id").value = id;
+          document.getElementById("display-name").value = (
+            emp.name || "No Employee Name"
+          )
+            .toString()
+            .toUpperCase();
+          document.getElementById("auto-passport").value = (
+            emp.passport || "---"
+          ).toString();
+          document.getElementById("display-desig").value = (
+            emp.designation || "---"
+          )
+            .toString()
+            .toUpperCase();
+          document.getElementById("search-results").style.display = "none";
+
+          fetchEmployeeBalance();
+          document.getElementById("advance-amount").focus();
+        }
+      }
+       function updateAmountInWords(val) {
+            const display = document.getElementById('amount-in-words');
+            if (!val || isNaN(val) || parseFloat(val) === 0) {
+                display.innerText = "";
+                return;
             }
+            display.innerText = "In Word: " + numberToWords(parseFloat(val));
         }
 
-        function selectEmployee(id) {
-            const emp = employees.find(e => e.id == id);
-            if(emp) {
-                document.getElementById('emp-search').value = id;
-                document.getElementById('selected-emp-id').value = id;
-                document.getElementById('display-name').value = (emp.name || "No Employee Name").toString().toUpperCase();
-                document.getElementById('auto-passport').value = (emp.passport || "---").toString();
-                document.getElementById('display-desig').value = (emp.designation || "---").toString().toUpperCase();
-                document.getElementById('search-results').style.display = 'none';
-                
-                fetchEmployeeBalance();
-                document.getElementById('advance-amount').focus();
-            }
-        }
+      // Render Pending List Outstanding Table dynamically
+      function renderPendingTable() {
+        const rowsContainer = document.getElementById("pending-table-rows");
 
-        // Render Pending List Outstanding Table dynamically
-        function renderPendingTable() {
-            const rowsContainer = document.getElementById('pending-table-rows');
-            
-            // Filter out only employees that have active outstanding pending balance (> 0)
-            const debtors = employees.map(emp => {
-                const bal = employeeBalances[emp.id] || { pending: 0, lastDate: 'N/A' };
-                return {
-                    ...emp,
-                    pending: bal.pending,
-                    lastDate: bal.lastDate
-                };
-            }).filter(item => item.pending > 0);
+        // Filter out only employees that have active outstanding pending balance (> 0)
+        const debtors = employees
+          .map((emp) => {
+            const bal = employeeBalances[emp.id] || {
+              pending: 0,
+              lastDate: "N/A",
+            };
+            return {
+              ...emp,
+              pending: bal.pending,
+              lastDate: bal.lastDate,
+            };
+          })
+          .filter((item) => item.pending > 0);
 
-            if (debtors.length === 0) {
-                rowsContainer.innerHTML = `
+        if (debtors.length === 0) {
+          rowsContainer.innerHTML = `
                     <tr>
                         <td colspan="6" class="py-10 text-center text-slate-400 uppercase font-bold tracking-wider">
                             <i class="fas fa-check-double text-[#d4af37] text-lg mr-2"></i> All Clear! No outstanding pendings found.
                         </td>
                     </tr>
                 `;
-                document.getElementById('pending-table-grand-total').innerText = "0 /-";
-                return;
-            }
+          document.getElementById("pending-table-grand-total").innerText =
+            "0 /-";
+          return;
+        }
 
-            rowsContainer.innerHTML = debtors.map(item => `
+        rowsContainer.innerHTML = debtors
+          .map(
+            (item) => `
                 <tr class="pending-row hover:bg-[#1c3352]/40 transition-all border-b border-slate-800 text-slate-300" data-pending="${item.pending}">
                     <td class="py-3.5 px-4 font-mono font-bold text-[#d4af37]">${item.id}</td>
                     <td class="py-3.5 px-4 uppercase font-bold text-white">${item.name}</td>
-                    <td class="py-3.5 px-4 uppercase opacity-85">${item.designation || '---'}</td>
-                    <td class="py-3.5 px-4 font-mono opacity-80">${item.passport || '---'}</td>
+                    <td class="py-3.5 px-4 uppercase opacity-85">${item.designation || "---"}</td>
+                    <td class="py-3.5 px-4 font-mono opacity-80">${item.passport || "---"}</td>
                     <td class="py-3.5 px-4 font-mono opacity-80">${item.lastDate}</td>
                     <td class="py-3.5 px-4 text-right font-mono font-black text-[#d4af37]">${item.pending.toLocaleString()} /-</td>
                 </tr>
-            `).join('');
+            `,
+          )
+          .join("");
 
-            // Calculate & display Grand Total for all outstanding debtors
-            calculatePendingTableGrandTotal();
-        }
+        calculatePendingTableGrandTotal();
+      }
 
-        // Calculate and dynamically render the grand total of currently visible debtors in the pending table
-        function calculatePendingTableGrandTotal() {
-            let total = 0;
-            const visibleRows = document.querySelectorAll('.pending-row');
-            
-            visibleRows.forEach(row => {
-                if (row.style.display !== 'none') {
-                    const pendingAmount = parseFloat(row.getAttribute('data-pending') || 0);
-                    total += pendingAmount;
-                }
-            });
+      function calculatePendingTableGrandTotal() {
+        let total = 0;
+        const visibleRows = document.querySelectorAll(".pending-row");
 
-            document.getElementById('pending-table-grand-total').innerText = total.toLocaleString() + " /-";
-        }
+        visibleRows.forEach((row) => {
+          if (row.style.display !== "none") {
+            const pendingAmount = parseFloat(
+              row.getAttribute("data-pending") || 0,
+            );
+            total += pendingAmount;
+          }
+        });
 
-        // Filter the Pending Table rows instantly by ID or Name & recalculate total
-        function filterPendingTable(searchQuery) {
-            const val = searchQuery.trim().toLowerCase();
-            const rows = document.querySelectorAll('.pending-row');
-            
-            rows.forEach(row => {
-                const cells = row.getElementsByTagName('td');
-                if (cells.length >= 2) {
-                    const idText = cells[0].textContent.toLowerCase();
-                    const nameText = cells[1].textContent.toLowerCase();
-                    if (idText.includes(val) || nameText.includes(val)) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
-            });
+        document.getElementById("pending-table-grand-total").innerText =
+          total.toLocaleString() + " /-";
+      }
 
-            // Recalculate totals based on filtered items
-            calculatePendingTableGrandTotal();
-        }
+      function filterPendingTable(searchQuery) {
+        const val = searchQuery.trim().toLowerCase();
+        const rows = document.querySelectorAll(".pending-row");
 
-        // Render Transaction History Table dynamically (Latest first, supports instant reprint of any item)
-        function renderHistoryTable() {
-            const rowsContainer = document.getElementById('history-table-rows');
+        rows.forEach((row) => {
+          const cells = row.getElementsByTagName("td");
+          if (cells.length >= 2) {
+            const idText = cells[0].textContent.toLowerCase();
+            const nameText = cells[1].textContent.toLowerCase();
+            if (idText.includes(val) || nameText.includes(val)) {
+              row.style.display = "";
+            } else {
+              row.style.display = "none";
+            }
+          }
+        });
 
-            if (allTransactionsList.length === 0) {
-                rowsContainer.innerHTML = `
+        calculatePendingTableGrandTotal();
+      }
+
+      // Render Transaction History Table dynamically
+      function renderHistoryTable() {
+        const rowsContainer = document.getElementById("history-table-rows");
+
+        if (allTransactionsList.length === 0) {
+          rowsContainer.innerHTML = `
                     <tr>
                         <td colspan="7" class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest">
                             <i class="fas fa-history mr-2"></i> No transaction history found.
                         </td>
                     </tr>
                 `;
-                return;
-            }
+          return;
+        }
 
-            rowsContainer.innerHTML = allTransactionsList.map(item => {
-                const isAdvance = item.entryType === 'advance';
-                const typeBadge = isAdvance 
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-900/40 text-blue-400 border border-blue-800/50">Advance</span>`
-                    : `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-900/40 text-emerald-400 border border-emerald-800/50">Adjusted</span>`;
+        rowsContainer.innerHTML = allTransactionsList
+          .map((item) => {
+            const isAdvance = item.entryType === "advance";
+            const typeBadge = isAdvance
+              ? `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-900/40 text-blue-400 border border-blue-800/50">Advance</span>`
+              : `<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-900/40 text-emerald-400 border border-emerald-800/50">Adjusted</span>`;
 
-                return `
+            return `
                     <tr class="history-row hover:bg-[#1c3352]/40 transition-all border-b border-slate-800 text-slate-300" data-type="${item.entryType}">
                         <td class="py-3.5 px-4 font-mono font-bold text-[#d4af37]">${item.advanceNo}</td>
                         <td class="py-3.5 px-4 font-mono opacity-80">${item.recordDate}</td>
@@ -1118,192 +1476,389 @@
                         <td class="py-3.5 px-4">${typeBadge}</td>
                         <td class="py-3.5 px-4 text-right font-mono font-black text-white">${parseFloat(item.amount || 0).toLocaleString()} /-</td>
                         <td class="py-3.5 px-4 text-center">
-                            <button type="button" onclick="reprintHistoryTransaction('${item.advanceNo}')" title="Reprint Voucher" class="bg-[#1e3a5f] hover:bg-slate-700 text-[#d4af37] hover:text-white p-2 rounded-lg border border-[#d4af37]/30 transition-all">
+                            <button type="button" onclick="reprintHistoryTransaction('${item.advanceNo}')" title="Reprint Advance No" class="bg-[#1e3a5f] hover:bg-slate-700 text-[#d4af37] hover:text-white p-2 rounded-lg border border-[#d4af37]/30 transition-all">
                                 <i class="fas fa-print"></i>
                             </button>
                         </td>
                     </tr>
                 `;
-            }).join('');
-        }
+          })
+          .join("");
+      }
 
-         function updateAmountInWords(val) {
-            const display = document.getElementById('amount-in-words');
-            if (!val || isNaN(val) || parseFloat(val) === 0) {
-                display.innerText = "";
-                return;
-            }
-            display.innerText = "In Word: " + numberToWords(parseFloat(val));
-        }
-        // Action handler to reprint selected transaction voucher instantly from History Tab
-        function reprintHistoryTransaction(voucherNo) {
-            const foundItem = allTransactionsList.find(item => item.advanceNo === voucherNo);
-            if (foundItem) {
-                lastSavedEntries = [foundItem];
-                prepareAndPrint();
-            } else {
-                showAlert("Voucher record not found in system memory.");
-            }
-        }
-
-        // Filter the History Table rows instantly by both SELECTED TYPE Dropdown and SEARCH Text input
-        function filterHistoryTypeAndSearch() {
-            const selectedType = document.getElementById('history-type-filter').value.toLowerCase(); // 'all', 'advance', or 'adjustment'
-            const searchQuery = document.getElementById('history-table-search').value.trim().toLowerCase();
-            const rows = document.querySelectorAll('.history-row');
-            
-            rows.forEach(row => {
-                const cells = row.getElementsByTagName('td');
-                if (cells.length >= 4) {
-                    const rowType = row.getAttribute('data-type').toLowerCase(); // 'advance' or 'adjustment'
-                    const voucherText = cells[0].textContent.toLowerCase();
-                    const idText = cells[2].textContent.toLowerCase();
-                    const nameText = cells[3].textContent.toLowerCase();
-
-                    // Step 1: Check Type filter condition
-                    const matchesType = (selectedType === 'all' || rowType === selectedType);
-                    
-                    // Step 2: Check Search input query condition
-                    const matchesSearch = (searchQuery === '' || 
-                                           voucherText.includes(searchQuery) || 
-                                           idText.includes(searchQuery) || 
-                                           nameText.includes(searchQuery));
-
-                    // Row displays only if both filter rules are passed
-                    if (matchesType && matchesSearch) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                }
-            });
-        }
-
-        async function directSaveToSheet() {
-    const id = document.getElementById('selected-emp-id').value;
-    const amtVal = document.getElementById('advance-amount').value;
-    const rDate = document.getElementById('record-date').value;
-    
-    if(!id) return showAlert("Please select an employee first.");
-    if(!rDate) return showAlert("Please select a date.");
-    if(!amtVal || parseFloat(amtVal) <= 0) return showAlert("Please enter a valid amount.");
-    
-    const amt = parseFloat(amtVal);
-    document.getElementById('loader').classList.remove('hidden');
-
-    const dateParts = rDate.split('-');
-    const monthNames = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
-    const monthIndex = parseInt(dateParts[1], 10) - 1;
-    const monthName = monthNames[monthIndex] || "TEMP";
-    const year = dateParts[2];
-    const monthYear = `${monthName}_${year}`; 
-
-    // ভাউচার নম্বর জেনারেট করা
-    const nextVoucher = await (currentMode === 'advance' ? fetchNextVoucher(rDate) : fetchNextAdjustmentVoucher(rDate));
-
-    const lifetimeInfo = employeeBalances[id] || { totalAdvance: 0, totalAdjusted: 0, pending: 0 };
-    const prevPending = lifetimeInfo.pending;
-    const currentPending = currentMode === 'advance' ? (prevPending + amt) : (prevPending - amt);
-
-    const entry = {
-        advanceNo: nextVoucher,
-        tsDate: new Date().toLocaleDateString('en-GB'),
-        tsTime: new Date().toLocaleTimeString('en-GB'),
-        recordDate: rDate, 
-        id: id,
-        name: document.getElementById('display-name').value,
-        desig: document.getElementById('display-desig').value,
-        passport: document.getElementById('auto-passport').value,
-        amount: amt, 
-        amountWords: numberToWords(amt),
-        reference: document.getElementById('reference').value || "",
-        remark: document.getElementById('remark').value || "",
-        entryType: currentMode, 
-        prevPending: prevPending, 
-        newPending: currentPending,
-        newPendingWords: numberToWords(currentPending) 
-    };
-
-    lastSavedEntries = [entry];
-
-    const rootNode = currentMode === 'advance' ? 'ADVANCE' : 'ADJUSTMENT';
-    
-    // পাথ আপডেট করা হলো: rootNode / Month / Date / VoucherNo
-    const storagePath = `${rootNode}/${monthYear}/${rDate}/${nextVoucher}`;
-
-    try {
-        await rtb.ref(storagePath).set(entry);
-        await aggregateAllLifetimeBalances();
-
-        if(currentMode === 'advance') {
-            document.getElementById('success-title').innerText = "Advance Saved!";
-            document.getElementById('success-subtitle').innerText = `Advance synced successfully as ${nextVoucher}`;
+      function reprintHistoryTransaction(voucherNo) {
+        const foundItem = allTransactionsList.find(
+          (item) => item.advanceNo === voucherNo,
+        );
+        if (foundItem) {
+          lastSavedEntries = [foundItem];
+          prepareAndPrint();
         } else {
-            document.getElementById('success-title').innerText = "Adjustment Saved!";
-            document.getElementById('success-subtitle').innerText = `Adjustment synced successfully as ${nextVoucher}`;
+          showAlert("Advance No record not found in system memory.");
         }
+      }
 
-        document.getElementById('loader').classList.add('hidden');
-        document.getElementById('success-modal').classList.remove('hidden');
-    } catch(e) { 
-        console.error("RTB save failed:", e);
-        document.getElementById('loader').classList.add('hidden'); 
-        showAlert("Sync failed! Check Firebase Connection.");
-    }
-}
+      function filterHistoryTypeAndSearch() {
+        const selectedType = document
+          .getElementById("history-type-filter")
+          .value.toLowerCase();
+        const searchQuery = document
+          .getElementById("history-table-search")
+          .value.trim()
+          .toLowerCase();
+        const rows = document.querySelectorAll(".history-row");
 
-        function resetEntry() {
-            document.getElementById('advance-form').reset();
-            document.getElementById('selected-emp-id').value = "";
-            document.getElementById('display-name').value = "";
-            document.getElementById('auto-passport').value = "";
-            document.getElementById('display-desig').value = "";
-            document.getElementById('success-modal').classList.add('hidden');
-            document.getElementById('balance-summary-card').classList.add('hidden');
-            
-            // Received Date and Voucher Number cleared instantly on form reset as requested
-            const dateInput = document.getElementById('record-date');
-            if (dateInput._flatpickr) {
-                dateInput._flatpickr.clear();
+        rows.forEach((row) => {
+          const cells = row.getElementsByTagName("td");
+          if (cells.length >= 4) {
+            const rowType = row.getAttribute("data-type").toLowerCase();
+            const voucherText = cells[0].textContent.toLowerCase();
+            const idText = cells[2].textContent.toLowerCase();
+            const nameText = cells[3].textContent.toLowerCase();
+
+            const matchesType =
+              selectedType === "all" || rowType === selectedType;
+            const matchesSearch =
+              searchQuery === "" ||
+              voucherText.includes(searchQuery) ||
+              idText.includes(searchQuery) ||
+              nameText.includes(searchQuery);
+
+            if (matchesType && matchesSearch) {
+              row.style.display = "";
+            } else {
+              row.style.display = "none";
             }
-            document.getElementById('next-adv-no').innerText = "Select Date";
-            document.getElementById('amount-in-words').innerText = "";
-            refreshSystemData(true); 
+          }
+        });
+      }
+
+      // ONE-CLICK CLOUD SYNC: রিয়েল-টাইমে ডাটাবেসের সমস্ত পূর্বের লগ স্ক্যান করে /SUMMARY নোড গঠন করবে।
+      async function recalculateAndSyncAllLedger() {
+        if (
+          !confirm(
+            "Are you sure you want to recalculate and sync all summaries from historical logs? This will align your pre-calculated metrics with all recorded ledger transactions.",
+          )
+        ) {
+          return;
+        }
+        document.getElementById("loader-text").innerText =
+          "Rebuilding & Syncing Summary Data...";
+        document.getElementById("loader").classList.remove("hidden");
+
+        try {
+          const txRef = rtb.ref("ADVANCE_ADJUSTMENT_TRANSACTIONS");
+          const snapshot = await txRef.once("value");
+
+          if (!snapshot.exists()) {
+            document.getElementById("loader").classList.add("hidden");
+            showAlert("No historical transactions found to aggregate.");
+            return;
+          }
+
+          const transactions = snapshot.val();
+          const summaryData = {};
+          let globalAdvanceSum = 0;
+          let globalAdjustedSum = 0;
+
+          // নেস্টেড স্ট্রাকচার (Month > Date > Entry) স্ক্যান করার লজিক
+          snapshot.forEach((monthSnap) => {
+            monthSnap.forEach((dateSnap) => {
+              dateSnap.forEach((txSnap) => {
+                const tx = txSnap.val();
+                const empId = tx.id;
+                if (!empId) return;
+                const amount = parseFloat(tx.amount || 0);
+                const type = tx.entryType; 
+
+                if (!summaryData[empId]) {
+                  summaryData[empId] = { name: tx.name || "Unknown", desig: tx.desig || "---", passport: tx.passport || "---", lastDate: tx.recordDate || "---", totalAdvance: 0, totalAdjusted: 0, pending: 0 };
+                }
+
+                if (type === "advance") {
+                  summaryData[empId].totalAdvance += amount;
+                  summaryData[empId].pending += amount;
+                  globalAdvanceSum += amount;
+                } else if (type === "adjustment") {
+                  summaryData[empId].totalAdjusted += amount;
+                  summaryData[empId].pending -= amount;
+                  globalAdjustedSum += amount;
+                }
+
+                const currentLast = parseDateString(summaryData[empId].lastDate);
+                const txDate = parseDateString(tx.recordDate);
+                if (txDate > currentLast) {
+                  summaryData[empId].lastDate = tx.recordDate;
+                }
+              });
+            });
+          });
+
+          const globalSummaryData = {
+            totalAdvance: globalAdvanceSum,
+            totalAdjusted: globalAdjustedSum,
+            pending: globalAdvanceSum - globalAdjustedSum,
+          };
+
+          // Multi-path atomic set to overwrite previous SUMMARY caches instantly
+          const syncUpdates = {};
+          syncUpdates["ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL"] = globalSummaryData;
+          syncUpdates["ADVANCE_ADJUSTMENT_SUMMARY/USERS"] = summaryData;
+
+          await rtb.ref().update(syncUpdates);
+          await refreshSystemData(true);
+
+          document.getElementById("loader").classList.add("hidden");
+          alert(
+            "All historical entries have been successfully audited and rebuilt in the Cloud Summary cache!",
+          );
+        } catch (e) {
+          console.error("Cloud synchronization failed: ", e);
+          document.getElementById("loader").classList.add("hidden");
+          showAlert("Sync & Auditing failed! Check internet connection.");
+        }
+      }
+
+      // OPTIMIZED: Implements atomic pre-calculated ledger writes. No heavy calculation loads!
+      async function directSaveToSheet() {
+        const id = document.getElementById("selected-emp-id").value;
+        const amtVal = document.getElementById("advance-amount").value;
+        const rDate = document.getElementById("record-date").value;
+
+        if (!id) return showAlert("Please select an employee first.");
+        if (!rDate) return showAlert("Please select a date.");
+        if (!amtVal || parseFloat(amtVal) <= 0)
+          return showAlert("Please enter a valid amount.");
+
+        const amt = parseFloat(amtVal);
+        document.getElementById("loader").innerText = "Saving to Cloud RTB...";
+        document.getElementById("loader").classList.remove("hidden");
+
+        const dateParts = rDate.split("-");
+        const monthNames = [
+          "JAN",
+          "FEB",
+          "MAR",
+          "APR",
+          "MAY",
+          "JUN",
+          "JUL",
+          "AUG",
+          "SEP",
+          "OCT",
+          "NOV",
+          "DEC",
+        ];
+        const monthIndex = parseInt(dateParts[1], 10) - 1;
+        const monthName = monthNames[monthIndex] || "TEMP";
+        const year = dateParts[2];
+        const monthYear = `${monthName}_${year}`;
+
+        const nextVoucher = await (currentMode === "advance"
+          ? fetchNextVoucher(rDate)
+          : fetchNextAdjustmentVoucher(rDate));
+
+        // Instantly fetch current individual ledger balance from pre-calculated memory
+        const lifetimeInfo = employeeBalances[id] || {
+          totalAdvance: 0,
+          totalAdjusted: 0,
+          pending: 0,
+        };
+        const prevPending = lifetimeInfo.pending;
+        const currentPending =
+          currentMode === "advance" ? prevPending + amt : prevPending - amt;
+
+        const entry = {
+          advanceNo: nextVoucher,
+          tsDate: new Date().toLocaleDateString("en-GB"),
+          tsTime: new Date().toLocaleTimeString("en-GB"),
+          recordDate: rDate,
+          id: id,
+          name: document.getElementById("display-name").value,
+          desig: document.getElementById("display-desig").value,
+          passport: document.getElementById("auto-passport").value,
+          amount: amt,
+          amountWords: numberToWords(amt),
+          reference: document.getElementById("reference").value || "",
+          remark: document.getElementById("remark").value || "",
+          entryType: currentMode,
+          prevPending: prevPending,
+          newPending: currentPending,
+          newPendingWords: numberToWords(currentPending),
+        };
+
+        lastSavedEntries = [entry];
+
+        const rootNode = currentMode === "advance" ? "ADVANCE" : "ADJUSTMENT";
+
+        // Build multi-path atomic updates object
+        const updates = {};
+
+        // 1. Log Raw transaction to monthly bucket
+        updates[`${rootNode}/${monthYear}/${rDate}/${id}_${nextVoucher}`] = entry;
+
+        // 2. Log to Unified Transactions node for history queries
+        updates[`ADVANCE_ADJUSTMENT_TRANSACTIONS/${monthYear}/${rDate}/${id}_${nextVoucher}`] = entry;
+
+        // 3. Atomically update Pre-calculated Global Summary aggregates
+        if (currentMode === "advance") {
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/totalAdvance`] =
+            Number(globalSummary.totalAdvance || 0) + amt;
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/pending`] =
+            Number(globalSummary.pending || 0) + amt;
+
+          // 4. Atomically update Pre-calculated Employee Aggregate
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/totalAdvance`] =
+            Number(lifetimeInfo.totalAdvance || 0) + amt;
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/pending`] =
+            Number(lifetimeInfo.pending || 0) + amt;
+        } else {
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/totalAdjusted`] =
+            Number(globalSummary.totalAdjusted || 0) + amt;
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/pending`] =
+            Number(globalSummary.pending || 0) - amt;
+
+          // 4. Atomically update Pre-calculated Employee Aggregate
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/totalAdjusted`] =
+            Number(lifetimeInfo.totalAdjusted || 0) + amt;
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/pending`] =
+            Number(lifetimeInfo.pending || 0) - amt;
         }
 
-        function numberToWords(num) {
-            const isNegative = num < 0;
-            const absoluteNum = Math.abs(num);
-            const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-            const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-            const numStr = absoluteNum.toString();
-            if (absoluteNum > 999999999) return 'Amount too large';
-            let n = ('000000000' + numStr).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
-            if (!n) return ''; 
-            let str = '';
-            str += (Number(n[1]) != 0) ? (a[Number(n[1])] || b[n[1][0]] + ' ' + a[n[1][1]]) + 'Crore ' : '';
-            str += (Number(n[2]) != 0) ? (a[Number(n[2])] || b[n[2][0]] + ' ' + a[n[2][1]]) + 'Lakh ' : '';
-            str += (Number(n[3]) != 0) ? (a[Number(n[3])] || b[n[3][0]] + ' ' + a[n[3][1]]) + 'Thousand ' : '';
-            str += (Number(n[4]) != 0) ? (a[Number(n[4])] || b[n[4][0]] + ' ' + a[n[4][1]]) + 'Hundred ' : '';
-            str += (Number(n[5]) != 0) ? ((str != '') ? 'and ' : '') + (a[Number(n[5])] || b[n[5][0]] + ' ' + a[n[5][1]]) : '';
-            
-            let finalStr = str ? str + 'Taka Only' : 'Zero Taka Only';
-            return isNegative ? 'Minus ' + finalStr : finalStr;
+        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/name`] = entry.name;
+        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/desig`] = entry.desig;
+        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/passport`] = entry.passport;
+        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/lastDate`] = rDate;
+
+        try {
+          // Execute atomic updates in 1 single write operation
+          await rtb.ref().update(updates);
+
+          // Re-sync light summary state
+          await syncPreCalculatedAggregates();
+
+          if (currentMode === "advance") {
+            document.getElementById("success-title").innerText = "Advance Saved!";
+            document.getElementById('success-subtitle').innerText = `Advance saved successfully as ${nextVoucher}`;
+          } else {
+            document.getElementById("success-title").innerText = "Adjustment Saved!";
+            document.getElementById('success-subtitle').innerText = `Adjustment saved successfully as ${nextVoucher}`;
+          }
+
+          document.getElementById("loader").classList.add("hidden");
+          document.getElementById("success-modal").classList.remove("hidden");
+        } catch (e) {
+          console.error("RTB save failed:", e);
+          document.getElementById("loader").classList.add("hidden");
+          showAlert("Sync failed! Check Firebase Connection.");
         }
+      }
 
-        function getReceiptHTML(item, copyType) {
-            const isAdj = item.entryType === 'adjustment';
-            const receiptTitle = isAdj ? "Advance Adjustment Receipt" : "Money Advance Receipt";
-            const amountLabel = isAdj ? "ADJUSTED AMT" : "ADVANCE AMOUNT";
-            const goldColor = "#d4af37";
-            const navyColor = "#1e3a5f";
+      function resetEntry() {
+        document.getElementById("advance-form").reset();
+        document.getElementById("selected-emp-id").value = "";
+        document.getElementById("display-name").value = "";
+        document.getElementById("auto-passport").value = "";
+        document.getElementById("display-desig").value = "";
+        document.getElementById("success-modal").classList.add("hidden");
+        document.getElementById("balance-summary-card").classList.add("hidden");
 
-            const prevPendingVal = Number(item.prevPending || 0);
-            const currentPendingVal = Number(item.newPending || 0);
-            const transactionVal = Number(item.amount || 0);
-            const currentPendingWords = item.newPendingWords || numberToWords(currentPendingVal);
+        // Received Date and Voucher Number cleared instantly on form reset as requested
+        const dateInput = document.getElementById("record-date");
+        if (dateInput._flatpickr) {
+          dateInput._flatpickr.clear();
+        }
+        document.getElementById("next-adv-no").innerText = "Select Date";
+         document.getElementById('amount-in-words').innerText = "";
+        refreshSystemData(true);
+      }
 
-            return `
+      function numberToWords(num) {
+        const isNegative = num < 0;
+        const absoluteNum = Math.abs(num);
+        const a = [
+          "",
+          "One ",
+          "Two ",
+          "Three ",
+          "Four ",
+          "Five ",
+          "Six ",
+          "Seven ",
+          "Eight ",
+          "Nine ",
+          "Ten ",
+          "Eleven ",
+          "Twelve ",
+          "Thirteen ",
+          "Fourteen ",
+          "Fifteen ",
+          "Sixteen ",
+          "Seventeen ",
+          "Eighteen ",
+          "Nineteen ",
+        ];
+        const b = [
+          "",
+          "",
+          "Twenty",
+          "Thirty",
+          "Forty",
+          "Fifty",
+          "Sixty",
+          "Seventy",
+          "Eighty",
+          "Ninety",
+        ];
+        const numStr = absoluteNum.toString();
+        if (absoluteNum > 999999999) return "Amount too large";
+        let n = ("000000000" + numStr)
+          .substr(-9)
+          .match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if (!n) return "";
+        let str = "";
+        str +=
+          Number(n[1]) != 0
+            ? (a[Number(n[1])] || b[n[1][0]] + " " + a[n[1][1]]) + "Crore "
+            : "";
+        str +=
+          Number(n[2]) != 0
+            ? (a[Number(n[2])] || b[n[2][0]] + " " + a[n[2][1]]) + "Lakh "
+            : "";
+        str +=
+          Number(n[3]) != 0
+            ? (a[Number(n[3])] || b[n[3][0]] + " " + a[n[3][1]]) + "Thousand "
+            : "";
+        str +=
+          Number(n[4]) != 0
+            ? (a[Number(n[4])] || b[n[4][0]] + " " + a[n[4][1]]) + "Hundred "
+            : "";
+        str +=
+          Number(n[5]) != 0
+            ? (str != "" ? "and " : "") +
+              (a[Number(n[5])] || b[n[5][0]] + " " + a[n[5][1]])
+            : "";
+
+        let finalStr = str ? str + "Taka Only" : "Zero Taka Only";
+        return isNegative ? "Minus " + finalStr : finalStr;
+      }
+
+      function getReceiptHTML(item, copyType) {
+        const isAdj = item.entryType === "adjustment";
+        const receiptTitle = isAdj
+          ? "Advance Adjustment Receipt"
+          : " Advance Money Receipt";
+        const amountLabel = isAdj ? "ADJUSTED AMT" : "ADVANCE RECEIVED AMOUNT";
+        const goldColor = "#d4af37";
+        const navyColor = "#1e3a5f";
+
+        const prevPendingVal = Number(item.prevPending || 0);
+        const currentPendingVal = Number(item.newPending || 0);
+        const transactionVal = Number(item.amount || 0);
+        const currentPendingWords =
+          item.newPendingWords || numberToWords(currentPendingVal);
+
+        return `
                 <div class="receipt-slip" style="border: 3px solid ${navyColor} !important;">
                     <div style="position: absolute; top: 15px; right: 15px; font-size: 10px; font-weight: bold; text-transform: uppercase; border: 2px solid ${goldColor}; padding: 2px 8px; border-radius: 4px; background: ${navyColor} !important; color: ${goldColor} !important;">${copyType} Copy</div>
                     <div style="display: flex; align-items: center; justify-content: center; border-bottom: 3.5px solid ${navyColor}; padding-bottom: 12px; margin-bottom: 15px; gap: 10px;">
@@ -1314,7 +1869,7 @@
                         </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 15px; font-weight: 900; color: ${navyColor} !important;">
-                        <span>VOUCHER: ${item.advanceNo}</span>
+                        <span>ADVANCE NO: ${item.advanceNo}</span>
                         <span>DATE: ${item.recordDate}</span>
                     </div>
                     <div style="font-size: 13px; line-height: 2.2;">
@@ -1329,26 +1884,25 @@
 
                     <div style="margin-top: 10px; padding: 10px 12px; background: #f8fafc; border: 2px solid ${navyColor}; border-radius: 8px; font-size: 12px; font-family: monospace; -webkit-print-color-adjust: exact; box-sizing: border-box;">
                         <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px; margin-bottom: 4px;">
-                            <span style="font-weight: bold; color: #475569;">Prev. Pending:</span>
+                            <span style="font-weight: bold; color: #475569;">Prev Advance pending:</span>
                             <span style="font-weight: 900; color: ${navyColor};">${prevPendingVal.toLocaleString()} /-</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px; margin-bottom: 4px;">
-                            <span style="font-weight: bold; color: #475569;">${isAdj ? 'Adjusted Now' : 'Advance Taken'}:</span>
-                            <span style="font-weight: 900; color: ${isAdj ? '#16a34a' : '#2563eb'};">${transactionVal.toLocaleString()} /-</span>
+                            <span style="font-weight: bold; color: #475569;">${isAdj ? "Adjusted Now" : "Advance Received"}:</span>
+                            <span style="font-weight: 900; color: ${isAdj ? "#16a34a" : "#2563eb"};">${transactionVal.toLocaleString()} /-</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 900; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px; margin-bottom: 4px;">
                             <span style="color: ${navyColor};">Net Pending:</span>
                             <span style="color: ${goldColor};">${currentPendingVal.toLocaleString()} /-</span>
                         </div>
-                        <!-- Net Pending in Words Added Below -->
                         <div style="font-size: 9.5px; font-weight: bold; color: #555; text-transform: uppercase; text-align: left; font-style: italic; line-height: 1.2;">
                             (In Words: ${currentPendingWords})
                         </div>
                     </div>
 
                     <div style="flex-grow: 1; margin-top: 10px;">
-                        <div style="font-size: 9px; font-weight: 900; color: ${navyColor} !important;">REFERENCE: ${item.reference || 'No Reference Entry'}</div>
-                        <div style="font-size: 9px; font-weight: 900; margin-top: 3px; color: ${navyColor} !important;">REMARKS: ${item.remark || 'No Remarks Entry'}</div>
+                        <div style="font-size: 9px; font-weight: 900; color: ${navyColor} !important;">REFERENCE: ${item.reference || "No Reference Entry"}</div>
+                        <div style="font-size: 9px; font-weight: 900; margin-top: 3px; color: ${navyColor} !important;">REMARKS: ${item.remark || "No Remarks Entry"}</div>
                     </div>
                     <div style="display: flex; justify-content: space-between; margin-top: auto; padding-bottom: 20px;">
                         <div style="text-align: center; width: 100px;"><div style="border-top: 1.5px solid ${navyColor} !important;"></div><span style="font-size: 9px; font-weight: 900; color: ${navyColor} !important;">RECEIVER</span></div>
@@ -1358,18 +1912,21 @@
                     <div style="position: absolute; bottom: 10px; left: 0; right: 0; text-align: center; font-size: 8px; color: #888 !important;">OFFICIAL SYSTEM RECORD • ${item.tsDate} | ${item.tsTime}</div>
                 </div>
             `;
-        }
+      }
 
-        function prepareAndPrint() {
-            const printArea = document.getElementById('receipt-print-area');
-            let htmlContent = '';
-            lastSavedEntries.forEach((item) => {
-                htmlContent += `<div class="dual-receipt-wrapper">${getReceiptHTML(item, 'Office')}<div style="width: 5%; height: 680px; position: relative;"><div style="border-left: 2px dotted #1e3a5f; height: 100%; position: absolute; left: 50%;"></div></div>${getReceiptHTML(item, 'Employee')}</div>`;
-            });
-            printArea.innerHTML = htmlContent;
-            printArea.classList.remove('hidden');
-            setTimeout(() => { window.print(); printArea.classList.add('hidden'); }, 500);
-        }
+      function prepareAndPrint() {
+        const printArea = document.getElementById("receipt-print-area");
+        let htmlContent = "";
+        lastSavedEntries.forEach((item) => {
+          htmlContent += `<div class="dual-receipt-wrapper">${getReceiptHTML(item, "Office")}<div style="width: 5%; height: 680px; position: relative;"><div style="border-left: 2px dotted #1e3a5f; height: 100%; position: absolute; left: 50%;"></div></div>${getReceiptHTML(item, "Employee")}</div>`;
+        });
+        printArea.innerHTML = htmlContent;
+        printArea.classList.remove("hidden");
+        setTimeout(() => {
+          window.print();
+          printArea.classList.add("hidden");
+        }, 500);
+      }
     </script>
-</body>
+  </body>
 </html>
