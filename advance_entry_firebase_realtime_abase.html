@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Advance & Adjustment System</title>
+    <title>Advance & Adjustment Entry</title>
     <link
       class="no-print"
       rel="icon"
@@ -27,13 +27,12 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
     <style>
-      :root {
-        --brand-blue: #1e3a5f;
-        --brand-gold: #d4af37;
-        --brand-blue-hover: #142842;
-        --bg-dark-blue: #0f1e33;
-      }
-
+     :root {
+            --brand-blue: #1e3a5f;
+            --brand-gold: #d4af37;
+            --brand-blue-hover: #142842;
+            --bg-dark-blue: #0f1e33; 
+        }
       .page-wrapper {
         max-width: 1200px;
         margin: 0 auto;
@@ -149,6 +148,9 @@
         @page {
           size: A4 landscape;
           margin: 5mm;
+        }
+        body {
+          background: white !important;
         }
         body * {
           visibility: hidden;
@@ -507,10 +509,20 @@
             </div>
 
             <div class="md:col-span-3">
-                        <label id="amount-label" class="input-label">Advance Amount</label>
-                        <input type="number" id="advance-amount" oninput="updateAmountInWords(this.value)" class="w-full p-2.5 rounded-lg border-2 font-black text-white bg-[#0f1e33] text-lg border-slate-600 focus:border-[#d4af37] outline-none">
-                        <p id="amount-in-words" class="text-[9px] text-[#d4af37] font-black mt-1 uppercase italic h-4"></p>
-                    </div>
+              <label id="amount-label" class="input-label"
+                >Advance Amount</label
+              >
+              <input
+                type="number"
+                id="advance-amount"
+                oninput="updateAmountInWords(this.value)"
+                class="w-full p-2.5 rounded-lg border-2 font-black text-white bg-[#0f1e33] text-lg border-slate-600 focus:border-[#d4af37] outline-none"
+              />
+              <p
+                id="amount-in-words"
+                class="text-[9px] text-[#d4af37] font-black mt-1 uppercase italic h-4"
+              ></p>
+            </div>
 
             <div class="md:col-span-3">
               <label class="input-label">Reference</label>
@@ -1000,14 +1012,18 @@
       // OPTIMIZED: Synchronizes pre-calculated sums instantly without downloading raw history logs!
       async function syncPreCalculatedAggregates() {
         try {
-          const globalSnap = await rtb.ref("ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL").once("value");
+          const globalSnap = await rtb
+            .ref("ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL")
+            .once("value");
           globalSummary = globalSnap.val() || {
             totalAdvance: 0,
             totalAdjusted: 0,
             pending: 0,
           };
 
-          const usersSnap = await rtb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
+          const usersSnap = await rtb
+            .ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS")
+            .once("value");
           employeeBalances = usersSnap.val() || {};
 
           // Instantly update header widgets
@@ -1030,14 +1046,16 @@
             .orderByKey()
             .limitToLast(50)
             .once("value");
-            
+
           const data = snap.val() || {};
-          
+
           // নেস্টেড ডেটাকে টেবিলের জন্য ফ্ল্যাট লিস্টে রূপান্তর
           let list = [];
-          snap.forEach(monthSnap => {
-            monthSnap.forEach(dateSnap => {
-              dateSnap.forEach(txSnap => { list.push(txSnap.val()); });
+          snap.forEach((monthSnap) => {
+            monthSnap.forEach((dateSnap) => {
+              dateSnap.forEach((txSnap) => {
+                list.push(txSnap.val());
+              });
             });
           });
           allTransactionsList = list;
@@ -1349,14 +1367,14 @@
           document.getElementById("advance-amount").focus();
         }
       }
-       function updateAmountInWords(val) {
-            const display = document.getElementById('amount-in-words');
-            if (!val || isNaN(val) || parseFloat(val) === 0) {
-                display.innerText = "";
-                return;
-            }
-            display.innerText = "In Word: " + numberToWords(parseFloat(val));
+      function updateAmountInWords(val) {
+        const display = document.getElementById("amount-in-words");
+        if (!val || isNaN(val) || parseFloat(val) === 0) {
+          display.innerText = "";
+          return;
         }
+        display.innerText = "In Word: " + numberToWords(parseFloat(val));
+      }
 
       // Render Pending List Outstanding Table dynamically
       function renderPendingTable() {
@@ -1569,10 +1587,18 @@
                 const empId = tx.id;
                 if (!empId) return;
                 const amount = parseFloat(tx.amount || 0);
-                const type = tx.entryType; 
+                const type = tx.entryType;
 
                 if (!summaryData[empId]) {
-                  summaryData[empId] = { name: tx.name || "Unknown", desig: tx.desig || "---", passport: tx.passport || "---", lastDate: tx.recordDate || "---", totalAdvance: 0, totalAdjusted: 0, pending: 0 };
+                  summaryData[empId] = {
+                    name: tx.name || "Unknown",
+                    desig: tx.desig || "---",
+                    passport: tx.passport || "---",
+                    lastDate: tx.recordDate || "---",
+                    totalAdvance: 0,
+                    totalAdjusted: 0,
+                    pending: 0,
+                  };
                 }
 
                 if (type === "advance") {
@@ -1585,7 +1611,9 @@
                   globalAdjustedSum += amount;
                 }
 
-                const currentLast = parseDateString(summaryData[empId].lastDate);
+                const currentLast = parseDateString(
+                  summaryData[empId].lastDate,
+                );
                 const txDate = parseDateString(tx.recordDate);
                 if (txDate > currentLast) {
                   summaryData[empId].lastDate = tx.recordDate;
@@ -1695,10 +1723,13 @@
         const updates = {};
 
         // 1. Log Raw transaction to monthly bucket
-        updates[`${rootNode}/${monthYear}/${rDate}/${id}_${nextVoucher}`] = entry;
+        updates[`${rootNode}/${monthYear}/${rDate}/${id}_${nextVoucher}`] =
+          entry;
 
         // 2. Log to Unified Transactions node for history queries
-        updates[`ADVANCE_ADJUSTMENT_TRANSACTIONS/${monthYear}/${rDate}/${id}_${nextVoucher}`] = entry;
+        updates[
+          `ADVANCE_ADJUSTMENT_TRANSACTIONS/${monthYear}/${rDate}/${id}_${nextVoucher}`
+        ] = entry;
 
         // 3. Atomically update Pre-calculated Global Summary aggregates
         if (currentMode === "advance") {
@@ -1727,7 +1758,8 @@
 
         updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/name`] = entry.name;
         updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/desig`] = entry.desig;
-        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/passport`] = entry.passport;
+        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/passport`] =
+          entry.passport;
         updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/lastDate`] = rDate;
 
         try {
@@ -1738,11 +1770,15 @@
           await syncPreCalculatedAggregates();
 
           if (currentMode === "advance") {
-            document.getElementById("success-title").innerText = "Advance Saved!";
-            document.getElementById('success-subtitle').innerText = `Advance saved successfully as ${nextVoucher}`;
+            document.getElementById("success-title").innerText =
+              "Advance Saved!";
+            document.getElementById("success-subtitle").innerText =
+              `Advance saved successfully as ${nextVoucher}`;
           } else {
-            document.getElementById("success-title").innerText = "Adjustment Saved!";
-            document.getElementById('success-subtitle').innerText = `Adjustment saved successfully as ${nextVoucher}`;
+            document.getElementById("success-title").innerText =
+              "Adjustment Saved!";
+            document.getElementById("success-subtitle").innerText =
+              `Adjustment saved successfully as ${nextVoucher}`;
           }
 
           document.getElementById("loader").classList.add("hidden");
@@ -1769,7 +1805,7 @@
           dateInput._flatpickr.clear();
         }
         document.getElementById("next-adv-no").innerText = "Select Date";
-         document.getElementById('amount-in-words').innerText = "";
+        document.getElementById("amount-in-words").innerText = "";
         refreshSystemData(true);
       }
 
