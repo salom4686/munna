@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Employee Monthly Summary Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <style>
+      :root {
+        --brand-blue: #002147;
+        --brand-gold: #ffd700;
+        --brand-blue-light: #003370;
+        --brand-blue-pale: #e8edf4;
+        --brand-gold-dim: #c9a800;
+        --brand-gold-soft: #fff4b2;
+        --text-light: #ffffff;
+        --text-dark: #1a1a2e;
+        --border: #b0bdd4;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Source Sans 3", sans-serif;
+        background: var(--brand-blue);
+        color: var(--text-dark);
+        font-size: 12px;
+      }
+      .page-header {
+        background: var(--brand-blue);
+        padding: 18px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 4px solid var(--brand-gold);
+      }
+      .page-header h2 {
+        font-family: "Playfair Display", serif;
+        color: var(--brand-gold);
+        font-size: 22px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .header-badge {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 1px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+      }
+      .controls {
+        background: var(--brand-blue);
+        padding: 16px 32px;
+        border-bottom: 3px solid var(--brand-gold);
+      }
+      .row-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .controls label {
+        color: var(--brand-gold);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .controls input[type="text"] {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 6px;
+        background: #001530;
+        color: #e0e8f4;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .controls input[type="text"]::placeholder {
+        color: #6a88aa;
+      }
+      .controls input[type="text"]:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      }
+      .flatpickr-calendar {
+        background: #001d3d !important;
+        border: 1px solid var(--brand-gold) !important;
+      }
+      .flatpickr-day {
+        color: #cce !important;
+      }
+      .flatpickr-day.selected,
+      .flatpickr-day.today {
+        background: var(--brand-gold) !important;
+        color: var(--brand-blue) !important;
+        border-color: var(--brand-gold) !important;
+      }
+      .flatpickr-day:hover {
+        background: var(--brand-gold) !important;
+        color: black !important;
+        border-color: var(--brand-gold) !important;
+      }
+      .flatpickr-months .flatpickr-month,
+      .flatpickr-weekdays,
+      span.flatpickr-weekday {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+      }
+      .flatpickr-day.prevMonthDay,
+      .flatpickr-day.nextMonthDay {
+        visibility: hidden;
+      }
+      .btn {
+        padding: 8px 18px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        font-weight: 600;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        letter-spacing: 0.4px;
+        transition:
+          transform 0.1s,
+          box-shadow 0.2s,
+          background 0.2s;
+      }
+      .btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn-report {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+      }
+      .btn-report:hover {
+        background: #ffe840;
+      }
+      .btn-print {
+        background: #27ae60;
+        color: white;
+      }
+      .btn-print:hover {
+        background: #2ecc71;
+      }
+      .btn-matrix {
+        background: #8e44ad;
+        color: white;
+      }
+      .btn-matrix:hover {
+        background: #9b59b6;
+      }
+
+      /* Matrix Modal Styles */
+      .matrix-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+      }
+      .matrix-modal-content {
+        background-color: white;
+        margin: 10% auto;
+        padding: 25px;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 450px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        animation: modalFadeIn 0.3s ease;
+      }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .matrix-modal-body label {
+        display: block;
+        margin-top: 12px;
+        font-weight: 600;
+        color: var(--brand-blue);
+      }
+      .matrix-modal-body input,
+      .matrix-modal-body select {
+        width: 100%;
+        padding: 10px;
+        margin-top: 5px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+      }
+
+      .content {
+        padding: 24px 32px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 33, 71, 0.12);
+      }
+      thead tr {
+        background: var(--brand-blue);
+      }
+      th {
+        padding: 12px 8px;
+        color: white;
+        text-align: center;
+        border: 1px solid #335185;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        white-space: normal;
+      }
+      td {
+        padding: 10px 8px;
+        border: 1px solid var(--border);
+        white-space: nowrap;
+        background: #fff;
+        transition: background 0.15s;
+      }
+      tbody tr:nth-child(even) td {
+        background: var(--brand-blue-pale);
+      }
+      tbody tr:hover td {
+        background: var(--brand-gold-soft);
+      }
+      .text-left {
+        text-align: left;
+      }
+      .text-right {
+        text-align: right;
+      }
+      .total-row td {
+        font-weight: 700;
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+        border: 1px solid #335185 !important;
+      }
+      .signature-area {
+        margin-top: 60px;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+      }
+      .sig-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .sig-line {
+        width: 160px;
+        border-bottom: 2px solid var(--brand-blue);
+      }
+      .sig-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--brand-blue);
+        letter-spacing: 0.5px;
+      }
+      .print-footer-signature {
+        display: none;
+      }
+      .print-header {
+        display: none;
+      }
+
+      @media print {
+        body {
+          background: #fff;
+          padding: 0;
+          font-size: 9px;
+        }
+        .controls,
+        .page-header,
+        .btn {
+          display: none !important;
+        }
+        .content {
+          padding: 10px;
+        }
+        .print-header {
+          display: flex !important;
+          justify-content: space-between;
+          font-weight: bold;
+          font-size: 9px;
+          margin-bottom: 12px;
+          width: 100%;
+          color: #000;
+          padding-bottom: 8px;
+        }
+        .print-header .co-name {
+          font-family: "Playfair Display", serif;
+          font-size: 13px;
+        }
+        table {
+          font-size: 8px;
+          border: 1px solid #000 !important;
+          box-shadow: none;
+        }
+        th {
+          background: #f2f2f2 !important;
+          color: #000 !important;
+          font-weight: bold !important;
+          border: 1px solid #000 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          padding: 6px 4px;
+        }
+        td {
+          padding: 5px 4px;
+          border: 1px solid #000 !important;
+        }
+        .total-row td {
+          background: #eee !important;
+          color: #000 !important;
+          font-weight: bold !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          border: 1px solid #000 !important;
+        }
+        tfoot {
+          display: table-row-group;
+        }
+        .print-footer-signature {
+          display: table-row !important;
+        }
+        .screen-signature {
+          display: none !important;
+        }
+        tbody tr:nth-child(even) td {
+          background: #f2f2f2 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .signature-area {
+          margin-top: 50px;
+        }
+        .sig-line {
+          border-bottom: 1px solid #000 !important;
+        }
+        .sig-label {
+          color: #000 !important;
+        }
+        .ot-hours-preview {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-header">
+      <h2>ALOMHOW CO LTD</h2>
+      <span class="header-badge">Monthly Summary Report</span>
+    </div>
+
+    <div class="controls">
+      <div class="row-container">
+        <label>From:</label>
+        <input
+          type="text"
+          id="dateFrom"
+          placeholder="Start Date"
+          style="width: 130px"
+        />
+        <label>To:</label>
+        <input
+          type="text"
+          id="dateTo"
+          placeholder="End Date"
+          style="width: 130px"
+        />
+        <input
+          type="text"
+          id="filterId"
+          placeholder="Filter by ID"
+          style="width: 120px"
+        />
+        <button class="btn btn-report" onclick="generateReport()">
+          &#9654; Report View
+        </button>
+        <button class="btn btn-print" onclick="window.print()">
+          &#128438; Print Report
+        </button>
+        <input
+          type="text"
+          id="searchTable"
+          style="width: 220px"
+          placeholder="Search in table..."
+          onkeyup="searchTable()"
+        />
+        <button class="btn btn-matrix" onclick="openMatrixModal()">
+          📅 Matrix Report
+        </button>
+      </div>
+    </div>
+
+    <!-- Matrix Report Modal -->
+    <div id="matrixModal" class="matrix-modal">
+      <div class="matrix-modal-content">
+        <h3
+          style="
+            font-family: &quot;Playfair Display&quot;, serif;
+            color: var(--brand-blue);
+            margin-bottom: 20px;
+          "
+        >
+          Attendance Matrix
+        </h3>
+        <div class="matrix-modal-body">
+          <label>Select Month & Year</label>
+          <input type="month" id="matrixMonth" />
+
+          <label>Employee ID (Optional)</label>
+          <input type="text" id="matrixIdFilter" placeholder="e.g. ACL-0001" />
+
+          <label>Filter by Project</label>
+          <select id="matrixSideFilter">
+            <option value="">All Projects</option>
+          </select>
+        </div>
+        <div
+          style="
+            margin-top: 25px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+          "
+        >
+          <button
+            class="btn"
+            style="background: #eee; color: #333"
+            onclick="closeMatrixModal()"
+          >
+            Cancel
+          </button>
+          <button class="btn btn-matrix" onclick="generateMatrixGrid()">
+            View Attendance
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="reportOutput"></div>
+    </div>
+
+    <!-- Load Firebase FIRST, then flatpickr, then app script -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+      // ── Firebase init ──
+      const firebaseConfig = {
+        apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+        authDomain: "munna-acl-fda7c.firebaseapp.com",
+        databaseURL:
+          "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "munna-acl-fda7c",
+        storageBucket: "munna-acl-fda7c.firebasestorage.app",
+        messagingSenderId: "371130316468",
+        appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+      };
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      // ── Flatpickr init (after script loaded) ──
+      flatpickr("#dateFrom", { dateFormat: "Y-m-d" });
+      flatpickr("#dateTo", { dateFormat: "Y-m-d" });
+
+      function openMatrixModal() {
+        populateProjectFilter();
+        document.getElementById("matrixModal").style.display = "block";
+      }
+
+      function closeMatrixModal() {
+        document.getElementById("matrixModal").style.display = "none";
+      }
+
+      async function populateProjectFilter() {
+        const db = firebase.firestore();
+        const sideFilter = document.getElementById("matrixSideFilter");
+        if (sideFilter.options.length > 1) return;
+
+        try {
+          const snap = await db.collection("PROJECT_NAME").get();
+          snap.forEach((doc) => {
+            const data = doc.data();
+            const name = data.NAME || data.Name || data.name;
+            if (name) {
+              const opt = document.createElement("option");
+              opt.value = name;
+              opt.textContent = name;
+              sideFilter.appendChild(opt);
+            }
+          });
+        } catch (e) {
+          console.error("Error loading projects:", e);
+        }
+      }
+
+      async function generateMatrixGrid() {
+        const monthInput = document.getElementById("matrixMonth").value;
+        const sideFilter = document.getElementById("matrixSideFilter").value;
+        const idFilter = document.getElementById("matrixIdFilter").value.trim();
+
+        if (!monthInput) {
+          alert("Please select a month.");
+          return;
+        }
+
+        const [year, month0] = monthInput.split("-").map(Number);
+        const month = month0 - 1;
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const dateRange = [];
+        for (
+          let d = new Date(firstDay);
+          d <= lastDay;
+          d.setDate(d.getDate() + 1)
+        ) {
+          dateRange.push(new Date(d));
+        }
+
+        const db = firebase.firestore();
+        try {
+          const [attSnap, holSnap] = await Promise.all([
+            db.collectionGroup("Present_Absent").get(),
+            db.collection("HOLIDAY_LIST").get(),
+          ]);
+
+          const publicHolidayDates = new Set();
+          holSnap.forEach((doc) => {
+            const d = doc.data().DATE || doc.data().date;
+            if (d) publicHolidayDates.add(d);
+          });
+
+          const attendanceMap = {},
+            employees = {};
+          attSnap.forEach((doc) => {
+            const d = doc.data();
+            const docDate = new Date(d.DATE);
+            if (
+              docDate.getFullYear() === year &&
+              docDate.getMonth() === month
+            ) {
+              if (idFilter && d.ID !== idFilter) return;
+              if (sideFilter && d.SIDE_NAME !== sideFilter) return;
+
+              if (!employees[d.ID]) employees[d.ID] = d.EMPLOYEE_NAME;
+              if (!attendanceMap[d.ID]) attendanceMap[d.ID] = {};
+
+              let status =
+                d.STATUS === "PRESENT"
+                  ? "P"
+                  : d.STATUS === "ABSENT"
+                    ? "A"
+                    : "-";
+              attendanceMap[d.ID][d.DATE] = status;
+            }
+          });
+
+          const sortedIds = Object.keys(employees).sort((a, b) =>
+            a.localeCompare(b, undefined, { numeric: true }),
+          );
+          const monthName = firstDay.toLocaleString("default", {
+            month: "long",
+          });
+          const printDateTime = formatDateTime();
+
+          let dayTotalsP = Array(dateRange.length).fill(0);
+          let rowsHtml = "";
+          let grandTotalP = 0,
+            grandTotalA = 0;
+
+          sortedIds.forEach((id, idx) => {
+            let countP = 0,
+              countA = 0;
+            let daysTd = dateRange
+              .map((d, dIdx) => {
+                const ds = d.toISOString().split("T")[0];
+                const isSunday = d.getDay() === 0;
+                const isPubHol = publicHolidayDates.has(ds);
+                const stat = attendanceMap[id][ds] || "-";
+
+                if (stat === "P") {
+                  dayTotalsP[dIdx]++;
+                  countP++;
+                }
+                if (stat === "A") countA++;
+
+                let style =
+                  isSunday || isPubHol
+                    ? 'style="background:#fff0f0;color:#cc0000;font-weight:bold;border:1px solid #000;"'
+                    : "";
+                return `<td ${style}>${stat !== "-" ? stat : ""}</td>`;
+              })
+              .join("");
+
+            grandTotalP += countP;
+            grandTotalA += countA;
+            rowsHtml += `<tr><td>${idx + 1}</td><td class="text-left">${id} - ${employees[id]}</td>${daysTd}
+                        <td style="font-weight:bold;background:#e6fffa">${countP}</td>
+                        <td style="font-weight:bold;background:#fff0f0">${countA}</td></tr>`;
+          });
+
+          const tableHeader = `<thead>
+            <tr style="height: 22px;">
+              <th rowspan="2" style="width:20px;">SL</th>
+              <th rowspan="2" style="width:160px;">ID & Name</th>
+              <th colspan="${dateRange.length}">Attendance Summary: ${monthName} ${year} ${sideFilter ? "- " + sideFilter : ""}</th>
+              <th colspan="2" style="background:#0d685b;">SUM</th>
+            </tr>
+            <tr style="height: 35px;">
+              ${dateRange
+                .map((d) => {
+                  const isSun = d.getDay() === 0;
+                  const isPubHol = publicHolidayDates.has(
+                    d.toISOString().split("T")[0],
+                  );
+                  return `<th style="width:25px;${isSun || isPubHol ? "color:#ff4d4d" : ""}">${d.getDate()}<br><small>${d.toLocaleDateString("en-US", { weekday: "short" }).substring(0, 2)}</small></th>`;
+                })
+                .join("")}
+              <th style="width:25px;background:#198754;">P</th>
+              <th style="width:25px;background:#dc3545;">A</th>
+            </tr>
+          </thead>`;
+
+          const tableFooter = `<tfoot><tr class="total-row">
+            <td colspan="2" style="text-align:left;padding-left:10px;">DAILY TOTAL</td>
+            ${dayTotalsP.map((p) => `<td>${p}</td>`).join("")}
+            <td>${grandTotalP}</td><td>${grandTotalA}</td>
+          </tr></tfoot>`;
+
+          const preview = window.open("", "_blank");
+          preview.document.write(`
+            <html>
+              <head>
+                <title>Matrix Attendance - ${monthName}</title>
+                <style>
+                  @page { size: A4 landscape; margin: 5mm; }
+                  body { font-family: sans-serif; padding: 10px; margin: 0; }
+                  .company-name { text-align: center; font-size: 24px; font-weight: bold; color: #002147; margin-bottom: 10px; }
+                  table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.2px solid #000; }
+                  th, td { border: 1px solid #000; text-align: center; font-size: 9px; padding: 2px 0; }
+                  th { background: #1d3a6d; color: #fff; }
+                  .text-left { text-align: left; padding-left: 5px; white-space: nowrap; overflow: hidden; }
+                  .total-row td { background: #eee !important; color: #000 !important; font-weight: bold; }
+                  .no-print { position: fixed; top: 10px; right: 10px; padding: 8px 15px; background: #000; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+                  @media print { .no-print { display: none; } body { padding: 0; } }
+                </style>
+              </head>
+              <body>
+                <button class="no-print" onclick="window.print()">Print Report</button>
+                <h1 class="company-name">ALAMHOW CO LTD</h1>
+                <div style="text-align:right; font-size:10px; margin-bottom:5px;">Printed on: ${printDateTime}</div>
+                <table>${tableHeader}<tbody>${rowsHtml}</tbody>${tableFooter}</table>
+                <div style="margin-top:20px; display:flex; justify-content:space-between;">
+                  <table style="width:auto; min-width:200px;">
+                    <tr><th colspan="2">SUMMARY</th></tr>
+                    <tr><td style="text-align:left;padding:5px">Total Present</td><td style="width:50px">${grandTotalP}</td></tr>
+                    <tr><td style="text-align:left;padding:5px">Total Absent</td><td>${grandTotalA}</td></tr>
+                  </table>
+                  <div style="display:flex; gap:50px; align-items:flex-end;">
+                    <div style="border-top:1px solid #000; width:120px; text-align:center; font-size:10px">Prepared By</div>
+                    <div style="border-top:1px solid #000; width:120px; text-align:center; font-size:10px">Authorized By</div>
+                  </div>
+                </div>
+              </body>
+            </html>
+          `);
+          preview.document.close();
+          closeMatrixModal();
+        } catch (e) {
+          console.error(e);
+          alert("Error generating matrix: " + e.message);
+        }
+      }
+
+      function formatDateTime() {
+        const now = new Date();
+        const date = now.toLocaleDateString("en-GB").replace(/\//g, ".");
+        const time = now.toLocaleTimeString("en-US", { hour12: true });
+        return `${date}, ${time}`;
+      }
+
+      function searchTable() {
+        const filter = document
+          .getElementById("searchTable")
+          .value.toUpperCase();
+        const table = document.querySelector("table");
+        if (!table) return;
+        const rows = table.getElementsByTagName("tr");
+        for (let i = 1; i < rows.length - 1; i++) {
+          const txt = rows[i].textContent || rows[i].innerText;
+          rows[i].style.display =
+            txt.toUpperCase().indexOf(filter) > -1 ? "" : "none";
+        }
+      }
+
+      async function generateReport() {
+        const output = document.getElementById("reportOutput");
+        const dFromVal = document.getElementById("dateFrom").value;
+        const dToVal = document.getElementById("dateTo").value;
+        const dFrom = new Date(dFromVal);
+        const dTo = new Date(dToVal);
+        const filterId = document.getElementById("filterId").value.trim();
+
+        output.innerHTML =
+          '<p style="padding:30px;text-align:center;color:#002147;font-size:14px;font-style:italic">⏳ Processing data, please wait…</p>';
+
+        try {
+          const db = firebase.firestore();
+          const rtdb = firebase.database();
+
+          const [snap, otSnap, advSnap] = await Promise.all([
+            db.collectionGroup("Present_Absent").get(),
+            rtdb.ref("OVER_TIME").once("value"),
+            rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
+          ]);
+
+          const otData = otSnap.val() || {};
+          const advData = advSnap.val() || {};
+          let workers = {};
+
+          snap.forEach((doc) => {
+            const d = doc.data();
+            const docDate = new Date(d.DATE);
+            if (filterId && d.ID !== filterId) return;
+            if (dFromVal && dToVal && (docDate < dFrom || docDate > dTo))
+              return;
+            if (!workers[d.ID]) {
+              workers[d.ID] = {
+                id: d.ID,
+                name: d.EMPLOYEE_NAME,
+                passport: d.PASSPORT,
+                des: d.DESIGNATION,
+                sal: parseInt(d.SALARY) || 0,
+                daily: Math.round((parseInt(d.SALARY) || 0) / 26),
+                norm: 0,
+                hol: 0,
+                sun: 0,
+                pres: 0,
+                abs: 0,
+                otH: 0,
+                otA: 0,
+                adv: 0,
+                fine: 0,
+                others: parseInt(d.OTHERS) || 0,
+              };
+            }
+            if (d.STATUS === "PRESENT") workers[d.ID].pres++;
+            else if (d.STATUS === "ABSENT") workers[d.ID].abs++;
+            if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
+            workers[d.ID].sun += parseInt(d.SUNDAY_WORK) || 0;
+            workers[d.ID].hol += parseInt(d.HOLIDAY_WORK) || 0;
+            workers[d.ID].fine += parseInt(d.FINE) || 0;
+          });
+
+          for (const my in otData) {
+            const monthData = otData[my];
+            if (typeof monthData !== "object") continue;
+            for (const dateFolder in monthData) {
+              const dayRecords = monthData[dateFolder];
+              if (typeof dayRecords !== "object") continue;
+              for (const recordKey in dayRecords) {
+                const row = dayRecords[recordKey];
+                if (row && row.ID && workers[row.ID]) {
+                  // তারিখ অনুযায়ী OT ফিল্টার (যদি প্রয়োজন হয়)
+                  const otDate = new Date(row.OT_Date || dateFolder);
+                  if (dFromVal && dToVal && (otDate < dFrom || otDate > dTo))
+                    continue;
+
+                  workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS) || 0;
+                  workers[row.ID].otA += parseFloat(row.Total_Taka) || 0;
+                }
+              }
+            }
+          }
+          for (const id in workers) {
+            if (advData[id])
+              workers[id].adv = parseInt(advData[id].pending) || 0;
+          }
+
+          let totals = {
+            norm: 0,
+            hol: 0,
+            sun: 0,
+            pres: 0,
+            abs: 0,
+            otA: 0,
+            others: 0,
+            gross: 0,
+            adv: 0,
+            fine: 0,
+            nps: 0,
+            csg: 0,
+            totDed: 0,
+            net: 0,
+          };
+
+          let rows = "";
+          let count = 1;
+          Object.keys(workers)
+            .sort()
+            .forEach((id) => {
+              const w = workers[id];
+              const gross = w.norm * w.daily + w.hol + w.sun + w.otA + w.others;
+              const nps = Math.round(gross * 0.01);
+              const csg = Math.round(gross * 0.015);
+              const totDed = w.adv + w.fine + nps + csg;
+              const net = gross - totDed;
+
+              totals.norm += w.norm;
+              totals.hol += w.hol;
+              totals.sun += w.sun;
+              totals.pres += w.pres;
+              totals.abs += w.abs;
+              totals.otA += w.otA;
+              totals.others += w.others;
+              totals.gross += gross;
+              totals.adv += w.adv;
+              totals.fine += w.fine;
+              totals.nps += nps;
+              totals.csg += csg;
+              totals.totDed += totDed;
+              totals.net += net;
+
+              rows += `<tr>
+                        <td style="text-align:center">${count++}</td>
+                        <td class="text-left">${w.id}</td>
+                        <td class="text-left">${w.name}</td>
+                        <td class="text-left">${w.passport}</td>
+                        <td class="text-left">
+                            ${w.des}
+                            <div style="font-size: 9px; color: #666; font-style: italic;">(Salary: ${w.sal})</div>
+                        </td>
+                        <td class="text-right">${w.daily}</td>
+                        <td class="text-right">${w.norm}</td>
+                        <td class="text-right">${w.hol}</td>
+                        <td class="text-right">${w.sun}</td>
+                        <td class="text-right">${w.pres}</td>
+                        <td class="text-right">${w.abs}</td>
+                        <td class="text-right">
+                            ${w.otA}
+                            <div class="ot-hours-preview" style="font-size: 9px; color: #666; font-style: italic;">${w.otH} </div>
+                        </td>
+                        <td class="text-right">${w.others}</td>
+                        <td class="text-right"><strong>${gross}</strong></td>
+                        <td class="text-right">${w.adv}</td>
+                        <td class="text-right">${w.fine}</td>
+                        <td class="text-right">${nps}</td>
+                        <td class="text-right">${csg}</td>
+                        <td class="text-right">${totDed}</td>
+                        <td class="text-right"><strong>${net}</strong></td>
+                        <td></td>
+                    </tr>`;
+            });
+
+          const html = `
+                    <div class="print-header">
+                        <span class="co-name">ALOMHOW CO LTD — Monthly Salary Report</span>
+                        <span>Period: ${dFromVal || "…"} to ${dToVal || "…"}</span>
+                        <span>Printed: ${formatDateTime()}</span>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th rowspan="2">SL</th><th rowspan="2">EMP ID</th><th rowspan="2">Employee Name</th><th rowspan="2">Passport</th><th rowspan="2">Designation</th>
+                                <th rowspan="2">Daily Basic</th><th rowspan="2">Normal (P)</th><th rowspan="2">Holiday</th><th rowspan="2">Sunday</th>
+                                <th rowspan="2">Total Present </th><th rowspan="2">Absent</th><th rowspan="2">OT Amt</th><th rowspan="2">Others</th>
+                                <th rowspan="2">Gross Salary</th><th colspan="5">DEDUCTIONS</th><th rowspan="2">Net Salary</th>
+                                <th rowspan="2">Signature</th>
+                            </tr>
+                            <tr>
+                                <th>Advance</th><th>Fine</th>
+                                <th>NPS 1%</th><th>CSG 1.5%</th><th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="6" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
+                                <td class="text-right">${totals.norm}</td>
+                                <td class="text-right">${totals.hol}</td>
+                                <td class="text-right">${totals.sun}</td>
+                                <td class="text-right">${totals.pres}</td>
+                                <td class="text-right">${totals.abs}</td>
+                                <td class="text-right">${totals.otA}</td>
+                                <td class="text-right">${totals.others}</td>
+                                <td class="text-right">${totals.gross}</td>
+                                <td class="text-right">${totals.adv}</td>
+                                <td class="text-right">${totals.fine}</td>
+                                <td class="text-right">${totals.nps}</td>
+                                <td class="text-right">${totals.csg}</td>
+                                <td class="text-right">${totals.totDed}</td>
+                                <td class="text-right">${totals.net}</td>
+                                <td></td>
+                            </tr>
+                            <tr class="print-footer-signature">
+                                <td colspan="21" style="border: none !important; padding: 80px 0 20px 0 !important;">
+                                    <div class="signature-area" style="margin-top: 0; display: flex; justify-content: space-around; border: none !important;">
+                                        <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+                                        <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+                                        <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="signature-area screen-signature">
+                        <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+                        <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+                        <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+                    </div>`;
+
+          output.innerHTML = html;
+        } catch (e) {
+          output.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+        }
+      }
+    </script>
+  </body>
+</html>
