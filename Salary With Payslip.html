@@ -4,14 +4,8 @@
     <meta charset="UTF-8" />
     <title>Employee Monthly Summary Report</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
     <style>
       :root {
         --brand-blue: #002147;
@@ -21,185 +15,75 @@
         --border: #b0bdd4;
       }
       * { box-sizing: border-box; margin: 0; padding: 0; }
-      body {
-        font-family: "Source Sans 3", sans-serif;
-        background: var(--brand-blue);
-        color: #1a1a2e;
-        font-size: 12px;
-      }
-      .page-header {
-        background: var(--brand-blue);
-        padding: 18px 32px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 4px solid var(--brand-gold);
-      }
-      .page-header h2 {
-        font-family: "Playfair Display", serif;
-        color: var(--brand-gold);
-        font-size: 22px;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
-      }
-      .header-badge {
-        background: var(--brand-gold);
-        color: var(--brand-blue);
-        font-weight: 700;
-        font-size: 10px;
-        letter-spacing: 1px;
-        padding: 4px 12px;
-        border-radius: 20px;
-        text-transform: uppercase;
-      }
-      .controls {
-        background: var(--brand-blue);
-        padding: 16px 32px;
-        border-bottom: 3px solid var(--brand-gold);
-      }
-      .row-container {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-      .controls label {
-        color: var(--brand-gold);
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-      }
-      .controls input[type="text"] {
-        padding: 8px 12px;
-        font-size: 12px;
-        font-family: "Source Sans 3", sans-serif;
-        border: 1.5px solid #3a5a8a;
-        border-radius: 6px;
-        background: #001530;
-        color: #e0e8f4;
-        outline: none;
+      body { font-family: "Source Sans 3", sans-serif; background: var(--brand-blue); color: #1a1a2e; font-size: 12px; }
+ 
+      .page-header { background: var(--brand-blue); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid var(--brand-gold); }
+      .page-header h2 { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 22px; letter-spacing: 1.5px; text-transform: uppercase; }
+      .header-badge { background: var(--brand-gold); color: var(--brand-blue); font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+ 
+      /* ── Tab Bar ── */
+      .tab-bar { background: #001530; border-bottom: 3px solid var(--brand-gold); display: flex; padding: 0 32px; gap: 0; }
+      .tab-btn { padding: 12px 24px; font-size: 12px; font-weight: 700; font-family: "Source Sans 3", sans-serif; color: #6a88aa; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; letter-spacing: 0.5px; text-transform: uppercase; }
+      .tab-btn:hover { color: var(--brand-gold); }
+      .tab-btn.active { color: var(--brand-gold); border-bottom: 3px solid var(--brand-gold); }
+ 
+      /* ── Controls ── */
+      .controls { background: var(--brand-blue); padding: 14px 32px; border-bottom: 3px solid var(--brand-gold); }
+      .row-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .controls label { color: var(--brand-gold); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+      .controls input[type="text"], .controls select {
+        padding: 8px 12px; font-size: 12px; font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a; border-radius: 6px; background: #001530; color: #e0e8f4; outline: none;
         transition: border-color 0.2s, box-shadow 0.2s;
       }
       .controls input[type="text"]::placeholder { color: #6a88aa; }
-      .controls input[type="text"]:focus {
-        border-color: var(--brand-gold);
-        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      .controls input[type="text"]:focus, .controls select:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18); }
+ 
+      /* ── Att Filter Row ── */
+      .att-controls { background: var(--brand-blue); padding: 14px 32px; border-bottom: 3px solid var(--brand-gold); display: none; }
+      .att-controls.active { display: block; }
+      .att-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .att-controls label { color: var(--brand-gold); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap; }
+      .att-controls select, .att-controls input[type="text"] {
+        padding: 8px 12px; font-size: 12px; font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a; border-radius: 6px; background: #001530; color: #e0e8f4; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
       }
+      .att-controls select:focus, .att-controls input[type="text"]:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18); }
+      .att-controls input::placeholder { color: #6a88aa; }
+ 
+      /* Filter Type Dropdown special style */
+      .filter-type-select { background: #001530; color: var(--brand-gold); border: 2px solid var(--brand-gold); font-weight: 700; min-width: 140px; }
+      .secondary-filter { display: none; }
+      .secondary-filter.active { display: flex; align-items: center; gap: 10px; }
+ 
+      /* Flatpickr dark theme */
       .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
       .flatpickr-day { color: #cce !important; }
       .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
       .flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; border-color: var(--brand-gold) !important; }
       .flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
       .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
-
+ 
       /* ── Buttons ── */
-      .btn {
-        padding: 8px 18px;
-        font-size: 12px;
-        font-family: "Source Sans 3", sans-serif;
-        font-weight: 700;
-        border: 2px solid transparent;
-        border-radius: 6px;
-        cursor: pointer;
-        letter-spacing: 0.4px;
-        transition: transform 0.15s, box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
-      }
+      .btn { padding: 8px 18px; font-size: 12px; font-family: "Source Sans 3", sans-serif; font-weight: 700; border: 2px solid transparent; border-radius: 6px; cursor: pointer; letter-spacing: 0.4px; transition: transform 0.15s, box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s; }
       .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
       .btn:active { transform: translateY(0); }
-
-      /* Report View — gold fill, navy text */
-      .btn-report {
-        background: var(--brand-gold);
-        color: var(--brand-blue);
-        border-color: var(--brand-gold);
-      }
-      .btn-report:hover {
-        background: transparent;
-        color: var(--brand-gold);
-        border-color: var(--brand-gold);
-      }
-
-      /* Print — gold outline style */
-      .btn-print {
-        background: transparent;
-        color: var(--brand-gold);
-        border: 2px solid var(--brand-gold);
-      }
-      .btn-print:hover {
-        background: var(--brand-gold);
-        color: var(--brand-blue);
-      }
-
-      /* Employee List — gold fill */
-      .btn-emplist {
-        background: var(--brand-gold);
-        color: var(--brand-blue);
-        border: 2px solid var(--brand-gold);
-      }
-      .btn-emplist:hover {
-        background: transparent;
-        color: var(--brand-gold);
-      }
-
-      /* Clear / Reset button */
-      .btn-clear {
-        background: transparent;
-        color: #ff6b6b;
-        border: 2px solid #ff6b6b;
-        position: relative;
-        overflow: hidden;
-      }
-      .btn-clear:hover {
-        background: #ff6b6b;
-        color: white;
-        border-color: #ff6b6b;
-        box-shadow: 0 4px 14px rgba(255,107,107,0.4);
-      }
-      .btn-clear:active {
-        transform: scale(0.97) !important;
-      }
-
-      /* Payslip + View row buttons */
-      .btn-payslip {
-        background: var(--brand-gold);
-        color: #000000;
-        padding: 5px 11px;
-        font-size: 10px;
-        border: 2px solid #c9a800;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: 800;
-        font-family: "Source Sans 3", sans-serif;
-        transition: all 0.2s;
-        white-space: nowrap;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      }
-      .btn-payslip:hover {
-        background: #ffe840;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-      }
-      .btn-view {
-        background: var(--brand-blue);
-        color: #ffd700;
-        padding: 5px 11px;
-        font-size: 10px;
-        border: 2px solid #ffd700;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: 800;
-        font-family: "Source Sans 3", sans-serif;
-        transition: all 0.2s;
-        white-space: nowrap;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-      }
-      .btn-view:hover {
-        background: #003a7a;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-      }
-
+      .btn-report { background: var(--brand-gold); color: var(--brand-blue); border-color: var(--brand-gold); }
+      .btn-report:hover { background: transparent; color: var(--brand-gold); border-color: var(--brand-gold); }
+      .btn-att { background: #00a86b; color: white; border-color: #00a86b; }
+      .btn-att:hover { background: transparent; color: #00a86b; border-color: #00a86b; }
+      .btn-print { background: transparent; color: var(--brand-gold); border: 2px solid var(--brand-gold); }
+      .btn-print:hover { background: var(--brand-gold); color: var(--brand-blue); }
+      .btn-emplist { background: var(--brand-gold); color: var(--brand-blue); border: 2px solid var(--brand-gold); }
+      .btn-emplist:hover { background: transparent; color: var(--brand-gold); }
+      .btn-clear { background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; }
+      .btn-clear:hover { background: #ff6b6b; color: white; border-color: #ff6b6b; box-shadow: 0 4px 14px rgba(255,107,107,0.4); }
+      .btn-payslip { background: var(--brand-gold); color: #000000; padding: 5px 11px; font-size: 10px; border: 2px solid #c9a800; border-radius: 5px; cursor: pointer; font-weight: 800; font-family: "Source Sans 3", sans-serif; transition: all 0.2s; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+      .btn-payslip:hover { background: #ffe840; transform: translateY(-1px); }
+      .btn-view { background: var(--brand-blue); color: #ffd700; padding: 5px 11px; font-size: 10px; border: 2px solid #ffd700; border-radius: 5px; cursor: pointer; font-weight: 800; font-family: "Source Sans 3", sans-serif; transition: all 0.2s; white-space: nowrap; }
+      .btn-view:hover { background: #003a7a; transform: translateY(-1px); }
+ 
       .content { padding: 24px 32px; }
       table { width: 100%; border-collapse: collapse; margin-top: 8px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 33, 71, 0.12); }
       thead tr { background: var(--brand-blue); }
@@ -216,7 +100,27 @@
       .sig-label { font-size: 11px; font-weight: 600; color: var(--brand-blue); letter-spacing: 0.5px; }
       .print-footer-signature { display: none; }
       .print-header { display: none; }
-
+ 
+      /* ── Attendance Table specific ── */
+      .att-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+      .att-badge.present { background: #d1fae5; color: #065f46; }
+      .att-badge.absent { background: #fee2e2; color: #991b1b; }
+      .att-badge.holiday { background: #fef3c7; color: #92400e; }
+      .att-badge.sunday { background: #ede9fe; color: #5b21b6; }
+ 
+      .summary-cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+      .s-card { background: white; border-radius: 8px; padding: 12px 18px; display: flex; flex-direction: column; gap: 2px; min-width: 120px; box-shadow: 0 2px 8px rgba(0,33,71,0.1); border-left: 4px solid var(--brand-blue); }
+      .s-card-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #6b7280; }
+      .s-card-value { font-size: 22px; font-weight: 800; color: var(--brand-blue); font-family: "Playfair Display", serif; }
+      .s-card.green { border-left-color: #10b981; }
+      .s-card.green .s-card-value { color: #065f46; }
+      .s-card.red { border-left-color: #ef4444; }
+      .s-card.red .s-card-value { color: #991b1b; }
+      .s-card.gold { border-left-color: var(--brand-gold); }
+      .s-card.gold .s-card-value { color: #92400e; }
+      .s-card.purple { border-left-color: #8b5cf6; }
+      .s-card.purple .s-card-value { color: #5b21b6; }
+ 
       /* ── Employee List Panel ── */
       .emp-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
       .emp-panel-overlay.active { display: flex; }
@@ -236,27 +140,11 @@
       .emp-panel-table td { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
       .emp-panel-table tbody tr:hover td { background: #ede9fe; }
       .sel-count { font-size: 12px; color: var(--brand-gold); font-weight: 700; }
-      .btn-gen-selected {
-        background: var(--brand-gold);
-        color: var(--brand-blue);
-        border: 2px solid var(--brand-gold);
-        padding: 8px 20px;
-        border-radius: 7px;
-        font-size: 12px;
-        font-weight: 700;
-        font-family: "Source Sans 3", sans-serif;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-      .btn-gen-selected:hover {
-        background: transparent;
-        color: var(--brand-gold);
-        box-shadow: 0 4px 12px rgba(255,215,0,0.25);
-      }
+      .btn-gen-selected { background: var(--brand-gold); color: var(--brand-blue); border: 2px solid var(--brand-gold); padding: 8px 20px; border-radius: 7px; font-size: 12px; font-weight: 700; font-family: "Source Sans 3", sans-serif; cursor: pointer; transition: all 0.2s; }
+      .btn-gen-selected:hover { background: transparent; color: var(--brand-gold); }
       .btn-gen-selected:disabled { opacity: 0.4; cursor: not-allowed; }
       .month-sel { padding: 6px 10px; border: 1.5px solid var(--brand-gold); border-radius: 6px; font-size: 12px; outline: none; cursor: pointer; background: #001530; color: #e0e8f4; }
-      .month-sel:focus { border-color: var(--brand-gold); }
-
+ 
       /* ── Custom Message Box ── */
       .msgbox-overlay { display:none; position:fixed; inset:0; background:rgba(0,21,48,0.82); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
       .msgbox-overlay.active { display:flex; }
@@ -276,129 +164,129 @@
       .msgbox-btn.primary:hover { background:transparent; color:var(--brand-blue); border-color:var(--brand-blue); }
       .msgbox-btn.secondary { background:#f3f4f6; color:#374151; border-color:#e5e7eb; }
       .msgbox-btn.secondary:hover { background:#e5e7eb; }
-
-      /* ── Page Loader Overlay — NAVY BG ── */
-      .gen-loader {
-        display: none;
-        position: fixed;
-        inset: 0;
-        background: var(--brand-blue);
-        z-index: 99990;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 20px;
-      }
+ 
+      /* ── Generation Loader ── */
+      .gen-loader { display: none; position: fixed; inset: 0; background: var(--brand-blue); z-index: 99990; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
       .gen-loader.active { display: flex; }
-      .gen-loader-title {
-        font-family: "Playfair Display", serif;
-        color: var(--brand-gold);
-        font-size: 24px;
-        letter-spacing: 1.5px;
-        text-shadow: 0 0 20px rgba(255,215,0,0.4);
-      }
-      .gen-loader-sub {
-        color: #a0b8d8;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        min-height: 20px;
-      }
-
-      /* Big counter display */
-      .gen-count-display {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255,215,0,0.08);
-        border: 2px solid var(--brand-gold);
-        border-radius: 16px;
-        padding: 16px 48px;
-        min-width: 220px;
-        text-align: center;
-      }
-      .gen-count-label {
-        color: #a0b8d8;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 2px;
-        text-transform: uppercase;
-      }
-      .gen-count-numbers {
-        color: var(--brand-gold);
-        font-family: "Playfair Display", serif;
-        font-size: 48px;
-        font-weight: 700;
-        line-height: 1;
-        letter-spacing: 2px;
-        text-shadow: 0 0 30px rgba(255,215,0,0.5);
-      }
-      .gen-count-of {
-        color: #6a88aa;
-        font-size: 13px;
-        font-weight: 600;
-        letter-spacing: 1px;
-      }
-
-      .gen-progress-wrap {
-        width: 320px;
-        height: 8px;
-        background: #001030;
-        border-radius: 20px;
-        overflow: hidden;
-        border: 1px solid #1e3a5f;
-      }
-      .gen-progress-bar {
-        height: 100%;
-        background: linear-gradient(90deg, #ffd700, #ffe87a, #ffd700);
-        background-size: 200% 100%;
-        animation: shimmer 1.5s linear infinite;
-        border-radius: 20px;
-        width: 0%;
-        transition: width 0.4s ease;
-      }
+      .gen-loader-title { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 24px; letter-spacing: 1.5px; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
+      .gen-loader-sub { color: #a0b8d8; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; min-height: 20px; }
+      .gen-count-display { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,215,0,0.08); border: 2px solid var(--brand-gold); border-radius: 16px; padding: 16px 48px; min-width: 220px; text-align: center; }
+      .gen-count-label { color: #a0b8d8; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+      .gen-count-numbers { color: var(--brand-gold); font-family: "Playfair Display", serif; font-size: 48px; font-weight: 700; line-height: 1; letter-spacing: 2px; text-shadow: 0 0 30px rgba(255,215,0,0.5); }
+      .gen-count-of { color: #6a88aa; font-size: 13px; font-weight: 600; letter-spacing: 1px; }
+      .gen-progress-wrap { width: 320px; height: 8px; background: #001030; border-radius: 20px; overflow: hidden; border: 1px solid #1e3a5f; }
+      .gen-progress-bar { height: 100%; background: linear-gradient(90deg, #ffd700, #ffe87a, #ffd700); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; border-radius: 20px; width: 0%; transition: width 0.4s ease; }
       @keyframes shimmer { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
-      .gen-spinner {
-        width: 52px;
-        height: 52px;
-        border: 4px solid #1e3a5f;
-        border-top-color: var(--brand-gold);
-        border-right-color: rgba(255,215,0,0.4);
-        border-radius: 50%;
-        animation: spin .7s linear infinite;
-      }
+      .gen-spinner { width: 52px; height: 52px; border: 4px solid #1e3a5f; border-top-color: var(--brand-gold); border-right-color: rgba(255,215,0,0.4); border-radius: 50%; animation: spin .7s linear infinite; }
       @keyframes spin { to{transform:rotate(360deg)} }
-
-      /* Current processing badge */
-      .gen-emp-badge {
-        background: #001530;
-        border: 1.5px solid #335185;
-        border-radius: 8px;
-        padding: 6px 16px;
-        color: #a0b8d8;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-height: 32px;
-      }
+      .gen-emp-badge { background: #001530; border: 1.5px solid #335185; border-radius: 8px; padding: 6px 16px; color: #a0b8d8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; min-height: 32px; }
       .gen-emp-badge span { color: var(--brand-gold); font-weight: 700; }
-
-      /* Loading page screen (new tab) */
-      .loading-screen-info {
-        color: #a0b8d8;
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 0.5px;
-        text-align: center;
+ 
+      /* ── OT & Advance shared controls ── */
+      .ot-controls, .adv-controls {
+        background: var(--brand-blue); padding: 14px 32px;
+        border-bottom: 3px solid var(--brand-gold); display: none;
       }
-
+      .ot-controls.active, .adv-controls.active { display: block; }
+      .ot-filter-row, .adv-filter-row {
+        display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+      }
+      .ot-controls label, .adv-controls label {
+        color: var(--brand-gold); font-size: 11px; font-weight: 600;
+        letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+      }
+      .ot-controls select, .ot-controls input[type="text"],
+      .adv-controls select, .adv-controls input[type="text"] {
+        padding: 8px 12px; font-size: 12px; font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a; border-radius: 6px;
+        background: #001530; color: #e0e8f4; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .ot-controls select:focus, .ot-controls input:focus,
+      .adv-controls select:focus, .adv-controls input:focus {
+        border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255,215,0,0.18);
+      }
+      .ot-controls input::placeholder, .adv-controls input::placeholder { color: #6a88aa; }
+ 
+      .ot-amt-cell { font-family: monospace; font-weight: 700; color: #15803d; }
+      .ot-hrs-cell { font-family: monospace; color: #1d4ed8; }
+ 
+      .adv-badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
+      .adv-badge.pending { background: #fee2e2; color: #991b1b; }
+      .adv-badge.cleared { background: #d1fae5; color: #065f46; }
+      .adv-badge.partial { background: #fef3c7; color: #92400e; }
+ 
+      .adv-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+      .adv-detail-overlay.active { display: flex; }
+      .adv-detail-box { background: white; border-radius: 12px; width: 720px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+      .adv-detail-header { background: linear-gradient(135deg,#002147,#003580,#001a38); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; border-bottom: 3px solid var(--brand-gold); flex-shrink: 0; }
+      .adv-detail-header h3 { color: var(--brand-gold); font-family: "Playfair Display",serif; font-size: 16px; }
+      .adv-detail-body { overflow-y: auto; flex: 1; padding: 16px; }
+      .adv-detail-footer { padding: 12px 20px; border-top: 2px solid var(--brand-gold); background: var(--brand-blue); border-radius: 0 0 12px 12px; display: flex; justify-content: flex-end; }
+      .adv-detail-footer button { background: var(--brand-gold); color: var(--brand-blue); border: none; padding: 8px 24px; border-radius: 7px; font-weight: 700; font-family: "Source Sans 3",sans-serif; cursor: pointer; font-size: 12px; }
+ 
+      .s-card.teal { border-left-color: #0d9488; }
+      .s-card.teal .s-card-value { color: #0f766e; }
+      .s-card.blue { border-left-color: #3b82f6; }
+      .s-card.blue .s-card-value { color: #1d4ed8; }
+ 
+      /* ══════════════════════════════════════
+         ATTENDANCE MATRIX specific styles
+      ══════════════════════════════════════ */
+      .matrix-controls {
+        background: var(--brand-blue); padding: 14px 32px;
+        border-bottom: 3px solid var(--brand-gold); display: none;
+      }
+      .matrix-controls.active { display: block; }
+      .matrix-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+      .matrix-controls label {
+        color: var(--brand-gold); font-size: 11px; font-weight: 600;
+        letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;
+      }
+      .matrix-controls select, .matrix-controls input[type="text"],
+      .matrix-controls input[type="month"] {
+        padding: 8px 12px; font-size: 12px; font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a; border-radius: 6px;
+        background: #001530; color: #e0e8f4; outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .matrix-controls select:focus, .matrix-controls input:focus {
+        border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255,215,0,0.18);
+      }
+      .matrix-controls input::placeholder { color: #6a88aa; }
+ 
+      /* Matrix table in screen view */
+      .matrix-wrapper { overflow-x: auto; margin-top: 8px; }
+      .matrix-table { border-collapse: collapse; font-size: 10px; min-width: 100%; }
+      .matrix-table th { background: var(--brand-blue); color: white; border: 1px solid #335185; padding: 4px 2px; text-align: center; font-size: 9px; font-weight: 700; letter-spacing: 0.4px; white-space: nowrap; }
+      .matrix-table td { border: 1px solid #b0bdd4; padding: 3px 2px; text-align: center; font-size: 9px; white-space: nowrap; background: white; }
+      .matrix-table tbody tr:nth-child(even) td { background: #f0f4f8; }
+      .matrix-table tbody tr:hover td { background: #fff4b2; }
+ 
+      /* Cell status colours */
+      .mc-P  { color: #065f46; font-weight: 800; }
+      .mc-A  { color: #991b1b; font-weight: 800; }
+      .mc-H  { color: #b45309; font-weight: 700; }
+      .mc-L  { color: #1d4ed8; font-weight: 700; }
+      .mc-sun-bg  { background: #fff0f0 !important; }
+      .mc-hol-bg  { background: #fff9e6 !important; }
+ 
+      /* Summary cols */
+      .matrix-sum-P  { background: #d1fae5 !important; color: #065f46; font-weight: 800; }
+      .matrix-sum-A  { background: #fee2e2 !important; color: #991b1b; font-weight: 800; }
+      .matrix-sum-SUN{ background: #fef3c7 !important; color: #92400e; font-weight: 800; }
+      .matrix-sum-HOL{ background: #ede9fe !important; color: #5b21b6; font-weight: 800; }
+ 
+      /* Emp name cell */
+      .matrix-emp-cell { text-align: left !important; padding-left: 6px !important; font-weight: 600; min-width: 140px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+ 
+      /* Footer total row */
+      .matrix-total-row td { background: #1d3a6d !important; color: #ffd700 !important; font-weight: 800 !important; border: 1px solid #335185 !important; font-size: 9px; }
+ 
       @media print {
         body { background: #fff; padding: 0; font-size: 9px; }
-        .controls, .page-header, .btn, .emp-panel-overlay { display: none !important; }
+        .controls, .page-header, .btn, .emp-panel-overlay, .tab-bar,
+        .att-controls, .matrix-controls { display: none !important; }
         .content { padding: 10px; }
         .print-header { display: flex !important; justify-content: space-between; font-weight: bold; font-size: 9px; margin-bottom: 12px; width: 100%; color: #000; border-bottom: 1px solid #000 !important; padding-bottom: 8px; }
         .print-header .co-name { font-family: "Playfair Display", serif; font-size: 13px; }
@@ -415,16 +303,31 @@
         .screen-signature { display: none !important; }
         .ot-hours-preview { display: none !important; }
         .btn-payslip, .btn-view { display: none !important; }
+        .att-badge { border: 1px solid #999; }
+        .summary-cards { display: none !important; }
+        .ot-badge, .adv-badge { border: 1px solid #999 !important; }
       }
     </style>
   </head>
   <body>
     <div class="page-header">
       <h2>ALOMHOW CO LTD</h2>
-      <span class="header-badge">Monthly Summary Report</span>
+      <span class="header-badge">HR Management System</span>
     </div>
-
-    <div class="controls">
+ 
+    <!-- ── Tab Bar ── -->
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('monthly')" id="tab-monthly">📊 Monthly Summary</button>
+      <button class="tab-btn" onclick="switchTab('attendance')" id="tab-attendance">📋 Daily Attendance</button>
+      <button class="tab-btn" onclick="switchTab('matrix')" id="tab-matrix">📅 Attendance Matrix</button>
+      <button class="tab-btn" onclick="switchTab('overtime')" id="tab-overtime">⏰ Overtime</button>
+      <button class="tab-btn" onclick="switchTab('advance')" id="tab-advance">💰 Advance</button>
+    </div>
+ 
+    <!-- ══════════════════════════════════
+         MONTHLY SUMMARY CONTROLS
+    ══════════════════════════════════ -->
+    <div class="controls" id="monthly-controls">
       <div class="row-container">
         <label>From:</label>
         <input type="text" id="dateFrom" placeholder="Start Date" style="width:130px" />
@@ -435,16 +338,154 @@
         <button class="btn btn-print" onclick="window.print()">&#128438; Print Report</button>
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="searchTable" style="width:200px" placeholder="Search in table..." onkeyup="searchTableFn()" />
-          <button class="btn btn-emplist" onclick="openEmpPanel()">👥All Payslips </button>
-          <button class="btn btn-clear" onclick="clearAll()" title="Clear everything and reset the page">🗑️REFRESH </button>
+          <button class="btn btn-emplist" onclick="openEmpPanel()">👥 All Payslips</button>
+          <button class="btn btn-clear" onclick="clearAll()" title="Clear everything and reset">🗑️ REFRESH</button>
         </div>
       </div>
     </div>
-
+ 
+    <!-- ══════════════════════════════════
+         DAILY ATTENDANCE CONTROLS
+    ══════════════════════════════════ -->
+    <div class="att-controls" id="attendance-controls">
+      <div class="att-filter-row">
+        <label>Filter Type:</label>
+        <select class="filter-type-select" id="attFilterType" onchange="onFilterTypeChange()">
+          <option value="all">All Records</option>
+          <option value="employee">By Employee</option>
+          <option value="project">By Project</option>
+          <option value="date">By Date Range</option>
+          <option value="id">By ID</option>
+          <option value="name">By Name</option>
+        </select>
+        <label>From:</label>
+        <input type="text" id="attDateFrom" placeholder="Start Date" style="width:130px" />
+        <label>To:</label>
+        <input type="text" id="attDateTo" placeholder="End Date" style="width:130px" />
+        <div class="secondary-filter" id="sf-employee">
+          <label>Employee:</label>
+          <select id="attEmpSelect" style="min-width:180px; padding:8px 12px; font-size:12px; border:1.5px solid #3a5a8a; border-radius:6px; background:#001530; color:#e0e8f4; outline:none;">
+            <option value="">All Employees</option>
+          </select>
+        </div>
+        <div class="secondary-filter" id="sf-project">
+          <label>Project:</label>
+          <select id="attProjectSelect" style="min-width:180px; padding:8px 12px; font-size:12px; border:1.5px solid #3a5a8a; border-radius:6px; background:#001530; color:#e0e8f4; outline:none;">
+            <option value="">All Projects</option>
+          </select>
+        </div>
+        <div class="secondary-filter" id="sf-id">
+          <label>Emp ID:</label>
+          <input type="text" id="attIdInput" placeholder="e.g. ACL001" style="width:130px" />
+        </div>
+        <div class="secondary-filter" id="sf-name">
+          <label>Name:</label>
+          <input type="text" id="attNameInput" placeholder="Search name..." style="width:160px" />
+        </div>
+        <button class="btn btn-att" onclick="generateAttendance()">📋 Load Attendance</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-clear" onclick="clearAttendance()">🗑️ Clear</button>
+      </div>
+    </div>
+ 
+    <!-- ══════════════════════════════════
+         ATTENDANCE MATRIX CONTROLS  ← NEW
+    ══════════════════════════════════ -->
+    <div class="matrix-controls" id="matrix-controls">
+      <div class="matrix-filter-row">
+        <label>From:</label>
+        <input type="text" id="matrixDateFrom" placeholder="Start Date" style="width:130px" />
+        <label>To:</label>
+        <input type="text" id="matrixDateTo" placeholder="End Date" style="width:130px" />
+        <label>Project / Site:</label>
+        <select id="matrixSideFilter" style="min-width:180px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;">
+          <option value="">All Projects</option>
+        </select>
+        <label>Employee:</label>
+        <select id="matrixEmpFilter" style="min-width:180px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;">
+          <option value="">All Employees</option>
+        </select>
+        <button class="btn btn-att" onclick="generateMatrix()" style="background:#0d9488;border-color:#0d9488;">📅 ATTENDANCE SHEET</button>
+        <button class="btn" onclick="printMatrix()" style="background:transparent;color:var(--brand-gold);border:2px solid var(--brand-gold);">🖨️ Print</button>
+        <button class="btn btn-clear" onclick="clearMatrix()">🗑️ Clear</button>
+      </div>
+      <!-- Legend -->
+      <div style="display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;align-items:center">
+        <span style="color:#a0b8d8;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px">Legend:</span>
+        <span style="background:#d1fae5;color:#065f46;font-weight:800;font-size:10px;padding:2px 10px;border-radius:8px">P — Present</span>
+        <span style="background:#fee2e2;color:#991b1b;font-weight:800;font-size:10px;padding:2px 10px;border-radius:8px">A — Absent</span>
+        <span style="background:#fff0f0;color:#cc0000;font-size:10px;padding:2px 10px;border-radius:8px;border:1px solid #fca5a5">🔴 Sunday</span>
+        <span style="background:#fff9e6;color:#92400e;font-size:10px;padding:2px 10px;border-radius:8px;border:1px solid #fcd34d">🟡 Public Holiday</span>
+        <span style="background:#ede9fe;color:#5b21b6;font-size:10px;padding:2px 10px;border-radius:8px">H — Holiday Work</span>
+        <span style="background:#dbeafe;color:#1d4ed8;font-size:10px;padding:2px 10px;border-radius:8px">L — Leave</span>
+      </div>
+    </div>
+ 
+    <!-- ══════════════════════════════════
+         OVERTIME CONTROLS
+    ══════════════════════════════════ -->
+    <div class="ot-controls" id="overtime-controls">
+      <div class="ot-filter-row">
+        <label>Filter:</label>
+        <select class="filter-type-select" id="otFilterType" onchange="onOtFilterChange()" style="min-width:140px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:2px solid var(--brand-gold);border-radius:6px;background:#001530;color:var(--brand-gold);font-weight:700;outline:none;">
+          <option value="all">All Records</option>
+          <option value="employee">By Employee</option>
+          <option value="project">By Project/Site</option>
+          <option value="id">By ID</option>
+        </select>
+        <label>From:</label>
+        <input type="text" id="otDateFrom" placeholder="Start Date" style="width:130px" />
+        <label>To:</label>
+        <input type="text" id="otDateTo" placeholder="End Date" style="width:130px" />
+        <div class="secondary-filter" id="ot-sf-employee">
+          <label>Employee:</label>
+          <select id="otEmpSelect" style="min-width:180px;padding:8px 12px;font-size:12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;">
+            <option value="">All Employees</option>
+          </select>
+        </div>
+        <div class="secondary-filter" id="ot-sf-project">
+          <label>Site:</label>
+          <select id="otProjectSelect" style="min-width:180px;padding:8px 12px;font-size:12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;">
+            <option value="">All Sites</option>
+          </select>
+        </div>
+        <div class="secondary-filter" id="ot-sf-id">
+          <label>Emp ID:</label>
+          <input type="text" id="otIdInput" placeholder="e.g. ACL001" style="width:130px" />
+        </div>
+        <button class="btn btn-att" onclick="generateOT()" style="background:#7c3aed;border-color:#7c3aed;">⏰ Load OT</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-clear" onclick="clearOT()">🗑️ Clear</button>
+      </div>
+    </div>
+ 
+    <!-- ══════════════════════════════════
+         ADVANCE CONTROLS
+    ══════════════════════════════════ -->
+    <div class="adv-controls" id="advance-controls">
+      <div class="adv-filter-row">
+        <label>Status:</label>
+        <select id="advStatusFilter" style="min-width:130px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:2px solid var(--brand-gold);border-radius:6px;background:#001530;color:var(--brand-gold);font-weight:700;outline:none;">
+          <option value="all">All</option>
+          <option value="pending">Pending Only</option>
+          <option value="cleared">Cleared Only</option>
+        </select>
+        <label>Search:</label>
+        <input type="text" id="advSearchInput" placeholder="ID or Name..." style="width:180px;padding:8px 12px;font-size:12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;" />
+        <button class="btn btn-att" onclick="generateAdvance()" style="background:#b45309;border-color:#b45309;">💰 Load Advance</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-clear" onclick="clearAdvance()">🗑️ Clear</button>
+      </div>
+    </div>
+ 
     <div class="content">
       <div id="reportOutput"></div>
+      <div id="attOutput" style="display:none"></div>
+      <div id="matrixOutput" style="display:none"></div>
+      <div id="otOutput" style="display:none"></div>
+      <div id="advOutput" style="display:none"></div>
     </div>
-
+ 
     <!-- ── Employee List Panel ── -->
     <div class="emp-panel-overlay" id="empPanel">
       <div class="emp-panel-box">
@@ -463,13 +504,10 @@
           <table class="emp-panel-table">
             <thead>
               <tr>
-                <th style="width:40px;text-align:center; color:rgb(24, 23, 23)">
+                <th style="width:40px;text-align:center;color:rgb(24,23,23)">
                   <input type="checkbox" id="panelSelectAll" onchange="togglePanelAll()" style="width:15px;height:15px;accent-color:var(--brand-blue);cursor:pointer" />
                 </th>
-                <th>EMP ID</th>
-                <th>Employee Name</th>
-                <th>Passport</th>
-                <th>Designation</th>
+                <th>EMP ID</th><th>Employee Name</th><th>Passport</th><th>Designation</th>
               </tr>
             </thead>
             <tbody id="empPanelBody">
@@ -483,7 +521,21 @@
         </div>
       </div>
     </div>
-
+ 
+    <!-- ── Advance Detail Modal ── -->
+    <div class="adv-detail-overlay" id="advDetailOverlay">
+      <div class="adv-detail-box">
+        <div class="adv-detail-header">
+          <h3 id="advDetailTitle">💰 Advance Details</h3>
+          <button class="panel-close" onclick="closeAdvDetail()">✕</button>
+        </div>
+        <div class="adv-detail-body" id="advDetailBody">Loading...</div>
+        <div class="adv-detail-footer">
+          <button onclick="closeAdvDetail()">Close</button>
+        </div>
+      </div>
+    </div>
+ 
     <!-- ── Custom Message Box ── -->
     <div class="msgbox-overlay" id="msgboxOverlay">
       <div class="msgbox-card">
@@ -497,37 +549,26 @@
         </div>
       </div>
     </div>
-
-    <!-- ── Generation Loader (Navy BG + Counter) ── -->
+ 
+    <!-- ── Generation Loader ── -->
     <div class="gen-loader" id="genLoader">
       <div class="gen-spinner"></div>
       <div class="gen-loader-title">⚡ Generating Payslips</div>
-
-      <!-- Big counter -->
       <div class="gen-count-display">
         <div class="gen-count-label">Completed</div>
         <div class="gen-count-numbers" id="genCountCurrent">0</div>
         <div class="gen-count-of">of <span id="genCountTotal">0</span> payslip(s)</div>
       </div>
-
-      <!-- Progress bar -->
-      <div class="gen-progress-wrap">
-        <div class="gen-progress-bar" id="genProgressBar"></div>
-      </div>
-
-      <!-- Current employee badge -->
-      <div class="gen-emp-badge" id="genEmpBadge">
-        🔄 Initializing...
-      </div>
-
+      <div class="gen-progress-wrap"><div class="gen-progress-bar" id="genProgressBar"></div></div>
+      <div class="gen-emp-badge" id="genEmpBadge">🔄 Initializing...</div>
       <div class="gen-loader-sub" id="genLoaderSub">Please wait while payslips are being prepared</div>
     </div>
-
+ 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
+ 
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
@@ -539,15 +580,748 @@
         appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
       };
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
+ 
+      // ── Flatpickr init ──
       flatpickr("#dateFrom", { dateFormat: "Y-m-d" });
       flatpickr("#dateTo", { dateFormat: "Y-m-d" });
+      flatpickr("#matrixDateFrom", { dateFormat: "Y-m-d" });
+      flatpickr("#matrixDateTo", { dateFormat: "Y-m-d" });
       flatpickr("#panelDateFrom", { dateFormat: "Y-m-d" });
       flatpickr("#panelDateTo", { dateFormat: "Y-m-d" });
-
+      flatpickr("#attDateFrom", { dateFormat: "Y-m-d" });
+      flatpickr("#attDateTo", { dateFormat: "Y-m-d" });
+      flatpickr("#otDateFrom", { dateFormat: "Y-m-d" });
+      flatpickr("#otDateTo", { dateFormat: "Y-m-d" });
+ 
       let _empListCache = null;
+      let _currentTab = "monthly";
+      let _matrixLoaded = false;   // for filter options
+ 
+      // ══════════════════════════════════════════
+      //  TAB SWITCHING
+      // ══════════════════════════════════════════
+      function switchTab(tab) {
+        _currentTab = tab;
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById("tab-" + tab).classList.add("active");
+ 
+        // Controls
+        document.getElementById("monthly-controls").style.display = tab === "monthly" ? "" : "none";
+        document.getElementById("attendance-controls").classList.toggle("active", tab === "attendance");
+        document.getElementById("matrix-controls").classList.toggle("active", tab === "matrix");
+        document.getElementById("overtime-controls").classList.toggle("active", tab === "overtime");
+        document.getElementById("advance-controls").classList.toggle("active", tab === "advance");
+ 
+        // Output areas
+        document.getElementById("reportOutput").style.display = tab === "monthly" ? "" : "none";
+        document.getElementById("attOutput").style.display = tab === "attendance" ? "" : "none";
+        document.getElementById("matrixOutput").style.display = tab === "matrix" ? "" : "none";
+        document.getElementById("otOutput").style.display = tab === "overtime" ? "" : "none";
+        document.getElementById("advOutput").style.display = tab === "advance" ? "" : "none";
+ 
+        if (tab === "attendance") loadAttFilterOptions();
+        if (tab === "matrix") loadMatrixFilterOptions();
+        if (tab === "overtime") loadOtFilterOptions();
+      }
+ 
+      // ══════════════════════════════════════════
+      //  ATTENDANCE FILTER LOGIC
+      // ══════════════════════════════════════════
+      let _attEmpLoaded = false;
+ 
+      function onFilterTypeChange() {
+        const type = document.getElementById("attFilterType").value;
+        document.querySelectorAll(".secondary-filter").forEach(el => el.classList.remove("active"));
+        if (type === "employee") document.getElementById("sf-employee").classList.add("active");
+        else if (type === "project") document.getElementById("sf-project").classList.add("active");
+        else if (type === "id") document.getElementById("sf-id").classList.add("active");
+        else if (type === "name") document.getElementById("sf-name").classList.add("active");
+      }
+ 
+      async function loadAttFilterOptions() {
+        if (_attEmpLoaded) return;
+        try {
+          const db = firebase.firestore();
+          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empSel = document.getElementById("attEmpSelect");
+          empSel.innerHTML = '<option value="">All Employees</option>';
+          const empList = [];
+          empSnap.forEach(d => { const e = d.data(); empList.push({ id: e.id || d.id, name: e.name || "" }); });
+          empList.sort((a,b) => a.id.localeCompare(b.id));
+          empList.forEach(e => {
+            const opt = document.createElement("option");
+            opt.value = e.id; opt.textContent = `${e.id} — ${e.name}`;
+            empSel.appendChild(opt);
+          });
+ 
+          const attSnap = await db.collectionGroup("Present_Absent").get();
+          const projects = new Set();
+          attSnap.forEach(doc => {
+            const d = doc.data();
+            if (d.SIDE_NAME && d.SIDE_NAME.trim()) projects.add(d.SIDE_NAME.trim());
+          });
+          const projSel = document.getElementById("attProjectSelect");
+          projSel.innerHTML = '<option value="">All Projects</option>';
+          [...projects].sort().forEach(p => {
+            const opt = document.createElement("option");
+            opt.value = p; opt.textContent = p;
+            projSel.appendChild(opt);
+          });
+ 
+          _attEmpLoaded = true;
+        } catch(e) { console.error("Filter options load error:", e); }
+      }
+ 
+      // ══════════════════════════════════════════
+      //  DAILY ATTENDANCE GENERATION
+      // ══════════════════════════════════════════
+      async function generateAttendance() {
+        const attOut = document.getElementById("attOutput");
+        const filterType = document.getElementById("attFilterType").value;
+        const dFromVal = document.getElementById("attDateFrom").value;
+        const dToVal = document.getElementById("attDateTo").value;
+        const dFrom = dFromVal ? new Date(dFromVal) : null;
+        const dTo = dToVal ? new Date(dToVal) : null;
+        const selEmp = document.getElementById("attEmpSelect").value;
+        const selProj = document.getElementById("attProjectSelect").value;
+        const selId = document.getElementById("attIdInput").value.trim();
+        const selName = document.getElementById("attNameInput").value.trim().toLowerCase();
+ 
+        attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance data...</p>';
+ 
+        try {
+          const db = firebase.firestore();
+          const snap = await db.collectionGroup("Present_Absent").get();
+          let records = [];
+          snap.forEach(doc => {
+            const d = doc.data();
+            const docDate = new Date(d.DATE);
+            if (dFrom && dTo && (docDate < dFrom || docDate > dTo)) return;
+            if (filterType === "employee" && selEmp && String(d.ID).trim() !== selEmp) return;
+            if (filterType === "project" && selProj && (d.SIDE_NAME || "").trim() !== selProj) return;
+            if (filterType === "id" && selId && String(d.ID).trim() !== selId) return;
+            if (filterType === "name" && selName && !(d.EMPLOYEE_NAME || "").toLowerCase().includes(selName)) return;
+            records.push(d);
+          });
+ 
+          records.sort((a,b) => {
+            const dateDiff = new Date(b.DATE) - new Date(a.DATE);
+            if (dateDiff !== 0) return dateDiff;
+            return String(a.ID).localeCompare(String(b.ID));
+          });
+ 
+          if (!records.length) {
+            attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No records found.</p>';
+            return;
+          }
+ 
+          let totPresent=0,totAbsent=0,totHoliday=0,totSunday=0,uniqueEmps=new Set(),uniqueDates=new Set();
+          records.forEach(r => {
+            if (r.STATUS === "PRESENT") totPresent++;
+            else if (r.STATUS === "ABSENT") totAbsent++;
+            if (parseInt(r.HOLIDAY_WORK)>0) totHoliday+=parseInt(r.HOLIDAY_WORK);
+            if (parseInt(r.SUNDAY_WORK)>0) totSunday+=parseInt(r.SUNDAY_WORK);
+            uniqueEmps.add(r.ID); uniqueDates.add(r.DATE);
+          });
+ 
+          let periodText = (dFromVal && dToVal) ? `${dFromVal} to ${dToVal}` : dFromVal ? `From ${dFromVal}` : "All Dates";
+          let filterDesc = filterType === "employee" && selEmp ? `Employee: ${selEmp}`
+            : filterType === "project" && selProj ? `Project: ${selProj}`
+            : filterType === "id" && selId ? `ID: ${selId}`
+            : filterType === "name" && selName ? `Name: "${selName}"` : "All Records";
+ 
+          const rows = records.map((r,i) => {
+            const status = (r.STATUS||"").toUpperCase();
+            const holW = parseInt(r.HOLIDAY_WORK)||0, sunW = parseInt(r.SUNDAY_WORK)||0;
+            let badgeClass = "present";
+            if (status==="ABSENT") badgeClass="absent";
+            else if (holW>0) badgeClass="holiday";
+            else if (sunW>0) badgeClass="sunday";
+            return `<tr>
+              <td style="text-align:center;color:#9ca3af;font-size:10px">${i+1}</td>
+              <td>${r.DATE||"-"}</td>
+              <td style="font-weight:700;color:var(--brand-blue)">${r.ID||"-"}</td>
+              <td>${r.EMPLOYEE_NAME||"-"}</td>
+              <td>${r.PASSPORT||"-"}</td>
+              <td>${r.DESIGNATION||"-"}</td>
+              <td style="text-align:center"><span class="att-badge ${badgeClass}">${status}</span></td>
+              <td>${r.SIDE_NAME||"-"}</td>
+              <td style="text-align:center">${holW||0}</td>
+              <td style="text-align:center">${sunW||0}</td>
+              <td style="text-align:right;font-size:10px;color:#6b7280">${r.SALARY||"-"}</td>
+              <td>${r.REMARK||"-"}</td>
+            </tr>`;
+          }).join("");
+ 
+          attOut.innerHTML = `
+            <div class="print-header">
+              <span class="co-name">ALOMHOW CO LTD — Daily Attendance Report</span>
+              <span>Period: ${periodText} | Filter: ${filterDesc}</span>
+              <span>Printed: ${formatDateTime()}</span>
+            </div>
+            <div class="summary-cards">
+              <div class="s-card"><div class="s-card-label">Total Records</div><div class="s-card-value">${records.length}</div></div>
+              <div class="s-card"><div class="s-card-label">Employees</div><div class="s-card-value">${uniqueEmps.size}</div></div>
+              <div class="s-card"><div class="s-card-label">Days Covered</div><div class="s-card-value">${uniqueDates.size}</div></div>
+              <div class="s-card green"><div class="s-card-label">Present</div><div class="s-card-value">${totPresent}</div></div>
+              <div class="s-card red"><div class="s-card-label">Absent</div><div class="s-card-value">${totAbsent}</div></div>
+              <div class="s-card gold"><div class="s-card-label">Holiday Work</div><div class="s-card-value">${totHoliday}</div></div>
+              <div class="s-card purple"><div class="s-card-label">Sunday Work</div><div class="s-card-value">${totSunday}</div></div>
+            </div>
+            <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+              <div style="color:#ffd700;font-size:11px;font-weight:700">📋 ${records.length} record(s) | Filter: <span style="color:#a0c4ff">${filterDesc}</span></div>
+              <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px" oninput="searchAttFn(this.value)" />
+            </div>
+            <table id="attTable">
+              <thead><tr>
+                <th>SL</th><th>Date</th><th>EMP ID</th><th>Employee Name</th>
+                <th>Passport</th><th>Designation</th><th>Status</th>
+                <th>Project / Site</th><th>Holiday</th><th>Sunday</th>
+                <th>Salary</th><th>Remark</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+            </table>`;
+        } catch(e) {
+          attOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+        }
+      }
+ 
+      function searchAttFn(val) {
+        const f = val.toUpperCase();
+        const tbl = document.getElementById("attTable");
+        if (!tbl) return;
+        Array.from(tbl.querySelectorAll("tbody tr")).forEach(r => {
+          r.style.display = (r.textContent||"").toUpperCase().includes(f) ? "" : "none";
+        });
+      }
+ 
+      function clearAttendance() {
+        document.getElementById("attOutput").innerHTML = "";
+        document.getElementById("attFilterType").value = "all";
+        onFilterTypeChange();
+        try { document.getElementById("attDateFrom")._flatpickr.clear(); } catch(e) {}
+        try { document.getElementById("attDateTo")._flatpickr.clear(); } catch(e) {}
+        document.getElementById("attIdInput").value = "";
+        document.getElementById("attNameInput").value = "";
+        document.getElementById("attEmpSelect").value = "";
+        document.getElementById("attProjectSelect").value = "";
+      }
+ 
+      // ══════════════════════════════════════════
+      //  ATTENDANCE MATRIX — NEW FEATURE
+      // ══════════════════════════════════════════
+ 
+      // Cache for filter dropdowns
+      let _matrixSidesLoaded = false;
+      let _matrixEmpsLoaded  = false;
+ 
+      async function loadMatrixFilterOptions() {
+        if (_matrixLoaded) return;
+        try {
+          const db = firebase.firestore();
+ 
+          // Load employees
+          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empSel = document.getElementById("matrixEmpFilter");
+          empSel.innerHTML = '<option value="">All Employees</option>';
+          const empList = [];
+          empSnap.forEach(d => { const e = d.data(); empList.push({ id: e.id || d.id, name: e.name || "" }); });
+          empList.sort((a,b) => a.id.localeCompare(b.id));
+          empList.forEach(e => {
+            const opt = document.createElement("option");
+            opt.value = e.id; opt.textContent = `${e.id} — ${e.name}`;
+            empSel.appendChild(opt);
+          });
+ 
+          // Load project/side names from attendance records
+          const attSnap = await db.collectionGroup("Present_Absent").get();
+          const sides = new Set();
+          attSnap.forEach(doc => {
+            const d = doc.data();
+            if (d.SIDE_NAME && d.SIDE_NAME.trim()) sides.add(d.SIDE_NAME.trim());
+          });
+          const sideSel = document.getElementById("matrixSideFilter");
+          sideSel.innerHTML = '<option value="">All Projects</option>';
+          [...sides].sort().forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s; opt.textContent = s;
+            sideSel.appendChild(opt);
+          });
+ 
+          _matrixLoaded = true;
+        } catch(e) { console.error("Matrix filter load error:", e); }
+      }
+ 
+      // Held matrix data for print window
+      let _matrixPrintData = null;
+ async function generateMatrix() {
+    const matOut = document.getElementById("matrixOutput");
+    const dFromVal = document.getElementById("matrixDateFrom").value;
+    const dToVal   = document.getElementById("matrixDateTo").value;
+    const sideFilter = document.getElementById("matrixSideFilter").value.trim();
+    const empFilter  = document.getElementById("matrixEmpFilter").value.trim();
 
-      // ── Custom Message Box ──
+    if (!dFromVal || !dToVal) {
+        showMsg("তারিখ রেঞ্জ সিলেক্ট করুন।", { title: "Date Range Required", type: "warn" });
+        return;
+    }
+
+    matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance matrix...</p>';
+
+    try {
+        const inputStart = new Date(dFromVal); inputStart.setHours(0, 0, 0, 0);
+        const inputEnd   = new Date(dToVal);   inputEnd.setHours(23, 59, 59, 999);
+        const firstDay   = new Date(inputStart.getFullYear(), inputStart.getMonth(), 1);
+        const lastDay    = new Date(inputStart.getFullYear(), inputStart.getMonth() + 1, 0);
+
+        const dateRange = [];
+        for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
+            dateRange.push(new Date(d));
+        }
+
+        const toLocalDateStr = (d) => {
+            const y   = d.getFullYear();
+            const m   = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            return `${y}-${m}-${day}`;
+        };
+
+        const db = firebase.firestore();
+
+        const publicHolidayDates = new Set();
+        const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+        holidaySnap.forEach(doc => publicHolidayDates.add(doc.id));
+
+        const snap = await db.collectionGroup("Present_Absent").get();
+        const attendanceMap = {}, employees = {};
+
+        snap.forEach(doc => {
+            const d = doc.data();
+            if (!d.ID || !d.DATE) return;
+            if (sideFilter && (d.SIDE_NAME || "").trim() !== sideFilter) return;
+            if (empFilter  && String(d.ID).trim() !== empFilter) return;
+
+            const empId = String(d.ID).trim();
+            if (!employees[empId]) employees[empId] = d.EMPLOYEE_NAME || empId;
+            if (!attendanceMap[empId]) attendanceMap[empId] = {};
+
+            const st = (d.STATUS || "").trim().toUpperCase();
+            let shortStat = "-";
+            if      (st.startsWith("P")) shortStat = "P";
+            else if (st.startsWith("A")) shortStat = "A";
+            else if (st.startsWith("L")) shortStat = "L";
+            else if (st.startsWith("H")) shortStat = "H";
+            attendanceMap[empId][d.DATE] = shortStat;
+        });
+
+        const sortedIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+        const monthName = firstDay.toLocaleString("default", { month: "long" });
+        const year = firstDay.getFullYear();
+
+        const now = new Date();
+        const printDateTime = now.toLocaleString("en-GB", {
+            day: "2-digit", month: "short", year: "numeric",
+            hour: "2-digit", minute: "2-digit", hour12: true
+        });
+
+        let dayTotalsP   = Array(dateRange.length).fill(0);
+        let dayTotalsSun = Array(dateRange.length).fill(0);
+        let dayTotalsHol = Array(dateRange.length).fill(0);
+        let dayTotalsA   = Array(dateRange.length).fill(0);
+        let grandTotalP = 0, grandTotalA = 0, grandTotalSun = 0, grandTotalHol = 0;
+
+        // ── TABLE HEADER ──────────────────────────────────────────────
+        const tableHeader = `<thead>
+  <tr style="height:22px;">
+    <th rowspan="2" style="width:20px; padding:1px;">SL</th>
+    <th rowspan="2" style="width:160px; padding:1px;">EMPLOYEE ID &amp; Name</th>
+    <th colspan="${dateRange.length}" style="padding:0 10px; font-size:11px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+        <div style="flex:2; text-align:center; font-weight:bold;">
+          Attendance Summary: ${monthName} ${year}${sideFilter ? ` — ${sideFilter.toUpperCase()}` : " — ALL PROJECT"}
+        </div>
+        <div style="flex:1; text-align:right; font-size:9px; font-weight:normal;">
+          Printed on: ${printDateTime}
+        </div>
+      </div>
+    </th>
+    <th colspan="4" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
+  </tr>
+  <tr style="height:35px;">
+    ${dateRange.map((d) => {
+        const dayName  = d.toLocaleDateString("en-US", { weekday: "short" }).substring(0, 2);
+        const isSun    = d.getDay() === 0;
+        const ds       = toLocalDateStr(d);
+        const isPubHol = publicHolidayDates.has(ds);
+        const isOut    = d < inputStart || d > inputEnd;
+        const redStyle = isSun || isPubHol ? "color:#ff4d4d !important;" : "";
+
+        if (isPubHol && !isOut) {
+            return `<th style="width:25px; padding:1px 0; vertical-align:middle; ${redStyle}">
+              <div class="holiday-box" style="width:25px; height:25px; margin:0 auto;">
+                <svg viewBox="0 0 100 100" class="holiday-svg" style="width:100%;height:100%;">
+                  <circle cx="50" cy="50" r="47" style="fill:none;stroke:#ff4d4d;stroke-width:6;"/>
+                  <path id="hcurve${d.getDate()}" d="M 15,55 A 35,35 0 0,1 85,55" fill="transparent"/>
+                  <text style="fill:#ff4d4d;font-weight:900;font-size:16px;">
+                    <textPath xlink:href="#hcurve${d.getDate()}" startOffset="50%" text-anchor="middle">Holiday</textPath>
+                  </text>
+                  <text x="50" y="62" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:40px;">${d.getDate()}</text>
+                  <text x="50" y="88" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:24px;">${dayName}</text>
+                </svg>
+              </div>
+            </th>`;
+        }
+
+        return `<th style="width:25px; padding:1px 0; vertical-align:middle; ${redStyle}">
+          <div style="line-height:1;">${d.getDate()}<br><span style="font-size:7px">${dayName}</span></div>
+        </th>`;
+    }).join("")}
+    <th style="width:25px; background:#198754; padding:1px;">P</th>
+    <th style="width:25px; background:#dc3545; padding:1px;">A</th>
+    <th style="width:25px; background:#ffc107; color:#000; padding:1px;">SUN</th>
+    <th style="width:25px; background:#6c757d; padding:1px;">HOL</th>
+  </tr>
+</thead>`;
+
+        // ── TABLE BODY ────────────────────────────────────────────────
+        const tableBody = sortedIds.map((id, idx) => {
+            let countP = 0, countA = 0, countSun = 0, countHol = 0;
+
+            const daysHtml = dateRange.map((d, dIdx) => {
+                const ds       = toLocalDateStr(d);
+                const isSunday = d.getDay() === 0;
+                const isPubHol = publicHolidayDates.has(ds);
+
+                if (d < inputStart || d > inputEnd) return `<td></td>`;
+
+                let stat = attendanceMap[id] ? (attendanceMap[id][ds] || "-") : "-";
+
+                if (stat === "P") {
+                    if (isSunday)      { dayTotalsSun[dIdx]++; countSun++; }
+                    else if (isPubHol) { dayTotalsHol[dIdx]++; countHol++; }
+                    else               { dayTotalsP[dIdx]++;   countP++;   }
+                }
+                if (stat === "A") { dayTotalsA[dIdx]++; countA++; }
+
+                if (isSunday || isPubHol) {
+                    const bg = "background-color:#fff0f0; border:1px solid #000;";
+                    if (stat === "A") return `<td style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
+                    if (stat === "P") return `<td style="${bg} color:green; font-weight:bold;">P</td>`;
+                    if (stat === "L" || stat === "H") return `<td style="${bg} color:green;">${stat}</td>`;
+                    return `<td style="${bg}"></td>`;
+                }
+
+                if (stat === "P") return `<td style="color:green; font-weight:bold;">P</td>`;
+                if (stat === "A") return `<td style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
+                if (stat === "L" || stat === "H") return `<td style="color:green;">${stat}</td>`;
+                return `<td></td>`;
+            }).join("");
+
+            grandTotalP   += countP;
+            grandTotalA   += countA;
+            grandTotalSun += countSun;
+            grandTotalHol += countHol;
+
+            return `<tr>
+  <td>${idx + 1}</td>
+  <td class="text-start">${id} — ${employees[id]}</td>
+  ${daysHtml}
+  <td style="font-weight:bold; background:#e6fffa; color:#065f46;">${countP}</td>
+  <td style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
+  <td style="font-weight:bold; background:#fff9e6; color:#92400e;">${countSun}</td>
+  <td style="font-weight:bold; background:#f3f0ff; color:#5b21b6;">${countHol}</td>
+</tr>`;
+        }).join("");
+
+        // ── TABLE FOOTER ──────────────────────────────────────────────
+        const tableFooter = `<tr>
+  <td colspan="2" style="text-align:left; padding:4px 8px; font-weight:bold; background:#1d3a6d; color:#ffd700;">DAILY TOTAL</td>
+  ${dayTotalsP.map((_, idx) => {
+      if (dateRange[idx] < inputStart || dateRange[idx] > inputEnd) return `<td style="background:#1d3a6d;"></td>`;
+      const allP = dayTotalsP[idx] + dayTotalsSun[idx] + dayTotalsHol[idx];
+      return `<td style="text-align:center; font-weight:bold; background:#1d3a6d; color:#ffd700; font-size:9px;">${allP || ""}</td>`;
+  }).join("")}
+  <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalP}</td>
+  <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalA}</td>
+  <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSun}</td>
+  <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalHol}</td>
+</tr>`;
+
+        // ── নতুন ট্যাবে ওপেন ─────────────────────────────────────────
+        matOut.innerHTML = '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;"> Generating Attendance Sheet...</p>';
+
+        const preview = window.open("", "_blank");
+
+        if (!preview) {
+            showMsg("Popup blocked! Browser-এ popup allow করুন।", { title: "Popup Blocked", type: "warn" });
+            matOut.innerHTML = '<p style="color:orange; padding:20px;">⚠️ Popup blocked। Browser-এ popup allow করে আবার চেষ্টা করুন।</p>';
+            return;
+        }
+
+        preview.document.write(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Summary — ${monthName} ${year}</title>
+  <style>
+    * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    @page { size: A4 landscape; margin: 5mm; }
+    body { font-family: sans-serif; padding: 10px; margin: 0; zoom: 1.4; }
+
+    .company-name {
+      text-align: center;
+      margin: 0;
+      font-size: 26px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(1px 1px 1.5px rgba(0,0,0,0.15));
+    }
+
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.2px solid #000; margin-top: 10px; }
+    th, td { border: 1px solid #000; text-align: center; font-size: 10px; padding: 1px 0; }
+    th { background: #1d3a6d; color: #fff; }
+
+    .holiday-box { margin: 0 auto; display: flex; align-items: center; justify-content: center; }
+    .holiday-svg { width: 100%; height: 100%; }
+    .text-start { text-align: left !important; padding-left: 5px !important; white-space: nowrap; overflow: hidden; }
+
+    .no-print { position: fixed; top: 10px; right: 10px; padding: 10px 20px; background: #1d3a6d; color: #ffd700; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; z-index: 1000; }
+    .no-print:hover { background: #2a4f9a; }
+
+    @media print {
+      body { zoom: 1.0; }
+      th, td { font-size: 8.5px; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+  <h1 class="company-name">ALAMHOW CO LTD</h1>
+  <table>
+    ${tableHeader}
+    <tbody>${tableBody}</tbody>
+    <tfoot>${tableFooter}</tfoot>
+  </table>
+
+  <div style="margin-top:15px; display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
+    <table style="width:auto; min-width:240px; border-collapse:collapse; border:1px solid #000;">
+      <thead>
+        <tr><th colspan="2" style="background:#1d3a6d; color:#ffd700; padding:4px 10px; font-size:11px;">PRESENT SUMMARY</th></tr>
+      </thead>
+      <tbody>
+        <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; border:1px solid #ccc;">Total Normal Working Days</td><td style="font-weight:bold; width:60px; border:1px solid #ccc; text-align:center;">${grandTotalP}</td></tr>
+        <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:#b58900; border:1px solid #ccc;">Total Sunday Working Days</td><td style="font-weight:bold; color:#b58900; border:1px solid #ccc; text-align:center;">${grandTotalSun}</td></tr>
+        <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; border:1px solid #ccc;">Total Holiday Working Days</td><td style="font-weight:bold; border:1px solid #ccc; text-align:center;">${grandTotalHol}</td></tr>
+        <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:red; border:1px solid #ccc;">Total Absent</td><td style="font-weight:bold; color:red; border:1px solid #ccc; text-align:center;">${grandTotalA}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:40px; display:flex; justify-content:space-between; padding:0 40px;">
+    <div style="border-top:1px solid #000; width:140px; text-align:center; font-size:10px; font-weight:bold; padding-top:4px;">Prepared By</div>
+    <div style="border-top:1px solid #000; width:140px; text-align:center; font-size:10px; font-weight:bold; padding-top:4px;">Checked By</div>
+    <div style="border-top:1px solid #000; width:140px; text-align:center; font-size:10px; font-weight:bold; padding-top:4px;">Authorized Signature</div>
+  </div>
+</body>
+</html>`);
+        preview.document.close();
+
+    } catch (e) {
+        matOut.innerHTML = `<p style="color:red; padding:20px;">Error: ${e.message}</p>`;
+    }
+}
+
+function printMatrix() {
+    const area = document.getElementById("matrixPrintArea");
+    if (!area) {
+        showMsg("প্রথমে Matrix Generate করুন।", { title: "No Data", type: "warn" });
+        return;
+    }
+    window.print();
+}
+
+
+function printMatrix() {
+    const area = document.getElementById("matrixPrintArea");
+    if (!area) {
+        showMsg("প্রথমে Matrix Generate করুন।", { title: "No Data", type: "warn" });
+        return;
+    }
+    window.print();
+}
+      function toDateStr(d) {
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      }
+ 
+      function searchMatrixFn(val) {
+        const f = val.toLowerCase();
+        const tbody = document.getElementById("matrixTbody");
+        if (!tbody) return;
+        Array.from(tbody.querySelectorAll("tr")).forEach(row => {
+          row.style.display = (row.textContent||"").toLowerCase().includes(f) ? "" : "none";
+        });
+      }
+ 
+      function clearMatrix() {
+        document.getElementById("matrixOutput").innerHTML = "";
+        try { document.getElementById("matrixDateFrom")._flatpickr.clear(); } catch(e) {}
+        try { document.getElementById("matrixDateTo")._flatpickr.clear(); } catch(e) {}
+        document.getElementById("matrixSideFilter").value = "";
+        document.getElementById("matrixEmpFilter").value = "";
+        _matrixPrintData = null;
+      }
+ 
+      function printMatrix() {
+        if (!_matrixPrintData) {
+          showMsg("প্রথমে Matrix Generate করুন।", { title: "No Data", type: "warn" });
+          return;
+        }
+ 
+        const D = _matrixPrintData;
+        const phSet = new Set(D.publicHolidayDates);
+        const dayNames = ["SU","MO","TU","WE","TH","FR","SA"];
+ 
+        // Rebuild rows for print window
+        let empRows = D.sortedIds.map((id, idx) => {
+          let cP=0, cA=0, cSun=0, cHol=0;
+          const dayCells = D.dateRange.map((dc, dIdx) => {
+            const isSun = dc.day === 0;
+            const isPH  = phSet.has(dc.ds);
+            const rec   = D.attendanceMap[id] ? D.attendanceMap[id][dc.ds] : null;
+            const stat  = rec ? rec.stat : "-";
+            const sunW  = rec ? rec.sunWork : 0;
+            const holW  = rec ? rec.holWork : 0;
+ 
+            let bgStyle = "";
+            let color = "";
+            let display = stat === "-" ? "" : stat;
+ 
+            if (stat === "P") {
+              if (isSun || sunW > 0) { bgStyle="background:#fff0f0;"; color="color:#cc0000;font-weight:800;"; cSun++; }
+              else if (isPH || holW > 0) { bgStyle="background:#fff9e6;"; color="color:#b45309;font-weight:800;"; cHol++; }
+              else { color="color:#065f46;font-weight:800;"; cP++; }
+            } else if (stat === "A") { color="color:#cc0000;font-weight:800;"; cA++; }
+            else if (stat === "H") { bgStyle="background:#fff9e6;"; color="color:#b45309;font-weight:700;"; cHol++; }
+            else if (stat === "L") { color="color:#1d4ed8;font-weight:700;"; }
+            else if (isSun || isPH) { bgStyle="background:#fff0f0;"; }
+ 
+            return `<td style="border:1px solid #000;padding:1px 0;text-align:center;font-size:8.5px;width:20px;${bgStyle}${color}">${display}</td>`;
+          }).join("");
+ 
+          return `<tr>
+            <td style="border:1px solid #000;padding:1px 3px;text-align:center;font-size:8.5px">${idx+1}</td>
+            <td style="border:1px solid #000;padding:1px 4px;font-size:8.5px;font-weight:600;white-space:nowrap;max-width:160px;overflow:hidden">${id} - ${D.employees[id]}</td>
+            ${dayCells}
+            <td style="border:1px solid #000;padding:1px 3px;text-align:center;font-size:8.5px;font-weight:800;background:#e6fffa;color:#065f46">${cP}</td>
+            <td style="border:1px solid #000;padding:1px 3px;text-align:center;font-size:8.5px;font-weight:800;background:#fff0f0;color:#991b1b">${cA}</td>
+            <td style="border:1px solid #000;padding:1px 3px;text-align:center;font-size:8.5px;font-weight:800;background:#fff9e6;color:#92400e">${cSun}</td>
+            <td style="border:1px solid #000;padding:1px 3px;text-align:center;font-size:8.5px;font-weight:800;background:#f3f0ff;color:#5b21b6">${cHol}</td>
+          </tr>`;
+        }).join("");
+ 
+        const dayHdrs = D.dateRange.map(dc => {
+          const isSun = dc.day === 0;
+          const isPH  = phSet.has(dc.ds);
+          const style = (isSun||isPH) ? "color:#ff4444;font-weight:900;" : "color:white;";
+          return `<th style="border:1px solid #335185;padding:2px 0;text-align:center;font-size:7.5px;width:20px;${style}">
+            <div>${dc.date}<br><span style="font-size:6px">${dayNames[dc.day]}</span></div></th>`;
+        }).join("");
+ 
+        const totCells = D.dateRange.map((dc, idx) => {
+          const allP = D.dayTotalsP[idx] + D.dayTotalsSun[idx] + D.dayTotalsHol[idx];
+          return `<td style="border:1px solid #335185;padding:1px 0;text-align:center;font-size:8px;font-weight:800;background:#1d3a6d;color:#ffd700">${allP||""}</td>`;
+        }).join("");
+ 
+        const now = new Date();
+        const printDT = now.toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});
+ 
+        const win = window.open("","_blank");
+        win.document.write(`<!doctype html><html><head>
+          <meta charset="UTF-8">
+          <title>Attendance Matrix — ${D.monthName} ${D.year}</title>
+          <style>
+            @page { size: A4 landscape; margin: 5mm; }
+            * { box-sizing: border-box; margin: 0; padding: 0; }
+            body { font-family: Arial, sans-serif; padding: 8px; background: white; }
+            .co-name { text-align: center; font-size: 22px; font-weight: 900; letter-spacing: 1px; margin-bottom: 4px; }
+            table { width: 100%; border-collapse: collapse; border: 1.5px solid #000; margin-top: 8px; }
+            th { background: #1d3a6d; color: #fff; border: 1px solid #335185; padding: 2px 1px; text-align: center; font-size: 8.5px; }
+            td { border: 1px solid #ccc; padding: 1px; text-align: center; font-size: 8.5px; }
+            .summary-mini { margin-top: 12px; border-collapse: collapse; }
+            .summary-mini th { background: #f2f2f2; color: #000; font-size: 10px; }
+            .summary-mini td { font-size: 10px; padding: 4px 10px; }
+            .sig-row { display: flex; justify-content: space-between; margin-top: 30px; padding: 0 30px; }
+            .sig-item { border-top: 1px solid #000; width: 150px; text-align: center; font-size: 10px; font-weight: 700; padding-top: 4px; }
+            .no-print { position: fixed; top: 8px; right: 8px; background: #002147; color: #ffd700; border: 2px solid #ffd700; padding: 8px 18px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 700; z-index: 999; }
+            @media print { .no-print { display: none; } }
+          </style>
+        </head><body>
+          <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+          <div class="co-name">ALAMHOW CO LTD</div>
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" style="width:18px">SL</th>
+                <th rowspan="2" style="min-width:130px;text-align:left;padding-left:4px">
+                  <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+                    <span>Attendance Matrix: ${D.monthName} ${D.year}${D.sideLabel !== "ALL PROJECTS" ? " | "+D.sideLabel : ""}</span>
+                    <span style="font-size:7px;font-weight:normal">Printed: ${printDT}</span>
+                  </div>
+                </th>
+                <th colspan="${D.dateRange.length}"></th>
+                <th colspan="4" style="background:#0d685b;font-size:8px">SUMMARY</th>
+              </tr>
+              <tr>
+                ${dayHdrs}
+                <th style="background:#198754;font-size:8px;width:22px">P</th>
+                <th style="background:#dc3545;font-size:8px;width:22px">A</th>
+                <th style="background:#b45309;font-size:8px;width:22px">SUN</th>
+                <th style="background:#6c757d;font-size:8px;width:22px">HOL</th>
+              </tr>
+            </thead>
+            <tbody>${empRows}</tbody>
+            <tfoot>
+              <tr style="background:#1d3a6d">
+                <td colspan="2" style="border:1px solid #335185;text-align:right;padding-right:6px;font-weight:800;color:#ffd700;font-size:8.5px">DAILY TOTAL</td>
+                ${totCells}
+                <td style="border:1px solid #335185;font-weight:800;background:#1d3a6d;color:#ffd700;font-size:8.5px">${D.grandP}</td>
+                <td style="border:1px solid #335185;font-weight:800;background:#1d3a6d;color:#ffd700;font-size:8.5px">${D.grandA}</td>
+                <td style="border:1px solid #335185;font-weight:800;background:#1d3a6d;color:#ffd700;font-size:8.5px">${D.grandSun}</td>
+                <td style="border:1px solid #335185;font-weight:800;background:#1d3a6d;color:#ffd700;font-size:8.5px">${D.grandHol}</td>
+              </tr>
+            </tfoot>
+          </table>
+ 
+          <table class="summary-mini" style="margin-top:14px;width:auto;min-width:240px">
+            <thead><tr><th colspan="2" style="text-align:left;padding:4px 10px">PRESENT SUMMARY</th></tr></thead>
+            <tbody>
+              <tr><td style="text-align:left;padding:3px 10px;font-weight:700">Total Normal Working Days</td><td style="font-weight:800;color:#065f46;padding:3px 10px">${D.grandP}</td></tr>
+              <tr><td style="text-align:left;padding:3px 10px;font-weight:700;color:#b58900">Total Sunday Working Days</td><td style="font-weight:800;color:#b58900;padding:3px 10px">${D.grandSun}</td></tr>
+              <tr><td style="text-align:left;padding:3px 10px;font-weight:700">Total Holiday Working Days</td><td style="font-weight:800;padding:3px 10px">${D.grandHol}</td></tr>
+              <tr><td style="text-align:left;padding:3px 10px;font-weight:700;color:red">Total Absent</td><td style="font-weight:800;color:red;padding:3px 10px">${D.grandA}</td></tr>
+            </tbody>
+          </table>
+ 
+          <div class="sig-row">
+            <div class="sig-item">Prepared By</div>
+            <div class="sig-item">Checked By</div>
+            <div class="sig-item">Authorized Signature</div>
+          </div>
+        </body></html>`);
+        win.document.close();
+      }
+ 
+      // ══════════════════════════════════════════
+      //  UTILITIES
+      // ══════════════════════════════════════════
       function showMsg(msg, {title="Notice", type="warn", confirm=false, onOk=null}={}) {
         const icons = {warn:"⚠️", err:"❌", ok:"✅", info:"ℹ️"};
         document.getElementById("msgboxIcon").textContent = icons[type]||"ℹ️";
@@ -573,31 +1347,23 @@
         document.getElementById("msgboxOverlay").classList.add("active");
       }
       function closeMsgBox() { document.getElementById("msgboxOverlay").classList.remove("active"); }
-
-      // ── Generation Loader with Counter ──
+ 
       function showLoader(current, total, empId) {
         document.getElementById("genLoader").classList.add("active");
         document.getElementById("genCountCurrent").textContent = current;
         document.getElementById("genCountTotal").textContent = total;
         document.getElementById("genProgressBar").style.width = (total > 0 ? (current/total*100) : 0) + "%";
         const badge = document.getElementById("genEmpBadge");
-        if (empId) {
-          badge.innerHTML = `🔄 Processing: <span>${empId}</span>`;
-        } else {
-          badge.innerHTML = `🔄 Initializing...`;
-        }
-        document.getElementById("genLoaderSub").textContent =
-          total > 0
-            ? `${current} of ${total} payslip${total>1?'s':''} completed`
-            : "Please wait...";
+        badge.innerHTML = empId ? `🔄 Processing: <span>${empId}</span>` : `🔄 Initializing...`;
+        document.getElementById("genLoaderSub").textContent = total > 0 ? `${current} of ${total} payslip${total>1?'s':''} completed` : "Please wait...";
       }
       function hideLoader() { document.getElementById("genLoader").classList.remove("active"); }
-
+ 
       function formatDateTime() {
         const n = new Date();
         return n.toLocaleDateString("en-GB").replace(/\//g, ".") + ", " + n.toLocaleTimeString("en-US", { hour12: true });
       }
-
+ 
       function searchTableFn() {
         const f = document.getElementById("searchTable").value.toUpperCase();
         const tbl = document.querySelector("#reportOutput table");
@@ -608,7 +1374,7 @@
           rows[i].style.display = txt.toUpperCase().indexOf(f) > -1 ? "" : "none";
         }
       }
-
+ 
       function numToWords(amount) {
         const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
         const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
@@ -628,7 +1394,7 @@
         const m = d.toLocaleString("en-US",{month:"short"}).toUpperCase();
         return `${day}-${m}-${d.getFullYear()}`;
       }
-
+ 
       // ══════════════════════════════════════════
       //  EMPLOYEE PANEL
       // ══════════════════════════════════════════
@@ -645,7 +1411,7 @@
       document.getElementById("empPanel").addEventListener("click", function(e) {
         if (e.target === this) closeEmpPanel();
       });
-
+ 
       async function loadEmpPanelList() {
         const tbody = document.getElementById("empPanelBody");
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#9ca3af">⏳ Loading employees...</td></tr>';
@@ -664,7 +1430,7 @@
           tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:20px;color:red">⚠️ Error: ${e.message}</td></tr>`;
         }
       }
-
+ 
       function renderPanelRows(list) {
         const tbody = document.getElementById("empPanelBody");
         tbody.innerHTML = "";
@@ -689,7 +1455,7 @@
         });
         updatePanelCount();
       }
-
+ 
       function filterPanelList() {
         const q = document.getElementById("panelSearch").value.toLowerCase();
         document.querySelectorAll("#empPanelBody tr").forEach((tr) => {
@@ -697,7 +1463,7 @@
           tr.style.display = txt.includes(q) ? "" : "none";
         });
       }
-
+ 
       function togglePanelAll() {
         const master = document.getElementById("panelSelectAll").checked;
         document.querySelectorAll("#empPanelBody tr").forEach((tr) => {
@@ -707,7 +1473,7 @@
         });
         updatePanelCount();
       }
-
+ 
       function updatePanelCount() {
         const checked = document.querySelectorAll(".panel-cb:checked").length;
         const total = document.querySelectorAll(".panel-cb").length;
@@ -721,7 +1487,7 @@
           if (cb) tr.style.background = cb.checked ? "#ede9fe" : "";
         });
       }
-
+ 
       // ══════════════════════════════════════════
       //  PAYSLIP FETCH & RENDER
       // ══════════════════════════════════════════
@@ -730,15 +1496,12 @@
         const rtdb = firebase.database();
         const dFrom = new Date(dFromVal);
         const dTo = new Date(dToVal);
-
         const empDoc = await db.collection("EMPLOYEE_LIST").doc(empId).get();
         let emp = {};
         if (empDoc.exists) emp = empDoc.data();
         const salary = Number(emp.salary || 0);
         const dailyRate = salary / 26;
-
-        let normalWorkDays = 0, holidayWork = 0, sundayWork = 0, absentDays = 0, totalOT = 0, totalAdvance = 0;
-
+        let normalWorkDays=0, holidayWork=0, sundayWork=0, absentDays=0, totalOT=0, totalAdvance=0;
         const snap = await db.collectionGroup("Present_Absent").get();
         snap.forEach((doc) => {
           const d = doc.data();
@@ -751,7 +1514,6 @@
           holidayWork += parseInt(d.HOLIDAY_WORK) || 0;
           sundayWork += parseInt(d.SUNDAY_WORK) || 0;
         });
-
         const otSnap = await rtdb.ref("OVER_TIME").once("value");
         const otData = otSnap.val() || {};
         for (const my in otData) {
@@ -770,11 +1532,9 @@
             }
           }
         }
-
         const advSnap = await rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
         const advData = advSnap.val() || {};
         if (advData[empId]) totalAdvance = parseInt(advData[empId].pending) || 0;
-
         const normalAmt = dailyRate * normalWorkDays;
         const gross = normalAmt + holidayWork + sundayWork + totalOT;
         const csgEmp = gross * 0.015;
@@ -782,55 +1542,36 @@
         const totalDed = csgEmp + npsEmp + totalAdvance;
         const netPay = gross - totalDed;
         const now = new Date();
-
         return {
-          empId: emp.id || empId,
-          name: emp.name || "",
-          desig: emp.designation || "",
-          passport: emp.passport || "",
-          joining: emp.joining || "",
+          empId: emp.id || empId, name: emp.name || "", desig: emp.designation || "",
+          passport: emp.passport || "", joining: emp.joining || "",
           entryDate: now.toLocaleDateString("en-GB"),
           time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
           serviceLength: (function() {
             if (!emp.joining) return "";
             const parts = emp.joining.split(/[\/\-\.]/);
             let jDate;
-            if (parts[0].length === 4) {
-              jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-            } else {
-              jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
-            }
+            if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+            else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
             if (isNaN(jDate)) return "";
             const today = new Date();
-            let months = (today.getFullYear() - jDate.getFullYear()) * 12 + (today.getMonth() - jDate.getMonth());
-            if (today.getDate() < jDate.getDate()) months--;
-            if (months < 0) months = 0;
-            const years = Math.floor(months / 12);
-            const remMonths = months % 12;
-            let formatted = "";
-            if (years === 0) formatted = remMonths + " Month" + (remMonths !== 1 ? "s" : "");
-            else if (remMonths === 0) formatted = years + " Year" + (years !== 1 ? "s" : "");
-            else formatted = years + " Year" + (years !== 1 ? "s" : "") + " " + remMonths + " Month" + (remMonths !== 1 ? "s" : "");
-            return { total: months, formatted: formatted };
+            let months = (today.getFullYear()-jDate.getFullYear())*12+(today.getMonth()-jDate.getMonth());
+            if (today.getDate()<jDate.getDate()) months--;
+            if (months<0) months=0;
+            const years=Math.floor(months/12), remMonths=months%12;
+            let formatted = years===0 ? remMonths+" Month"+(remMonths!==1?"s":"")
+              : remMonths===0 ? years+" Year"+(years!==1?"s":"")
+              : years+" Year"+(years!==1?"s":"")+" "+remMonths+" Month"+(remMonths!==1?"s":"");
+            return { total: months, formatted };
           })(),
-          normalWork: fmt2(normalAmt),
-          holidayWork: fmt2(holidayWork),
-          sundayWork: fmt2(sundayWork),
-          overtime: fmt2(totalOT),
-          gross: fmt2(gross),
-          csgEmp: fmt2(csgEmp),
-          npsEmp: fmt2(npsEmp),
-          advanceRefund: fmt2(totalAdvance),
-          absentDays: absentDays,
-          totalDed: fmt2(totalDed),
-          netPay: fmt2(netPay),
-          netPayWords: numToWords(netPay),
+          normalWork: fmt2(normalAmt), holidayWork: fmt2(holidayWork),
+          sundayWork: fmt2(sundayWork), overtime: fmt2(totalOT),
+          gross: fmt2(gross), csgEmp: fmt2(csgEmp), npsEmp: fmt2(npsEmp),
+          advanceRefund: fmt2(totalAdvance), absentDays,
+          totalDed: fmt2(totalDed), netPay: fmt2(netPay), netPayWords: numToWords(netPay),
         };
       }
-
-      // ══════════════════════════════════════════
-      //  PAYSLIP HTML — Earnings/Deductions header = GREY bg + BLACK text
-      // ══════════════════════════════════════════
+ 
       function buildOneSlip(d, period, title) {
         return `
         <div style="position:relative;overflow:hidden;background:white;padding:8mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
@@ -861,13 +1602,12 @@
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">GANG</span><span style="width:10px;font-weight:700">:</span><span></span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">SRN</span><span style="width:10px;font-weight:700">:</span><span></span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">NPS NO</span><span style="width:10px;font-weight:700">:</span><span></span></div>
-                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style=\"font-size:10px;font-weight:600;color:#374151\">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
+                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
               <div>
-                <!-- EARNINGS header: grey bg + black text -->
-                <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;border-bottom:1px solid #d1d5db;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings</div>
+                <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings</div>
                 <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWork}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidayWork}</td></tr>
@@ -877,12 +1617,11 @@
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
-                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px 3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px 3px">${d.gross}</td></tr>
+                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.gross}</td></tr>
                 </table>
               </div>
               <div>
-                <!-- DEDUCTIONS header: grey bg + black text -->
-                <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;border-bottom:1px solid #d1d5db;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Deductions</div>
+                <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Deductions</div>
                 <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">CSG Emp. <span style="color:#888">(1.5%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.csgEmp}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">NPS Emp. <span style="color:#888">(1%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.npsEmp}</td></tr>
@@ -892,7 +1631,7 @@
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
-                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px 3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px 3px">${d.totalDed}</td></tr>
+                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.totalDed}</td></tr>
                 </table>
               </div>
             </div>
@@ -945,14 +1684,14 @@
           </div>
         </div>`;
       }
-
-      // ── Shared CSS for payslip window ──
+ 
       function payslipWindowCSS() {
-        return `
-        <style>
+        return `<style>
           *{box-sizing:border-box;margin:0;padding:0}
           body{background:#f3f4f6;font-family:'Source Sans 3',Arial,sans-serif;padding:10mm}
-          .page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}.page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}.page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}
+          .page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}
+          .page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}
+          .page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}
           .no-print{text-align:center;margin-bottom:8mm}
           .no-print button{background:#002147;color:#ffd700;border:2px solid #ffd700;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
           .no-print button:hover{background:#ffd700;color:#002147}
@@ -965,8 +1704,7 @@
           }
         </style>`;
       }
-
-      // ── Single payslip window ──
+ 
       async function openSlipTab(empId, dFromVal, dToVal) {
         const win = window.open("", "_blank");
         win.document.write(`<!doctype html><html><head><title>Loading...</title><style>
@@ -994,15 +1732,12 @@
               ${buildOneSlip(d, period, "OFFICE COPY")}
             </div>
           </body></html>`;
-          win.document.open();
-          win.document.write(html);
-          win.document.close();
+          win.document.open(); win.document.write(html); win.document.close();
         } catch(e) {
           win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
         }
       }
-
-      // ── Details tab ──
+ 
       async function openDetailsTab(empId, dFromVal, dToVal) {
         const win = window.open("", "_blank");
         win.document.write(`<!doctype html><html><head><title>Loading...</title><style>
@@ -1019,12 +1754,9 @@
         try {
           const db = firebase.firestore();
           const rtdb = firebase.database();
-          const dFrom = new Date(dFromVal);
-          const dTo = new Date(dToVal);
-
+          const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
           const empDoc = await db.collection("EMPLOYEE_LIST").doc(empId).get();
           const emp = empDoc.exists ? empDoc.data() : { name: "Unknown" };
-
           const snap = await db.collectionGroup("Present_Absent").get();
           let att = [];
           snap.forEach((doc) => {
@@ -1035,7 +1767,6 @@
             att.push(d);
           });
           att.sort((a,b) => new Date(a.DATE) - new Date(b.DATE));
-
           const otSnap = await rtdb.ref("OVER_TIME").once("value");
           const otData = otSnap.val() || {};
           let otMap = {};
@@ -1051,12 +1782,10 @@
               }
             }
           }
-
           let rows = att.map((r,i) => {
             const ot = otMap[r.DATE] || {};
             return `<tr><td style="text-align:center">${i+1}</td><td>${r.DATE}</td><td style="text-align:center">${r.STATUS}</td><td>${r.SIDE_NAME||"-"}</td><td style="text-align:center">${ot.TOTAL_OT_HOURS||0}</td><td style="text-align:center">${r.HOLIDAY_WORK||0}</td><td style="text-align:center">${r.SUNDAY_WORK||0}</td><td>${r.REMARK||"-"}</td></tr>`;
           }).join("");
-
           const html = `<!doctype html><html><head><title>Details - ${empId}</title><style>
             body{font-family:'Source Sans 3',sans-serif;padding:30px;background:#f4f7f6;color:#1a1a2e}
             .header{background:#002147;color:#ffd700;padding:20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
@@ -1065,7 +1794,6 @@
             td{padding:10px;border:1px solid #eee;font-size:12px}
             tr:hover{background:#fffecb}
             .btn-print{background:#ffd700;color:#002147;border:2px solid #ffd700;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer;transition:all .2s}
-            .btn-print:hover{background:transparent;color:#ffd700}
             @media print{.no-print{display:none}}
           </style></head><body>
             <div class="header">
@@ -1075,53 +1803,43 @@
             <p style="margin-bottom:10px;font-size:12px"><b>Period:</b> ${dFromVal} to ${dToVal}</p>
             <table><thead><tr><th>SL</th><th>Date</th><th>Status</th><th>Project Name</th><th>OT Hours</th><th>Holiday Work</th><th>Sunday Work</th><th>Remark</th></tr></thead><tbody>${rows}</tbody></table>
           </body></html>`;
-          win.document.open();
-          win.document.write(html);
-          win.document.close();
+          win.document.open(); win.document.write(html); win.document.close();
         } catch(e) {
           win.document.write(`<p style="color:red">Error: ${e.message}</p>`);
         }
       }
-
+ 
       // ══════════════════════════════════════════
       //  GENERATE PAYSLIPS FROM PANEL
       // ══════════════════════════════════════════
       async function generateFromPanel() {
         const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
         if (!selected.length) return;
-
         const dFromVal = document.getElementById("panelDateFrom").value;
         const dToVal = document.getElementById("panelDateTo").value;
         if (!dFromVal || !dToVal) {
           showMsg("তারিখ রেঞ্জ সিলেক্ট করুন — From এবং To উভয়ই দিতে হবে।", {title:"Date Range Required", type:"warn"});
           return;
         }
-
         const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
-
         const genBtn = document.getElementById("panelGenBtn");
-        genBtn.disabled = true;
-        genBtn.textContent = "⏳ Generating...";
-
-        // Show loader immediately with 0/total
+        genBtn.disabled = true; genBtn.textContent = "⏳ Generating...";
         showLoader(0, selected.length, "");
-
-        // Open new tab with navy loading screen showing count
         const win = window.open("", "_blank");
-        win.document.write(`<!doctype html><html><head><title>Generating Payslips...</title><style>
+        win.document.write(`<!doctype html><html><head><title>Generating...</title><style>
           *{box-sizing:border-box;margin:0;padding:0}
-          body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#002147;font-family:'Segoe UI',sans-serif;flex-direction:column;gap:20px}
+          body{display:flex;align-items:center;justify-content:center;height:100vh;background:#002147;font-family:'Segoe UI',sans-serif;flex-direction:column;gap:20px}
           .spinner{width:56px;height:56px;border:5px solid #1e3a5f;border-top-color:#ffd700;border-right-color:rgba(255,215,0,0.4);border-radius:50%;animation:spin .7s linear infinite}
           @keyframes spin{to{transform:rotate(360deg)}}
           .title{color:#ffd700;font-size:22px;font-weight:700;letter-spacing:1.5px}
           .count-box{background:rgba(255,215,0,0.08);border:2px solid #ffd700;border-radius:14px;padding:14px 40px;text-align:center}
-          .count-big{color:#ffd700;font-size:44px;font-weight:700;line-height:1;text-shadow:0 0 20px rgba(255,215,0,0.4)}
+          .count-big{color:#ffd700;font-size:44px;font-weight:700;line-height:1}
           .count-of{color:#6a88aa;font-size:13px;font-weight:600;margin-top:4px}
-          .sub{color:#6a88aa;font-size:12px;font-weight:600;letter-spacing:.5px}
-          .bar-wrap{width:280px;height:8px;background:#001030;border-radius:20px;overflow:hidden;border:1px solid #1e3a5f}
+          .sub{color:#6a88aa;font-size:12px;font-weight:600}
+          .bar-wrap{width:280px;height:8px;background:#001030;border-radius:20px;overflow:hidden}
           .bar{height:100%;background:linear-gradient(90deg,#ffd700,#ffe87a);width:0%;border-radius:20px;transition:width .4s}
         </style></head><body>
-          <div class="spinner" id="sp"></div>
+          <div class="spinner"></div>
           <div class="title">⚡ Generating Payslips</div>
           <div class="count-box">
             <div class="count-big" id="cc">0</div>
@@ -1130,15 +1848,11 @@
           <div class="bar-wrap"><div class="bar" id="pb"></div></div>
           <div class="sub" id="st">Initializing...</div>
         </body></html>`);
-
         try {
           let allPages = "";
-
           for (let i = 0; i < selected.length; i++) {
             const empId = selected[i];
             showLoader(i, selected.length, empId);
-
-            // Update new tab counter
             try {
               if (win && !win.closed) {
                 win.document.getElementById("cc").textContent = i;
@@ -1146,15 +1860,8 @@
                 win.document.getElementById("st").textContent = `Processing: ${empId}`;
               }
             } catch(e2) {}
-
             const d = await fetchPayslipData(empId, dFromVal, dToVal);
-            allPages += `
-              <div class="page">
-                ${buildOneSlip(d, period, "EMPLOYEE COPY")}
-                ${buildOneSlip(d, period, "OFFICE COPY")}
-              </div>`;
-
-            // Update after each completion
+            allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
             showLoader(i + 1, selected.length, empId);
             try {
               if (win && !win.closed) {
@@ -1164,10 +1871,8 @@
               }
             } catch(e2) {}
           }
-
           const fullHtml = `<!doctype html><html><head>
-            <meta charset="UTF-8">
-            <title>Payslips — ${period}</title>
+            <meta charset="UTF-8"><title>Payslips — ${period}</title>
             <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
             ${payslipWindowCSS()}
           </head><body>
@@ -1177,113 +1882,86 @@
             </div>
             ${allPages}
           </body></html>`;
-
-          win.document.open();
-          win.document.write(fullHtml);
-          win.document.close();
+          win.document.open(); win.document.write(fullHtml); win.document.close();
           hideLoader();
         } catch(e) {
           hideLoader();
           win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
-          showMsg(`Payslip generate করতে সমস্যা হয়েছে:<br><code style="color:red">${e.message}</code>`, {title:"Generation Error", type:"err"});
+          showMsg(`Error: ${e.message}`, {title:"Generation Error", type:"err"});
         }
-
         genBtn.disabled = false;
         genBtn.textContent = "⚡ Generate Payslip";
       }
-
+ 
       // ══════════════════════════════════════════
-      //  MAIN REPORT
+      //  MAIN MONTHLY REPORT
       // ══════════════════════════════════════════
       async function generateReport() {
         const output = document.getElementById("reportOutput");
         const dFromVal = document.getElementById("dateFrom").value;
         const dToVal = document.getElementById("dateTo").value;
-        const dFrom = new Date(dFromVal);
-        const dTo = new Date(dToVal);
+        const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
         const filterId = document.getElementById("filterId").value.trim();
-
-        window._reportFrom = dFromVal;
-        window._reportTo = dToVal;
-
-        output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data, please wait…</p>';
-
+        window._reportFrom = dFromVal; window._reportTo = dToVal;
+        output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
         try {
           const db = firebase.firestore();
           const rtdb = firebase.database();
-
           const [snap, otSnap, advSnap] = await Promise.all([
             db.collectionGroup("Present_Absent").get(),
             rtdb.ref("OVER_TIME").once("value"),
             rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
           ]);
-
-          const otData = otSnap.val() || {};
-          const advData = advSnap.val() || {};
+          const otData = otSnap.val() || {}, advData = advSnap.val() || {};
           let workers = {};
-
           snap.forEach((doc) => {
             const d = doc.data();
             const docDate = new Date(d.DATE);
             if (filterId && d.ID !== filterId) return;
             if (dFromVal && dToVal && (docDate < dFrom || docDate > dTo)) return;
             if (!workers[d.ID]) {
-              workers[d.ID] = {
-                id: d.ID, name: d.EMPLOYEE_NAME, passport: d.PASSPORT, des: d.DESIGNATION,
-                sal: parseInt(d.SALARY)||0, daily: Math.round((parseInt(d.SALARY)||0)/26),
-                norm: 0, hol: 0, sun: 0, pres: 0, abs: 0, otH: 0, otA: 0, adv: 0, fine: 0,
-                others: parseInt(d.OTHERS)||0,
-              };
+              workers[d.ID] = { id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
+                sal:parseInt(d.SALARY)||0, daily:Math.round((parseInt(d.SALARY)||0)/26),
+                norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0, others:parseInt(d.OTHERS)||0 };
             }
-            if (d.STATUS === "PRESENT") workers[d.ID].pres++;
-            else if (d.STATUS === "ABSENT") workers[d.ID].abs++;
-            if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
+            if (d.STATUS==="PRESENT") workers[d.ID].pres++;
+            else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
+            if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
             workers[d.ID].sun += parseInt(d.SUNDAY_WORK)||0;
             workers[d.ID].hol += parseInt(d.HOLIDAY_WORK)||0;
             workers[d.ID].fine += parseInt(d.FINE)||0;
           });
-
           for (const my in otData) {
-            const md = otData[my];
-            if (typeof md !== "object") continue;
+            const md = otData[my]; if (typeof md!=="object") continue;
             for (const df in md) {
-              const dr = md[df];
-              if (typeof dr !== "object") continue;
+              const dr = md[df]; if (typeof dr!=="object") continue;
               for (const rk in dr) {
                 const row = dr[rk];
                 if (row && row.ID && workers[row.ID]) {
-                  const otDate = new Date(row.OT_Date || df);
-                  if (dFromVal && dToVal && (otDate < dFrom || otDate > dTo)) continue;
+                  const otDate = new Date(row.OT_Date||df);
+                  if (dFromVal && dToVal && (otDate<dFrom||otDate>dTo)) continue;
                   workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS)||0;
                   workers[row.ID].otA += parseFloat(row.Total_Taka)||0;
                 }
               }
             }
           }
-
-          for (const id in workers) {
-            if (advData[id]) workers[id].adv = parseInt(advData[id].pending)||0;
-          }
-
+          for (const id in workers) { if (advData[id]) workers[id].adv = parseInt(advData[id].pending)||0; }
           let totals = { norm:0,hol:0,sun:0,pres:0,abs:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0 };
-          let rows = "";
-          let count = 1;
-
+          let rows = "", count = 1;
           Object.keys(workers).sort().forEach((id) => {
             const w = workers[id];
             const rowTotalBasic = w.norm * w.daily;
             const gross = rowTotalBasic + w.hol + w.sun + w.otA + w.others;
-            const nps = Math.round(gross * 0.01);
-            const csg = Math.round(gross * 0.015);
+            const nps = Math.round(gross*0.01), csg = Math.round(gross*0.015);
             const totDed = w.adv + w.fine + nps + csg;
             const net = gross - totDed;
-            totals.totBasic += rowTotalBasic; totals.totDaily += w.daily;
-            totals.norm += w.norm; totals.hol += w.hol; totals.sun += w.sun;
-            totals.pres += w.pres; totals.abs += w.abs; totals.otA += w.otA;
-            totals.otH += w.otH; totals.others += w.others; totals.gross += gross;
-            totals.adv += w.adv; totals.fine += w.fine; totals.nps += nps;
-            totals.csg += csg; totals.totDed += totDed; totals.net += net;
-
+            totals.totBasic+=rowTotalBasic; totals.totDaily+=w.daily;
+            totals.norm+=w.norm; totals.hol+=w.hol; totals.sun+=w.sun;
+            totals.pres+=w.pres; totals.abs+=w.abs; totals.otA+=w.otA;
+            totals.otH+=w.otH; totals.others+=w.others; totals.gross+=gross;
+            totals.adv+=w.adv; totals.fine+=w.fine; totals.nps+=nps;
+            totals.csg+=csg; totals.totDed+=totDed; totals.net+=net;
             rows += `<tr>
               <td style="text-align:center">${count++}</td>
               <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
@@ -1313,8 +1991,7 @@
               </td>
             </tr>`;
           });
-
-          const html = `
+          output.innerHTML = `
           <div class="print-header">
             <span class="co-name">ALOMHOW CO LTD — Monthly Salary Report</span>
             <span>Period: ${dFromVal||"…"} to ${dToVal||"…"}</span>
@@ -1332,7 +2009,7 @@
                 <th rowspan="2">Gross Salary</th>
                 <th colspan="5">DEDUCTIONS</th>
                 <th rowspan="2">Net Salary</th>
-                <th rowspan="2">Details</th>
+                <th rowspan="2">Signature</th>
               </tr>
               <tr><th>Advance</th><th>Fine</th><th>NPS 1%</th><th>CSG 1.5%</th><th>Total</th></tr>
             </thead>
@@ -1370,58 +2047,388 @@
             <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
             <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
           </div>`;
-
-          output.innerHTML = html;
         } catch(e) {
           output.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
-          showMsg(`Report load করতে সমস্যা হয়েছে:<br><code style="color:red">${e.message}</code>`, {title:"Report Error", type:"err"});
+          showMsg(`Error: ${e.message}`, {title:"Report Error", type:"err"});
         }
       }
-
+ 
       // ══════════════════════════════════════════
       //  CLEAR / RESET ALL
       // ══════════════════════════════════════════
       function clearAll() {
-        showMsg(
-          " ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?",
-          {
-            title: "Reset Page",
-            type: "warn",
-            confirm: true,
-            onOk: () => {
-              // Clear report output
-              document.getElementById("reportOutput").innerHTML = "";
-
-              // Clear all text inputs
-              document.getElementById("filterId").value = "";
-              document.getElementById("searchTable").value = "";
-
-              // Reset flatpickr date pickers
-              try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
-              try { document.getElementById("dateTo")._flatpickr.clear(); } catch(e) {}
-
-              // Close employee panel if open
-              closeEmpPanel();
-
-              // Close any message box
-              closeMsgBox();
-
-              // Reset window report date tracking
-              window._reportFrom = "";
-              window._reportTo = "";
-
-              // Flash effect on controls bar to show reset happened
-              const ctrl = document.querySelector(".controls");
-              ctrl.style.transition = "background 0.15s";
-              ctrl.style.background = "rgba(255,107,107,0.15)";
-              setTimeout(() => {
-                ctrl.style.background = "";
-                setTimeout(() => ctrl.style.transition = "", 400);
-              }, 300);
+        showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?", {
+          title: "Reset Page", type: "warn", confirm: true,
+          onOk: () => {
+            document.getElementById("reportOutput").innerHTML = "";
+            document.getElementById("filterId").value = "";
+            document.getElementById("searchTable").value = "";
+            try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
+            try { document.getElementById("dateTo")._flatpickr.clear(); } catch(e) {}
+            closeEmpPanel(); closeMsgBox();
+            window._reportFrom = ""; window._reportTo = "";
+            const ctrl = document.querySelector(".controls");
+            ctrl.style.transition = "background 0.15s";
+            ctrl.style.background = "rgba(255,107,107,0.15)";
+            setTimeout(() => { ctrl.style.background = ""; setTimeout(() => ctrl.style.transition = "", 400); }, 300);
+          }
+        });
+      }
+ 
+      // ══════════════════════════════════════════
+      //  OVERTIME TAB
+      // ══════════════════════════════════════════
+      let _otEmpLoaded = false;
+      let _otCache = null;
+ 
+      function onOtFilterChange() {
+        const type = document.getElementById("otFilterType").value;
+        document.querySelectorAll("#overtime-controls .secondary-filter").forEach(el => el.classList.remove("active"));
+        if (type === "employee") document.getElementById("ot-sf-employee").classList.add("active");
+        else if (type === "project") document.getElementById("ot-sf-project").classList.add("active");
+        else if (type === "id") document.getElementById("ot-sf-id").classList.add("active");
+      }
+ 
+      async function loadOtFilterOptions() {
+        if (_otEmpLoaded) return;
+        try {
+          const db = firebase.firestore();
+          const rtdb = firebase.database();
+          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empSel = document.getElementById("otEmpSelect");
+          empSel.innerHTML = '<option value="">All Employees</option>';
+          const empList = [];
+          empSnap.forEach(d => { const e = d.data(); empList.push({ id: e.id||d.id, name: e.name||"" }); });
+          empList.sort((a,b) => a.id.localeCompare(b.id));
+          empList.forEach(e => {
+            const opt = document.createElement("option");
+            opt.value = e.id; opt.textContent = `${e.id} — ${e.name}`;
+            empSel.appendChild(opt);
+          });
+          const otSnap = await rtdb.ref("OVER_TIME").once("value");
+          const otData = otSnap.val() || {};
+          const records = [], sites = new Set();
+          for (const my in otData) {
+            const md = otData[my]; if (typeof md!=="object") continue;
+            for (const df in md) {
+              const dr = md[df]; if (typeof dr!=="object") continue;
+              for (const rk in dr) {
+                const row = dr[rk];
+                if (row && row.ID) { records.push(row); if (row.SITE_NAME) sites.add(row.SITE_NAME.trim()); }
+              }
             }
           }
-        );
+          _otCache = records;
+          const projSel = document.getElementById("otProjectSelect");
+          projSel.innerHTML = '<option value="">All Sites</option>';
+          [...sites].sort().forEach(s => {
+            const opt = document.createElement("option"); opt.value=s; opt.textContent=s; projSel.appendChild(opt);
+          });
+          _otEmpLoaded = true;
+        } catch(e) { console.error("OT filter load error:", e); }
       }
+ 
+      async function generateOT() {
+        const otOut = document.getElementById("otOutput");
+        const filterType = document.getElementById("otFilterType").value;
+        const dFromVal = document.getElementById("otDateFrom").value;
+        const dToVal = document.getElementById("otDateTo").value;
+        const dFrom = dFromVal ? new Date(dFromVal) : null;
+        const dTo = dToVal ? new Date(dToVal) : null;
+        const selEmp = document.getElementById("otEmpSelect").value;
+        const selSite = document.getElementById("otProjectSelect").value;
+        const selId = document.getElementById("otIdInput").value.trim();
+ 
+        otOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading overtime data...</p>';
+        try {
+          if (!_otCache) {
+            const rtdb = firebase.database();
+            const otSnap = await rtdb.ref("OVER_TIME").once("value");
+            const otData = otSnap.val() || {};
+            _otCache = [];
+            for (const my in otData) {
+              const md = otData[my]; if (typeof md!=="object") continue;
+              for (const df in md) {
+                const dr = md[df]; if (typeof dr!=="object") continue;
+                for (const rk in dr) { const row=dr[rk]; if (row&&row.ID) _otCache.push(row); }
+              }
+            }
+          }
+          let records = _otCache.filter(row => {
+            const otDate = row.OT_Date ? new Date(row.OT_Date) : null;
+            if (dFrom && dTo && otDate && (otDate<dFrom||otDate>dTo)) return false;
+            if (filterType==="employee" && selEmp && String(row.ID)!==selEmp) return false;
+            if (filterType==="project" && selSite && (row.SITE_NAME||"").trim()!==selSite) return false;
+            if (filterType==="id" && selId && String(row.ID)!==selId) return false;
+            return true;
+          });
+          records.sort((a,b) => new Date(b.OT_Date||0) - new Date(a.OT_Date||0));
+          if (!records.length) {
+            otOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No overtime records found.</p>';
+            return;
+          }
+          let totalHrs=0, totalAmt=0, uniqueEmps=new Set();
+          records.forEach(r => {
+            totalHrs += parseFloat(r.TOTAL_OT_HOURS||r.OT_Hours||0);
+            totalAmt += parseFloat(r.Total_Taka||0);
+            uniqueEmps.add(r.ID);
+          });
+          let periodText=(dFromVal&&dToVal)?`${dFromVal} to ${dToVal}`:"All Dates";
+          let filterDesc=filterType==="employee"&&selEmp?`Employee: ${selEmp}`:filterType==="project"&&selSite?`Site: ${selSite}`:filterType==="id"&&selId?`ID: ${selId}`:"All Records";
+          const rows = records.map((r,i) => `<tr>
+            <td style="text-align:center;color:#9ca3af;font-size:10px">${i+1}</td>
+            <td>${r.OT_Date||"-"}</td>
+            <td style="font-weight:700;color:var(--brand-blue)">${r.ID||"-"}</td>
+            <td>${r.EMPLOYEE_NAME||r.Name||"-"}</td>
+            <td style="color:#6b7280;font-size:11px">${r.DESIGNATION||r.Designation||"-"}</td>
+            <td>${r.SITE_NAME||r.Site||"-"}</td>
+            <td class="ot-hrs-cell" style="text-align:right">${parseFloat(r.TOTAL_OT_HOURS||r.OT_Hours||0).toFixed(2)}</td>
+            <td class="text-right" style="color:#6b7280;font-size:11px">${r.OT_Rate||"-"}</td>
+            <td class="ot-amt-cell" style="text-align:right">${parseFloat(r.Total_Taka||0).toFixed(2)}</td>
+          </tr>`).join("");
+          otOut.innerHTML = `
+            <div class="print-header">
+              <span class="co-name">ALOMHOW CO LTD — Overtime Report</span>
+              <span>Period: ${periodText} | Filter: ${filterDesc}</span>
+              <span>Printed: ${formatDateTime()}</span>
+            </div>
+            <div class="summary-cards">
+              <div class="s-card"><div class="s-card-label">Total Records</div><div class="s-card-value">${records.length}</div></div>
+              <div class="s-card"><div class="s-card-label">Employees</div><div class="s-card-value">${uniqueEmps.size}</div></div>
+              <div class="s-card blue"><div class="s-card-label">Total OT Hours</div><div class="s-card-value">${totalHrs.toFixed(1)}</div></div>
+              <div class="s-card green"><div class="s-card-label">Total OT Amount</div><div class="s-card-value">${totalAmt.toLocaleString()}</div></div>
+            </div>
+            <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+              <div style="color:#ffd700;font-size:11px;font-weight:700">⏰ ${records.length} record(s) | <span style="color:#a0c4ff">${filterDesc}</span></div>
+              <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px" oninput="searchOtFn(this.value)" />
+            </div>
+            <table id="otTable">
+              <thead><tr>
+                <th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Designation</th>
+                <th>Site / Project</th><th>OT Hours</th><th>OT Rate</th><th>OT Amount</th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="6" class="text-right">TOTAL</td>
+                  <td class="text-right">${totalHrs.toFixed(2)}</td>
+                  <td></td>
+                  <td class="text-right">${totalAmt.toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>`;
+        } catch(e) {
+          otOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+        }
+      }
+ 
+      function searchOtFn(val) {
+        const f = val.toUpperCase();
+        const tbl = document.getElementById("otTable");
+        if (!tbl) return;
+        Array.from(tbl.querySelectorAll("tbody tr")).forEach(row => {
+          row.style.display = (row.textContent||"").toUpperCase().includes(f) ? "" : "none";
+        });
+      }
+ 
+      function clearOT() {
+        document.getElementById("otOutput").innerHTML = "";
+        document.getElementById("otFilterType").value = "all";
+        onOtFilterChange();
+        try { document.getElementById("otDateFrom")._flatpickr.clear(); } catch(e) {}
+        try { document.getElementById("otDateTo")._flatpickr.clear(); } catch(e) {}
+        document.getElementById("otIdInput").value = "";
+        document.getElementById("otEmpSelect").value = "";
+        document.getElementById("otProjectSelect").value = "";
+      }
+ 
+      // ══════════════════════════════════════════
+      //  ADVANCE TAB
+      // ══════════════════════════════════════════
+      let _advDetailData = {};
+ 
+      async function generateAdvance() {
+        const advOut = document.getElementById("advOutput");
+        const statusFilter = document.getElementById("advStatusFilter").value;
+        const search = document.getElementById("advSearchInput").value.trim().toLowerCase();
+        advOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading advance data...</p>';
+        try {
+          const rtdb = firebase.database();
+          const db = firebase.firestore();
+          const [advSnap, empSnap] = await Promise.all([
+            rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
+            db.collection("EMPLOYEE_LIST").get()
+          ]);
+          const advData = advSnap.val() || {};
+          const empMap = {};
+          empSnap.forEach(d => { const e=d.data(); empMap[e.id||d.id]=e.name||""; });
+          let rows_data = [];
+          for (const empId in advData) {
+            const u = advData[empId];
+            const total=parseInt(u.total_advance||u.totalAdvance||0);
+            const paid=parseInt(u.total_paid||u.totalPaid||0);
+            const pending=parseInt(u.pending||0);
+            const name=u.name||empMap[empId]||"";
+            let status = pending<=0 ? "cleared" : paid>0&&pending>0 ? "partial" : "pending";
+            if (statusFilter==="pending" && pending<=0) continue;
+            if (statusFilter==="cleared" && pending>0) continue;
+            if (search && !empId.toLowerCase().includes(search) && !name.toLowerCase().includes(search)) continue;
+            rows_data.push({ empId, name, total, paid, pending, status, raw:u });
+          }
+          rows_data.sort((a,b) => b.pending-a.pending);
+          if (!rows_data.length) {
+            advOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No advance records found.</p>';
+            return;
+          }
+          const totTotal=rows_data.reduce((s,r)=>s+r.total,0);
+          const totPaid=rows_data.reduce((s,r)=>s+r.paid,0);
+          const totPending=rows_data.reduce((s,r)=>s+r.pending,0);
+          const countPending=rows_data.filter(r=>r.pending>0).length;
+          const countCleared=rows_data.filter(r=>r.pending<=0).length;
+          const tableRows = rows_data.map((r,i) => {
+            const bc=r.status==="cleared"?"cleared":r.status==="partial"?"partial":"pending";
+            const bt=r.status==="cleared"?"CLEARED":r.status==="partial"?"PARTIAL":"PENDING";
+            return `<tr>
+              <td style="text-align:center;color:#9ca3af;font-size:10px">${i+1}</td>
+              <td style="font-weight:700;color:var(--brand-blue)">${r.empId}</td>
+              <td style="font-weight:600">${r.name}</td>
+              <td style="text-align:right;font-family:monospace">${r.total.toLocaleString()}</td>
+              <td style="text-align:right;font-family:monospace;color:#065f46">${r.paid.toLocaleString()}</td>
+              <td style="text-align:right;font-family:monospace;font-weight:700;color:${r.pending>0?'#991b1b':'#065f46'}">${r.pending.toLocaleString()}</td>
+              <td style="text-align:center"><span class="adv-badge ${bc}">${bt}</span></td>
+              <td style="text-align:center"><button class="btn-view" onclick="openAdvDetail('${r.empId}')">📋 Details</button></td>
+            </tr>`;
+          }).join("");
+          advOut.innerHTML = `
+            <div class="print-header">
+              <span class="co-name">ALOMHOW CO LTD — Advance Report</span>
+              <span>Status: ${statusFilter} | Search: ${search||"All"}</span>
+              <span>Printed: ${formatDateTime()}</span>
+            </div>
+            <div class="summary-cards">
+              <div class="s-card"><div class="s-card-label">Total Employees</div><div class="s-card-value">${rows_data.length}</div></div>
+              <div class="s-card red"><div class="s-card-label">Pending</div><div class="s-card-value">${countPending}</div></div>
+              <div class="s-card green"><div class="s-card-label">Cleared</div><div class="s-card-value">${countCleared}</div></div>
+              <div class="s-card gold"><div class="s-card-label">Total Advance</div><div class="s-card-value">${totTotal.toLocaleString()}</div></div>
+              <div class="s-card teal"><div class="s-card-label">Total Paid</div><div class="s-card-value">${totPaid.toLocaleString()}</div></div>
+              <div class="s-card red"><div class="s-card-label">Total Pending</div><div class="s-card-value">${totPending.toLocaleString()}</div></div>
+            </div>
+            <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+              <div style="color:#ffd700;font-size:11px;font-weight:700">💰 ${rows_data.length} employee(s) | Pending: <span style="color:#fca5a5;font-size:13px">${totPending.toLocaleString()}</span></div>
+              <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px" oninput="searchAdvFn(this.value)" />
+            </div>
+            <table id="advTable">
+              <thead><tr>
+                <th>SL</th><th>EMP ID</th><th>Name</th>
+                <th>Total Advance</th><th>Total Paid</th><th>Pending Balance</th>
+                <th>Status</th><th>Details</th>
+              </tr></thead>
+              <tbody>${tableRows}</tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td colspan="3" class="text-right">GRAND TOTAL</td>
+                  <td class="text-right">${totTotal.toLocaleString()}</td>
+                  <td class="text-right">${totPaid.toLocaleString()}</td>
+                  <td class="text-right">${totPending.toLocaleString()}</td>
+                  <td colspan="2"></td>
+                </tr>
+              </tfoot>
+            </table>`;
+          _advDetailData = advData;
+        } catch(e) {
+          advOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+        }
+      }
+ 
+      function searchAdvFn(val) {
+        const f = val.toUpperCase();
+        const tbl = document.getElementById("advTable");
+        if (!tbl) return;
+        Array.from(tbl.querySelectorAll("tbody tr")).forEach(row => {
+          row.style.display = (row.textContent||"").toUpperCase().includes(f) ? "" : "none";
+        });
+      }
+ 
+      function clearAdvance() {
+        document.getElementById("advOutput").innerHTML = "";
+        document.getElementById("advStatusFilter").value = "all";
+        document.getElementById("advSearchInput").value = "";
+      }
+ 
+      async function openAdvDetail(empId) {
+        document.getElementById("advDetailOverlay").classList.add("active");
+        document.getElementById("advDetailTitle").textContent = `💰 Advance Details — ${empId}`;
+        document.getElementById("advDetailBody").innerHTML = '<p style="padding:20px;text-align:center;color:#6b7280">⏳ Loading...</p>';
+        document.body.style.overflow = "hidden";
+        try {
+          const rtdb = firebase.database();
+          const txSnap = await rtdb.ref(`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${empId}`).once("value");
+          const data = txSnap.val() || {};
+          let txSnap2 = null;
+          try { txSnap2 = await rtdb.ref(`ADVANCE_RECORDS/${empId}`).once("value"); } catch(e2) {}
+          const txData2 = (txSnap2 && txSnap2.val()) || {};
+          let txRows = "";
+          if (typeof txData2==="object" && Object.keys(txData2).length>0) {
+            const txList = [];
+            for (const k in txData2) txList.push(txData2[k]);
+            txList.sort((a,b) => new Date(b.date||b.DATE||0)-new Date(a.date||a.DATE||0));
+            txRows = txList.map((t,i) => `<tr>
+              <td style="text-align:center">${i+1}</td>
+              <td>${t.date||t.DATE||"-"}</td>
+              <td>${t.type||t.TYPE||"-"}</td>
+              <td style="text-align:right;font-family:monospace">${parseInt(t.amount||t.AMOUNT||0).toLocaleString()}</td>
+              <td>${t.note||t.NOTE||t.remark||"-"}</td>
+            </tr>`).join("");
+          }
+          const pending=parseInt(data.pending||0), total=parseInt(data.total_advance||data.totalAdvance||0), paid=parseInt(data.total_paid||data.totalPaid||0);
+          const statusBadge = pending<=0 ? '<span class="adv-badge cleared">CLEARED</span>' : paid>0 ? '<span class="adv-badge partial">PARTIAL</span>' : '<span class="adv-badge pending">PENDING</span>';
+          document.getElementById("advDetailBody").innerHTML = `
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+              <div style="background:#fef3c7;border-radius:8px;padding:12px;text-align:center;border-left:4px solid #f59e0b">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#78350f;letter-spacing:1px">Total Advance</div>
+                <div style="font-size:24px;font-weight:800;font-family:'Playfair Display',serif;color:#92400e">${total.toLocaleString()}</div>
+              </div>
+              <div style="background:#d1fae5;border-radius:8px;padding:12px;text-align:center;border-left:4px solid #10b981">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#065f46;letter-spacing:1px">Total Paid</div>
+                <div style="font-size:24px;font-weight:800;font-family:'Playfair Display',serif;color:#065f46">${paid.toLocaleString()}</div>
+              </div>
+              <div style="background:${pending>0?'#fee2e2':'#d1fae5'};border-radius:8px;padding:12px;text-align:center;border-left:4px solid ${pending>0?'#ef4444':'#10b981'}">
+                <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${pending>0?'#991b1b':'#065f46'};letter-spacing:1px">Pending</div>
+                <div style="font-size:24px;font-weight:800;font-family:'Playfair Display',serif;color:${pending>0?'#991b1b':'#065f46'}">${pending.toLocaleString()}</div>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;display:flex;align-items:center;gap:12px">
+              <div style="font-size:12px"><strong>Employee ID:</strong> ${empId}</div>
+              <div style="font-size:12px"><strong>Name:</strong> ${data.name||"-"}</div>
+              <div>${statusBadge}</div>
+            </div>
+            ${txRows ? `
+            <div style="font-weight:700;font-size:12px;color:var(--brand-blue);margin-bottom:8px;text-transform:uppercase">Transaction History</div>
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="background:var(--brand-blue)">
+                <th style="color:white;padding:8px;border:1px solid #335185;text-align:center">SL</th>
+                <th style="color:white;padding:8px;border:1px solid #335185">Date</th>
+                <th style="color:white;padding:8px;border:1px solid #335185">Type</th>
+                <th style="color:white;padding:8px;border:1px solid #335185;text-align:right">Amount</th>
+                <th style="color:white;padding:8px;border:1px solid #335185">Note</th>
+              </tr></thead>
+              <tbody>${txRows}</tbody>
+            </table>` : `<p style="color:#9ca3af;font-style:italic;text-align:center;padding:20px">No individual transaction records found.</p>`}`;
+        } catch(e) {
+          document.getElementById("advDetailBody").innerHTML = `<p style="color:red;padding:20px">Error: ${e.message}</p>`;
+        }
+      }
+ 
+      function closeAdvDetail() {
+        document.getElementById("advDetailOverlay").classList.remove("active");
+        document.body.style.overflow = "";
+      }
+      document.getElementById("advDetailOverlay").addEventListener("click", function(e) {
+        if (e.target === this) closeAdvDetail();
+      });
+ 
+      // Init
+      switchTab("monthly");
     </script>
   </body>
 </html>
