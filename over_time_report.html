@@ -4,384 +4,569 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Over Time Report</title>
-  <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
+    <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap');
-        
+
         :root {
-            --brand-blue: #1e3a8a;
-            --brand-gold: #f59e0b;
+            --navy: #0f2460;
+            --navy-dark: #091847;
+            --navy-mid: #1a3578;
+            --navy-light: #1e3a8a;
+            --navy-pale: #e8edf8;
+            --gold: #d4a017;
+            --gold-bright: #f5b700;
+            --gold-light: #fef3c7;
+            --gold-pale: #fffbeb;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f1f5f9;
+            background: linear-gradient(135deg, #0f2460 0%, #1a3578 50%, #0f2460 100%);
+            min-height: 100vh;
             color: #1e293b;
         }
 
+        /* ── Loading Overlay ── */
         #initial-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
+            display:flex; flex-direction:column; justify-content:center; align-items:center;
+            z-index:9999; gap:16px;
         }
-
         .loader-spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--brand-blue);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            border: 3px solid rgba(212,160,23,0.3);
+            border-top: 3px solid var(--gold-bright);
+            border-radius:50%; width:48px; height:48px;
             animation: spin 1s linear infinite;
         }
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+        #initial-overlay p { color: var(--gold-light); font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:700; }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* ── App Container ── */
+        #app-container { display:none; }
+
+        /* ── Header ── */
+        .app-header {
+            background: linear-gradient(90deg, var(--navy-dark) 0%, var(--navy-mid) 60%, var(--navy-dark) 100%);
+            border-bottom: 3px solid var(--gold);
+            padding: 16px 24px;
+            display:flex; justify-content:space-between; align-items:center;
+            gap:16px; flex-wrap:wrap;
+            border-radius: 16px 16px 0 0;
+        }
+        .app-header h1 {
+            font-size:22px; font-weight:900; color:white;
+            letter-spacing:1px; text-transform:uppercase; line-height:1;
+        }
+        .app-header .subtitle {
+            font-size:10px; font-weight:700; color:var(--gold-bright);
+            text-transform:uppercase; letter-spacing:2px; margin-top:4px;
+        }
+        .brand-logo { height:56px; width:auto; object-fit:contain; filter: brightness(1.1); }
+
+        /* ── Period Badge ── */
+        .period-badge {
+            background: rgba(212,160,23,0.15);
+            border: 1px solid var(--gold);
+            color: var(--gold-bright);
+            padding: 6px 14px; border-radius:20px;
+            font-size:11px; font-weight:700; letter-spacing:0.5px;
         }
 
-        #app-container { display: none; }
-
-        .table-container {
-            overflow-x: auto;
-            max-width: 100%;
-            scrollbar-width: thin;
+        /* ── Print Button ── */
+        .print-btn {
+            background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+            color: var(--navy-dark); border:none;
+            padding: 7px 16px; border-radius:20px;
+            font-size:11px; font-weight:800; text-transform:uppercase;
+            cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:6px;
+            box-shadow: 0 2px 8px rgba(212,160,23,0.4);
         }
+        .print-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(212,160,23,0.5); }
 
-        table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            white-space: nowrap;
-        }
-
-        th, td {
-            border: 1px solid #e2e8f0;
-            padding: 10px 8px; 
-            text-align: center;
-            font-size: 13px; 
-        }
-
-        .sticky-sl { position: sticky; left: 0; background: white; z-index: 21; min-width: 40px; }
-        .sticky-id { position: sticky; left: 40px; background: white; z-index: 21; min-width: 80px; }
-        .sticky-name { 
-            position: sticky; 
-            left: 120px; 
-            background: white; 
-            z-index: 21; 
-            min-width: 180px; 
-            text-align: left; 
-            border-right: 2px solid #cbd5e1 !important; 
-        }
-
-        thead th.sticky-sl, thead th.sticky-id, thead th.sticky-name {
-            background-color: var(--brand-blue);
-            color: white;
-            z-index: 30;
-        }
-
-        .total-col {
-            position: sticky;
-            right: 0;
-            background: #f8fafc;
-            z-index: 20;
-            font-weight: bold;
-            border-left: 2px solid #cbd5e1 !important;
-        }
-
-        .sun-col { background-color: #fff1f2; color: #e11d48; }
-
-        .suggestion-box {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            z-index: 999;
-            display: none;
-            width: 100%;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .custom-calendar {
-            position: absolute;
-            top: 105%;
-            left: 0;
-            background: white;
-            border: 1px solid #cbd5e1;
-            border-radius: 12px;
-            padding: 12px;
-            z-index: 1000;
-            display: none;
-            width: 320px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-
-        .calendar-day-cell {
-            padding: 10px 0;
-            font-size: 14px;
-            cursor: pointer;
-            text-align: center;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .calendar-day-cell:hover {
-            background-color: var(--brand-blue);
-            color: white;
-        }
+        /* ── Filter Section ── */
+        /* ── Filter Section ── */
+.filter-section {
+    background: var(--navy-pale);
+    border-bottom: 2px solid rgba(212,160,23,0.3);
+    padding: 18px 24px;
+    overflow: visible;   /* ← এটা যোগ করুন */
+    position: relative;  /* ← এটা যোগ করুন */
+}
 
         .filter-label {
-            display: block;
-            text-transform: uppercase;
-            font-weight: 800;
-            color: #000000;
-            font-size: 13px;
-            margin-bottom: 6px;
-            margin-left: 4px;
+            display:block; text-transform:uppercase;
+            font-weight:800; color: var(--navy-dark);
+            font-size:11px; margin-bottom:6px; letter-spacing:0.5px;
+        }
+        .filter-input {
+            width:100%; padding:10px 12px;
+            background:white; border: 1.5px solid #c7d2e8;
+            border-radius:8px; outline:none;
+            font-size:13px; font-weight:500; color: var(--navy-dark);
+            transition:all 0.2s;
+        }
+        .filter-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212,160,23,0.15);
+        }
+        .filter-input:hover { border-color: var(--navy-light); }
+
+        /* ── Buttons ── */
+        .btn-view {
+            width:100%; height:44px;
+            background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
+            color:white; border:none; border-radius:8px;
+            font-size:12px; font-weight:800; text-transform:uppercase;
+            cursor:pointer; transition:all 0.2s; letter-spacing:0.5px;
+            box-shadow: 0 2px 8px rgba(15,36,96,0.3);
+        }
+        .btn-view:hover { background: linear-gradient(135deg, var(--navy-mid), var(--navy-dark)); transform:translateY(-1px); }
+
+        .btn-breakdown {
+            height:44px; padding:0 14px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+            color: var(--navy-dark); border:none; border-radius:8px;
+            font-size:11px; font-weight:800; text-transform:uppercase;
+            cursor:pointer; transition:all 0.2s; white-space:nowrap;
+            box-shadow: 0 2px 8px rgba(212,160,23,0.3);
+        }
+        .btn-breakdown:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(212,160,23,0.4); }
+
+        /* ── Suggestion Box ── */
+        .suggestion-box {
+            position:absolute; top:100%; left:0;
+            background:white; border:1.5px solid var(--gold);
+            border-radius:8px; box-shadow:0 10px 25px rgba(15,36,96,0.2);
+            z-index:999; display:none; width:100%; max-height:250px; overflow-y:auto;
+        }
+        .suggestion-item {
+            padding:10px 12px; cursor:pointer; border-bottom:1px solid #f1f5f9;
+            font-size:12px; display:flex; justify-content:space-between; align-items:center;
+            transition:background 0.15s;
+        }
+        .suggestion-item:hover { background:var(--gold-pale); }
+        .suggestion-item b { color: var(--navy-dark); }
+
+        
+/* ── Custom Calendar ── */
+.custom-calendar {
+    position: fixed;           /* ← absolute থেকে fixed করুন */
+    background: white;
+    border: 2px solid var(--gold);
+    border-radius: 12px;
+    padding: 14px;
+    z-index: 9999;             /* ← z-index বাড়ান */
+    display: none;
+    width: 300px;
+    box-shadow: 0 20px 40px rgba(15,36,96,0.25);
+}
+        .cal-header {
+            display:flex; justify-content:space-between; align-items:center;
+            margin-bottom:12px; padding-bottom:10px;
+            border-bottom:2px solid var(--gold-light);
+        }
+        .cal-nav {
+            background:var(--navy-pale); border:none; border-radius:6px;
+            width:30px; height:30px; cursor:pointer; font-weight:700;
+            color:var(--navy-dark); transition:all 0.15s; font-size:13px;
+        }
+        .cal-nav:hover { background:var(--navy-dark); color:var(--gold-bright); }
+        .cal-month { font-size:14px; font-weight:900; color:var(--navy-dark); }
+        .cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
+        .cal-days-header div { text-align:center; font-size:10px; font-weight:700; color:#94a3b8; padding:4px 0; }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+        .calendar-day-cell {
+            padding:8px 0; font-size:13px; cursor:pointer;
+            text-align:center; border-radius:6px; transition:all 0.15s; color:#374151;
+        }
+        .calendar-day-cell:hover { background:var(--navy-dark); color:white; }
+        .cal-selected { background:var(--gold) !important; color:var(--navy-dark) !important; font-weight:800; }
+
+        /* ── Main Content ── */
+        .main-content { padding:20px 24px; background:#f8faff; }
+
+        /* ── Table ── */
+        .table-container {
+            overflow-x:auto; border-radius:10px;
+            border:2px solid rgba(15,36,96,0.15);
+            box-shadow:0 4px 20px rgba(15,36,96,0.1);
+            scrollbar-width:thin; scrollbar-color: var(--gold) var(--navy-pale);
+        }
+        table { border-collapse:separate; border-spacing:0; width:100%; white-space:nowrap; }
+        th, td { border:1px solid #dde4f0; padding:9px 8px; text-align:center; font-size:12.5px; }
+
+        /* Sticky cols */
+        .sticky-sl   { position:sticky; left:0;    background:white; z-index:21; min-width:42px; }
+        .sticky-id   { position:sticky; left:42px;  background:white; z-index:21; min-width:82px; }
+        .sticky-name {
+            position:sticky; left:124px; background:white; z-index:21;
+            min-width:185px; text-align:left;
+            border-right:2px solid var(--gold) !important;
+        }
+        thead th.sticky-sl, thead th.sticky-id, thead th.sticky-name {
+            background: var(--navy-dark); color:white; z-index:30;
         }
 
-        .brand-logo { height: 60px; width: auto; object-fit: contain; }
+        /* Header row */
+        thead tr { background: var(--navy-dark); }
+        thead th {
+            color:white; font-weight:700; font-size:11px;
+            text-transform:uppercase; letter-spacing:0.3px;
+            border-color: rgba(255,255,255,0.15) !important;
+        }
 
-        .print-only { display: none; }
+        /* Total column */
+        .total-col {
+            position:sticky; right:0; background:#fffbeb;
+            z-index:20; font-weight:800; color: var(--navy-dark);
+            border-left:2px solid var(--gold) !important;
+        }
+        thead th.total-col { background: var(--gold); color: var(--navy-dark); }
+
+        /* Sunday column */
+        .sun-col { background:#fff5f5; color:#dc2626; }
+
+        /* Body rows */
+        tbody tr:nth-child(even) td { background:#f5f7ff; }
+        tbody tr:nth-child(even) td.sticky-sl,
+        tbody tr:nth-child(even) td.sticky-id,
+        tbody tr:nth-child(even) td.sticky-name { background:#f5f7ff; }
+        tbody tr:hover td { background: var(--gold-pale) !important; }
+        tbody tr:hover td.sticky-sl,
+        tbody tr:hover td.sticky-id,
+        tbody tr:hover td.sticky-name { background: var(--gold-pale) !important; }
+
+        .id-cell { color: var(--navy-dark); font-weight:800; }
+
+        /* Footer */
+        tfoot td {
+            background: var(--navy-pale); font-weight:800;
+            color: var(--navy-dark); font-size:12px;
+            border-top:2px solid var(--gold) !important;
+        }
+        tfoot td.total-col { background: var(--navy-dark); color:white; }
+
+        /* ── Breakdown Table ── */
+        .breakdown-head th {
+            background: var(--navy-dark); color:white;
+            font-size:11px; text-transform:uppercase; letter-spacing:0.3px;
+            padding:11px 8px;
+        }
+        .breakdown-head th:last-child { background: var(--gold); color: var(--navy-dark); font-weight:800; }
+        .breakdown-body tr:nth-child(even) td { background:#f5f7ff; }
+        .breakdown-body tr:hover td { background: var(--gold-pale) !important; }
+        .breakdown-foot td {
+            background: var(--navy-dark); color:white; font-weight:800; font-size:13px;
+        }
+        .breakdown-foot td:last-child { background: var(--gold); color: var(--navy-dark); }
+
+        /* ── Print ── */
+        .print-only { display:none; }
 
         @media print {
-            @page { size: A4 landscape; margin: 0.5cm 1cm; }
-            body { background-color: white !important; color: black !important; padding: 0 !important; margin: 0 !important; }
-            #initial-overlay, .no-print, #idSuggestions, .custom-calendar, .suggestion-box, #printBtn { display: none !important; }
-            #app-container { border: none !important; box-shadow: none !important; max-width: 100% !important; margin: 0 !important; }
-            .print-only { display: block !important; }
-            .table-container { overflow: visible !important; border: none !important; }
-            table { border: 1px solid black !important; width: 100% !important; }
-            th, td { border: 1px solid black !important; color: black !important; background: white !important; padding: 4px 2px !important; font-size: 11px !important; }
-            thead th { background-color: #f2f2f2 !important; color: black !important; }
-            .sticky-sl, .sticky-id, .sticky-name, .total-col { position: static !important; background: white !important; }
-            .print-footer-info { display: flex !important; justify-content: center; gap: 20px; margin-top: 15px; font-size: 10px; border-top: 1px solid #ddd; padding-top: 5px; }
+            @page { size:A4 landscape; margin:0.5cm 1cm; }
+            body { background:white !important; color:black !important; padding:0 !important; margin:0 !important; }
+            #initial-overlay, .no-print { display:none !important; }
+            #app-container { border:none !important; box-shadow:none !important; max-width:100% !important; margin:0 !important; }
+            .print-only { display:block !important; }
+            .table-container { overflow:visible !important; border:1px solid #ccc !important; }
+            table { border:1px solid black !important; width:100% !important; }
+            th, td { border:1px solid #aaa !important; color:black !important; background:white !important; padding:4px 2px !important; font-size:10px !important; }
+            thead th { background:#e8edf8 !important; color:black !important; }
+            .sticky-sl, .sticky-id, .sticky-name, .total-col { position:static !important; background:white !important; }
+            .app-header, .filter-section { display:none !important; }
         }
     </style>
 </head>
-<body class="p-2 md:p-4">
+<body class="p-3 md:p-5">
 
+    <!-- Loading -->
     <div id="initial-overlay">
-        <div class="loader-spinner mb-3"></div>
-        <p class="text-blue-900 font-bold text-xs uppercase tracking-widest">Loading Data...</p>
+        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Logo"
+             style="height:80px; width:auto; object-fit:contain; margin-bottom:8px; filter:brightness(1.2);">
+        <div style="font-size:11px; font-weight:900; color:#f5b700; letter-spacing:3px; text-transform:uppercase; margin-bottom:20px;">
+            ALAMHOW CO LTD.
+        </div>
+        <div class="loader-spinner"></div>
+        <p>Loading Data...</p>
     </div>
 
-    <div id="app-container" class="max-w-[98%] mx-auto bg-white rounded-xl shadow-2xl border border-slate-200">
-        
-        <div class="bg-white px-5 py-4 flex flex-col md:flex-row justify-between items-center border-b border-slate-100 gap-4">
-            <div class="flex items-center space-x-4">
-                <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Alamhow Logo" class="brand-logo">
+    <div id="app-container" style="max-width:99%; margin:0 auto; background:white; border-radius:16px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.4); border:2px solid rgba(212,160,23,0.4);">
+
+        <!-- Header -->
+        <div class="app-header no-print">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Logo" class="brand-logo">
                 <div>
-                    <h1 class="text-2xl font-black text-blue-900 tracking-tight leading-none uppercase">ALAMHOW CO LTD.</h1>
-                    <p class="text-[10px] text-amber-600 font-bold uppercase tracking-wider mt-1">Overtime Management Report</p>
+                    <h1 class="app-header">ALAMHOW CO LTD.</h1>
+                    <div class="subtitle">Overtime Management Report</div>
                 </div>
             </div>
-            <div class="flex items-center gap-3 no-print">
-                <div id="monthYearDisplay" class="px-4 py-1.5 bg-blue-50 text-blue-800 rounded-full text-xs font-bold border border-blue-100 shadow-sm"></div>
-                <button onclick="handlePrint()" id="printBtn" class="hidden px-4 py-1.5 bg-slate-100 text-slate-700 rounded-full text-xs font-bold border border-slate-200 hover:bg-slate-200 transition-all flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <div id="monthYearDisplay" class="period-badge"></div>
+                <button onclick="handlePrint()" id="printBtn" class="print-btn" style="display:none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
                     </svg>
-                    Print Report
+                    Print
                 </button>
             </div>
         </div>
 
-        <div class="print-only px-2 pt-4 mb-2">
-            <div class="flex justify-between items-end border-b-2 border-black pb-2">
-                <div class="text-left">
-                    
-                    <h1 class="text-xl font-black uppercase tracking-tight">OVER TIME REPORT</h1>
-                    
-                 </div>
-                 <div id="printFooterInfo" class="print-only print-footer-info">
-                <span><strong>Printing Date:</strong> <span id="pd"></span></span>
-                <span><strong>Printing Time:</strong> <span id="pt"></span></span>
-            </div>
-                <div class="text-right">
-                    <p class="text-xs font-bold uppercase">
-                        Period: <span id="printPeriodDisplay"></span>
-                    </p>
-                </div>
+        <!-- Print Header -->
+        <div class="print-only" style="padding:12px 16px 8px;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid black; padding-bottom:6px;">
+                <strong style="font-size:16px; text-transform:uppercase;">OVERTIME REPORT — ALAMHOW CO LTD.</strong>
+                <span style="font-size:10px;"><strong>Period:</strong> <span id="printPeriodDisplay"></span> &nbsp;|&nbsp; <strong>Printed:</strong> <span id="pd"></span> <span id="pt"></span></span>
             </div>
         </div>
 
-        <div class="p-5 bg-slate-50/50 border-b border-slate-100 relative no-print">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                <div class="relative">
-                    <label class="filter-label">Search ID</label>
-                    <input type="text" id="filterId" autocomplete="off" placeholder="ID or Name..." class="w-full py-2.5 px-3 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium transition-all">
+        <!-- Filters -->
+        <div class="filter-section no-print">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; align-items:end;">
+
+                <div style="position:relative;">
+                    <label class="filter-label">🔍 Search ID / Name</label>
+                    <input type="text" id="filterId" autocomplete="off" placeholder="ID or Name..." class="filter-input">
                     <div id="idSuggestions" class="suggestion-box"></div>
                 </div>
+
                 <div>
-                    <label class="filter-label">Site Location</label>
-                    <select id="filterSite" class="w-full py-2.5 px-3 bg-white border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 text-sm font-medium cursor-pointer transition-all">
+                    <label class="filter-label">📍 Site Location</label>
+                    <select id="filterSite" class="filter-input" style="cursor:pointer;">
                         <option value="">All Locations</option>
                     </select>
                 </div>
-                <div class="relative">
-                    <label class="filter-label">Start Date</label>
-                    <input type="text" id="fromDate" readonly placeholder="YYYY-MM-DD" class="w-full py-2.5 px-3 bg-white border border-slate-300 rounded-lg outline-none cursor-pointer text-sm font-medium hover:border-blue-400 transition-all">
+
+                <div style="position:relative;">
+                    <label class="filter-label">📅 Start Date</label>
+                    <input type="text" id="fromDate" readonly placeholder="YYYY-MM-DD" class="filter-input" style="cursor:pointer;">
                     <div id="fromCalendar" class="custom-calendar"></div>
                 </div>
-                <div class="relative">
-                    <label class="filter-label">End Date</label>
-                    <input type="text" id="toDate" readonly placeholder="YYYY-MM-DD" class="w-full py-2.5 px-3 bg-white border border-slate-300 rounded-lg outline-none cursor-pointer text-sm font-medium hover:border-blue-400 transition-all">
+
+                <div style="position:relative;">
+                    <label class="filter-label">📅 End Date</label>
+                    <input type="text" id="toDate" readonly placeholder="YYYY-MM-DD" class="filter-input" style="cursor:pointer;">
                     <div id="toCalendar" class="custom-calendar"></div>
                 </div>
-                <div class="flex items-end gap-2">
-                    <button onclick="applyFilters()" class="flex-1 bg-blue-900 text-white font-bold py-2 px-4 rounded-lg text-xs uppercase shadow-md hover:bg-blue-800 h-[46px] transition-all">
-                        View Report
-                    </button>
-                    <button onclick="showBreakdownOnly()" id="breakdownBtn" class="hidden px-4 py-2 bg-slate-800 text-white rounded-lg hover:bg-black transition-all flex items-center justify-center h-[46px] shadow-md">
-                        <span class="text-xs font-bold uppercase">Breakdown</span>
-                    </button>
+
+                <div style="display:flex; gap:8px; align-items:flex-end;">
+                    <button onclick="applyFilters()" class="btn-view" style="flex:1;">View Report</button>
+                    <button onclick="showBreakdownOnly()" id="breakdownBtn" class="btn-breakdown" style="display:none;">Breakdown</button>
                 </div>
             </div>
         </div>
 
-        <div id="mainContent" class="hidden p-5">
-            <div id="attendanceSection" class="block">
-                <div class="table-container rounded-lg border border-slate-200 shadow-xl bg-white mb-6">
+        <!-- Main Content -->
+        <div id="mainContent" style="display:none; padding:20px 20px; background:#f0f4ff;">
+
+            <div id="attendanceSection">
+                <div class="table-container" style="margin-bottom:20px;">
                     <table id="attendanceTable">
                         <thead id="attendanceHead"></thead>
-                        <tbody id="attendanceBody" class="text-slate-600"></tbody>
-                        <tfoot id="attendanceFoot" class="bg-slate-50 font-bold border-t-2 border-slate-200"></tfoot>
+                        <tbody id="attendanceBody"></tbody>
+                        <tfoot id="attendanceFoot"></tfoot>
                     </table>
                 </div>
             </div>
 
-            <div id="detailedReportSection" class="hidden">
-                <div class="table-container rounded-lg border border-slate-200 shadow-xl">
-                    <table id="detailsTable">
-                        <thead class="bg-slate-800 text-white text-xs">
+            <div id="detailedReportSection" style="display:none;">
+                <div class="table-container">
+                    <table>
+                        <thead class="breakdown-head">
                             <tr>
-                                <th class="py-3 text-left pl-4">Date</th><th>ID</th><th class="text-left">Name</th>
-                                <th class="text-left">Designation</th><th class="text-left">Site</th><th>Rate</th>
-                                <th>Hours</th><th class="bg-slate-700">Total Amount</th>
+                                <th style="text-align:left; padding-left:14px;">Date</th>
+                                <th>ID</th>
+                                <th style="text-align:left;">Name</th>
+                                <th style="text-align:left;">Designation</th>
+                                <th style="text-align:left;">Site</th>
+                                <th>Rate</th>
+                                <th>Hours</th>
+                                <th>Total Amount</th>
                             </tr>
                         </thead>
-                        <tbody id="detailsBody" class="text-sm"></tbody>
-                        <tfoot id="detailsFoot" class="bg-blue-900 text-white font-bold text-base"></tfoot>
+                        <tbody id="detailsBody" class="breakdown-body"></tbody>
+                        <tfoot id="detailsFoot" class="breakdown-foot"></tfoot>
                     </table>
                 </div>
             </div>
 
-            
         </div>
     </div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRrMcjKvg4pkCC3APIlH29Mxi0YgfFq_tySGnCCq83qsilRjBc2i0moIRgphnW6Svyrw/exec?get=data";
+<script>
+    const FIREBASE_URL = "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app";
+    const OT_NODE = "OVER_TIME";
     let rawData = [];
     let uniqueEmployeeMap = [];
-    const daysEn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const monthsEn = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const daysEn   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+    const monthsEn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
-    // সিস্টেম ইনিশিয়েলাইজেশন
     async function initSystem() {
         try {
-            const response = await fetch(SCRIPT_URL);
-            const data = await response.json();
-            rawData = data.map(item => {
-                const cleanedItem = {};
-                for (let key in item) {
-                    let val = item[key];
-                    cleanedItem[key] = (typeof val === 'string') ? val.trim() : (val === null ? "" : val);
-                }
-                return cleanedItem;
-            });
+            const res  = await fetch(`${FIREBASE_URL}/${OT_NODE}.json`);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const json = await res.json();
+            if (!json) throw new Error("No data found");
+            rawData = flattenFirebaseData(json);
             initFilters();
             document.getElementById('initial-overlay').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-        } catch (error) {
-            document.getElementById('initial-overlay').innerHTML = `<p class="text-red-500">Error loading data. Please refresh.</p>`;
+            document.getElementById('app-container').style.display   = 'block';
+        } catch (err) {
+            document.getElementById('initial-overlay').innerHTML =
+                `<div style="text-align:center;color:#fcd34d;padding:20px;">
+                    <div style="font-size:32px;margin-bottom:12px;">⚠️</div>
+                    <p style="font-weight:700;margin-bottom:8px;">Data load failed</p>
+                    <small style="color:#93c5fd;">${err.message}</small><br>
+                    <button onclick="location.reload()" style="margin-top:16px;padding:8px 20px;background:#d4a017;color:#0f2460;border:none;border-radius:8px;font-weight:800;cursor:pointer;">Retry</button>
+                </div>`;
         }
     }
 
-    // ফিল্টার ইনিশিয়েলাইজেশন
+    function flattenFirebaseData(otRoot) {
+        const records = [];
+        Object.values(otRoot).forEach(monthObj => {
+            if (typeof monthObj !== 'object' || !monthObj) return;
+            Object.values(monthObj).forEach(dateObj => {
+                if (typeof dateObj !== 'object' || !dateObj) return;
+                Object.values(dateObj).forEach(record => {
+                    if (typeof record !== 'object' || !record) return;
+                    records.push({
+                        id:          String(record.ID          || "").trim(),
+                        name:        String(record.Name        || "N/A").trim(),
+                        otDate:      String(record.OT_Date     || "").trim(),
+                        otHours:     parseFloat(record.TOTAL_OT_HOURS || 0) || 0,
+                        otRate:      record.OT_Rate   || 0,
+                        totalTaka:   parseFloat(record.Total_Taka || 0) || 0,
+                        site:        String(record.Site        || "").trim().replace(/\s+/g,' '),
+                        designation: String(record.Designation || "").trim(),
+                        passport:    String(record.Passport    || "").trim(),
+                    });
+                });
+            });
+        });
+        return records;
+    }
+
     function initFilters() {
         const seenIds = new Set();
         rawData.forEach(item => {
-            const empId = String(item.id).trim();
-            if (empId && !seenIds.has(empId)) {
-                seenIds.add(empId);
-                uniqueEmployeeMap.push({ id: empId, name: (item.name || "N/A").trim() });
+            if (item.id && !seenIds.has(item.id)) {
+                seenIds.add(item.id);
+                uniqueEmployeeMap.push({ id: item.id, name: item.name });
             }
         });
-        uniqueEmployeeMap.sort((a, b) => a.id.localeCompare(b.id, undefined, {numeric: true}));
-        
-        const siteSelect = document.getElementById('filterSite');
-        const sites = [...new Set(rawData.map(item => item.site))].filter(Boolean);
-        sites.sort().forEach(site => {
-            const opt = document.createElement('option');
-            opt.value = site; opt.textContent = site;
-            siteSelect.appendChild(opt);
-        });
-
-        setupCustomDatePicker('fromDate', 'fromCalendar');
-        setupCustomDatePicker('toDate', 'toCalendar');
+        uniqueEmployeeMap.sort((a,b) => a.id.localeCompare(b.id, undefined, {numeric:true}));
+        setupCustomDatePicker('fromDate','fromCalendar');
+        setupCustomDatePicker('toDate','toCalendar');
         setupIdSuggestions();
+        updateSiteDropdown();
     }
 
-    function setupCustomDatePicker(inputId, calendarId) {
-        const input = document.getElementById(inputId);
-        const calendar = document.getElementById(calendarId);
-        input.addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.querySelectorAll('.custom-calendar, .suggestion-box').forEach(el => el.style.display = 'none');
-            calendar.style.display = 'block';
-            renderCalendar(calendar, input);
-        });
-        document.addEventListener('click', (e) => { if (!calendar.contains(e.target)) calendar.style.display = 'none'; });
+   function updateSiteDropdown() {
+    const from = document.getElementById('fromDate').value;
+    const to   = document.getElementById('toDate').value;
+    const sel  = document.getElementById('filterSite');
+    const prev = sel.value;
+    
+    while (sel.options.length > 1) sel.remove(1);
+
+    // ← দুটো date না থাকলে dropdown খালি রাখো
+    if (!from || !to) {
+        sel.value = '';
+        return;
     }
+
+    const startD = new Date(from);
+    const endD   = new Date(to);
+    // ← শুধু selected range এর data filter করো
+    const filtered = rawData.filter(i => {
+        const d = new Date(i.otDate);
+        return d >= startD && d <= endD;
+    });
+
+    const siteMap = new Map();
+    filtered.forEach(i => {
+        const s = (i.site || "").trim();
+        if (s) siteMap.set(s.toLowerCase(), s);
+    });
+
+    [...siteMap.values()].sort((a, b) => a.localeCompare(b)).forEach(site => {
+        const opt = document.createElement('option');
+        opt.value = site;
+        opt.textContent = site;
+        sel.appendChild(opt);
+    });
+
+    // ← আগের selection যদি নতুন range এ থাকে তাহলে রাখো
+    if (prev && [...siteMap.values()].some(s => s === prev)) {
+        sel.value = prev;
+    } else {
+        sel.value = '';
+    }
+}
+
+   function setupCustomDatePicker(inputId, calendarId) {
+    const input    = document.getElementById(inputId);
+    const calendar = document.getElementById(calendarId);
+    
+    input.addEventListener('click', e => {
+        e.stopPropagation();
+        document.querySelectorAll('.custom-calendar,.suggestion-box')
+                .forEach(el => el.style.display='none');
+        
+        // ← input এর position অনুযায়ী calendar বসান
+        const rect = input.getBoundingClientRect();
+        calendar.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
+        calendar.style.left = rect.left + 'px';
+        
+        calendar.style.display = 'block';
+        renderCalendar(calendar, input);
+    });
+    
+    document.addEventListener('click', e => {
+        if (!calendar.contains(e.target)) calendar.style.display = 'none';
+    });
+}
 
     function renderCalendar(calendarEl, inputEl) {
-        let initialDate = new Date();
-        if (inputEl.value) {
-            const parsed = new Date(inputEl.value);
-            if (!isNaN(parsed.getTime())) initialDate = parsed;
-        }
-        let cMonth = initialDate.getMonth();
-        let cYear = initialDate.getFullYear();
+        let d0 = new Date();
+        if (inputEl.value) { const p=new Date(inputEl.value); if(!isNaN(p)) d0=p; }
+        let cM=d0.getMonth(), cY=d0.getFullYear();
 
         const build = () => {
-            const firstDay = new Date(cYear, cMonth, 1).getDay();
-            const daysInMonth = new Date(cYear, cMonth + 1, 0).getDate();
-            const selectedVal = inputEl.value;
+            const firstDay    = new Date(cY,cM,1).getDay();
+            const daysInMonth = new Date(cY,cM+1,0).getDate();
+            const sel         = inputEl.value;
 
-            let html = `<div class="flex justify-between items-center mb-4 border-b pb-3">
-                <button class="prev p-2 text-blue-700 font-bold hover:bg-blue-50 rounded-full">❮</button>
-                <div class="text-base font-black text-blue-900">${monthsEn[cMonth]} ${cYear}</div>
-                <button class="next p-2 text-blue-700 font-bold hover:bg-blue-50 rounded-full">❯</button>
+            calendarEl.innerHTML = `
+            <div class="cal-header">
+                <button class="cal-nav prev">❮</button>
+                <span class="cal-month">${monthsEn[cM]} ${cY}</span>
+                <button class="cal-nav next">❯</button>
             </div>
-            <div class="grid grid-cols-7 gap-1 text-[11px] text-center font-bold text-slate-500 mb-3">
-                <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-            </div><div class="grid grid-cols-7 gap-1">`;
+            <div class="cal-days-header">
+                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+            <div class="cal-grid">
+                ${'<div></div>'.repeat(firstDay)}
+                ${Array.from({length:daysInMonth},(_,i)=>{
+                    const day=i+1;
+                    const ds=`${cY}-${String(cM+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                    const active = ds===sel ? 'cal-selected' : '';
+                    return `<div class="calendar-day-cell ${active}" data-date="${ds}">${day}</div>`;
+                }).join('')}
+            </div>`;
 
-            for (let i = 0; i < firstDay; i++) html += `<div></div>`;
-            for (let i = 1; i <= daysInMonth; i++) {
-                const ds = `${cYear}-${String(cMonth + 1).padStart(2, '0')}-${String(i).padStart(2, '0')}`;
-                const isSelected = ds === selectedVal ? 'bg-amber-500 text-white font-bold' : '';
-                html += `<div class="calendar-day-cell ${isSelected}" data-date="${ds}">${i}</div>`;
-            }
-            calendarEl.innerHTML = html + `</div>`;
-            calendarEl.querySelector('.prev').onclick = (e) => { e.stopPropagation(); cMonth--; if(cMonth < 0){cMonth=11; cYear--;} build(); };
-            calendarEl.querySelector('.next').onclick = (e) => { e.stopPropagation(); cMonth++; if(cMonth > 11){cMonth=0; cYear++;} build(); };
+            calendarEl.querySelector('.prev').onclick = e => { e.stopPropagation(); cM--; if(cM<0){cM=11;cY--;} build(); };
+            calendarEl.querySelector('.next').onclick = e => { e.stopPropagation(); cM++; if(cM>11){cM=0;cY++;} build(); };
             calendarEl.querySelectorAll('.calendar-day-cell').forEach(c => {
-                c.onclick = (e) => { e.stopPropagation(); inputEl.value = c.dataset.date; calendarEl.style.display = 'none'; };
+                c.onclick = e => { e.stopPropagation(); inputEl.value=c.dataset.date; calendarEl.style.display='none'; updateSiteDropdown(); };
             });
         };
         build();
@@ -389,115 +574,149 @@
 
     function setupIdSuggestions() {
         const input = document.getElementById('filterId');
-        const box = document.getElementById('idSuggestions');
-        input.oninput = (e) => {
+        const box   = document.getElementById('idSuggestions');
+        input.oninput = e => {
             const term = e.target.value.toLowerCase();
-            const filtered = uniqueEmployeeMap.filter(emp => emp.id.toLowerCase().includes(term) || emp.name.toLowerCase().includes(term)).slice(0, 10);
+            const filtered = uniqueEmployeeMap.filter(emp =>
+                emp.id.toLowerCase().includes(term) || emp.name.toLowerCase().includes(term)
+            ).slice(0,10);
             if (filtered.length && term) {
-                box.innerHTML = filtered.map(emp => `<div class="p-3 cursor-pointer border-b text-xs hover:bg-blue-50 flex justify-between" data-id="${emp.id}"><b>${emp.id}</b><span>${emp.name}</span></div>`).join('');
+                box.innerHTML = filtered.map(emp =>
+                    `<div class="suggestion-item" data-id="${emp.id}">
+                        <b>${emp.id}</b><span style="color:#64748b;">${emp.name}</span>
+                    </div>`
+                ).join('');
                 box.style.display = 'block';
-                box.querySelectorAll('div').forEach(d => d.onclick = () => { input.value = d.dataset.id; box.style.display = 'none'; });
+                box.querySelectorAll('.suggestion-item').forEach(d =>
+                    d.onclick = () => { input.value=d.dataset.id; box.style.display='none'; }
+                );
             } else box.style.display = 'none';
         };
     }
 
-    // ফিল্টার প্রয়োগ
     function applyFilters() {
         const from = document.getElementById('fromDate').value;
-        const to = document.getElementById('toDate').value;
-        if(!from || !to) return;
-        const id = document.getElementById('filterId').value.trim().toLowerCase();
+        const to   = document.getElementById('toDate').value;
+        if (!from || !to) { alert("Please select Start and End dates."); return; }
+
+        const id   = document.getElementById('filterId').value.trim().toLowerCase();
         const site = document.getElementById('filterSite').value;
-        const startD = new Date(from);
-        const endD = new Date(to);
+        const startD = new Date(from), endD = new Date(to);
+
         const filtered = rawData.filter(item => {
             const d = new Date(item.otDate);
-            const matchId = id ? (String(item.id).toLowerCase().includes(id) || item.name.toLowerCase().includes(id)) : true;
+            const matchId   = id   ? (item.id.toLowerCase().includes(id) || item.name.toLowerCase().includes(id)) : true;
             const matchSite = site ? item.site === site : true;
-            return matchId && matchSite && d >= startD && d <= endD;
+            return matchId && matchSite && d>=startD && d<=endD;
         });
 
-        document.getElementById('attendanceSection').style.display = 'block';
+        document.getElementById('attendanceSection').style.display     = 'block';
         document.getElementById('detailedReportSection').style.display = 'none';
-        document.getElementById('breakdownBtn').classList.remove('hidden');
-        document.getElementById('printBtn').classList.remove('hidden');
-        document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('breakdownBtn').style.display          = 'inline-flex';
+        document.getElementById('printBtn').style.display              = 'flex';
+        document.getElementById('mainContent').style.display           = 'block';
         renderAll(filtered, startD, endD);
     }
 
-    // ডাটা রেন্ডারিং (দশমিক ফিক্সসহ)
     function renderAll(data, start, end) {
-        const dateRangeStr = `${start.toLocaleDateString('en-GB')} To ${end.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'})}`;
-        document.getElementById('monthYearDisplay').innerText = dateRangeStr;
+        const dateRangeStr = `${start.toLocaleDateString('en-GB')} → ${end.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
+        document.getElementById('monthYearDisplay').innerText   = dateRangeStr;
         document.getElementById('printPeriodDisplay').innerText = dateRangeStr;
 
         const dateList = [];
         let curr = new Date(start);
-        while(curr <= end){ dateList.push(new Date(curr)); curr.setDate(curr.getDate()+1); }
+        while (curr<=end) { dateList.push(new Date(curr)); curr.setDate(curr.getDate()+1); }
 
         const head = document.getElementById('attendanceHead');
         const body = document.getElementById('attendanceBody');
         const foot = document.getElementById('attendanceFoot');
 
-        let hHtml = `<tr class="bg-blue-900 text-white"><th>SL</th><th class="sticky-id">ID</th><th class="sticky-name">EMPLOYEE NAME</th>`;
-        dateList.forEach(d => { hHtml += `<th class="${d.getDay() === 0 ? 'bg-red-600' : ''} text-[9px] min-w-[32px]">${daysEn[d.getDay()]}<br>${d.getDate()}</th>`; });
-        head.innerHTML = hHtml + `<th class="total-col bg-blue-900 text-white">TOTAL</th></tr>`;
-
-        const employees = {};
-        data.forEach(item => { if(!employees[item.id]) employees[item.id] = { name: item.name }; });
-        const empIds = Object.keys(employees).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
-
-        let gt = 0; const colTot = {};
-        body.innerHTML = empIds.map((uid, idx) => {
-            let rowTot = 0;
-            let row = `<tr><td>${idx+1}</td><td class="sticky-id font-bold text-blue-900">${uid}</td><td class="sticky-name">${employees[uid].name}</td>`;
-            dateList.forEach(d => {
-                const ds = d.toLocaleDateString('en-CA');
-                const entry = data.find(e => String(e.id) === uid && new Date(e.otDate).toLocaleDateString('en-CA') === ds);
-                
-                // শিটের ভ্যালুকে সংখ্যায় রূপান্তর (যা আছে তাই থাকবে)
-                const hours = entry ? Number(entry.otHours) || 0 : 0;
-                rowTot += hours; 
-                colTot[ds] = (colTot[ds]||0) + hours;
-                
-                // সেল এ ডাটা দেখানোর সময় দশমিকসহ দেখানো
-                row += `<td class="${d.getDay()===0?'sun-col':''}">${hours > 0 ? Number(hours.toFixed(2)) : '—'}</td>`;
-            });
-            gt += rowTot;
-            return row + `<td class="total-col bg-blue-50 font-bold">${Number(rowTot.toFixed(2))}</td></tr>`;
-        }).join('');
-
-        let fHtml = `<tr><td colspan="3" class="text-right pr-2 font-bold">GRAND TOTAL</td>`;
-        dateList.forEach(d => { 
-            const cVal = colTot[d.toLocaleDateString('en-CA')] || 0;
-            fHtml += `<td class="font-bold">${cVal > 0 ? Number(cVal.toFixed(2)) : '0'}</td>`; 
+        // Header
+        let hHtml = `<tr>
+            <th class="sticky-sl">SL</th>
+            <th class="sticky-id">ID</th>
+            <th class="sticky-name">EMPLOYEE NAME</th>`;
+        dateList.forEach(d => {
+            const isSun = d.getDay()===0;
+            hHtml += `<th style="${isSun?'background:#dc2626;':'background:var(--navy-dark);'} min-width:34px; font-size:9px; color:white; padding:7px 2px;">
+                ${daysEn[d.getDay()]}<br>${d.getDate()}
+            </th>`;
         });
-        foot.innerHTML = fHtml + `<td class="total-col bg-blue-900 text-white font-bold">${Number(gt.toFixed(2))}</td></tr>`;
+        head.innerHTML = hHtml + `<th class="total-col">TOTAL</th></tr>`;
 
-        // ব্রেকডাউন সেকশন
-        const dBody = document.getElementById('detailsBody');
-        const sortedDetails = [...data].sort((a, b) => new Date(a.otDate) - new Date(b.otDate));
-        let tAmt = 0;
-        dBody.innerHTML = sortedDetails.map(item => {
-            const amt = Number(item.totalTaka) || 0; 
-            tAmt += amt;
-            const hVal = Number(item.otHours) || 0;
-            return `<tr><td class="text-left pl-4">${item.otDate}</td><td>${item.id}</td><td class="text-left">${item.name}</td><td class="text-left">${item.designation||'-'}</td><td class="text-left">${item.site}</td><td>${item.otRate}</td><td>${Number(hVal.toFixed(2))}</td><td>${amt.toLocaleString()}</td></tr>`;
+        // Employees
+        const employees = {};
+        data.forEach(item => { if(!employees[item.id]) employees[item.id]={name:item.name}; });
+        const empIds = Object.keys(employees).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+        let gt=0;
+        const colTot={};
+
+        body.innerHTML = empIds.map((uid,idx) => {
+            let rowTot=0;
+            let row=`<tr>
+                <td class="sticky-sl" style="color:#64748b; font-size:11px;">${idx+1}</td>
+                <td class="sticky-id id-cell">${uid}</td>
+                <td class="sticky-name" style="font-weight:600;">${employees[uid].name}</td>`;
+
+            dateList.forEach(d => {
+                const ds    = d.toLocaleDateString('en-CA');
+                const entry = data.find(e => e.id===uid && new Date(e.otDate).toLocaleDateString('en-CA')===ds);
+                const hours = entry ? entry.otHours : 0;
+                rowTot         += hours;
+                colTot[ds]      = (colTot[ds]||0) + hours;
+                const sunStyle  = d.getDay()===0 ? 'class="sun-col"' : '';
+                row += `<td ${sunStyle}>${hours>0 ? `<span style="font-weight:700;color:var(--navy-dark);">${Number(hours.toFixed(2))}</span>` : '<span style="color:#cbd5e1;">—</span>'}</td>`;
+            });
+
+            gt += rowTot;
+            return row + `<td class="total-col">${Number(rowTot.toFixed(2))}</td></tr>`;
         }).join('');
-        
-        document.getElementById('detailsFoot').innerHTML = `<tr><td colspan="6" class="text-right px-6 font-bold">TOTAL</td><td class="font-bold">${Number(gt.toFixed(2))} hrs</td><td class="font-bold">${tAmt.toLocaleString()} /-</td></tr>`;
+
+        // Footer
+        let fHtml = `<tr><td colspan="3" style="text-align:right; padding-right:10px;">GRAND TOTAL</td>`;
+        dateList.forEach(d => {
+            const cVal = colTot[d.toLocaleDateString('en-CA')]||0;
+            fHtml += `<td style="color:var(--navy-dark);">${cVal>0?Number(cVal.toFixed(2)):'—'}</td>`;
+        });
+        foot.innerHTML = fHtml + `<td class="total-col" style="background:var(--navy-dark);color:white;">${Number(gt.toFixed(2))}</td></tr>`;
+
+        // Breakdown
+        const dBody      = document.getElementById('detailsBody');
+        const sortedData = [...data].sort((a,b)=>new Date(a.otDate)-new Date(b.otDate));
+        let tAmt=0;
+        dBody.innerHTML = sortedData.map((item,i) => {
+            tAmt += item.totalTaka;
+            const bg = i%2===0 ? '' : 'background:#f5f7ff;';
+            return `<tr style="${bg}">
+                <td style="text-align:left; padding-left:14px; color:#64748b;">${item.otDate}</td>
+                <td style="font-weight:800; color:var(--navy-dark);">${item.id}</td>
+                <td style="text-align:left; font-weight:600;">${item.name}</td>
+                <td style="text-align:left; color:#64748b;">${item.designation||'-'}</td>
+                <td style="text-align:left;">${item.site}</td>
+                <td style="color:var(--navy-dark); font-weight:700;">${item.otRate}</td>
+                <td style="font-weight:700;">${Number(item.otHours.toFixed(2))}</td>
+                <td style="font-weight:800; color:var(--navy-dark);">${item.totalTaka.toLocaleString()}</td>
+            </tr>`;
+        }).join('');
+
+        document.getElementById('detailsFoot').innerHTML =
+            `<tr>
+                <td colspan="6" style="text-align:right; padding-right:14px;">TOTAL</td>
+                <td>${Number(gt.toFixed(2))} hrs</td>
+                <td>${tAmt.toLocaleString()} /-</td>
+            </tr>`;
     }
 
     function showBreakdownOnly() {
-        document.getElementById('attendanceSection').style.display = 'none';
-        document.getElementById('detailedReportSection').classList.remove('hidden');
+        document.getElementById('attendanceSection').style.display     = 'none';
         document.getElementById('detailedReportSection').style.display = 'block';
     }
 
     function handlePrint() {
         const now = new Date();
         document.getElementById('pd').innerText = now.toLocaleDateString('en-GB');
-        document.getElementById('pt').innerText = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('pt').innerText = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
         window.print();
     }
 
