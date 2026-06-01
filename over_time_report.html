@@ -154,38 +154,20 @@
 
         
 /* ── Custom Calendar ── */
-.custom-calendar {
-    position: fixed;           /* ← absolute থেকে fixed করুন */
-    background: white;
-    border: 2px solid var(--gold);
-    border-radius: 12px;
-    padding: 14px;
-    z-index: 9999;             /* ← z-index বাড়ান */
-    display: none;
-    width: 300px;
-    box-shadow: 0 20px 40px rgba(15,36,96,0.25);
-}
-        .cal-header {
-            display:flex; justify-content:space-between; align-items:center;
-            margin-bottom:12px; padding-bottom:10px;
-            border-bottom:2px solid var(--gold-light);
-        }
-        .cal-nav {
-            background:var(--navy-pale); border:none; border-radius:6px;
-            width:30px; height:30px; cursor:pointer; font-weight:700;
-            color:var(--navy-dark); transition:all 0.15s; font-size:13px;
-        }
-        .cal-nav:hover { background:var(--navy-dark); color:var(--gold-bright); }
-        .cal-month { font-size:14px; font-weight:900; color:var(--navy-dark); }
-        .cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
-        .cal-days-header div { text-align:center; font-size:10px; font-weight:700; color:#94a3b8; padding:4px 0; }
-        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
-        .calendar-day-cell {
-            padding:8px 0; font-size:13px; cursor:pointer;
-            text-align:center; border-radius:6px; transition:all 0.15s; color:#374151;
-        }
-        .calendar-day-cell:hover { background:var(--navy-dark); color:white; }
-        .cal-selected { background:var(--gold) !important; color:var(--navy-dark) !important; font-weight:800; }
+
+       .custom-calendar { position:fixed; background:#001d3d; border:2px solid var(--gold-bright) !important; border-radius:12px; padding:14px; z-index:9999; display:none; width:300px; box-shadow:0 20px 40px rgba(0,0,0,0.4); }
+.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:2px solid var(--gold); }
+.cal-nav { background:var(--navy-dark); border:2px solid var(--gold-bright); border-radius:6px; width:30px; height:30px; cursor:pointer; font-weight:700; color:var(--gold-bright); transition:all 0.15s; font-size:13px; }
+.cal-nav:hover { background:var(--gold-bright); color:var(--navy-dark); }
+.cal-month { font-size:14px; font-weight:900; color:var(--gold-bright); }
+.cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
+.cal-days-header div { text-align:center; font-size:10px; font-weight:700; color:var(--gold-bright); padding:4px 0; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+.calendar-day-cell { padding:8px 0; font-size:13px; cursor:pointer; text-align:center; border-radius:6px; transition:all 0.15s; color:var(--gold-light); }
+.calendar-day-cell:hover { background:var(--gold-bright) !important; color:var(--navy-dark) !important; }
+.cal-selected { background:var(--navy-dark) !important; color:var(--gold-bright) !important; font-weight:800; border:1px solid var(--gold-bright); }
+.cal-today { background:var(--gold-bright) !important; color:var(--navy-dark) !important; font-weight:900; box-shadow:0 0 8px rgba(245,183,0,0.6); border-radius:6px; }
+
 
         /* ── Main Content ── */
         .main-content { padding:20px 24px; background:#f8faff; }
