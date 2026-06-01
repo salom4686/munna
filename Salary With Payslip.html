@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Salary & Payslip</title>
+    <title>Salary &amp; Payslip</title>
     <link rel="icon"type="image/png"href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"/>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet" />
@@ -22,13 +22,11 @@
       .page-header h2 { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 22px; letter-spacing: 1.5px; text-transform: uppercase; }
       .header-badge { background: var(--brand-gold); color: var(--brand-blue); font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
 
-      /* ── Tab Bar ── */
       .tab-bar { background: #001530; border-bottom: 3px solid var(--brand-gold); display: flex; padding: 0 32px; gap: 0; }
       .tab-btn { padding: 12px 24px; font-size: 12px; font-weight: 700; font-family: "Source Sans 3", sans-serif; color: #6a88aa; border: none; background: transparent; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -3px; transition: all 0.2s; letter-spacing: 0.5px; text-transform: uppercase; }
       .tab-btn:hover { color: var(--brand-gold); }
       .tab-btn.active { color: var(--brand-gold); border-bottom: 3px solid var(--brand-gold); }
 
-      /* ── Controls ── */
       .controls { background: var(--brand-blue); padding: 14px 32px; border-bottom: 3px solid var(--brand-gold); }
       .row-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
       .controls label { color: var(--brand-gold); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
@@ -40,13 +38,11 @@
       .controls input[type="text"]::placeholder { color: #6a88aa; }
       .controls input[type="text"]:focus, .controls select:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18); }
 
-      /* Cache status */
       .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
       .status-ok { background: #10b981; }
       .status-loading { background: #ffd700; animation: pulse 1s infinite; }
       @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-      /* ── Att Filter Row ── */
       .att-controls { background: var(--brand-blue); padding: 14px 32px; border-bottom: 3px solid var(--brand-gold); display: none; }
       .att-controls.active { display: block; }
       .att-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -63,7 +59,6 @@
       .secondary-filter { display: none; }
       .secondary-filter.active { display: flex; align-items: center; gap: 10px; }
 
-      /* Flatpickr dark theme */
       .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
       .flatpickr-day { color: #cce !important; }
       .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
@@ -71,7 +66,6 @@
       .flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
       .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
 
-      /* ── Buttons ── */
       .btn { padding: 8px 18px; font-size: 12px; font-family: "Source Sans 3", sans-serif; font-weight: 700; border: 2px solid transparent; border-radius: 6px; cursor: pointer; letter-spacing: 0.4px; transition: transform 0.15s, box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s; }
       .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
       .btn:active { transform: translateY(0); }
@@ -107,7 +101,6 @@
       .print-footer-signature { display: none; }
       .print-header { display: none; }
 
-      /* ── Attendance Table specific ── */
       .att-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
       .att-badge.present { background: #d1fae5; color: #065f46; }
       .att-badge.absent { background: #fee2e2; color: #991b1b; }
@@ -131,7 +124,6 @@
       .s-card.blue { border-left-color: #3b82f6; }
       .s-card.blue .s-card-value { color: #1d4ed8; }
 
-      /* ── Employee List Panel ── */
       .emp-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
       .emp-panel-overlay.active { display: flex; }
       .emp-panel-box { background: white; border-radius: 12px; width: 680px; max-width: 95vw; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
@@ -155,7 +147,6 @@
       .btn-gen-selected:disabled { opacity: 0.4; cursor: not-allowed; }
       .month-sel { padding: 6px 10px; border: 1.5px solid var(--brand-gold); border-radius: 6px; font-size: 12px; outline: none; cursor: pointer; background: #001530; color: #e0e8f4; }
 
-      /* ── Custom Message Box ── */
       .msgbox-overlay { display:none; position:fixed; inset:0; background:rgba(0,21,48,0.82); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
       .msgbox-overlay.active { display:flex; }
       .msgbox-card { background:#fff; border-radius:14px; min-width:320px; max-width:420px; box-shadow:0 30px 70px rgba(0,0,0,0.5); overflow:hidden; animation:msgPop .22s cubic-bezier(.34,1.56,.64,1); }
@@ -175,7 +166,6 @@
       .msgbox-btn.secondary { background:#f3f4f6; color:#374151; border-color:#e5e7eb; }
       .msgbox-btn.secondary:hover { background:#e5e7eb; }
 
-      /* ── Generation Loader ── */
       .gen-loader { display: none; position: fixed; inset: 0; background: var(--brand-blue); z-index: 99990; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
       .gen-loader.active { display: flex; }
       .gen-loader-title { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 24px; letter-spacing: 1.5px; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
@@ -192,7 +182,6 @@
       .gen-emp-badge { background: #001530; border: 1.5px solid #335185; border-radius: 8px; padding: 6px 16px; color: #a0b8d8; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; min-height: 32px; }
       .gen-emp-badge span { color: var(--brand-gold); font-weight: 700; }
 
-      /* ── OT & Advance shared controls ── */
       .ot-controls, .adv-controls {
         background: var(--brand-blue); padding: 14px 32px;
         border-bottom: 3px solid var(--brand-gold); display: none;
@@ -235,7 +224,16 @@
       .adv-detail-footer { padding: 12px 20px; border-top: 2px solid var(--brand-gold); background: var(--brand-blue); border-radius: 0 0 12px 12px; display: flex; justify-content: flex-end; }
       .adv-detail-footer button { background: var(--brand-gold); color: var(--brand-blue); border: none; padding: 8px 24px; border-radius: 7px; font-weight: 700; font-family: "Source Sans 3",sans-serif; cursor: pointer; font-size: 12px; }
 
-      /* ══ ATTENDANCE MATRIX ══ */
+      /* ══ OT Detail Modal (wider) ══ */
+      .ot-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9100; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+      .ot-detail-overlay.active { display: flex; }
+      .ot-detail-box { background: white; border-radius: 12px; width: 820px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); animation: msgPop .22s cubic-bezier(.34,1.56,.64,1); }
+      .ot-detail-header { background: linear-gradient(135deg,#002147,#003580,#001a38); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; border-bottom: 3px solid var(--brand-gold); flex-shrink: 0; }
+      .ot-detail-header h3 { color: var(--brand-gold); font-family: "Playfair Display",serif; font-size: 16px; }
+      .ot-detail-body { overflow-y: auto; flex: 1; padding: 16px; }
+      .ot-detail-footer { padding: 12px 20px; border-top: 2px solid var(--brand-gold); background: var(--brand-blue); border-radius: 0 0 12px 12px; display: flex; justify-content: flex-end; }
+      .ot-detail-footer button { background: var(--brand-gold); color: var(--brand-blue); border: none; padding: 8px 24px; border-radius: 7px; font-weight: 700; font-family: "Source Sans 3",sans-serif; cursor: pointer; font-size: 12px; }
+
       .matrix-controls {
         background: var(--brand-blue); padding: 14px 32px;
         border-bottom: 3px solid var(--brand-gold); display: none;
@@ -307,10 +305,9 @@
   <body>
     <div class="page-header">
       <h2>ALOMHOW CO LTD</h2>
-      <span class="header-badge">SALARY ATTENDANCE & PAYSLIP </span>
+      <span class="header-badge">SALARY ATTENDANCE &amp; PAYSLIP </span>
     </div>
 
-    <!-- ── Tab Bar ── -->
     <div class="tab-bar">
       <button class="tab-btn active" onclick="switchTab('monthly')" id="tab-monthly">📊 Monthly Salary Summary</button>
       <button class="tab-btn" onclick="switchTab('attendance')" id="tab-attendance">📋 Daily Attendance</button>
@@ -328,16 +325,14 @@
         <input type="text" id="dateTo" placeholder="End Date" style="width:130px" />
         <input type="text" id="filterId" placeholder="Filter by ID" style="width:120px" />
         <button class="btn btn-report" onclick="generateReport()">&#9654; Report View</button>
-       
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="searchTable" style="width:200px" placeholder="Search in table..." onkeyup="searchTableFn()" />
           <button class="btn btn-emplist" onclick="openEmpPanel()">👥 All Payslips</button>
           <button class="btn btn-clear" onclick="clearAll()" title="Clear everything and reset">🗑️ REFRESH</button>
           <span id="cacheStatus" style="color:#6a88aa;font-size:11px;font-weight:600">
             <span class="status-dot status-loading"></span> Data not loaded yet
-            
           </span>
-           <button class="btn btn-print" onclick="window.print()">&#128438; Print Report</button>
+          <button class="btn btn-print" onclick="window.print()">&#128438; Print Report</button>
         </div>
       </div>
     </div>
@@ -403,7 +398,6 @@
         <button class="btn" onclick="printMatrix()" style="background:transparent;color:var(--brand-gold);border:2px solid var(--brand-gold);">🖨️ Print</button>
         <button class="btn btn-clear" onclick="clearMatrix()">🗑️ Clear</button>
       </div>
-      
     </div>
 
     <!-- ══ OVERTIME CONTROLS ══ -->
@@ -517,6 +511,20 @@
       </div>
     </div>
 
+    <!-- ── OT Detail Modal ── -->
+    <div class="ot-detail-overlay" id="otDetailOverlay">
+      <div class="ot-detail-box">
+        <div class="ot-detail-header">
+          <h3 id="otDetailTitle">⏰ Overtime Details</h3>
+          <button class="panel-close" onclick="closeOtDetail()">✕</button>
+        </div>
+        <div class="ot-detail-body" id="otDetailBody">Loading...</div>
+        <div class="ot-detail-footer">
+          <button onclick="closeOtDetail()">Close</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Custom Message Box ── -->
     <div class="msgbox-overlay" id="msgboxOverlay">
       <div class="msgbox-card">
@@ -562,7 +570,6 @@
       };
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-      // ── Flatpickr init ──
       flatpickr("#dateFrom",      { dateFormat: "Y-m-d", onChange: syncPanelDates });
       flatpickr("#dateTo",        { dateFormat: "Y-m-d", onChange: syncPanelDates });
       flatpickr("#matrixDateFrom",{ dateFormat: "Y-m-d" });
@@ -584,17 +591,10 @@
       let _currentTab = "monthly";
       let _matrixLoaded = false;
 
-      // ══════════════════════════════════════════
-      //  GLOBAL CACHE — Document 2 এর fast engine
-      // ══════════════════════════════════════════
       let _cache = {
-        loaded: false,
-        loading: false,
-        empList: [],
-        empMap: {},
-        advMap: {},
+        loaded: false, loading: false, empList: [], empMap: {}, advMap: {},
       };
-      let _attRangeCache = {};  // key: "from|to" → { attendance:{}, otMap:{} }
+      let _attRangeCache = {};
 
       function setStatus(type, msg) {
         const el = document.getElementById("cacheStatus");
@@ -616,18 +616,13 @@
           empSnap.forEach(d => {
             const e = d.data();
             const emp = {
-              id: e.id || d.id,
-              name: e.name || "",
-              passport: e.passport || "",
-              desig: e.designation || "",
-              salary: parseInt(e.salary) || 0,
-              joining: e.joining || "",
+              id: e.id || d.id, name: e.name || "", passport: e.passport || "",
+              desig: e.designation || "", salary: parseInt(e.salary) || 0, joining: e.joining || "",
             };
             _cache.empList.push(emp);
             _cache.empMap[emp.id] = emp;
           });
           _cache.empList.sort((a,b) => a.id.localeCompare(b.id));
-
           const advSnap = await rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
           const advData = advSnap.val() || {};
           _cache.advMap = {};
@@ -646,17 +641,12 @@
       async function fetchRangeData(dFromVal, dToVal) {
         const key = `${dFromVal}|${dToVal}`;
         if (_attRangeCache[key]) return _attRangeCache[key];
-
         setStatus("loading", "⏳ Fetching attendance & OT...");
         const db = firebase.firestore();
         const rtdb = firebase.database();
-
         const snap = await db.collectionGroup("Present_Absent")
-          .where("DATE", ">=", dFromVal)
-          .where("DATE", "<=", dToVal)
-          .get();
+          .where("DATE", ">=", dFromVal).where("DATE", "<=", dToVal).get();
         const attendance = {};
-
         snap.forEach(doc => {
           const d = doc.data();
           if (!d.ID || !d.DATE) return;
@@ -670,35 +660,26 @@
           rec.fine   += parseInt(d.FINE)         || 0;
           rec.others += parseInt(d.OTHERS)       || 0;
         });
-
-        const fromMY = `${dFromVal.substring(0,4)}-${dFromVal.substring(5,7)}`;
-        const toMY   = `${dToVal.substring(0,4)}-${dToVal.substring(5,7)}`;
-        const otMap  = {};
-
-       const otSnap = await rtdb.ref("OVER_TIME").once("value");
-const otData = otSnap.val() || {};
-for (const monthKey in otData) {
-  const monthObj = otData[monthKey];
-  if (typeof monthObj !== "object" || !monthObj) continue;
-  
-  for (const dateKey in monthObj) {
-    const dateObj = monthObj[dateKey];
-    if (typeof dateObj !== "object" || !dateObj) continue;
-    
-    for (const recKey in dateObj) {
-      const row = dateObj[recKey];
-      if (!row || !row.ID) continue;
-      
-      const otDateStr = String(row.OT_Date || "").trim();
-      if (!otDateStr) continue;
-      if (otDateStr < dFromVal || otDateStr > dToVal) continue;
-      
-      const id = String(row.ID).trim();
-      otMap[id] = (otMap[id] || 0) + (parseFloat(row.Total_Taka) || 0);
-    }
-  }
-}
-
+        const otMap = {};
+        const otSnap = await rtdb.ref("OVER_TIME").once("value");
+        const otData = otSnap.val() || {};
+        for (const monthKey in otData) {
+          const monthObj = otData[monthKey];
+          if (typeof monthObj !== "object" || !monthObj) continue;
+          for (const dateKey in monthObj) {
+            const dateObj = monthObj[dateKey];
+            if (typeof dateObj !== "object" || !dateObj) continue;
+            for (const recKey in dateObj) {
+              const row = dateObj[recKey];
+              if (!row || !row.ID) continue;
+              const otDateStr = String(row.OT_Date || "").trim();
+              if (!otDateStr) continue;
+              if (otDateStr < dFromVal || otDateStr > dToVal) continue;
+              const id = String(row.ID).trim();
+              otMap[id] = (otMap[id] || 0) + (parseFloat(row.Total_Taka) || 0);
+            }
+          }
+        }
         const result = { attendance, otMap };
         _attRangeCache[key] = result;
         setStatus("ok", `✅ Data ready — ${Object.keys(attendance).length} records`);
@@ -717,18 +698,15 @@ for (const monthKey in otData) {
         const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
         const monthDays = getDaysInMonth(dFromVal);
         const dailyRate = isCook ? salary / monthDays : parseFloat((salary / 26).toFixed(2));
-
         const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
-        const totalOT      = rangeData.otMap[empId] || 0;
-        const totalAdvance = _cache.advMap[empId]   || 0;
-
+        const totalOT      = rangeData.otMap[empId]   || 0;
+        const totalAdvance = _cache.advMap[empId]      || 0;
         const normalAmt = dailyRate * att.norm;
         const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
         const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
         const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
         const totalDed  = csgEmp + npsEmp + totalAdvance + (att.fine || 0);
         const netPay    = gross - totalDed;
-
         const now = new Date();
         let serviceLength = "";
         if (emp.joining) {
@@ -747,59 +725,56 @@ for (const monthKey in otData) {
             serviceLength = { total: months, formatted };
           }
         }
-
         return {
-          empId: emp.id, name: emp.name, desig: emp.desig,
-          passport: emp.passport, joining: emp.joining,
-          entryDate: now.toLocaleDateString("en-GB"),
+          empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
+          joining: emp.joining, entryDate: now.toLocaleDateString("en-GB"),
           time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-          serviceLength,
-          normalWork:    normalAmt.toFixed(2),
-          holidayWork:   att.hol.toFixed(2),
-          sundayWork:    att.sun.toFixed(2),
-          overtime:      totalOT.toFixed(2),
-          others:        (att.others||0).toFixed(2),
-          gross:         gross.toFixed(2),
-          csgEmp:        csgEmp.toFixed(2),
-          npsEmp:        npsEmp.toFixed(2),
-          advanceRefund: totalAdvance.toFixed(2),
-          fine:          (att.fine||0).toFixed(2),
-          absentDays:    att.abs,
-          totalDed:      totalDed.toFixed(2),
-          netPay:        netPay.toFixed(2),
-          netPayWords:   numToWords(netPay),
+          serviceLength, normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
+          sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
+          others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
+          csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
+          advanceRefund: totalAdvance.toFixed(2), fine: (att.fine||0).toFixed(2),
+          absentDays: att.abs, totalDed: totalDed.toFixed(2),
+          netPay: netPay.toFixed(2), netPayWords: numToWords(netPay),
         };
       }
 
-      // ══════════════════════════════════════════
-      //  TAB SWITCHING
-      // ══════════════════════════════════════════
-      function switchTab(tab) {
-        _currentTab = tab;
-        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-        document.getElementById("tab-" + tab).classList.add("active");
+     // ══════════════════════════════════════════
+//  TAB SWITCHING
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  _currentTab = tab;
+  const tabTitles = {
+    monthly: "Monthly Salary Summary",
+    attendance: "Daily Attendance",
+    matrix: "Present Sheet",
+    overtime: "Overtime Report",
+    advance: "Advance Report"
+  };
+  document.title = "ALOMHOW — " + (tabTitles[tab] || tab);
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+  document.getElementById("monthly-controls").style.display = tab === "monthly" ? "" : "none";
+  document.getElementById("attendance-controls").classList.toggle("active", tab === "attendance");
+  document.getElementById("matrix-controls").classList.toggle("active", tab === "matrix");
+  document.getElementById("overtime-controls").classList.toggle("active", tab === "overtime");
+  document.getElementById("advance-controls").classList.toggle("active", tab === "advance");
+  document.getElementById("reportOutput").style.display  = tab === "monthly"    ? "" : "none";
+  document.getElementById("attOutput").style.display     = tab === "attendance"  ? "" : "none";
+  document.getElementById("matrixOutput").style.display  = tab === "matrix"      ? "" : "none";
+  document.getElementById("otOutput").style.display      = tab === "overtime"    ? "" : "none";
+  document.getElementById("advOutput").style.display     = tab === "advance"     ? "" : "none";
+  if (tab === "attendance") loadAttFilterOptions();
+  if (tab === "matrix")     loadMatrixFilterOptions();
+  if (tab === "overtime")   loadOtFilterOptions();
+}
 
-        document.getElementById("monthly-controls").style.display = tab === "monthly" ? "" : "none";
-        document.getElementById("attendance-controls").classList.toggle("active", tab === "attendance");
-        document.getElementById("matrix-controls").classList.toggle("active", tab === "matrix");
-        document.getElementById("overtime-controls").classList.toggle("active", tab === "overtime");
-        document.getElementById("advance-controls").classList.toggle("active", tab === "advance");
+// ══════════════════════════════════════════
+//  ATTENDANCE FILTER
+// ══════════════════════════════════════════
+let _attEmpLoaded = false;
 
-        document.getElementById("reportOutput").style.display  = tab === "monthly"    ? "" : "none";
-        document.getElementById("attOutput").style.display     = tab === "attendance"  ? "" : "none";
-        document.getElementById("matrixOutput").style.display  = tab === "matrix"      ? "" : "none";
-        document.getElementById("otOutput").style.display      = tab === "overtime"    ? "" : "none";
-        document.getElementById("advOutput").style.display     = tab === "advance"     ? "" : "none";
 
-        if (tab === "attendance") loadAttFilterOptions();
-        if (tab === "matrix")     loadMatrixFilterOptions();
-        if (tab === "overtime")   loadOtFilterOptions();
-      }
-
-      // ══════════════════════════════════════════
-      //  ATTENDANCE FILTER
-      // ══════════════════════════════════════════
-      let _attEmpLoaded = false;
 
       function onFilterTypeChange() {
         const type = document.getElementById("attFilterType").value;
@@ -851,9 +826,7 @@ for (const monthKey in otData) {
         const selProj  = document.getElementById("attProjectSelect").value;
         const selId    = document.getElementById("attIdInput").value.trim();
         const selName  = document.getElementById("attNameInput").value.trim().toLowerCase();
-
         attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance data...</p>';
-
         try {
           const db = firebase.firestore();
           const snap = await db.collectionGroup("Present_Absent").get();
@@ -998,11 +971,7 @@ for (const monthKey in otData) {
         const dToVal     = document.getElementById("matrixDateTo").value;
         const sideFilter = document.getElementById("matrixSideFilter").value.trim();
         const empFilter  = document.getElementById("matrixEmpFilter").value.trim();
-
-        if (!dFromVal || !dToVal) {
-          showMsg("Date Range Required ", { title: "Date Range Required", type: "warn" });
-          return;
-        }
+        if (!dFromVal || !dToVal) { showMsg("Date Range Required ", { title: "Date Range Required", type: "warn" }); return; }
         matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance matrix...</p>';
         try {
           const inputStart = new Date(dFromVal); inputStart.setHours(0,0,0,0);
@@ -1011,17 +980,14 @@ for (const monthKey in otData) {
           const lastDay    = new Date(inputStart.getFullYear(), inputStart.getMonth()+1, 0);
           const dateRange  = [];
           for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate()+1)) dateRange.push(new Date(d));
-
           const toLocalDateStr = (d) => {
             const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
             return `${y}-${m}-${day}`;
           };
-
           const db = firebase.firestore();
           const publicHolidayDates = new Set();
           const holidaySnap = await db.collection("HOLIDAY_LIST").get();
           holidaySnap.forEach(doc => publicHolidayDates.add(doc.id));
-
           const snap = await db.collectionGroup("Present_Absent").get();
           const attendanceMap = {}, employees = {};
           snap.forEach(doc => {
@@ -1040,17 +1006,14 @@ for (const monthKey in otData) {
             else if (st.startsWith("H")) shortStat="H";
             attendanceMap[empId][d.DATE] = shortStat;
           });
-
           const sortedIds = Object.keys(employees).sort((a,b) => a.localeCompare(b, undefined, { numeric: true }));
           const monthName = firstDay.toLocaleString("default", { month: "long" });
           const year = firstDay.getFullYear();
           const now = new Date();
           const printDateTime = now.toLocaleString("en-GB", { day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true });
-
           let dayTotalsP=Array(dateRange.length).fill(0), dayTotalsSun=Array(dateRange.length).fill(0);
           let dayTotalsHol=Array(dateRange.length).fill(0), dayTotalsA=Array(dateRange.length).fill(0);
           let grandTotalP=0, grandTotalA=0, grandTotalSun=0, grandTotalHol=0;
-
           const tableHeader = `<thead>
   <tr style="height:22px;">
     <th rowspan="2" style="width:20px; padding:1px;">SL</th>
@@ -1098,7 +1061,6 @@ for (const monthKey in otData) {
     <th style="width:25px; background:#6c757d; padding:1px;">HOL</th>
   </tr>
 </thead>`;
-
           const tableBody = sortedIds.map((id, idx) => {
             const isCook = employees[id]?.isCook || false;
             let countP=0, countA=0, countSun=0, countHol=0;
@@ -1137,7 +1099,6 @@ for (const monthKey in otData) {
   <td style="font-weight:bold; background:#f3f0ff; color:#5b21b6;">${countHol}</td>
 </tr>`;
           }).join("");
-
           const tableFooter = `<tr>
   <td colspan="2" style="text-align:left; padding:4px 8px; font-weight:bold; background:#1d3a6d; color:#ffd700;">DAILY TOTAL</td>
   ${dayTotalsP.map((_,idx) => {
@@ -1150,7 +1111,6 @@ for (const monthKey in otData) {
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSun}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalHol}</td>
 </tr>`;
-
           matOut.innerHTML = '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;">Generating Attendance Sheet...</p>';
           const preview = window.open("", "_blank");
           if (!preview) {
@@ -1161,7 +1121,8 @@ for (const monthKey in otData) {
           preview.document.write(`<!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="UTF-8">
-  <title>Attendance Summary — ${monthName} ${year}</title>
+  <title>ALOMHOW — Present Sheet | ${monthName} ${year}</title>
+  
   <style>
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     @page { size: A4 landscape; margin: 5mm 5mm 0mm 5mm; }
@@ -1352,7 +1313,7 @@ for (const monthKey in otData) {
       }
 
       // ══════════════════════════════════════════
-      //  GENERATE PAYSLIPS — Fast cache-based engine
+      //  GENERATE PAYSLIPS
       // ══════════════════════════════════════════
       async function generateFromPanel() {
         const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
@@ -1369,7 +1330,6 @@ for (const monthKey in otData) {
         document.getElementById("genLoader").classList.add("active");
         updateLoader(0, selected.length, "");
         document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
-
         const win = window.open("", "_blank");
         if (!win) {
           showMsg("Popup blocked! Browser-এ popup allow করুন।", {title:"Popup Blocked", type:"warn"});
@@ -1378,12 +1338,9 @@ for (const monthKey in otData) {
           return;
         }
         win.document.write(loaderPageHTML(selected.length));
-
         try {
-          // ★ মাত্র ৩টি DB call — সব employee-এর জন্য একবার
           if (!_cache.loaded) await preloadStaticData();
           const rangeData = await fetchRangeData(dFromVal, dToVal);
-
           let allPages = "";
           for (let i=0; i<selected.length; i++) {
             const empId = selected[i];
@@ -1395,13 +1352,10 @@ for (const monthKey in otData) {
                 win.document.getElementById("st").textContent = `Processing: ${empId}`;
               }
             } catch(e2) {}
-
-            // No DB call — pure memory calculation
             const d = buildPayslipData(empId, dFromVal, dToVal, rangeData);
             allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
             updateLoader(i+1, selected.length, empId);
           }
-
           const fullHtml = `<!doctype html><html><head>
             <meta charset="UTF-8"><title>Payslips — ${period}</title>
             <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1591,10 +1545,6 @@ for (const monthKey in otData) {
         </body></html>`;
       }
 
-      // ══════════════════════════════════════════
-      //  SINGLE PAYSLIP & DETAILS TAB (from report table buttons)
-      //  এখন cache ব্যবহার করে — আলাদা DB call নেই
-      // ══════════════════════════════════════════
       async function openSlipTab(empId, dFromVal, dToVal) {
         const win = window.open("", "_blank");
         win.document.write(loaderPageHTML(1));
@@ -1679,14 +1629,18 @@ for (const monthKey in otData) {
       // ══════════════════════════════════════════
       //  MAIN MONTHLY REPORT
       // ══════════════════════════════════════════
-     async function generateReport() {
+      async function generateReport() {
         const output   = document.getElementById("reportOutput");
         const dFromVal = document.getElementById("dateFrom").value;
         const dToVal   = document.getElementById("dateTo").value;
         const dFrom    = new Date(dFromVal), dTo = new Date(dToVal);
         const filterId = document.getElementById("filterId").value.trim();
-        window._reportFrom = dFromVal; window._reportTo = dToVal;
-        output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
+       window._reportFrom = dFromVal; window._reportTo = dToVal;
+if (!dFromVal || !dToVal) {
+  showMsg("FROM & TO BOTH ARE REQUIRED", {title:"Date Required", type:"warn"});
+  return;
+}
+output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
 
         function getDaysInMonthLocal(dateStr) {
           if (!dateStr) return 26;
@@ -1900,50 +1854,59 @@ for (const monthKey in otData) {
       }
 
       function numberToWords(amount) {
-  const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-  const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-  function convert(n) {
-    if (n===0) return "";
-    else if (n<20) return ones[n]+" ";
-    else if (n<100) return tens[Math.floor(n/10)]+" "+(n%10?ones[n%10]+" ":"");
-    else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
-  }
-  const num = Math.round(amount);
-  if (num===0) return "Zero Taka Only";
-  let result = "";
-  if (num>=10000000) { result+=convert(Math.floor(num/10000000))+"Crore "; }
-  if (num%10000000>=100000) { result+=convert(Math.floor((num%10000000)/100000))+"Lakh "; }
-  if (num%100000>=1000) { result+=convert(Math.floor((num%100000)/1000))+"Thousand "; }
-  result+=convert(num%1000);
-  return result.trim()+" Taka Only";
-}
-      // ══════════════════════════════════════════
-      //  CLEAR / RESET
-      // ══════════════════════════════════════════
-      function clearAll() {
-        showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?", {
-          title: "Reset Page", type: "warn", confirm: true,
-          onOk: () => {
-            document.getElementById("reportOutput").innerHTML = "";
-            document.getElementById("filterId").value = "";
-            document.getElementById("searchTable").value = "";
-            try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
-            try { document.getElementById("dateTo")._flatpickr.clear(); } catch(e) {}
-            closeEmpPanel(); closeMsgBox();
-            window._reportFrom=""; window._reportTo="";
-            const ctrl = document.querySelector(".controls");
-            ctrl.style.transition="background 0.15s";
-            ctrl.style.background="rgba(255,107,107,0.15)";
-            setTimeout(() => { ctrl.style.background=""; setTimeout(()=>ctrl.style.transition="",400); },300);
-          }
-        });
+        const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+        const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+        function convert(n) {
+          if (n===0) return "";
+          else if (n<20) return ones[n]+" ";
+          else if (n<100) return tens[Math.floor(n/10)]+" "+(n%10?ones[n%10]+" ":"");
+          else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
+        }
+        const num = Math.round(amount);
+        if (num===0) return "Zero Taka Only";
+        let result = "";
+        if (num>=10000000) { result+=convert(Math.floor(num/10000000))+"Crore "; }
+        if (num%10000000>=100000) { result+=convert(Math.floor((num%10000000)/100000))+"Lakh "; }
+        if (num%100000>=1000) { result+=convert(Math.floor((num%100000)/1000))+"Thousand "; }
+        result+=convert(num%1000);
+        return result.trim()+" Taka Only";
       }
 
       // ══════════════════════════════════════════
-      //  OVERTIME TAB
+      //  CLEAR / RESET
       // ══════════════════════════════════════════
-      let _otEmpLoaded = false;
-      let _otCache     = null;
+     function clearAll() {
+  showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?", {
+    title: "Reset Page", type: "warn", confirm: true,
+    onOk: () => {
+      document.getElementById("reportOutput").innerHTML = "";
+      document.getElementById("filterId").value = "";
+      document.getElementById("searchTable").value = "";
+      try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
+      try { document.getElementById("dateTo")._flatpickr.clear(); } catch(e) {}
+      closeEmpPanel(); closeMsgBox();
+      window._reportFrom=""; window._reportTo="";
+      _attRangeCache = {};
+      _cache.loaded = false;
+      _cache.loading = false;
+      _otCache = null;
+      _otEmpLoaded = false;
+      _attEmpLoaded = false;
+      setStatus("loading", "⏳ Data not loaded yet");
+      const ctrl = document.querySelector(".controls");
+      ctrl.style.transition="background 0.15s";
+      ctrl.style.background="rgba(255,107,107,0.15)";
+      setTimeout(() => { ctrl.style.background=""; setTimeout(()=>ctrl.style.transition="",400); },300);
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  OVERTIME TAB — Employee-wise Grouped View
+// ══════════════════════════════════════════
+
+let _otEmpLoaded = false;
+let _otCache     = null;
 
       function onOtFilterChange() {
         const type = document.getElementById("otFilterType").value;
@@ -1953,150 +1916,281 @@ for (const monthKey in otData) {
         else if (type==="id")  document.getElementById("ot-sf-id").classList.add("active");
       }
 
-   async function loadOtFilterOptions() {
-  if (_otEmpLoaded) return;
-  try {
-    const db   = firebase.firestore();
-    const rtdb = firebase.database();
-    const empSnap = await db.collection("EMPLOYEE_LIST").get();
-    const empSel  = document.getElementById("otEmpSelect");
-    empSel.innerHTML = '<option value="">All Employees</option>';
-    const empList = [];
-    empSnap.forEach(d => { const e=d.data(); empList.push({id:e.id||d.id, name:e.name||""}); });
-    empList.sort((a,b) => a.id.localeCompare(b.id));
-    empList.forEach(e => {
-      const opt=document.createElement("option"); opt.value=e.id; opt.textContent=`${e.id} — ${e.name}`; empSel.appendChild(opt);
-    });
-    const otSnap = await rtdb.ref("OVER_TIME").once("value");
-    const otData = otSnap.val()||{};
-    const records=[];
-    for (const my in otData) {
-      const md=otData[my]; if (typeof md!=="object") continue;
-      for (const df in md) {
-        const dr=md[df]; if (typeof dr!=="object") continue;
-        for (const rk in dr) { const row=dr[rk]; if (row&&row.ID) records.push(row); }
+      async function loadOtFilterOptions() {
+        if (_otEmpLoaded) return;
+        try {
+          const db   = firebase.firestore();
+          const rtdb = firebase.database();
+          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empSel  = document.getElementById("otEmpSelect");
+          empSel.innerHTML = '<option value="">All Employees</option>';
+          const empList = [];
+          empSnap.forEach(d => { const e=d.data(); empList.push({id:e.id||d.id, name:e.name||""}); });
+          empList.sort((a,b) => a.id.localeCompare(b.id));
+          empList.forEach(e => {
+            const opt=document.createElement("option"); opt.value=e.id; opt.textContent=`${e.id} — ${e.name}`; empSel.appendChild(opt);
+          });
+          const otSnap = await rtdb.ref("OVER_TIME").once("value");
+          const otData = otSnap.val()||{};
+          const records=[];
+          for (const my in otData) {
+            const md=otData[my]; if (typeof md!=="object") continue;
+            for (const df in md) {
+              const dr=md[df]; if (typeof dr!=="object") continue;
+              for (const rk in dr) { const row=dr[rk]; if (row&&row.ID) records.push(row); }
+            }
+          }
+          _otCache = records;
+          updateOtSiteDropdown();
+          document.getElementById("otDateFrom").addEventListener("change", () => { if(_otCache) updateOtSiteDropdown(); });
+          document.getElementById("otDateTo").addEventListener("change",   () => { if(_otCache) updateOtSiteDropdown(); });
+          _otEmpLoaded = true;
+        } catch(e) { console.error("OT filter load error:", e); }
       }
-    }
-    _otCache = records;
-    updateOtSiteDropdown();
-    document.getElementById("otDateFrom").addEventListener("change", () => { if(_otCache) updateOtSiteDropdown(); });
-    document.getElementById("otDateTo").addEventListener("change",   () => { if(_otCache) updateOtSiteDropdown(); });
-    _otEmpLoaded = true;
-  } catch(e) { console.error("OT filter load error:", e); }
-}
 
-function updateOtSiteDropdown() {
-  const dFromVal = document.getElementById("otDateFrom").value;
-  const dToVal   = document.getElementById("otDateTo").value;
-  const dFrom    = dFromVal ? new Date(dFromVal) : null;
-  const dTo      = dToVal   ? new Date(dToVal)   : null;
-  const sites    = new Set();
-  (_otCache||[]).forEach(row => {
-    if (!row.Site) return;
-    const otDate = row.OT_Date ? new Date(row.OT_Date) : null;
-    if (dFrom && dTo && otDate && (otDate<dFrom||otDate>dTo)) return;
-    sites.add(row.Site.trim());
-  });
-  const projSel = document.getElementById("otProjectSelect");
-  projSel.innerHTML = '<option value="">All Sites</option>';
-  [...sites].sort().forEach(s => {
-    const opt=document.createElement("option"); opt.value=s; opt.textContent=s; projSel.appendChild(opt);
-  });
-}
+      function updateOtSiteDropdown() {
+        const dFromVal = document.getElementById("otDateFrom").value;
+        const dToVal   = document.getElementById("otDateTo").value;
+        const dFrom    = dFromVal ? new Date(dFromVal) : null;
+        const dTo      = dToVal   ? new Date(dToVal)   : null;
+        const sites    = new Set();
+        (_otCache||[]).forEach(row => {
+          if (!row.Site) return;
+          const otDate = row.OT_Date ? new Date(row.OT_Date) : null;
+          if (dFrom && dTo && otDate && (otDate<dFrom||otDate>dTo)) return;
+          sites.add(row.Site.trim());
+        });
+        const projSel = document.getElementById("otProjectSelect");
+        projSel.innerHTML = '<option value="">All Sites</option>';
+        [...sites].sort().forEach(s => {
+          const opt=document.createElement("option"); opt.value=s; opt.textContent=s; projSel.appendChild(opt);
+        });
+      }
 
-     async function generateOT() {
-  const otOut    = document.getElementById("otOutput");
-  const filterType = document.getElementById("otFilterType").value;
-  const dFromVal = document.getElementById("otDateFrom").value;
-  const dToVal   = document.getElementById("otDateTo").value;
-  const dFrom    = dFromVal ? new Date(dFromVal) : null;
-  const dTo      = dToVal   ? new Date(dToVal)   : null;
-  const selEmp   = document.getElementById("otEmpSelect").value;
-  const selSite  = document.getElementById("otProjectSelect").value;
-  const selId    = document.getElementById("otIdInput").value.trim();
+      // ★ UPDATED: Employee-wise grouped OT view
+      async function generateOT() {
+        const otOut    = document.getElementById("otOutput");
+        const filterType = document.getElementById("otFilterType").value;
+        const dFromVal = document.getElementById("otDateFrom").value;
+        const dToVal   = document.getElementById("otDateTo").value;
+        const dFrom    = dFromVal ? new Date(dFromVal) : null;
+        const dTo      = dToVal   ? new Date(dToVal)   : null;
+        const selEmp   = document.getElementById("otEmpSelect").value;
+        const selSite  = document.getElementById("otProjectSelect").value;
+        const selId    = document.getElementById("otIdInput").value.trim();
 
-  otOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading overtime data...</p>';
-  try {
-    if (!_otCache) {
-      const rtdb = firebase.database();
-      const otSnap = await rtdb.ref("OVER_TIME").once("value");
-      const otData = otSnap.val()||{};
-      _otCache=[];
-      for (const my in otData) {
-        const md=otData[my]; if (typeof md!=="object") continue;
-        for (const df in md) {
-          const dr=md[df]; if (typeof dr!=="object") continue;
-          for (const rk in dr) { const row=dr[rk]; if (row&&row.ID) _otCache.push(row); }
+        otOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading overtime data...</p>';
+        try {
+          if (!_otCache) {
+            const rtdb = firebase.database();
+            const otSnap = await rtdb.ref("OVER_TIME").once("value");
+            const otData = otSnap.val()||{};
+            _otCache=[];
+            for (const my in otData) {
+              const md=otData[my]; if (typeof md!=="object") continue;
+              for (const df in md) {
+                const dr=md[df]; if (typeof dr!=="object") continue;
+                for (const rk in dr) { const row=dr[rk]; if (row&&row.ID) _otCache.push(row); }
+              }
+            }
+          }
+
+          // Filter records
+          let records = _otCache.filter(row => {
+            const otDate = row.OT_Date ? new Date(row.OT_Date) : null;
+            if (dFrom && dTo && otDate && (otDate<dFrom||otDate>dTo)) return false;
+            if (filterType==="employee" && selEmp && String(row.ID)!==selEmp) return false;
+            if (filterType==="project"  && selSite && (row.Site||"").trim()!==selSite) return false;
+            if (filterType==="id" && selId && String(row.ID)!==selId) return false;
+            return true;
+          });
+
+          if (!records.length) {
+            otOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No overtime records found.</p>';
+            return;
+          }
+
+          // ── Group by Employee ──
+          const empGroups = {};
+          records.forEach(r => {
+            const id = String(r.ID).trim();
+            if (!empGroups[id]) {
+              empGroups[id] = {
+                id, name: r.Name||"", desig: r.Designation||"",
+                totalHrs: 0, totalAmt: 0, records: []
+              };
+            }
+            empGroups[id].totalHrs += parseFloat(r.TOTAL_OT_HOURS||0);
+            empGroups[id].totalAmt += parseFloat(r.Total_Taka||0);
+            empGroups[id].records.push(r);
+          });
+
+          // Sort by employee ID
+          const sortedIds = Object.keys(empGroups).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+          let grandHrs = 0, grandAmt = 0;
+          sortedIds.forEach(id => { grandHrs += empGroups[id].totalHrs; grandAmt += empGroups[id].totalAmt; });
+
+          let periodText = (dFromVal&&dToVal) ? `${dFromVal} to ${dToVal}` : "All Dates";
+          let filterDesc = filterType==="employee"&&selEmp ? `Employee: ${selEmp}` :
+                           filterType==="project"&&selSite ? `Site: ${selSite}` :
+                           filterType==="id"&&selId ? `ID: ${selId}` : "All Records";
+
+          const tableRows = sortedIds.map((id, i) => {
+            const g = empGroups[id];
+            const sitesSet = new Set(g.records.map(r => (r.Site||"").trim()).filter(Boolean));
+            const sites = [...sitesSet].join(", ") || "-";
+            const dayCount = g.records.length;
+            return `<tr>
+              <td style="text-align:center;color:#9ca3af;font-size:10px">${i+1}</td>
+              <td style="font-weight:700;color:var(--brand-blue)">${g.id}</td>
+              <td style="font-weight:600">${g.name||"-"}</td>
+              <td style="color:#6b7280;font-size:11px">${g.desig||"-"}</td>
+              <td style="color:#6b7280;font-size:11px;max-width:160px;overflow:hidden;text-overflow:ellipsis;">${sites}</td>
+              <td style="text-align:center;font-family:monospace;color:#1d4ed8;font-weight:700;font-size:13px">${dayCount}</td>
+              <td class="ot-hrs-cell" style="text-align:right;font-weight:800;font-size:13px">${g.totalHrs.toFixed(2)}</td>
+              <td class="ot-amt-cell" style="text-align:right;font-weight:800;font-size:13px">${g.totalAmt.toFixed(2)}</td>
+              <td style="text-align:center">
+                <button class="btn-view" onclick="openOtDetail('${g.id}')">📋 Details</button>
+              </td>
+            </tr>`;
+          }).join("");
+
+          otOut.innerHTML = `
+            <div class="print-header">
+              <span class="co-name">ALOMHOW CO LTD — Overtime Report (Summary)</span>
+              <span>Period: ${periodText} | Filter: ${filterDesc}</span>
+              <span>Printed: ${formatDateTime()}</span>
+            </div>
+            <div class="summary-cards">
+              <div class="s-card"><div class="s-card-label">Total Employees</div><div class="s-card-value">${sortedIds.length}</div></div>
+              <div class="s-card"><div class="s-card-label">Total OT Records</div><div class="s-card-value">${records.length}</div></div>
+              <div class="s-card blue"><div class="s-card-label">Total OT Hours</div><div class="s-card-value">${grandHrs.toFixed(1)}</div></div>
+              <div class="s-card green"><div class="s-card-label">Total OT Amount</div><div class="s-card-value">${grandAmt.toLocaleString()}</div></div>
+            </div>
+            <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+              <div style="color:#ffd700;font-size:11px;font-weight:700">⏰ ${sortedIds.length} employee(s) | Period: <span style="color:#a0c4ff">${periodText}</span></div>
+              <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px" oninput="searchOtFn(this.value)" />
+            </div>
+            <table id="otTable">
+              <thead><tr>
+                <th>SL</th><th>EMP ID</th><th>Name</th><th>Designation</th>
+                <th>Project(s)</th><th>OT Days</th><th>Total OT Hours</th><th>Total OT Amount</th><th>Details</th>
+              </tr></thead>
+              <tbody>${tableRows}</tbody>
+              <tfoot>
+                <tr class="total-row">
+                 <td colspan="5" class="text-right">GRAND TOTAL</td>
+<td class="text-right">${records.length}</td>
+<td class="text-right">${grandHrs.toFixed(2)}</td>
+<td class="text-right">${grandAmt.toFixed(2)}</td>
+<td></td>
+                </tr>
+              </tfoot>
+            </table>`;
+        } catch(e) {
+          otOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
         }
       }
-    }
-    let records = _otCache.filter(row => {
-      const otDate = row.OT_Date ? new Date(row.OT_Date) : null;
-      if (dFrom && dTo && otDate && (otDate<dFrom||otDate>dTo)) return false;
-      if (filterType==="employee" && selEmp && String(row.ID)!==selEmp) return false;
-      if (filterType==="project"  && selSite && (row.Site||"").trim()!==selSite) return false; // ★ SITE_NAME → Site
-      if (filterType==="id" && selId && String(row.ID)!==selId) return false;
-      return true;
-    });
-    records.sort((a,b) => new Date(b.OT_Date||0)-new Date(a.OT_Date||0));
-    if (!records.length) {
-      otOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No overtime records found.</p>';
-      return;
-    }
-    let totalHrs=0, totalAmt=0, uniqueEmps=new Set();
-    records.forEach(r => {
-      totalHrs += parseFloat(r.TOTAL_OT_HOURS||0);
-      totalAmt += parseFloat(r.Total_Taka||0);
-      uniqueEmps.add(r.ID);
-    });
-    let periodText=(dFromVal&&dToVal)?`${dFromVal} to ${dToVal}`:"All Dates";
-    let filterDesc=filterType==="employee"&&selEmp?`Employee: ${selEmp}`:filterType==="project"&&selSite?`Site: ${selSite}`:filterType==="id"&&selId?`ID: ${selId}`:"All Records";
-    const rows = records.map((r,i) => `<tr>
-      <td style="text-align:center;color:#9ca3af;font-size:10px">${i+1}</td>
-      <td>${r.OT_Date||"-"}</td>
-      <td style="font-weight:700;color:var(--brand-blue)">${r.ID||"-"}</td>
-      <td>${r.Name||"-"}</td>
-      <td style="color:#6b7280;font-size:11px">${r.Designation||"-"}</td>
-      <td>${r.Site||"-"}</td>
-      <td class="ot-hrs-cell" style="text-align:right">${parseFloat(r.TOTAL_OT_HOURS||0).toFixed(2)}</td>
-      <td class="text-right" style="color:#6b7280;font-size:11px">${r.OT_Rate||"-"}</td>
-      <td class="ot-amt-cell" style="text-align:right">${parseFloat(r.Total_Taka||0).toFixed(2)}</td>
-    </tr>`).join("");
-    otOut.innerHTML = `
-      <div class="print-header">
-        <span class="co-name">ALOMHOW CO LTD — Over time Report</span>
-        <span>Period: ${periodText} | Filter: ${filterDesc}</span>
-        <span>Printed: ${formatDateTime()}</span>
-      </div>
-      <div class="summary-cards">
-        <div class="s-card"><div class="s-card-label">Total Records</div><div class="s-card-value">${records.length}</div></div>
-        <div class="s-card"><div class="s-card-label">Employees</div><div class="s-card-value">${uniqueEmps.size}</div></div>
-        <div class="s-card blue"><div class="s-card-label">Total OT Hours</div><div class="s-card-value">${totalHrs.toFixed(1)}</div></div>
-        <div class="s-card green"><div class="s-card-label">Total OT Amount</div><div class="s-card-value">${totalAmt.toLocaleString()}</div></div>
-      </div>
-      <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
-        <div style="color:#ffd700;font-size:11px;font-weight:700">⏰ ${records.length} record(s) | <span style="color:#a0c4ff">${filterDesc}</span></div>
-        <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px" oninput="searchOtFn(this.value)" />
-      </div>
-      <table id="otTable">
-        <thead><tr>
-          <th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Designation</th>
-          <th>Site / Project</th><th>OT Hours</th><th>OT Rate</th><th>OT Amount</th>
-        </tr></thead>
-        <tbody>${rows}</tbody>
-        <tfoot>
-          <tr class="total-row">
-            <td colspan="6" class="text-right">TOTAL</td>
-            <td class="text-right">${totalHrs.toFixed(2)}</td>
-            <td></td>
-            <td class="text-right">${totalAmt.toFixed(2)}</td>
-          </tr>
-        </tfoot>
-      </table>`;
-  } catch(e) {
-    otOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
-  }
-}
+
+      // ── OT Detail Modal ──
+      function openOtDetail(empId) {
+        document.getElementById("otDetailTitle").textContent = `⏰ Overtime Details — ${empId}`;
+        document.getElementById("otDetailBody").innerHTML = '<p style="padding:20px;text-align:center;color:#6b7280">⏳ Loading...</p>';
+        document.getElementById("otDetailOverlay").classList.add("active");
+        document.body.style.overflow = "hidden";
+
+        if (!_otCache) {
+          document.getElementById("otDetailBody").innerHTML = '<p style="color:red;padding:20px">Data not loaded. Please click View first.</p>';
+          return;
+        }
+
+        const empRecs = _otCache.filter(r => String(r.ID).trim() === String(empId).trim());
+        // Apply current date filter if set
+        const dFromVal = document.getElementById("otDateFrom").value;
+        const dToVal   = document.getElementById("otDateTo").value;
+        const dFrom    = dFromVal ? new Date(dFromVal) : null;
+        const dTo      = dToVal   ? new Date(dToVal)   : null;
+        const filtered = empRecs.filter(r => {
+          const otDate = r.OT_Date ? new Date(r.OT_Date) : null;
+          if (dFrom && dTo && otDate && (otDate < dFrom || otDate > dTo)) return false;
+          return true;
+        });
+
+        if (!filtered.length) {
+          document.getElementById("otDetailBody").innerHTML = '<p style="color:#9ca3af;padding:20px;text-align:center">No records found for this employee in the selected period.</p>';
+          return;
+        }
+
+        filtered.sort((a,b) => new Date(a.OT_Date||0) - new Date(b.OT_Date||0));
+        const name  = filtered[0].Name || empId;
+        const desig = filtered[0].Designation || "-";
+        let totHrs = 0, totAmt = 0;
+        filtered.forEach(r => { totHrs += parseFloat(r.TOTAL_OT_HOURS||0); totAmt += parseFloat(r.Total_Taka||0); });
+
+        const rows = filtered.map((r, i) => `<tr style="${i%2===1?'background:#f8faff;':''}">
+          <td style="text-align:center;color:#9ca3af;font-size:10px;padding:7px 8px">${i+1}</td>
+          <td style="padding:7px 8px;font-weight:600">${r.OT_Date||"-"}</td>
+          <td style="padding:7px 8px;color:#6b7280">${r.Site||"-"}</td>
+          <td style="text-align:right;font-family:monospace;color:#1d4ed8;font-weight:700;padding:7px 8px">${parseFloat(r.TOTAL_OT_HOURS||0).toFixed(2)}</td>
+          <td style="text-align:right;font-size:11px;color:#6b7280;padding:7px 8px">${r.OT_Rate||"-"}</td>
+          <td style="text-align:right;font-family:monospace;color:#065f46;font-weight:700;padding:7px 8px">${parseFloat(r.Total_Taka||0).toFixed(2)}</td>
+          <td style="font-size:11px;color:#6b7280;padding:7px 8px">${r.Remark||r.remark||"-"}</td>
+        </tr>`).join("");
+
+        document.getElementById("otDetailBody").innerHTML = `
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+            <div style="background:#dbeafe;border-radius:8px;padding:12px;text-align:center;border-left:4px solid #3b82f6">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#1e40af;letter-spacing:1px">Total OT Days</div>
+              <div style="font-size:28px;font-weight:800;font-family:'Playfair Display',serif;color:#1d4ed8">${filtered.length}</div>
+            </div>
+            <div style="background:#d1fae5;border-radius:8px;padding:12px;text-align:center;border-left:4px solid #10b981">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#065f46;letter-spacing:1px">Total OT Hours</div>
+              <div style="font-size:28px;font-weight:800;font-family:'Playfair Display',serif;color:#065f46">${totHrs.toFixed(2)}</div>
+            </div>
+            <div style="background:#fef3c7;border-radius:8px;padding:12px;text-align:center;border-left:4px solid #f59e0b">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;color:#92400e;letter-spacing:1px">Total Amount</div>
+              <div style="font-size:28px;font-weight:800;font-family:'Playfair Display',serif;color:#92400e">${totAmt.toLocaleString()}</div>
+            </div>
+          </div>
+          <div style="margin-bottom:12px;display:flex;align-items:center;gap:16px;padding:8px 12px;background:#f8faff;border-radius:6px;border:1px solid #e0e8f4">
+            <span style="font-size:12px"><strong>EMP ID:</strong> <span style="font-family:monospace;color:var(--brand-blue);font-weight:700">${empId}</span></span>
+            <span style="font-size:12px"><strong>Name:</strong> ${name}</span>
+            <span style="font-size:12px"><strong>Designation:</strong> ${desig}</span>
+          </div>
+          <div style="font-weight:700;font-size:12px;color:var(--brand-blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">📋 Day-wise Overtime</div>
+          <table style="width:100%;border-collapse:collapse;font-size:12px;border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(0,33,71,0.1)">
+            <thead>
+              <tr style="background:var(--brand-blue)">
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:center;width:40px">SL</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:left">Date</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:left">Site / Project</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">OT Hours</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">OT Rate</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">Amount (Taka)</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:left">Remark</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr style="background:#1d3a6d">
+                <td colspan="3" style="color:#ffd700;font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-size:12px">TOTAL</td>
+                <td style="color:#ffd700;font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-family:monospace;font-size:13px">${totHrs.toFixed(2)}</td>
+                <td style="border:1px solid #335185;padding:9px 8px"></td>
+                <td style="color:#ffd700;font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-family:monospace;font-size:13px">${totAmt.toFixed(2)}</td>
+                <td style="border:1px solid #335185;padding:9px 8px"></td>
+              </tr>
+            </tfoot>
+          </table>`;
+      }
+
+      function closeOtDetail() {
+        document.getElementById("otDetailOverlay").classList.remove("active");
+        document.body.style.overflow = "";
+      }
+
+      document.getElementById("otDetailOverlay").addEventListener("click", function(e) {
+        if (e.target === this) closeOtDetail();
+      });
 
       function searchOtFn(val) {
         const f=val.toUpperCase(), tbl=document.getElementById("otTable");
