@@ -1,442 +1,803 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PAY SLIP</title>
-    <style>
-        /* Print Settings */
-        @media print {
-            @page {
-                size: A4;
-                margin: 0; 
-            }
-            body { 
-                background: white; 
-                padding: 0; 
-                margin: 0; 
-            }
-            .no-print { display: none !important; }
-            #payslipContainer {
-                width: 100%;
-                margin: 0;
-                padding: 0;
-            }
-            .payslip-main { 
-                margin: 0 auto !important; 
-                border: none !important; 
-                box-shadow: none !important;
-                width: 210mm; 
-                height: 297mm; 
-                padding: 10mm 15mm !important; 
-                box-sizing: border-box;
-                display: block;
-                page-break-after: always;
-                page-break-inside: avoid;
-            }
-            .payslip-main:last-child {
-                page-break-after: auto !important;
-            }
-            .row-item-bold { -webkit-print-color-adjust: exact; background-color: #f0f0f0 !important; }
-            .name-value { -webkit-print-color-adjust: exact; background-color: #f5faff !important; }
-        }
+  <meta charset="UTF-8" />
+  <title>Payslip Generator — Fast</title>
+  <link rel="icon"type="image/png"href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <style>
+    :root {
+      --brand-blue: #002147;
+      --brand-gold: #ffd700;
+      --border: #b0bdd4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Source Sans 3", sans-serif; background: var(--brand-blue); color: #1a1a2e; font-size: 12px; }
 
-        /* Web View Styles */
-        body { 
-            font-family: 'Calibri', 'Arial', sans-serif; 
-            background-color: #f0f2f5; 
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            padding: 20px; 
-            margin: 0;
-        }
+    .page-header { background: var(--brand-blue); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid var(--brand-gold); }
+    .page-header h2 { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 22px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .header-badge { background: var(--brand-gold); color: var(--brand-blue); font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
 
-        .no-print { 
-            background: #fff; 
-            padding: 20px; 
-            margin-bottom: 25px; 
-            border-radius: 12px; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 900px;
-            border: 1px solid #e0e0e0;
-            text-align: center;
-        }
+    .controls { background: var(--brand-blue); padding: 14px 32px; border-bottom: 3px solid var(--brand-gold); }
+    .row-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .controls label { color: var(--brand-gold); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .controls input[type="text"] { padding: 8px 12px; font-size: 12px; font-family: "Source Sans 3", sans-serif; border: 1.5px solid #3a5a8a; border-radius: 6px; background: #001530; color: #e0e8f4; outline: none; transition: border-color 0.2s; }
+    .controls input[type="text"]::placeholder { color: #6a88aa; }
+    .controls input[type="text"]:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255,215,0,0.18); }
 
-        .controls-row { display: flex; align-items: center; gap: 15px; justify-content: center; flex-wrap: wrap; }
+    .btn { padding: 8px 18px; font-size: 12px; font-family: "Source Sans 3", sans-serif; font-weight: 700; border: 2px solid transparent; border-radius: 6px; cursor: pointer; letter-spacing: 0.4px; transition: all 0.2s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    .btn-gold { background: var(--brand-gold); color: var(--brand-blue); border-color: var(--brand-gold); }
+    .btn-gold:hover { background: transparent; color: var(--brand-gold); }
+    .btn-clear { background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; }
+    .btn-clear:hover { background: #ff6b6b; color: white; }
 
-        .dropdown-wrapper { position: relative; width: 350px; text-align: left; }
-        .dropbtn {
-            background-color: #ffffff;
-            color: #333;
-            padding: 10px 15px;
-            font-size: 15px;
-            border: 1px solid #ced4da;
-            border-radius: 6px;
-            cursor: pointer;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 45px;
-        }
+    /* Flatpickr */
+    .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
+    .flatpickr-day { color: #cce !important; }
+    .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
+    .flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; }
+    .flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+    .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #ffffff;
-            width: 100%;
-            box-shadow: 0px 10px 25px rgba(0,0,0,0.15);
-            z-index: 1000;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            max-height: 450px;
-            overflow-y: auto;
-            margin-top: 5px;
-        }
-        .dropdown-content.show { display: block; }
-        .search-box { width: 92%; padding: 10px; margin: 8px; border: 1px solid #ddd; border-radius: 4px; }
-        
-        .select-actions {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
-        .action-link {
-            color: #007bff;
-            cursor: pointer;
-            font-weight: bold;
-            text-decoration: underline;
-        }
+    /* Employee Panel */
+    .emp-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+    .emp-panel-overlay.active { display: flex; }
+    .emp-panel-box { background: white; border-radius: 12px; width: 700px; max-width: 95vw; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+    .emp-panel-header { background: linear-gradient(135deg, #002147 0%, #003580 60%, #001a38 100%); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; border-bottom: 3px solid var(--brand-gold); flex-shrink: 0; }
+    .emp-panel-header h3 { color: var(--brand-gold); font-family: "Playfair Display", serif; font-size: 16px; }
+    .emp-panel-controls { background: var(--brand-blue); padding: 12px 16px; border-bottom: 2px solid var(--brand-gold); flex-shrink: 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .emp-panel-controls input { flex: 1; min-width: 160px; padding: 7px 12px; border: 1.5px solid var(--brand-gold); border-radius: 6px; font-size: 12px; outline: none; background: #001530; color: #e0e8f4; }
+    .date-input { padding: 7px 12px; border: 1.5px solid var(--brand-gold); border-radius: 6px; font-size: 12px; outline: none; background: #001530; color: #e0e8f4; width: 110px; }
+    .emp-panel-body { overflow-y: auto; flex: 1; }
+    .emp-panel-footer { padding: 12px 16px; border-top: 2px solid var(--brand-gold); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; background: var(--brand-blue); border-radius: 0 0 12px 12px; }
+    .panel-close { background: var(--brand-gold); color: var(--brand-blue); border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .panel-close:hover { transform: rotate(90deg); }
+    .emp-panel-table { width: 100%; border-collapse: collapse; }
+    .emp-panel-table thead tr { background: #f3f4f6; position: sticky; top: 0; z-index: 1; }
+    .emp-panel-table th { padding: 9px 12px; font-size: 11px; font-weight: 700; color: #374151; border-bottom: 2px solid #e5e7eb; text-transform: uppercase; letter-spacing: 0.5px; }
+    .emp-panel-table td { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+    .emp-panel-table tbody tr:hover td { background: #ede9fe; cursor: pointer; }
+    .sel-count { font-size: 12px; color: var(--brand-gold); font-weight: 700; }
+    .btn-gen-selected { background: var(--brand-gold); color: var(--brand-blue); border: 2px solid var(--brand-gold); padding: 8px 20px; border-radius: 7px; font-size: 12px; font-weight: 700; font-family: "Source Sans 3", sans-serif; cursor: pointer; transition: all 0.2s; }
+    .btn-gen-selected:hover { background: transparent; color: var(--brand-gold); }
+    .btn-gen-selected:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .employee-item { display: flex; align-items: center; padding: 10px; border-bottom: 1px solid #f1f1f1; cursor: pointer; }
-        .employee-item:hover { background-color: #f8f9fa; }
-        .employee-item input { margin-right: 12px; transform: scale(1.2); }
+    /* Generation Loader */
+    .gen-loader { display: none; position: fixed; inset: 0; background: var(--brand-blue); z-index: 99990; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    .gen-loader.active { display: flex; }
+    .gen-loader-title { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 24px; letter-spacing: 1.5px; }
+    .gen-count-display { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,215,0,0.08); border: 2px solid var(--brand-gold); border-radius: 16px; padding: 16px 48px; min-width: 220px; text-align: center; }
+    .gen-count-label { color: #a0b8d8; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    .gen-count-numbers { color: var(--brand-gold); font-family: "Playfair Display", serif; font-size: 48px; font-weight: 700; line-height: 1; }
+    .gen-count-of { color: #6a88aa; font-size: 13px; font-weight: 600; letter-spacing: 1px; }
+    .gen-progress-wrap { width: 320px; height: 8px; background: #001030; border-radius: 20px; overflow: hidden; border: 1px solid #1e3a5f; }
+    .gen-progress-bar { height: 100%; background: linear-gradient(90deg, #ffd700, #ffe87a, #ffd700); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; border-radius: 20px; width: 0%; transition: width 0.4s ease; }
+    @keyframes shimmer { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+    .gen-spinner { width: 52px; height: 52px; border: 4px solid #1e3a5f; border-top-color: var(--brand-gold); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .gen-emp-badge { background: #001530; border: 1.5px solid #335185; border-radius: 8px; padding: 6px 16px; color: #a0b8d8; font-size: 11px; font-weight: 600; min-height: 32px; }
+    .gen-emp-badge span { color: var(--brand-gold); font-weight: 700; }
+    .gen-loader-sub { color: #a0b8d8; font-size: 13px; font-weight: 600; }
 
-        .payslip-main { 
-            width: 210mm; 
-            min-height: 297mm; 
-            background-color: white;
-            border: 2px solid #000; 
-            padding: 10mm 15mm; 
-            box-sizing: border-box;
-            position: relative;
-            margin-bottom: 40px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+    /* Status badge */
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-ok { background: #10b981; }
+    .status-loading { background: #ffd700; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-        .header-logo {
-            position: absolute;
-            top: 15mm;
-            left: 15mm;
-            width: 80px;
-            height: auto;
-        }
+    /* Message Box */
+    .msgbox-overlay { display:none; position:fixed; inset:0; background:rgba(0,21,48,0.82); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .msgbox-overlay.active { display:flex; }
+    .msgbox-card { background:#fff; border-radius:14px; min-width:320px; max-width:420px; box-shadow:0 30px 70px rgba(0,0,0,0.5); overflow:hidden; animation:msgPop .22s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes msgPop { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .msgbox-header { display:flex; align-items:center; gap:10px; padding:16px 20px 12px; border-bottom:2px solid #f0f0f0; }
+    .msgbox-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .msgbox-icon.warn { background:#fff8e1; }
+    .msgbox-icon.err  { background:#ffeaea; }
+    .msgbox-title { font-family:"Playfair Display",serif; font-size:15px; font-weight:700; color:var(--brand-blue); }
+    .msgbox-body { padding:14px 20px 18px; font-size:13px; color:#374151; line-height:1.6; }
+    .msgbox-footer { padding:10px 20px 16px; display:flex; justify-content:flex-end; }
+    .msgbox-btn { padding:8px 22px; border:2px solid transparent; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; font-family:"Source Sans 3",sans-serif; }
+    .msgbox-btn.primary { background:var(--brand-gold); color:var(--brand-blue); border-color:var(--brand-gold); }
 
-        .header { text-align: center; margin-bottom: 10px; position: relative; }
-        .gang-srn-row { display: flex; justify-content: center; position: relative; margin-bottom: 10px; font-size: 14px; font-weight: bold; }
-        .srn-pos { position: absolute; right: 10px; top: 0px; }
-        .info-header { display: flex; justify-content: space-between; margin-top: 5px; font-size: 13px; }
-        .info-left-grid { display: grid; grid-template-columns: 85px 15px 1fr; row-gap: 3px; align-items: center; }
-
-        .name-bar { border: 1px solid #000; display: flex; margin: 10px 0; }
-        .name-label { width: 60px; border-right: 1px solid #000; padding: 6px; font-weight: bold; text-align: center; }
-        .name-value { padding: 6px; flex-grow: 1; background-color: #f5faff; font-weight: bold; text-transform: uppercase; font-size: 16px; }
-
-        .content-container { display: flex; border: 2px solid #000; min-height: 480px; }
-        .left-content { width: 75%; border-right: 2px solid #000; display: flex; flex-direction: column; }
-        .right-grid { width: 25%; background-color: #fdfdfd; display: flex; flex-direction: column; }
-        
-        .row-item { height: 30px; display: flex; align-items: center; padding: 0 12px; border-bottom: 1px solid #eee; font-size: 14px; }
-        .row-item-bold { font-weight: bold; border-bottom: 2px solid #000; background-color: #f0f0f0; }
-        .grid-box { height: 30px; border-bottom: 2px solid #000; text-align: right; padding-right: 12px; line-height: 30px; font-weight: bold; font-size: 14px; }
-
-        .leave-table, .summary-table { width: 100%; border-collapse: collapse; margin-top: 15px; text-align: center; font-size: 13px; }
-        .leave-table th, .leave-table td, .summary-table td { border: 1px solid #000; padding: 6px; }
-        .summary-box { width: 70%; margin: 20px auto; }
-
-        .footer { margin-top: 30px; font-size: 13px; line-height: 1.8; }
-        .loading-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 2000; justify-content: center; align-items: center; font-weight: bold; color: #007bff; }
-        
-        .watermark {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-30deg);
-            width: 450px;
-            opacity: 0.04;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .work-details {
-            display: flex;
-            gap: 15px;
-            margin-left: auto;
-            font-size: 12px;
-            font-weight: normal;
-        }
-        .work-detail-item {
-            border-left: 1px solid #ddd;
-            padding-left: 8px;
-        }
-    </style>
+    .content { padding: 24px 32px; color: #a0b8d8; font-size: 13px; text-align: center; }
+    .info-box { background: rgba(255,215,0,0.06); border: 1.5px solid rgba(255,215,0,0.2); border-radius: 10px; padding: 20px 28px; display: inline-block; text-align: left; margin-top: 20px; }
+    .info-box h3 { color: var(--brand-gold); font-family: "Playfair Display", serif; margin-bottom: 10px; }
+    .info-box li { color: #a0b8d8; margin: 6px 0; font-size: 12px; }
+    .info-box li strong { color: #4ade80; }
+  </style>
 </head>
-<body onload="loadEmployeeList()">
+<body>
 
-    <div id="loader" class="loading-overlay">Processing, please wait...</div>
+<div class="page-header">
+  <h2>ALOMHOW CO LTD</h2>
+  <span class="header-badge">⚡Payslip </span>
+</div>
 
-    <div class="no-print">
-        <h2 style="margin: 0 0 15px 0; color: #2c3e50;">ALAMHOW Pay Statement System</h2>
-        <div class="controls-row">
-            <div style="display: flex; gap: 5px; align-items: center;">
-                <input type="date" id="dFrom" style="padding:8px; border:1px solid #ddd; border-radius:4px;">
-                <span>TO</span>
-                <input type="date" id="dTo" style="padding:8px; border:1px solid #ddd; border-radius:4px;">
-            </div>
-            <div class="dropdown-wrapper">
-                <button onclick="toggleDropdown()" class="dropbtn" id="dropBtn">
-                    <span>Select Employee(s)</span>
-                    <span>▼</span>
-                </button>
-                <div id="myDropdown" class="dropdown-content">
-                    <input type="text" placeholder="Search ID or Name..." id="searchInput" class="search-box" onkeyup="filterList()">
-                    <div class="select-actions">
-                        <span class="action-link" onclick="selectAll(true)">Select All</span>
-                        <span class="action-link" onclick="selectAll(false)">Unselect All</span>
-                    </div>
-                    <div id="employeeChecklist">
-                        <p style="padding: 10px; text-align: center;">Loading employee list...</p>
-                    </div>
-                </div>
-            </div>
-            <button onclick="generateSelected()" style="background:#007bff; color:white; border:none; padding:12px 25px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                Generate
-            </button>
-            <button onclick="window.print()" style="background:#6c757d; color:white; border:none; padding:12px 25px; border-radius:6px; cursor:pointer; font-weight:bold;">
-                🖨️ Print
-            </button>
-        </div>
+<div class="controls">
+  <div class="row-container">
+    <label>From:</label>
+    <input type="text" id="dateFrom" placeholder="Start Date" style="width:130px" />
+    <label>To:</label>
+    <input type="text" id="dateTo" placeholder="End Date" style="width:130px" />
+    <button class="btn btn-gold" onclick="openEmpPanel()">👥 Select Employees &amp; payslip </button>
+    <span id="cacheStatus" style="color:#6a88aa;font-size:11px;font-weight:600">
+      <span class="status-dot status-loading"></span> Data not loaded yet
+    </span>
+  </div>
+</div>
+
+
+
+<!-- Employee Panel -->
+<div class="emp-panel-overlay" id="empPanel">
+  <div class="emp-panel-box">
+    <div class="emp-panel-header">
+      <h3>👥  Payslip</h3>
+      <button class="panel-close" onclick="closeEmpPanel()">✕</button>
     </div>
+    <div class="emp-panel-controls">
+      <input type="text" id="panelSearch" placeholder="🔍 Search by name or ID..." oninput="filterPanelList()" />
+      <label style="color:var(--brand-gold);font-size:11px">From:</label>
+      <input type="text" id="panelDateFrom" placeholder="Start" class="date-input" />
+      <label style="color:var(--brand-gold);font-size:11px">To:</label>
+      <input type="text" id="panelDateTo" placeholder="End" class="date-input" />
+    </div>
+    <div class="emp-panel-body">
+      <table class="emp-panel-table">
+        <thead>
+          <tr>
+            <th style="width:40px;text-align:center">
+              <input type="checkbox" id="panelSelectAll" onchange="togglePanelAll()" style="width:15px;height:15px;accent-color:var(--brand-blue);cursor:pointer" />
+            </th>
+            <th>EMP ID</th><th>Employee Name</th><th>Passport</th><th>Designation</th>
+          </tr>
+        </thead>
+        <tbody id="empPanelBody">
+          <tr><td colspan="5" style="text-align:center;padding:30px;color:#9ca3af">⏳ Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="emp-panel-footer">
+      <span class="sel-count" id="panelSelCount">0 selected</span>
+      <button class="btn-gen-selected" id="panelGenBtn" onclick="generateFromPanel()" disabled>⚡ Generate Payslip</button>
+    </div>
+  </div>
+</div>
 
-    <div id="payslipContainer"></div>
+<!-- Generation Loader -->
+<div class="gen-loader" id="genLoader">
+  <div class="gen-spinner"></div>
+  <div class="gen-loader-title">⚡ Generating Payslips</div>
+  <div class="gen-count-display">
+    <div class="gen-count-label">Completed</div>
+    <div class="gen-count-numbers" id="genCountCurrent">0</div>
+    <div class="gen-count-of">of <span id="genCountTotal">0</span> payslip(s)</div>
+  </div>
+  <div class="gen-progress-wrap"><div class="gen-progress-bar" id="genProgressBar"></div></div>
+  <div class="gen-emp-badge" id="genEmpBadge">🔄 Initializing...</div>
+  <div class="gen-loader-sub" id="genLoaderSub">Please wait...</div>
+</div>
 
-    <script>
-        // Google Apps Script Web App URL
-        const API_URL = 'https://script.google.com/macros/s/AKfycbyo3jRKmzSjCNdKQXRfAAKz9Fp7_bdzDh1o6_F5bJpcKj_lw6rcaKVSF2S-yAOKJeH_/exec';
-        const LOGO_URL = 'https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo=w400-h400-nc';
+<!-- Message Box -->
+<div class="msgbox-overlay" id="msgboxOverlay">
+  <div class="msgbox-card">
+    <div class="msgbox-header">
+      <div class="msgbox-icon warn" id="msgboxIcon">⚠️</div>
+      <div class="msgbox-title" id="msgboxTitle">Notice</div>
+    </div>
+    <div class="msgbox-body" id="msgboxBody"></div>
+    <div class="msgbox-footer">
+      <button class="msgbox-btn primary" onclick="closeMsgBox()">OK</button>
+    </div>
+  </div>
+</div>
 
-        function toggleDropdown() { document.getElementById("myDropdown").classList.toggle("show"); }
-        window.onclick = function(e) {
-            if (!e.target.matches('.dropbtn') && !e.target.closest('.dropdown-content')) {
-                document.getElementById("myDropdown").classList.remove("show");
-            }
-        }
-        function filterList() {
-            let filter = document.getElementById("searchInput").value.toUpperCase();
-            let items = document.getElementsByClassName("employee-item");
-            for (let i = 0; i < items.length; i++) {
-                let txt = items[i].innerText;
-                items[i].style.display = txt.toUpperCase().indexOf(filter) > -1 ? "" : "none";
-            }
-        }
-        function selectAll(shouldSelect) {
-            const checkboxes = document.querySelectorAll('.emp-cb');
-            checkboxes.forEach(cb => {
-                const parentItem = cb.closest('.employee-item');
-                if (parentItem.style.display !== 'none') cb.checked = shouldSelect;
-            });
-            updateBtnText();
-        }
-        
-        // Fetch method for GitHub to Google Script
-        async function loadEmployeeList() {
-            try {
-                const response = await fetch(`${API_URL}?action=getEmployeeList`);
-                const list = await response.json();
-                const container = document.getElementById('employeeChecklist');
-                if (!list || list.length === 0) {
-                    container.innerHTML = '<p style="padding:10px">No data found.</p>';
-                    return;
-                }
-                let html = '';
-                list.forEach(emp => {
-                    html += `
-                        <div class="employee-item" onclick="toggleCheckbox(this, event)">
-                            <input type="checkbox" class="emp-cb" value="${emp.id}" onclick="event.stopPropagation(); updateBtnText();">
-                            <span><strong>${emp.id}</strong> - ${emp.name}</span>
-                        </div>`;
-                });
-                container.innerHTML = html;
-            } catch (error) {
-                console.error("Error loading list:", error);
-                document.getElementById('employeeChecklist').innerHTML = '<p style="padding:10px; color:red;">Cannot connect to server.</p>';
-            }
-        }
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-        function toggleCheckbox(div, event) {
-            const cb = div.querySelector('input');
-            cb.checked = !cb.checked;
-            updateBtnText();
-        }
-        function updateBtnText() {
-            const count = document.querySelectorAll('.emp-cb:checked').length;
-            document.getElementById('dropBtn').querySelector('span').innerText = count > 0 ? `${count} Selected` : "Select Employee(s)";
-        }
-        
-        async function generateSelected() {
-            const selectedIds = Array.from(document.querySelectorAll('.emp-cb:checked')).map(cb => cb.value);
-            const dFrom = document.getElementById('dFrom').value;
-            const dTo = document.getElementById('dTo').value;
-            
-            if (selectedIds.length === 0) { alert("Please select at least one employee."); return; }
-            
-            document.getElementById('loader').style.display = 'flex';
-            
-            try {
-                const response = await fetch(`${API_URL}?action=getEmployeesData&ids=${selectedIds.join(',')}&from=${dFrom}&to=${dTo}`);
-                const data = await response.json();
-                
-                document.getElementById('loader').style.display = 'none';
-                if (data.error) alert(data.error);
-                else renderPayslips(data);
-            } catch (error) {
-                document.getElementById('loader').style.display = 'none';
-                alert("Error loading data. Please try again.");
-            }
-        }
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+  authDomain: "munna-acl-fda7c.firebaseapp.com",
+  databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "munna-acl-fda7c",
+  storageBucket: "munna-acl-fda7c.firebasestorage.app",
+  messagingSenderId: "371130316468",
+  appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-        function renderPayslips(dataArray) {
-            const container = document.getElementById('payslipContainer');
-            let html = '';
-            
-            dataArray.forEach(d => {
-                const f = (val) => parseFloat(val) || 0;
+flatpickr("#dateFrom",     { dateFormat: "Y-m-d", onChange: syncPanelDates });
+flatpickr("#dateTo",       { dateFormat: "Y-m-d", onChange: syncPanelDates });
+flatpickr("#panelDateFrom",{ dateFormat: "Y-m-d" });
+flatpickr("#panelDateTo",  { dateFormat: "Y-m-d" });
 
-                const normPay = f(d.normalWorkAmount);
-                const otPay = f(d.overtimeAmount);
-                const sunPay = f(d.sundayWorkAmount);
-                const holPay = f(d.holidayWorkAmount);
-                const bonus = f(d.endOfYearBonus);
-                const trav = f(d.fixTravelling);
-                const attBonus = f(d.attendanceBonus);
-                const perfBonus = f(d.performanceBonus);
-                const prgfPay = f(d.prgfPayment);
+function syncPanelDates() {
+  const f = document.getElementById("dateFrom").value;
+  const t = document.getElementById("dateTo").value;
+  if (f) try { document.getElementById("panelDateFrom")._flatpickr.setDate(f); } catch(e){}
+  if (t) try { document.getElementById("panelDateTo")._flatpickr.setDate(t); } catch(e){}
+}
 
-                const totalPaymentsHeader = normPay + sunPay + holPay + bonus + trav + attBonus + otPay + perfBonus + prgfPay;
+// ══════════════════════════════════════════
+//  GLOBAL CACHE — একবার fetch, সব কাজে ব্যবহার
+// ══════════════════════════════════════════
+let _cache = {
+  loaded: false,
+  loading: false,
+  empList: [],          // [{id, name, passport, desig, salary}]
+  empMap: {},           // id → emp object
+  attendance: {},       // empId → { "2025-01-01": "P"|"A"|"L"|"H" }
+  otMap: {},            // empId → totalOtAmount (filtered by date range)
+  advMap: {},           // empId → pendingAmount
+};
 
-                html += `
-                <div class="payslip-main">
-                    <img src="${LOGO_URL}" class="watermark">
-                    <img src="${LOGO_URL}" class="header-logo">
-                    
-                    <div class="header">
-                        <p style="margin:0; font-weight: bold; letter-spacing: 1.5px;">PAY STATEMENT</p>
-                        <h2 style="margin:8px 0; font-size: 26px;">ALAMHOW CO LTD</h2>
-                        <p style="margin:0; font-weight: bold;">${d.dateFrom || ''} TO ${d.dateTo || ''}</p>
-                    </div>
-                    
-                    <div class="gang-srn-row">
-                        <span>GANG:- ${d.gang || ''}</span>
-                        <span class="srn-pos">SRN:- ${d.srn || ''}</span>
-                    </div>
+// ── Preload all static data (emp list, advance) on page load ──
+async function preloadStaticData() {
+  if (_cache.loaded || _cache.loading) return;
+  _cache.loading = true;
+  setStatus("loading", "⏳ Loading data...");
+  try {
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
 
-                    <div class="info-header">
-                        <div class="info-left-grid">
-                            <span>PERIOD</span> <span>:</span> <span>${d.period || 'M12'}</span>
-                            <span>EMPL. NO</span> <span>:</span> <span>${d.emplNo || ''}</span>
-                            <span>POST</span> <span>:</span> <span>${d.post || ''}</span>
-                            <span>I. D. No</span> <span>:</span> <span>${d.idNo || ''}</span>
-                            <span>NPS NO</span> <span>:</span> <span>${d.npsNo || '-'}</span>
-                        </div>
-                        <div style="text-align: right; align-self: flex-end; font-weight: bold;">
-                            DATE JOINED IN: ${d.dateJoinedIn || ''}
-                        </div>
-                    </div>
+    // 1. Employee list
+    const empSnap = await db.collection("EMPLOYEE_LIST").get();
+    _cache.empList = [];
+    _cache.empMap = {};
+    empSnap.forEach(d => {
+      const e = d.data();
+      const emp = {
+        id: e.id || d.id,
+        name: e.name || "",
+        passport: e.passport || "",
+        desig: e.designation || "",
+        salary: parseInt(e.salary) || 0,
+        joining: e.joining || "",
+      };
+      _cache.empList.push(emp);
+      _cache.empMap[emp.id] = emp;
+    });
+    _cache.empList.sort((a,b) => a.id.localeCompare(b.id));
 
-                    <div class="name-bar">
-                        <div class="name-label">Mr</div>
-                        <div class="name-value">${d.employeeName || ''}</div>
-                    </div>
+    // 2. Advance data (static — doesn't change with date range)
+    const advSnap = await rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
+    const advData = advSnap.val() || {};
+    _cache.advMap = {};
+    for (const id in advData) {
+      _cache.advMap[id] = parseInt(advData[id].pending) || 0;
+    }
 
-                    <div class="content-container">
-                        <div class="left-content">
-                            <div class="row-item row-item-bold">Payments <span style="margin-left:auto">Amount</span></div>
-                            <div class="row-item">
-                                Normal / Sunday / Holiday Work
-                                <div class="work-details">
-                                    <span class="work-detail-item">Norm: ${d.workDays || '0'}d</span>
-                                    <span class="work-detail-item">Sun: ${d.sundayWork || '0'}d</span>
-                                    <span class="work-detail-item">Hol: ${d.holidayWork || '0'}d</span>
-                                </div>
-                            </div>
-                            <div class="row-item">End Of Year Bonus</div>
-                            <div class="row-item">Fix Travelling</div>
-                            <div class="row-item">Attendance Bonus</div>
-                            <div class="row-item">Overtime (${d.overtimeHours || '0.00'} Hrs)</div>
-                            <div class="row-item">Performance Bonus</div>
-                            <div class="row-item" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )</div>
-                            
-                            <div style="flex-grow:1"></div>
-                            
-                            <div class="row-item row-item-bold">Deductions <span style="margin-left:auto; margin-right: 120px">Balance</span> <span>Amount</span></div>
-                            <div class="row-item">CSG Employee</div>
-                            <div class="row-item">N.P.S. Employee</div>
-                            <div class="row-item">Income Tax (P.A.Y.E)</div>
-                            <div class="row-item">Advance Refund</div>
-                            <div class="row-item">Absent <span style="margin-left: 140px">Days ${d.absentDays || '0'}</span></div>
-                            <div class="row-item" style="font-size: 11px">Portable Retirement Gratuity Fund ( P.R.G.F )</div>
-                        </div>
-                        <div class="right-grid">
-                            <div class="grid-box">${totalPaymentsHeader.toFixed(2)}</div>
-                            <div class="grid-box">${(normPay + sunPay + holPay).toFixed(2)}</div>
-                            <div class="grid-box">${bonus.toFixed(2)}</div>
-                            <div class="grid-box">${trav.toFixed(2)}</div>
-                            <div class="grid-box">${attBonus.toFixed(2)}</div>
-                            <div class="grid-box">${otPay.toFixed(2)}</div>
-                            <div class="grid-box">${perfBonus.toFixed(2)}</div>
-                            <div class="grid-box">${prgfPay.toFixed(2)}</div>
-                            
-                            <div style="flex-grow:1; border-bottom: 2px solid #000;"></div>
-                            
-                            <div style="height: 30px; border-bottom: 2px solid #000; background: #eee;"></div>
-                            <div class="grid-box">${f(d.csgEmployee).toFixed(2)}</div>
-                            <div class="grid-box">${f(d.npsEmployee).toFixed(2)}</div>
-                            <div class="grid-box">${f(d.incomeTax).toFixed(2)}</div>
-                            <div class="grid-box">${f(d.advanceRefund).toFixed(2)}</div>
-                            <div class="grid-box">${f(d.absentDeduction).toFixed(2)}</div>
-                            <div class="grid-box">${f(d.prgfDeduction).toFixed(2)}</div>
-                        </div>
-                    </div>
+    _cache.loaded = true;
+    _cache.loading = false;
+    setStatus("ok", `✅ ${_cache.empList.length} employees loaded`);
+  } catch(e) {
+    _cache.loading = false;
+    setStatus("err", "⚠️ Load error: " + e.message);
+  }
+}
 
-                    <table class="leave-table">
-                        <tr><th>A.L (Annual)</th><th>S.L (Sick)</th><th>L.L (Local)</th><th>Other</th><th>Remarks</th></tr>
-                        <tr style="height:35px"><td>${d.al || '0'}</td><td>${d.sl || '0'}</td><td>${d.ll || '0'}</td><td>-</td><td>-</td></tr>
-                    </table>
+function setStatus(type, msg) {
+  const el = document.getElementById("cacheStatus");
+  const dotClass = type === "ok" ? "status-ok" : "status-loading";
+  el.innerHTML = `<span class="status-dot ${dotClass}"></span>${msg}`;
+}
 
-                    <div class="summary-box">
-                        <table class="summary-table">
-                            <tr style="font-weight:bold; background:#f9f9f9"><td>GROSS PAY</td><td>DEDUCTIONS</td><td>B/F CENTS</td></tr>
-                            <tr style="height:35px; font-weight:bold; font-size:17px;"><td>${d.grossPay || '0.00'}</td><td>${d.deductionsTotal || '0.00'}</td><td>-</td></tr>
-                            <tr style="font-weight:bold; background:#f9f9f9"><td>PAID BY</td><td>TO BE PAID</td><td>C/F CENTS</td></tr>
-                            <tr style="height:45px; font-weight:bold; font-size:20px;"><td>CASH</td><td style="background:#fffde7">${d.toBePaid || '0.00'}</td><td></td></tr>
-                        </table>
-                    </div>
+// ── Fetch attendance + OT for a specific date range (cached by range key) ──
+let _attCache = {};  // key: "from|to" → { attendance: {}, otMap: {} }
 
-                    <div class="footer">
-                        SIGNATURE: ............................................................<br>
-                        <strong>DIRECTOR </strong><br>
-                        DATE: ${new Date().toLocaleDateString('en-GB')}
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-    </script>
+async function fetchRangeData(dFromVal, dToVal) {
+  const key = `${dFromVal}|${dToVal}`;
+  if (_attCache[key]) return _attCache[key];
+
+  setStatus("loading", "⏳ Fetching attendance & OT...");
+  const db = firebase.firestore();
+  const rtdb = firebase.database();
+  const dFrom = new Date(dFromVal);
+  const dTo = new Date(dToVal);
+
+  // Attendance — date range Firestore-এই filter হবে, শুধু দরকারি documents নামবে
+  const snap = await db.collectionGroup("Present_Absent")
+    .where("DATE", ">=", dFromVal)
+    .where("DATE", "<=", dToVal)
+    .get();
+  const attendance = {};  // empId → { date → remark/status info }
+
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (!d.ID || !d.DATE) return;
+
+    const id = String(d.ID).trim();
+    if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
+    const rec = attendance[id];
+    if (d.STATUS === "ABSENT") rec.abs++;
+    if (d.REMARK === "NORMAL WORK") rec.norm++;
+    rec.hol += parseInt(d.HOLIDAY_WORK) || 0;
+    rec.sun += parseInt(d.SUNDAY_WORK) || 0;
+    rec.fine = (rec.fine || 0) + (parseInt(d.FINE) || 0);
+    rec.others = (rec.others || 0) + (parseInt(d.OTHERS) || 0);
+  });
+
+  // OT — RTDB-তে where clause নেই, তাই JS-এ filter
+  // কিন্তু month/year key দিয়ে শুধু দরকারি month-এর data নামানো হচ্ছে
+  const fromMY = `${dFromVal.substring(0,4)}-${dFromVal.substring(5,7)}`; // e.g. "2025-01"
+  const toMY   = `${dToVal.substring(0,4)}-${dToVal.substring(5,7)}`;
+  const otMap = {};  // empId → total OT amount
+
+  // RTDB-তে OVER_TIME/{YYYY-MM}/... structure ধরে নিয়ে targeted fetch
+ const otSnap = await rtdb.ref("OVER_TIME").once("value");
+const otData = otSnap.val() || {};
+for (const monthKey in otData) {
+  const monthObj = otData[monthKey];
+  if (typeof monthObj !== "object" || !monthObj) continue;
+  
+  for (const dateKey in monthObj) {
+    const dateObj = monthObj[dateKey];
+    if (typeof dateObj !== "object" || !dateObj) continue;
+    
+    for (const recKey in dateObj) {
+      const row = dateObj[recKey];
+      if (!row || !row.ID) continue;
+      
+      const otDateStr = String(row.OT_Date || "").trim();
+      if (!otDateStr) continue;
+      if (otDateStr < dFromVal || otDateStr > dToVal) continue;
+      
+      const id = String(row.ID).trim();
+      otMap[id] = (otMap[id] || 0) + (parseFloat(row.Total_Taka) || 0);
+    }
+  }
+}
+
+  const result = { attendance, otMap };
+  _attCache[key] = result;
+  setStatus("ok", `✅ Data ready — ${Object.keys(attendance).length} employee records`);
+  return result;
+}
+
+// ══════════════════════════════════════════
+//  BUILD PAYSLIP DATA — from cache only, no DB calls
+// ══════════════════════════════════════════
+function getDaysInMonth(dateStr) {
+  if (!dateStr) return 26;
+  const d = new Date(dateStr);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
+
+function buildPayslipData(empId, dFromVal, dToVal, rangeData) {
+  const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
+  const salary = emp.salary;
+  const isCook = (emp.desig || "").trim().toUpperCase() === "COOK";
+  const monthDays = getDaysInMonth(dFromVal);
+  const dailyRate = isCook ? salary / monthDays : parseFloat((salary / 26).toFixed(2));
+
+  const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
+  const totalOT = rangeData.otMap[empId] || 0;
+  const totalAdvance = _cache.advMap[empId] || 0;
+
+  const normalAmt = dailyRate * att.norm;
+  const gross = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
+  const csgEmp = Math.round(gross * 0.015 * 100) / 100;
+  const npsEmp = Math.round(gross * 0.01 * 100) / 100;
+  const totalDed = csgEmp + npsEmp + totalAdvance + (att.fine || 0);
+  const netPay = gross - totalDed;
+
+  const now = new Date();
+
+  // Service length
+  let serviceLength = "";
+  if (emp.joining) {
+    const parts = emp.joining.split(/[\/\-\.]/);
+    let jDate;
+    if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+    if (!isNaN(jDate)) {
+      let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
+      if (now.getDate()<jDate.getDate()) months--;
+      if (months < 0) months = 0;
+      const years = Math.floor(months/12), rem = months%12;
+      const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
+        rem===0 ? `${years} Year${years!==1?'s':''}` :
+        `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
+      serviceLength = { total: months, formatted };
+    }
+  }
+
+  return {
+    empId: emp.id, name: emp.name, desig: emp.desig,
+    passport: emp.passport, joining: emp.joining,
+    entryDate: now.toLocaleDateString("en-GB"),
+    time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+    serviceLength,
+    normalWork: normalAmt.toFixed(2),
+    holidayWork: att.hol.toFixed(2),
+    sundayWork: att.sun.toFixed(2),
+    overtime: totalOT.toFixed(2),
+    others: (att.others||0).toFixed(2),
+    gross: gross.toFixed(2),
+    csgEmp: csgEmp.toFixed(2),
+    npsEmp: npsEmp.toFixed(2),
+    advanceRefund: totalAdvance.toFixed(2),
+    fine: (att.fine||0).toFixed(2),
+    absentDays: att.abs,
+    totalDed: totalDed.toFixed(2),
+    netPay: netPay.toFixed(2),
+    netPayWords: numToWords(netPay),
+  };
+}
+
+// ══════════════════════════════════════════
+//  EMPLOYEE PANEL
+// ══════════════════════════════════════════
+let _empListCache = null;
+
+async function openEmpPanel() {
+  document.getElementById("empPanel").classList.add("active");
+  document.body.style.overflow = "hidden";
+  syncPanelDates();
+  if (!_cache.loaded) await preloadStaticData();
+  if (!_empListCache) {
+    _empListCache = _cache.empList;
+    renderPanelRows(_empListCache);
+  } else {
+    renderPanelRows(_empListCache);
+  }
+}
+function closeEmpPanel() {
+  document.getElementById("empPanel").classList.remove("active");
+  document.body.style.overflow = "";
+}
+document.getElementById("empPanel").addEventListener("click", e => {
+  if (e.target === document.getElementById("empPanel")) closeEmpPanel();
+});
+
+function renderPanelRows(list) {
+  const tbody = document.getElementById("empPanelBody");
+  tbody.innerHTML = "";
+  list.forEach(e => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = e.id;
+    tr.innerHTML = `
+      <td style="text-align:center"><input type="checkbox" class="panel-cb" value="${e.id}" onchange="updatePanelCount()" style="width:15px;height:15px;accent-color:#6366f1;cursor:pointer"/></td>
+      <td style="font-family:monospace;font-weight:700;color:var(--brand-blue)">${e.id}</td>
+      <td style="font-weight:600">${e.name}</td>
+      <td style="color:#6b7280;font-size:11px">${e.passport}</td>
+      <td style="color:#6b7280;font-size:11px">${e.desig}</td>`;
+    tr.addEventListener("click", ev => {
+      if (ev.target.tagName === "INPUT") return;
+      const cb = tr.querySelector(".panel-cb");
+      cb.checked = !cb.checked;
+      updatePanelCount();
+    });
+    tr.style.cursor = "pointer";
+    tbody.appendChild(tr);
+  });
+  updatePanelCount();
+}
+
+function filterPanelList() {
+  const q = document.getElementById("panelSearch").value.toLowerCase();
+  document.querySelectorAll("#empPanelBody tr").forEach(tr => {
+    tr.style.display = (tr.textContent||"").toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+function togglePanelAll() {
+  const master = document.getElementById("panelSelectAll").checked;
+  document.querySelectorAll("#empPanelBody tr").forEach(tr => {
+    if (tr.style.display === "none") return;
+    const cb = tr.querySelector(".panel-cb");
+    if (cb) cb.checked = master;
+  });
+  updatePanelCount();
+}
+
+function updatePanelCount() {
+  const checked = document.querySelectorAll(".panel-cb:checked").length;
+  const total = document.querySelectorAll(".panel-cb").length;
+  document.getElementById("panelSelCount").textContent = `${checked} selected`;
+  document.getElementById("panelGenBtn").disabled = checked === 0;
+  const allCb = document.getElementById("panelSelectAll");
+  allCb.indeterminate = checked > 0 && checked < total;
+  allCb.checked = checked === total && total > 0;
+  document.querySelectorAll("#empPanelBody tr").forEach(tr => {
+    const cb = tr.querySelector(".panel-cb");
+    if (cb) tr.style.background = cb.checked ? "#ede9fe" : "";
+  });
+}
+
+// ══════════════════════════════════════════
+//  GENERATE — সব data একবার fetch, তারপর loop
+// ══════════════════════════════════════════
+async function generateFromPanel() {
+  const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
+  if (!selected.length) return;
+
+  const dFromVal = document.getElementById("panelDateFrom").value;
+  const dToVal   = document.getElementById("panelDateTo").value;
+  if (!dFromVal || !dToVal) {
+    showMsg("Please select a date range.", { title: "Date Required", type: "warn" });
+    return;
+  }
+
+  const genBtn = document.getElementById("panelGenBtn");
+  genBtn.disabled = true; genBtn.textContent = "⏳ Generating...";
+  document.getElementById("genLoader").classList.add("active");
+  updateLoader(0, selected.length, "");
+  document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
+
+  const win = window.open("", "_blank");
+  if (!win) {
+    showMsg("Popup blocked! Please allow popups in your browser.", { title: "Popup Blocked", type: "warn" });
+    document.getElementById("genLoader").classList.remove("active");
+    genBtn.disabled = false; genBtn.textContent = "⚡ Generate Payslip";
+    return;
+  }
+
+  win.document.write(loaderPageHTML(selected.length));
+
+  try {
+    // ★ মাত্র ৩টি DB call — সব employee-এর জন্য একবার
+    if (!_cache.loaded) await preloadStaticData();
+    const rangeData = await fetchRangeData(dFromVal, dToVal);
+
+    const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+    let allPages = "";
+
+    for (let i = 0; i < selected.length; i++) {
+      const empId = selected[i];
+      updateLoader(i, selected.length, empId);
+      tryUpdateWinLoader(win, i, selected.length, empId);
+
+      // এখন কোনো DB call নেই — শুধু memory থেকে calculate
+      const d = buildPayslipData(empId, dFromVal, dToVal, rangeData);
+      allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
+
+      updateLoader(i + 1, selected.length, empId);
+    }
+
+    const fullHtml = `<!doctype html><html><head>
+      <meta charset="UTF-8"><title>Payslips — ${period}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+      ${payslipWindowCSS()}
+    </head><body>
+      <div class="no-print">
+        <button onclick="window.print()">🖨️ Print </button>
+        &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip(s) — ${period}</span>
+      </div>
+      ${allPages}
+    </body></html>`;
+
+    win.document.open(); win.document.write(fullHtml); win.document.close();
+  } catch(e) {
+    win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
+    showMsg(`Error: ${e.message}`, { title: "Generation Error", type: "err" });
+  }
+
+  document.getElementById("genLoader").classList.remove("active");
+  genBtn.disabled = false; genBtn.textContent = "⚡ Generate Payslip";
+}
+
+function updateLoader(current, total, empId) {
+  document.getElementById("genCountCurrent").textContent = current;
+  document.getElementById("genCountTotal").textContent = total;
+  document.getElementById("genProgressBar").style.width = (total > 0 ? (current/total*100) : 0) + "%";
+  document.getElementById("genEmpBadge").innerHTML = empId ? `🔄 Processing: <span>${empId}</span>` : `🔄 Initializing...`;
+  document.getElementById("genLoaderSub").textContent = total > 0 ? `${current} of ${total} payslip${total>1?'s':''} completed` : "Please wait...";
+}
+
+function tryUpdateWinLoader(win, i, total, empId) {
+  try {
+    if (win && !win.closed) {
+      win.document.getElementById("cc").textContent = i;
+      win.document.getElementById("pb").style.width = (i/total*100) + "%";
+      win.document.getElementById("st").textContent = `Processing: ${empId}`;
+    }
+  } catch(e2) {}
+}
+
+// ══════════════════════════════════════════
+//  PAYSLIP HTML BUILDERS
+// ══════════════════════════════════════════
+function buildOneSlip(d, period, title) {
+  return `
+  <div style="position:relative;overflow:hidden;background:white;padding:8mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
+    <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.04;width:55%;z-index:0;pointer-events:none" alt="">
+    <div style="position:relative;z-index:1;font-family:'Source Sans 3',Arial,sans-serif;font-size:11px;color:#111">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
+        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="width:36px;height:36px;object-fit:contain" alt="">
+        <div style="text-align:center">
+          <div style="font-size:17px;font-weight:800;text-transform:uppercase">ALAMHOW CO LTD</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;border-top:1px solid #ccc;padding-top:2px">PAYSLIP</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:700;text-decoration:underline">${title}</span>
+        <span style="font-size:10px">PERIOD: ${period}</span>
+        <span style="font-size:9px;color:#666">TIME: ${d.time}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin-bottom:8px">
+        <div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP ID</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.empId}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP NAME</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.name}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">DESIGNATION</span><span style="width:10px;font-weight:700">:</span><span>${d.desig}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PASSPORT NO</span><span style="width:10px;font-weight:700">:</span><span>${d.passport}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">JOINING DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.joining}</span></div>
+        </div>
+        <div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.entryDate}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">GANG</span><span style="width:10px;font-weight:700">:</span><span></span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">SRN</span><span style="width:10px;font-weight:700">:</span><span></span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">NPS NO</span><span style="width:10px;font-weight:700">:</span><span></span></div>
+          <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings</div>
+          <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWork}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidayWork}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.sundayWork}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+            <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.gross}</td></tr>
+          </table>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Deductions</div>
+          <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">CSG Emp. <span style="color:#888">(1.5%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.csgEmp}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">NPS Emp. <span style="color:#888">(1%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.npsEmp}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Income Tax</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Advance Refund</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.advanceRefund}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fine</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fine}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Absent <span style="color:#aaa;font-size:9px">(info)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.absentDays} Days</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
+            <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.totalDed}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:8px;border-top:2px solid black;padding-top:6px">
+        <div style="font-weight:700;font-size:13px;display:flex;justify-content:space-between;text-transform:uppercase">
+          <span>Net Payable</span><span style="color:#15803d;font-family:monospace">${d.netPay}</span>
+        </div>
+        <div style="margin-top:3px;font-size:10px;color:#444;border:1px dashed #aaa;border-radius:4px;padding:3px 6px">
+          <span style="font-weight:700">IN WORDS:</span> ${d.netPayWords}
+        </div>
+      </div>
+      <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
+        <thead><tr style="background:#f3f4f6">
+          <th style="border:1px solid #9ca3af;padding:3px">A.L</th><th style="border:1px solid #9ca3af;padding:3px">S.L</th>
+          <th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
+          <th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
+        </tr></thead>
+        <tbody><tr>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+        </tr></tbody>
+      </table>
+      <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:16px">
+        <tr style="background:#f3f4f6;font-weight:700">
+          <th style="border:1px solid #9ca3af;padding:3px">GROSS PAY</th>
+          <th style="border:1px solid #9ca3af;padding:3px">DEDUCTIONS</th>
+          <th style="border:1px solid #9ca3af;padding:3px">B/F CENTS</th>
+        </tr>
+        <tr>
+          <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace">${d.gross}</td>
+          <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace">${d.totalDed}</td>
+          <td style="border:1px solid #9ca3af;padding:3px">-</td>
+        </tr>
+        <tr style="background:#f9fafb;font-weight:700">
+          <td style="border:1px solid #9ca3af;padding:2px">PAID BY CASH/CHQ/D.D</td>
+          <td style="border:1px solid #9ca3af;padding:2px">TO BE PAID</td>
+          <td style="border:1px solid #9ca3af;padding:2px">C/F CENTS</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #9ca3af;padding:3px">CASH</td>
+          <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace;font-weight:700">${d.netPay}</td>
+          <td style="border:1px solid #9ca3af;padding:3px"></td>
+        </tr>
+      </table>
+      <div style="margin-top:64px;font-size:10px;text-transform:uppercase">
+        DIRECTOR SIGNATURE:..........................................<br>
+        <span style="margin-top:4px;display:inline-block">DATE:...............................</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function payslipWindowCSS() {
+  return `<style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#f3f4f6;font-family:'Source Sans 3',Arial,sans-serif;padding:10mm}
+    .page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}
+    .page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}
+    .page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}
+    .no-print{text-align:center;margin-bottom:8mm}
+    .no-print button{background:#002147;color:#ffd700;border:2px solid #ffd700;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+    .no-print button:hover{background:#ffd700;color:#002147}
+    @media print{
+      @page{size:A4 landscape;margin:6mm}
+      body{background:white;padding:0}
+      .no-print{display:none!important}
+      .page{box-shadow:none;border-radius:0;padding:2mm 0;max-width:100%;gap:22mm;margin:0;page-break-after:always;break-after:page}
+      .page:last-child{page-break-after:avoid;break-after:avoid}
+    }
+  </style>`;
+}
+
+function loaderPageHTML(total) {
+  return `<!doctype html><html><head><title>Generating...</title><style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{display:flex;align-items:center;justify-content:center;height:100vh;background:#002147;font-family:sans-serif;flex-direction:column;gap:20px}
+    .spinner{width:56px;height:56px;border:5px solid #1e3a5f;border-top-color:#ffd700;border-right-color:rgba(255,215,0,0.4);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .title{color:#ffd700;font-size:22px;font-weight:700;letter-spacing:1.5px}
+    .count-box{background:rgba(255,215,0,0.08);border:2px solid #ffd700;border-radius:14px;padding:14px 40px;text-align:center}
+    .count-big{color:#ffd700;font-size:44px;font-weight:700;line-height:1}
+    .count-of{color:#6a88aa;font-size:13px;font-weight:600;margin-top:4px}
+    .bar-wrap{width:280px;height:8px;background:#001030;border-radius:20px;overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,#ffd700,#ffe87a);width:0%;border-radius:20px;transition:width .4s}
+    .sub{color:#6a88aa;font-size:12px;font-weight:600}
+  </style></head><body>
+    <div class="spinner"></div>
+    <div class="title">⚡ Generating Payslips</div>
+    <div class="count-box">
+      <div class="count-big" id="cc">0</div>
+      <div class="count-of">of ${total} payslip${total>1?'s':''}</div>
+    </div>
+    <div class="bar-wrap"><div class="bar" id="pb"></div></div>
+    <div class="sub" id="st">Fetching data...</div>
+  </body></html>`;
+}
+
+// ══════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════
+function numToWords(amount) {
+  const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function b100(n){if(n<20)return ones[n];return tens[Math.floor(n/10)]+(n%10?" "+ones[n%10]:"")}
+  function b1000(n){if(n<100)return b100(n);return ones[Math.floor(n/100)]+" Hundred"+(n%100?" "+b100(n%100):"")}
+  const num=Math.floor(Number(amount)||0);
+  if(num===0)return"Zero Taka Only";
+  let r="";
+  if(num>=1000000)r+=b1000(Math.floor(num/1000000))+" Million ";
+  if(num>=1000)r+=b1000(Math.floor((num%1000000)/1000))+" Thousand ";
+  if(num%1000)r+=b1000(num%1000);
+  return r.trim()+" Taka Only";
+}
+
+function fmtDate(d) {
+  const day=String(d.getDate()).padStart(2,"0");
+  const m=d.toLocaleString("en-US",{month:"short"}).toUpperCase();
+  return `${day}-${m}-${d.getFullYear()}`;
+}
+
+function showMsg(msg, { title="Notice", type="warn" }={}) {
+  const icons={warn:"⚠️",err:"❌",ok:"✅",info:"ℹ️"};
+  document.getElementById("msgboxIcon").textContent=icons[type]||"ℹ️";
+  document.getElementById("msgboxIcon").className="msgbox-icon "+type;
+  document.getElementById("msgboxTitle").textContent=title;
+  document.getElementById("msgboxBody").innerHTML=msg;
+  document.getElementById("msgboxOverlay").classList.add("active");
+}
+function closeMsgBox() { document.getElementById("msgboxOverlay").classList.remove("active"); }
+
+// Auto-preload on page load
+window.addEventListener("load", preloadStaticData);
+</script>
 </body>
 </html>
