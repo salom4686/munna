@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project Entry System</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo">
+  <style>
+    :root {
+      --nb-0:#001F3F; --nb-1:#002855; --nb-2:#003366; --nb-3:#003F7F; --nb-4:#004C99;
+      --nb-5:#0057B3; --nb-6:#0062CC; --nb-7:#0074E8;
+      --gold-0:#7a5500; --gold-1:#a37000; --gold-2:#c9900c; --gold-3:#e5a913;
+      --gold-4:#f5c842; --gold-5:#fde68a; --gold-6:#fff3c4;
+      --white:#e8f0ff; --text-dim:#7aaad8; --text-muted:#4a7aaa;
+      --border:rgba(229,169,19,.22); --border-h:rgba(229,169,19,.6);
+      --shadow:0 8px 48px rgba(0,10,30,.75);
+      --glow-gold:0 0 30px rgba(229,169,19,.2);
+      --glow-blue:0 0 30px rgba(0,80,200,.4);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{
+      background:#001530;
+      font-family:'Times New Roman',Times,serif;
+      min-height:100vh;display:flex;align-items:flex-start;
+      justify-content:center;overflow-x:hidden;
+    }
+    /* Atmospheric background */
+    body::before{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+      background:
+        radial-gradient(ellipse 70% 50% at 10% 5%,rgba(0,60,160,.55) 0%,transparent 60%),
+        radial-gradient(ellipse 50% 40% at 90% 90%,rgba(120,80,0,.18) 0%,transparent 55%),
+        radial-gradient(ellipse 40% 30% at 50% 50%,rgba(0,40,100,.4) 0%,transparent 70%);
+    }
+    body::after{
+      content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+      background-image:
+        linear-gradient(rgba(229,169,19,.028) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(229,169,19,.028) 1px,transparent 1px);
+      background-size:48px 48px;
+    }
+    .wrapper{position:relative;z-index:1;width:100%;max-width:960px;padding:28px 16px 56px}
+
+    /* ═══ HEADER ═══ */
+    .header{
+      display:flex;align-items:center;gap:18px;
+      margin-bottom:26px;animation:fadeDown .6s ease both;
+    }
+    .logo-ring{
+      flex-shrink:0;
+      display:flex;align-items:center;justify-content:center;
+      width:88px;height:88px;
+      border:none;background:transparent;box-shadow:none;overflow:visible;
+    }
+    .logo-ring img{
+      width:88px;height:88px;
+      object-fit:contain;
+      filter:brightness(1.08) contrast(1.05) drop-shadow(0 0 8px rgba(229,169,19,.3));
+    }
+    .header-text{}
+    .header h1{
+      font-family:'Times New Roman',Times,serif;
+      font-size:clamp(1.3rem,3.2vw,1.85rem);
+      font-weight:700;letter-spacing:.1em;
+      background:linear-gradient(135deg,var(--gold-5) 0%,var(--gold-3) 50%,var(--gold-2) 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+      line-height:1.2;
+    }
+    .header p{font-size:.68rem;color:var(--text-dim);letter-spacing:.22em;text-transform:uppercase;margin-top:4px}
+    .header-right{margin-left:auto}
+    .divider{display:flex;align-items:center;gap:12px;margin-bottom:22px;animation:fadeDown .5s .1s ease both}
+    .divider span{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(229,169,19,.4),transparent)}
+    .divider em{color:var(--gold-3);font-style:normal;font-size:.75rem;white-space:nowrap;letter-spacing:.15em}
+
+    /* ═══ STATUS ═══ */
+    .status-bar{
+      display:flex;align-items:center;gap:9px;padding:10px 16px;
+      border-radius:9px;border:1px solid;font-size:.7rem;font-weight:600;
+      letter-spacing:.1em;margin-bottom:22px;animation:fadeDown .5s .15s ease both;transition:all .4s;
+    }
+    .status-bar.ok{background:rgba(0,50,25,.7);border-color:rgba(36,110,68,.5);color:#5dffa0}
+    .status-bar.wait{background:rgba(0,25,65,.7);border-color:rgba(229,169,19,.28);color:var(--gold-3)}
+    .status-bar.fail{background:rgba(40,8,8,.7);border-color:rgba(120,36,36,.5);color:#ff8888}
+    .s-dot{width:8px;height:8px;border-radius:50%;background:currentColor;flex-shrink:0}
+    .s-dot.pulse{animation:pulse 1.4s ease infinite}
+
+    /* ═══ CARD ═══ */
+    .card{
+      background:linear-gradient(158deg,rgba(0,40,100,.92) 0%,rgba(0,25,63,.97) 100%);
+      border:1px solid var(--border);border-radius:16px;
+      padding:28px 26px 24px;
+      box-shadow:var(--shadow),var(--glow-gold),var(--glow-blue);
+      backdrop-filter:blur(14px);
+      animation:fadeUp .6s .15s ease both;margin-bottom:26px;
+    }
+    .sec-label{
+      font-family:'Times New Roman',Times,serif;font-size:.6rem;letter-spacing:.3em;
+      text-transform:uppercase;color:var(--gold-2);
+      margin-bottom:20px;display:flex;align-items:center;gap:10px;
+    }
+    .sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    /* ═══ FORM GRID ═══ */
+    /* Row 1: SL NO | Project ID */
+    /* Row 2: Date | Project Name */
+    /* Row 3: Start Date | Remark */
+    .fg{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .fgrp{display:flex;flex-direction:column;gap:6px}
+    label{
+      font-size:.6rem;font-weight:700;letter-spacing:.26em;
+      text-transform:uppercase;color:var(--gold-2);
+    }
+    .auto-badge{
+      display:inline-block;
+      background:rgba(229,169,19,.12);border:1px solid rgba(229,169,19,.25);
+      color:var(--gold-4);font-size:.48rem;letter-spacing:.12em;
+      padding:1px 5px;border-radius:4px;margin-left:4px;vertical-align:middle;
+    }
+
+    .input-wrap{position:relative}
+    input[type=text],input[type=date],textarea{
+      background:rgba(0,15,40,.8);border:1px solid var(--border);border-radius:8px;
+      padding:12px 16px;color:var(--white);
+      font-family:'Times New Roman',Times,serif;font-size:.88rem;font-weight:500;
+      outline:none;transition:border-color .25s,box-shadow .25s,background .25s;width:100%;
+      appearance:none;-webkit-appearance:none;
+    }
+    input::placeholder,textarea::placeholder{color:rgba(122,154,189,.35)}
+    input:focus,textarea:focus{
+      border-color:var(--gold-3);background:rgba(0,25,63,.96);
+      box-shadow:0 0 0 3px rgba(229,169,19,.09),0 0 16px rgba(229,169,19,.08);
+    }
+    textarea{resize:vertical;min-height:48px;line-height:1.55}
+
+    input[readonly]{
+      color:var(--gold-4);background:rgba(229,169,19,.07);
+      border-color:rgba(229,169,19,.32);cursor:default;
+      font-weight:700;letter-spacing:.04em;
+    }
+    .ld{
+      position:absolute;right:11px;top:50%;transform:translateY(-50%);
+      width:13px;height:13px;
+      border:2px solid rgba(229,169,19,.18);border-top-color:var(--gold-3);
+      border-radius:50%;animation:spin .7s linear infinite;
+    }
+
+    /* ═══ BUTTONS ═══ */
+    .btn-row{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+    .btn{
+      flex:1;min-width:120px;padding:13px 20px;border-radius:9px;border:none;cursor:pointer;
+      font-family:'Times New Roman',Times,serif;font-size:.74rem;font-weight:600;letter-spacing:.18em;
+      text-transform:uppercase;transition:all .25s;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--gold-2) 0%,var(--gold-3) 55%,var(--gold-4) 100%);
+      color:var(--nb-1);box-shadow:0 4px 22px rgba(229,169,19,.32);
+    }
+    .btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(229,169,19,.45)}
+    .btn-primary:active{transform:translateY(0)}
+    .btn-secondary{background:transparent;color:var(--gold-2);border:1px solid var(--border-h)}
+    .btn-secondary:hover{background:rgba(229,169,19,.08);border-color:var(--gold-3);color:var(--gold-3)}
+    .btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+    .spinner{
+      display:inline-block;width:12px;height:12px;
+      border:2px solid rgba(4,13,26,.3);border-top-color:var(--nb-1);
+      border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:5px;
+    }
+
+    /* ═══ CUSTOM CALENDAR ═══ */
+    .cal-overlay{
+      position:fixed;inset:0;background:rgba(2,8,18,.82);backdrop-filter:blur(8px);
+      z-index:500;display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .25s;
+    }
+    .cal-overlay.open{opacity:1;pointer-events:all}
+    .cal-box{
+      background:linear-gradient(155deg,rgba(0,40,105,.98) 0%,rgba(0,20,55,.99) 100%);
+      border:1px solid var(--border-h);border-radius:18px;
+      padding:24px;min-width:300px;max-width:340px;width:90%;
+      box-shadow:0 20px 80px rgba(0,0,0,.7),var(--glow-gold);
+      transform:translateY(20px) scale(.97);transition:transform .28s cubic-bezier(.22,1,.36,1);
+    }
+    .cal-overlay.open .cal-box{transform:none}
+    .cal-header{
+      display:flex;align-items:center;justify-content:space-between;
+      margin-bottom:18px;
+    }
+    .cal-nav{
+      background:rgba(229,169,19,.1);border:1px solid rgba(229,169,19,.25);
+      color:var(--gold-3);border-radius:7px;width:32px;height:32px;
+      cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;
+    }
+    .cal-nav:hover{background:rgba(229,169,19,.22);border-color:var(--gold-3)}
+    .cal-month-year{
+      font-family:'Times New Roman',Times,serif;font-size:.85rem;font-weight:600;
+      color:var(--gold-4);letter-spacing:.08em;cursor:pointer;
+    }
+    .cal-month-year:hover{color:var(--gold-5)}
+    .cal-dow{
+      display:grid;grid-template-columns:repeat(7,1fr);
+      margin-bottom:6px;gap:2px;
+    }
+    .cal-dow span{
+      text-align:center;font-size:.57rem;font-weight:700;
+      letter-spacing:.1em;color:var(--text-muted);padding:4px 0;
+    }
+    .cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+    .cal-day{
+      aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+      border-radius:7px;cursor:pointer;font-size:.78rem;font-weight:500;
+      color:var(--white);transition:all .18s;border:1px solid transparent;
+      font-family:'Times New Roman',Times,serif;
+    }
+    .cal-day:hover{background:rgba(229,169,19,.15);border-color:rgba(229,169,19,.3);color:var(--gold-4)}
+    .cal-day.today{background:rgba(0,55,150,.7);border-color:rgba(0,100,220,.8);color:var(--gold-5)}
+    .cal-day.selected{
+      background:linear-gradient(135deg,var(--gold-2),var(--gold-3));
+      color:var(--nb-1);font-weight:700;border-color:var(--gold-3);
+      box-shadow:0 0 12px rgba(229,169,19,.4);
+    }
+    .cal-day.other-month{color:var(--text-muted);opacity:.4}
+    .cal-day.empty{cursor:default}
+    .cal-footer{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+    .cal-btn{
+      padding:8px 18px;border-radius:7px;font-family:'Times New Roman',Times,serif;
+      font-size:.65rem;letter-spacing:.15em;cursor:pointer;border:none;
+      font-weight:600;transition:all .2s;
+    }
+    .cal-ok{
+      background:linear-gradient(135deg,var(--gold-2),var(--gold-3));
+      color:var(--nb-1);box-shadow:0 3px 12px rgba(229,169,19,.3);
+    }
+    .cal-ok:hover{box-shadow:0 5px 18px rgba(229,169,19,.45)}
+    .cal-cancel{background:rgba(229,169,19,.08);color:var(--gold-2);border:1px solid var(--border-h)}
+    .cal-cancel:hover{background:rgba(229,169,19,.14)}
+    .cal-input-trigger{cursor:pointer;caret-color:transparent}
+    .cal-input-trigger:focus{cursor:pointer}
+
+    /* year/month picker panel */
+    .ym-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}
+    .ym-cell{
+      padding:7px 4px;text-align:center;border-radius:7px;cursor:pointer;
+      font-size:.72rem;font-weight:600;color:var(--white);
+      border:1px solid transparent;transition:all .18s;
+    }
+    .ym-cell:hover{background:rgba(229,169,19,.15);border-color:rgba(229,169,19,.3);color:var(--gold-4)}
+    .ym-cell.active{background:linear-gradient(135deg,var(--gold-2),var(--gold-3));color:var(--nb-1);border-color:var(--gold-3)}
+    .ym-nav{
+      display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
+    }
+    .ym-nav-btn{
+      background:rgba(229,169,19,.1);border:1px solid rgba(229,169,19,.22);
+      color:var(--gold-3);border-radius:7px;width:28px;height:28px;
+      cursor:pointer;font-size:.85rem;display:flex;align-items:center;justify-content:center;
+      transition:all .2s;
+    }
+    .ym-nav-btn:hover{background:rgba(229,169,19,.2)}
+    .ym-label{font-family:'Times New Roman',Times,serif;font-size:.8rem;color:var(--gold-4);letter-spacing:.06em}
+
+    /* ═══ CUSTOM CONFIRM/ALERT BOX ═══ */
+    .msg-overlay{
+      position:fixed;inset:0;background:rgba(2,8,18,.85);backdrop-filter:blur(10px);
+      z-index:900;display:flex;align-items:center;justify-content:center;
+      opacity:0;pointer-events:none;transition:opacity .22s;
+    }
+    .msg-overlay.open{opacity:1;pointer-events:all}
+    .msg-box{
+      background:linear-gradient(155deg,rgba(0,40,105,.99) 0%,rgba(0,20,55,1) 100%);
+      border:1px solid var(--border-h);border-radius:16px;
+      padding:28px 28px 22px;max-width:380px;width:88%;
+      box-shadow:0 24px 80px rgba(0,0,0,.75),var(--glow-gold);
+      transform:translateY(18px) scale(.96);transition:transform .28s cubic-bezier(.22,1,.36,1);
+      text-align:center;
+    }
+    .msg-overlay.open .msg-box{transform:none}
+    .msg-icon{font-size:2rem;margin-bottom:14px;display:block}
+    .msg-title{
+      font-family:'Times New Roman',Times,serif;font-size:.95rem;font-weight:700;
+      color:var(--gold-4);letter-spacing:.08em;margin-bottom:10px;
+    }
+    .msg-body{font-size:.82rem;color:var(--text-dim);line-height:1.55;margin-bottom:22px}
+    .msg-btns{display:flex;gap:10px;justify-content:center}
+    .msg-btn{
+      padding:10px 24px;border-radius:8px;font-family:'Times New Roman',Times,serif;
+      font-size:.68rem;letter-spacing:.15em;cursor:pointer;border:none;
+      font-weight:600;transition:all .22s;
+    }
+    .msg-ok{
+      background:linear-gradient(135deg,var(--gold-2),var(--gold-3));
+      color:var(--nb-1);box-shadow:0 3px 14px rgba(229,169,19,.3);
+    }
+    .msg-ok:hover{box-shadow:0 6px 20px rgba(229,169,19,.45)}
+    .msg-ok.danger{background:linear-gradient(135deg,#7a1515,#a52020);color:#ffd0d0;box-shadow:0 3px 14px rgba(180,30,30,.35)}
+    .msg-ok.danger:hover{box-shadow:0 6px 20px rgba(180,30,30,.5)}
+    .msg-cancel{background:rgba(229,169,19,.08);color:var(--gold-2);border:1px solid var(--border-h)}
+    .msg-cancel:hover{background:rgba(229,169,19,.14)}
+
+    /* ═══ TOAST ═══ */
+    #toast{
+      position:fixed;bottom:28px;left:50%;
+      transform:translateX(-50%) translateY(80px);
+      padding:11px 26px;border-radius:10px;font-size:.8rem;font-weight:600;
+      letter-spacing:.07em;pointer-events:none;opacity:0;z-index:999;
+      transition:transform .38s cubic-bezier(.22,1,.36,1),opacity .3s;white-space:nowrap;
+    }
+    #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+    #toast.success{
+      background:linear-gradient(135deg,#08281a,#0a3020);
+      border:1px solid #287050;color:#5dffa0;
+      box-shadow:0 0 24px rgba(40,160,90,.22);
+    }
+    #toast.error{
+      background:linear-gradient(135deg,#280808,#200808);
+      border:1px solid #7a2a2a;color:#ff8888;
+      box-shadow:0 0 24px rgba(180,40,40,.22);
+    }
+
+    /* ═══ TABLE ═══ */
+    .rec-section{animation:fadeUp .6s .25s ease both}
+    .rec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+    .rec-count{font-size:.66rem;color:var(--text-dim);letter-spacing:.15em}
+    .tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);box-shadow:var(--glow-blue)}
+    table{width:100%;border-collapse:collapse;font-size:.8rem}
+    thead tr{background:rgba(0,40,100,.95)}
+    th{
+      padding:11px 13px;text-align:left;font-family:'Times New Roman',Times,serif;
+      font-size:.55rem;letter-spacing:.22em;color:var(--gold-2);
+      text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap;
+    }
+    tbody tr{transition:background .2s;border-bottom:1px solid rgba(229,169,19,.04)}
+    tbody tr:last-child{border-bottom:none}
+    tbody tr:hover{background:rgba(0,60,160,.3)}
+    td{padding:10px 13px;color:var(--white);vertical-align:middle}
+    .sl-cell{font-family:'Times New Roman',Times,serif;font-size:.78rem;font-weight:700;color:var(--text-muted);text-align:center}
+    .proj-id-cell{font-family:'Times New Roman',Times,serif;font-size:.7rem;font-weight:700;color:var(--gold-3);letter-spacing:.03em;white-space:nowrap}
+
+    /* Action buttons */
+    .action-cell{display:flex;gap:6px;align-items:center}
+    .act-btn{
+      padding:4px 11px;border-radius:6px;cursor:pointer;
+      font-family:'Times New Roman',Times,serif;font-size:.68rem;font-weight:700;
+      letter-spacing:.06em;transition:all .2s;border:1px solid;white-space:nowrap;
+    }
+    .act-edit{
+      background:rgba(0,55,140,.5);border-color:rgba(0,80,200,.6);color:#8ab4f8;
+    }
+    .act-edit:hover{background:rgba(0,80,180,.7);border-color:#4a90e2;color:#c0d8ff}
+    .act-del{
+      background:rgba(80,15,15,.5);border-color:rgba(120,30,30,.5);color:#f08080;
+    }
+    .act-del:hover{background:rgba(120,25,25,.7);border-color:#a03030;color:#ffaaaa}
+    .empty-state{text-align:center;padding:30px;color:var(--text-muted);font-size:.8rem;letter-spacing:.1em}
+
+    /* inline edit highlight */
+    tr.editing td{background:rgba(229,169,19,.04)!important}
+
+    @keyframes fadeDown{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.75)}}
+
+    @media(max-width:600px){
+      .card{padding:18px 12px}
+      .fg{grid-template-columns:1fr}
+      .header h1{font-size:1.2rem}
+    }
+  </style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- ═══ HEADER ═══ -->
+  <div class="header">
+    <div class="logo-ring">
+      <img src="https://lh3.googleusercontent.com/u/0/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="MHOW CO Logo" style="width:88px;height:88px;object-fit:contain;border-radius:50%;filter:brightness(1.08) contrast(1.05) drop-shadow(0 0 6px rgba(229,169,19,.35));"/>
+    </div>
+    <div class="header-text">
+      <h1>ALOMHOW CO LTD</h1>
+      <p>PROJECT MANAGEMENT SYSTEM</p>
+    </div>
+  </div>
+  <div class="divider"><span></span><em>✦ PROJECT MANAGEMENT PORTAL ✦</em><span></span></div>
+
+  <!-- ═══ FORM CARD ═══ -->
+  <div class="card">
+    <div class="sec-label">Add New Project</div>
+
+    <div class="fg">
+
+      <!-- Row 1: SL NO | Project ID -->
+      <div class="fgrp">
+        <label>SL No</label>
+        <div class="input-wrap">
+          <input type="text" id="f_sl" readonly placeholder="Loading..."/>
+          <div class="ld" id="slSpinner"></div>
+        </div>
+      </div>
+
+      <div class="fgrp">
+        <label>Project ID</label>
+        <div class="input-wrap">
+          <input type="text" id="f_proj_id" readonly placeholder="Generating..."/>
+          <div class="ld" id="idSpinner"></div>
+        </div>
+      </div>
+
+      <!-- Row 2: Date | Project Name -->
+      <div class="fgrp">
+        <label>Date</label>
+        <input type="text" id="f_date" readonly/>
+      </div>
+
+      <div class="fgrp">
+        <label>Project Name</label>
+        <input type="text" id="f_proj_name" placeholder="Enter project name..."/>
+      </div>
+
+      <!-- Row 3: Start Date | Remark -->
+      <div class="fgrp">
+        <label>Start Date</label>
+        <div class="input-wrap">
+          <input type="text" id="f_start_date" class="cal-input-trigger" readonly
+                 placeholder="Select date..." onclick="openCal('f_start_date')"/>
+        </div>
+      </div>
+
+      <div class="fgrp">
+        <label>Remark</label>
+        <textarea id="f_remark" rows="1" placeholder="Enter remarks..."></textarea>
+      </div>
+
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary" id="saveBtn" onclick="saveProject()">✦ Save Project</button>
+      <button class="btn btn-secondary" onclick="resetForm()">Reset</button>
+    </div>
+  </div>
+
+  <!-- ═══ RECORDS ═══ -->
+  <div class="rec-section">
+    <div class="rec-hdr">
+      <div class="sec-label" style="margin-bottom:0">Saved </div>
+      <div class="rec-count" id="recCount">—</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="text-align:center">SL</th>
+            <th>Project ID</th>
+            <th>Project Name</th>
+            <th>Date</th>
+            <th>Start Date</th>
+            <th>Remark</th>
+            <th style="text-align:center">Action</th>
+          </tr>
+        </thead>
+        <tbody id="recBody">
+          <tr><td colspan="7" class="empty-state">Connecting...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- ═══ TOAST ═══ -->
+<div id="toast"></div>
+
+<!-- ═══ CUSTOM CALENDAR ═══ -->
+<div class="cal-overlay" id="calOverlay" onclick="calBgClick(event)">
+  <div class="cal-box" id="calBox">
+    <div id="calInner"></div>
+    <div class="cal-footer">
+      <button class="cal-btn cal-cancel" onclick="closeCal()">Cancel</button>
+      <button class="cal-btn cal-ok" onclick="confirmCal()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CUSTOM MESSAGE BOX ═══ -->
+<div class="msg-overlay" id="msgOverlay">
+  <div class="msg-box" id="msgBox">
+    <span class="msg-icon" id="msgIcon"></span>
+    <div class="msg-title" id="msgTitle"></div>
+    <div class="msg-body" id="msgBody"></div>
+    <div class="msg-btns" id="msgBtns"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getFirestore, collection, addDoc, getDocs,
+  deleteDoc, updateDoc, doc, query, orderBy
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+/* ─── Firebase Config ─── */
+const firebaseConfig = {
+  apiKey:            "AIzaSyBjkm5KMhMd4SbL6-pvU9WbX1UaFJEVMBg",
+  authDomain:        "munna-acl-fda7c.firebaseapp.com",
+  projectId:         "munna-acl-fda7c",
+  storageBucket:     "munna-acl-fda7c.firebasestorage.app",
+  messagingSenderId: "371130316468",
+  appId:             "1:371130316468:web:61b4cba0dbbd5f027589e1",
+};
+const COLL = 'PROJECT_NAME';
+let db;
+
+/* ─── Init ─── */
+try {
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  await boot();
+} catch(e) {
+  console.error('Firebase error:', e.message);
+}
+
+/* ─── Boot ─── */
+async function boot() {
+  const now  = new Date();
+  const dd   = String(now.getDate()).padStart(2,'0');
+  const mm   = String(now.getMonth()+1).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  document.getElementById('f_date').value = `${dd}/${mm}/${yyyy}`;
+  await generateIds();
+  loadRecords();
+}
+
+/* ─── Auto IDs ─── */
+async function generateIds() {
+  const slSpin = document.getElementById('slSpinner');
+  const idSpin = document.getElementById('idSpinner');
+  slSpin.style.display = idSpin.style.display = 'block';
+  document.getElementById('f_sl').value = '';
+  document.getElementById('f_proj_id').value = '';
+  try {
+    const snap = await getDocs(collection(db, COLL));
+    let maxSl=0, maxSeq=0;
+    const prefix = `ACL-PROJ-`;
+    snap.forEach(d => {
+      const data = d.data();
+      const sl = parseInt(data.FIELD_A||data.SL_NO||0,10);
+      if(!isNaN(sl)&&sl>maxSl) maxSl=sl;
+      const pid = data.FIELD_B||data.PROJECT_ID||'';
+      if(pid.startsWith(prefix)){
+        const seq = parseInt(pid.replace(prefix,''),10);
+        if(!isNaN(seq)&&seq>maxSeq) maxSeq=seq;
+      }
+    });
+    document.getElementById('f_sl').value      = maxSl+1;
+    document.getElementById('f_proj_id').value = `${prefix}${String(maxSeq+1).padStart(4,'0')}`;
+  } catch(e) {
+    document.getElementById('f_sl').value      = 'Error';
+    document.getElementById('f_proj_id').value = 'Error';
+    toast('ID generation failed: '+e.message,'error');
+  } finally {
+    slSpin.style.display = idSpin.style.display = 'none';
+  }
+}
+
+/* ─── Save ─── */
+window.saveProject = async function() {
+  const sl        = document.getElementById('f_sl').value.trim();
+  const projName  = document.getElementById('f_proj_name').value.trim();
+  const projId    = document.getElementById('f_proj_id').value.trim();
+  const date      = document.getElementById('f_date').value;
+  const startDate = document.getElementById('f_start_date').value;
+  const remark    = document.getElementById('f_remark').value.trim();
+
+  if(!projName){ toast('Project Name is required!','error'); document.getElementById('f_proj_name').focus(); return; }
+  if(!projId||projId==='Error'){ toast('Project ID not ready, please reload','error'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span>Saving...';
+  try {
+    await addDoc(collection(db, COLL),{
+      FIELD_A:parseInt(sl,10),FIELD_B:projId,NAME:projName,
+      DATE:date,START_DATE:startDate,FIELD_D:remark,
+      FIELD_E:'',timestamp:new Date().toISOString(),
+    });
+    toast(`✦ ${projId} saved successfully!`,'success');
+    resetForm(); await generateIds(); loadRecords();
+  } catch(e){ toast('Error: '+e.message,'error'); }
+  finally{ btn.disabled=false; btn.innerHTML='✦ Save Project'; }
+};
+
+/* ─── Load ─── */
+async function loadRecords(){
+  try{
+    const snap=await getDocs(collection(db,COLL));
+    const docs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Always sort numerically by FIELD_A on client side
+    docs.sort((a,b)=>(parseInt(a.FIELD_A)||0)-(parseInt(b.FIELD_A)||0));
+    render(docs);
+  } catch(e){ toast('Load failed: '+e.message,'error'); }
+}
+
+/* ─── Render ─── */
+function render(docs){
+  document.getElementById('recCount').textContent=`Total ${docs.length} Project${docs.length!==1?'s':''}`;
+  const tb=document.getElementById('recBody');
+  if(!docs.length){ tb.innerHTML=`<tr><td colspan="7" class="empty-state">No projects found</td></tr>`; return; }
+  tb.innerHTML=docs.map((d,i)=>`
+    <tr id="row-${d.id}">
+      <td class="sl-cell">${i+1}</td>
+      <td class="proj-id-cell">${esc(d.FIELD_B??d.PROJECT_ID??'—')}</td>
+      <td><strong style="color:var(--gold-5)">${esc(d.NAME)}</strong></td>
+      <td style="white-space:nowrap;color:var(--text-dim)">${esc(d.DATE)}</td>
+      <td style="white-space:nowrap;color:var(--text-dim)">${esc(d.START_DATE)}</td>
+      <td style="color:var(--text-dim);max-width:150px">${esc(d.FIELD_D)}</td>
+      <td>
+        <div class="action-cell">
+          <button class="act-btn act-edit" onclick="editRow('${d.id}')">Edit</button>
+          <button class="act-btn act-del" onclick="confirmDelete('${d.id}','${esc(d.FIELD_B??'')}')">Delete</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+/* ─── Edit Row (inline) ─── */
+window.editRow = async function(id){
+  // find current data
+  const snap=await getDocs(collection(db,COLL));
+  let data=null; let docRef=null;
+  snap.forEach(d=>{ if(d.id===id){data=d.data(); docRef=doc(db,COLL,id);} });
+  if(!data) return;
+
+  const row=document.getElementById('row-'+id);
+  row.classList.add('editing');
+  row.innerHTML=`
+    <td class="sl-cell">${esc(String(data.FIELD_A??''))}</td>
+    <td class="proj-id-cell">${esc(data.FIELD_B??'—')}</td>
+    <td><input type="text" id="ed_name" value="${esc(data.NAME??'')}" style="width:100%;min-width:120px"/></td>
+    <td><input type="text" id="ed_date" value="${esc(data.DATE??'')}" style="width:100px" readonly/></td>
+    <td>
+      <input type="text" id="ed_start" value="${esc(data.START_DATE??'')}" style="width:100px"
+             class="cal-input-trigger" readonly onclick="openCal('ed_start')"/>
+    </td>
+    <td><input type="text" id="ed_remark" value="${esc(data.FIELD_D??'')}" style="width:100%;min-width:100px"/></td>
+    <td>
+      <div class="action-cell">
+        <button class="act-btn act-edit" onclick="saveEdit('${id}')">Save</button>
+        <button class="act-btn act-del" onclick="loadRecords()">Cancel</button>
+      </div>
+    </td>
+  `;
+};
+
+window.saveEdit = async function(id){
+  const name   = document.getElementById('ed_name')?.value.trim();
+  const start  = document.getElementById('ed_start')?.value.trim();
+  const remark = document.getElementById('ed_remark')?.value.trim();
+  if(!name){ toast('Project Name is required!','error'); return; }
+  try{
+    await updateDoc(doc(db,COLL,id),{NAME:name,START_DATE:start||'',FIELD_D:remark||''});
+    toast('Project updated!','success'); loadRecords();
+  } catch(e){ toast('Update failed: '+e.message,'error'); }
+};
+
+/* ─── Delete ─── */
+window.confirmDelete = function(id,projId){
+  showMsg({
+    icon:'🗑️', title:'Delete Project',
+    body:`Are you sure you want to delete <strong style="color:var(--gold-4)">${projId||id}</strong>? This action cannot be undone.`,
+    buttons:[
+      {label:'Cancel', cls:'msg-cancel', fn: ()=>closeMsg()},
+      {label:'Delete', cls:'msg-ok danger', fn: async ()=>{
+        closeMsg();
+        try{
+          await deleteDoc(doc(db,COLL,id));
+          toast('Project deleted','success'); loadRecords();
+        } catch(e){ toast('Delete failed: '+e.message,'error'); }
+      }},
+    ]
+  });
+};
+
+/* ─── Reset ─── */
+window.resetForm = function(){
+  document.getElementById('f_proj_name').value='';
+  document.getElementById('f_start_date').value='';
+  document.getElementById('f_remark').value='';
+  document.getElementById('f_proj_name').focus();
+};
+
+/* ══════════════════════════════════════
+   CUSTOM CALENDAR
+══════════════════════════════════════ */
+let _calTarget=null, _calSel=null, _calView='days';
+let _calViewYear=null, _calViewYearPage=null;
+
+const MONTHS=['January','February','March','April','May','June',
+              'July','August','September','October','November','December'];
+const DAYS_SHORT=['Su','Mo','Tu','We','Th','Fr','Sa'];
+
+window.openCal = function(targetId){
+  _calTarget=targetId;
+  const cur = document.getElementById(targetId)?.value;
+  const now=new Date();
+  if(cur){
+    const parts=cur.split('/');
+    if(parts.length===3){
+      _calSel={d:parseInt(parts[0]),m:parseInt(parts[1])-1,y:parseInt(parts[2])};
+    } else { _calSel=null; }
+  } else { _calSel=null; }
+  _calView='days';
+  _calViewYear={m:_calSel?_calSel.m:now.getMonth(), y:_calSel?_calSel.y:now.getFullYear()};
+  renderCal();
+  document.getElementById('calOverlay').classList.add('open');
+};
+window.closeCal=function(){document.getElementById('calOverlay').classList.remove('open')};
+window.calBgClick=function(e){if(e.target===document.getElementById('calOverlay'))closeCal()};
+window.confirmCal=function(){
+  if(!_calSel){closeCal();return;}
+  const val=`${String(_calSel.d).padStart(2,'0')}/${String(_calSel.m+1).padStart(2,'0')}/${_calSel.y}`;
+  const el=document.getElementById(_calTarget);
+  if(el) el.value=val;
+  closeCal();
+};
+
+function renderCal(){
+  const inner=document.getElementById('calInner');
+  if(_calView==='days') inner.innerHTML=renderDaysView();
+  else if(_calView==='months') inner.innerHTML=renderMonthsView();
+  else inner.innerHTML=renderYearsView();
+}
+function renderDaysView(){
+  const {m,y}=_calViewYear;
+  const now=new Date();
+  const firstDay=new Date(y,m,1).getDay();
+  const daysInMonth=new Date(y,m+1,0).getDate();
+  const prevDays=new Date(y,m,0).getDate();
+  let cells='';
+  // prev month
+  for(let i=firstDay-1;i>=0;i--){
+    cells+=`<div class="cal-day other-month">${prevDays-i}</div>`;
+  }
+  // this month
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=d===now.getDate()&&m===now.getMonth()&&y===now.getFullYear();
+    const isSel=_calSel&&d===_calSel.d&&m===_calSel.m&&y===_calSel.y;
+    let cls='cal-day';
+    if(isToday) cls+=' today';
+    if(isSel) cls+=' selected';
+    cells+=`<div class="${cls}" onclick="calSelectDay(${d},${m},${y})">${d}</div>`;
+  }
+  // next month fill
+  const total=firstDay+daysInMonth;
+  const rem=total%7===0?0:7-(total%7);
+  for(let d=1;d<=rem;d++) cells+=`<div class="cal-day other-month">${d}</div>`;
+
+  const dow=DAYS_SHORT.map(s=>`<span>${s}</span>`).join('');
+  return `
+    <div class="cal-header">
+      <button class="cal-nav" onclick="calNavMonth(-1)">&#8249;</button>
+      <div class="cal-month-year" onclick="switchCalView('months')">${MONTHS[m]} ${y}</div>
+      <button class="cal-nav" onclick="calNavMonth(1)">&#8250;</button>
+    </div>
+    <div class="cal-dow">${dow}</div>
+    <div class="cal-days">${cells}</div>
+  `;
+}
+function renderMonthsView(){
+  const {m,y}=_calViewYear;
+  const cells=MONTHS.map((name,i)=>{
+    const cls='ym-cell'+(i===m?' active':'');
+    return `<div class="${cls}" onclick="calSelectMonth(${i})">${name.slice(0,3)}</div>`;
+  }).join('');
+  return `
+    <div class="cal-header">
+      <button class="cal-nav" onclick="switchCalView('days')">&#8249;</button>
+      <div class="cal-month-year" onclick="switchCalView('years')">${y}</div>
+      <button class="cal-nav" style="visibility:hidden"></button>
+    </div>
+    <div class="ym-grid" style="margin-top:8px">${cells}</div>
+  `;
+}
+function renderYearsView(){
+  const {y}=_calViewYear;
+  const base=_calViewYearPage??Math.floor(y/12)*12;
+  _calViewYearPage=base;
+  const cells=Array.from({length:12},(_,i)=>{
+    const yr=base+i;
+    const cls='ym-cell'+(yr===y?' active':'');
+    return `<div class="${cls}" onclick="calSelectYear(${yr})">${yr}</div>`;
+  }).join('');
+  return `
+    <div class="ym-nav">
+      <button class="ym-nav-btn" onclick="calNavYearPage(-1)">&#8249;</button>
+      <div class="ym-label">${base} – ${base+11}</div>
+      <button class="ym-nav-btn" onclick="calNavYearPage(1)">&#8250;</button>
+    </div>
+    <div class="ym-grid">${cells}</div>
+  `;
+}
+window.calSelectDay=function(d,m,y){_calSel={d,m,y};_calViewYear={m,y};renderCal()};
+window.calSelectMonth=function(m){_calViewYear.m=m;_calView='days';renderCal()};
+window.calSelectYear=function(y){_calViewYear.y=y;_calView='months';renderCal()};
+window.calNavMonth=function(dir){
+  let {m,y}=_calViewYear;
+  m+=dir; if(m<0){m=11;y--;}else if(m>11){m=0;y++;}
+  _calViewYear={m,y}; renderCal();
+};
+window.calNavYearPage=function(dir){_calViewYearPage+=dir*12;renderCal()};
+window.switchCalView=function(v){
+  if(v==='years') _calViewYearPage=Math.floor(_calViewYear.y/12)*12;
+  _calView=v; renderCal();
+};
+
+/* ══════════════════════════════════════
+   CUSTOM MESSAGE BOX
+══════════════════════════════════════ */
+function showMsg({icon,title,body,buttons}){
+  document.getElementById('msgIcon').textContent=icon||'';
+  document.getElementById('msgTitle').textContent=title||'';
+  document.getElementById('msgBody').innerHTML=body||'';
+  const btns=document.getElementById('msgBtns');
+  btns.innerHTML='';
+  (buttons||[]).forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className=`msg-btn ${b.cls||''}`;
+    btn.textContent=b.label;
+    btn.onclick=b.fn;
+    btns.appendChild(btn);
+  });
+  document.getElementById('msgOverlay').classList.add('open');
+}
+function closeMsg(){document.getElementById('msgOverlay').classList.remove('open')}
+
+/* ─── Helpers ─── */
+function esc(v){ return (v||'—').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function setStatus(type,txt){
+  const bar=document.getElementById('statusBar');
+  document.getElementById('statusTxt').textContent=txt;
+  bar.className=`status-bar ${type}`;
+  const dot=bar.querySelector('.s-dot');
+  type==='ok'?dot.classList.remove('pulse'):dot.classList.add('pulse');
+}
+function toast(msg,type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className=`show ${type}`;
+  setTimeout(()=>t.className='',3500);
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key==='Enter') window.saveProject();
+});
+</script>
+</body>
+</html>
