@@ -34,13 +34,19 @@
     .btn-clear { background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; }
     .btn-clear:hover { background: #ff6b6b; color: white; }
 
-    /* Flatpickr */
-    .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
-    .flatpickr-day { color: #cce !important; }
-    .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
-    .flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; }
-    .flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
-    .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
+    
+     .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
+.flatpickr-day { color: #cce !important; }
+.flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
+.flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; border-color: var(--brand-gold) !important; }
+.flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+.flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
+.flatpickr-prev-month, .flatpickr-next-month { color: var(--brand-gold) !important; fill: var(--brand-gold) !important; }
+.flatpickr-prev-month svg, .flatpickr-next-month svg { fill: var(--brand-gold) !important; stroke: var(--brand-gold) !important; }
+.flatpickr-prev-month:hover, .flatpickr-next-month:hover { background: rgba(255, 215, 0, 0.15) !important; }
+.flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; border: none !important; }
+.flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+
 
     /* Employee Panel */
     .emp-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
@@ -218,6 +224,29 @@ flatpickr("#dateTo",       { dateFormat: "Y-m-d", onChange: syncPanelDates });
 flatpickr("#panelDateFrom",{ dateFormat: "Y-m-d" });
 flatpickr("#panelDateTo",  { dateFormat: "Y-m-d" });
 
+async function getWorkingDays(dateStr) {
+  const d = new Date(dateStr);
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  let sundays = 0;
+  for (let i = 1; i <= totalDays; i++) {
+    if (new Date(year, month, i).getDay() === 0) sundays++;
+  }
+
+  const db = firebase.firestore();
+  const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+  let holidays = 0;
+  holidaySnap.forEach(doc => {
+    const hDate = new Date(doc.id);
+    if (hDate.getFullYear() === year && hDate.getMonth() === month) {
+      if (new Date(doc.id).getDay() !== 0) holidays++;
+    }
+  });
+
+  return totalDays - sundays - holidays;
+}
 function syncPanelDates() {
   const f = document.getElementById("dateFrom").value;
   const t = document.getElementById("dateTo").value;
@@ -370,27 +399,24 @@ function getDaysInMonth(dateStr) {
   return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
 }
 
-function buildPayslipData(empId, dFromVal, dToVal, rangeData) {
+async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays) {
   const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
-  const salary = emp.salary;
-  const isCook = (emp.desig || "").trim().toUpperCase() === "COOK";
+  const salary    = emp.salary;
+  const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
   const monthDays = getDaysInMonth(dFromVal);
-  const dailyRate = isCook ? salary / monthDays : parseFloat((salary / 26).toFixed(2));
-
+  const dailyRate = isCook 
+    ? parseFloat((salary / monthDays).toFixed(2)) 
+    : parseFloat((salary / workingDays).toFixed(2));
   const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
-  const totalOT = rangeData.otMap[empId] || 0;
-  const totalAdvance = _cache.advMap[empId] || 0;
-
+  const totalOT      = rangeData.otMap[empId]   || 0;
+  const totalAdvance = _cache.advMap[empId]      || 0;
   const normalAmt = dailyRate * att.norm;
-  const gross = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
-  const csgEmp = Math.round(gross * 0.015 * 100) / 100;
-  const npsEmp = Math.round(gross * 0.01 * 100) / 100;
-  const totalDed = csgEmp + npsEmp + totalAdvance + (att.fine || 0);
-  const netPay = gross - totalDed;
-
+  const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
+  const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
+  const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
+  const totalDed  = csgEmp + npsEmp + totalAdvance + (att.fine || 0);
+  const netPay    = gross - totalDed;
   const now = new Date();
-
-  // Service length
   let serviceLength = "";
   if (emp.joining) {
     const parts = emp.joining.split(/[\/\-\.]/);
@@ -408,27 +434,17 @@ function buildPayslipData(empId, dFromVal, dToVal, rangeData) {
       serviceLength = { total: months, formatted };
     }
   }
-
   return {
-    empId: emp.id, name: emp.name, desig: emp.desig,
-    passport: emp.passport, joining: emp.joining,
-    entryDate: now.toLocaleDateString("en-GB"),
+    empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
+    joining: emp.joining, entryDate: now.toLocaleDateString("en-GB"),
     time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-    serviceLength,
-    normalWork: normalAmt.toFixed(2),
-    holidayWork: att.hol.toFixed(2),
-    sundayWork: att.sun.toFixed(2),
-    overtime: totalOT.toFixed(2),
-    others: (att.others||0).toFixed(2),
-    gross: gross.toFixed(2),
-    csgEmp: csgEmp.toFixed(2),
-    npsEmp: npsEmp.toFixed(2),
-    advanceRefund: totalAdvance.toFixed(2),
-    fine: (att.fine||0).toFixed(2),
-    absentDays: att.abs,
-    totalDed: totalDed.toFixed(2),
-    netPay: netPay.toFixed(2),
-    netPayWords: numToWords(netPay),
+    serviceLength, normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
+    sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
+    others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
+    csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
+    advanceRefund: totalAdvance.toFixed(2), fine: (att.fine||0).toFixed(2),
+    absentDays: att.abs, totalDed: totalDed.toFixed(2),
+    netPay: netPay.toFixed(2), netPayWords: numToWords(netPay),
   };
 }
 
@@ -518,50 +534,45 @@ function updatePanelCount() {
 async function generateFromPanel() {
   const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
   if (!selected.length) return;
-
   const dFromVal = document.getElementById("panelDateFrom").value;
   const dToVal   = document.getElementById("panelDateTo").value;
   if (!dFromVal || !dToVal) {
-    showMsg("Please select a date range.", { title: "Date Required", type: "warn" });
+    showMsg(" date range required ", {title:"Date Range Required", type:"warn"});
     return;
   }
-
+  const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
   const genBtn = document.getElementById("panelGenBtn");
-  genBtn.disabled = true; genBtn.textContent = "⏳ Generating...";
+  genBtn.disabled=true; genBtn.textContent="⏳ Generating...";
   document.getElementById("genLoader").classList.add("active");
   updateLoader(0, selected.length, "");
   document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
-
   const win = window.open("", "_blank");
   if (!win) {
-    showMsg("Popup blocked! Please allow popups in your browser.", { title: "Popup Blocked", type: "warn" });
+    showMsg("Popup blocked! Browser-এ popup allow করুন।", {title:"Popup Blocked", type:"warn"});
     document.getElementById("genLoader").classList.remove("active");
-    genBtn.disabled = false; genBtn.textContent = "⚡ Generate Payslip";
+    genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
     return;
   }
-
   win.document.write(loaderPageHTML(selected.length));
-
   try {
-    // ★ মাত্র ৩টি DB call — সব employee-এর জন্য একবার
     if (!_cache.loaded) await preloadStaticData();
     const rangeData = await fetchRangeData(dFromVal, dToVal);
-
-    const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+    const workingDays = await getWorkingDays(dFromVal);
     let allPages = "";
-
-    for (let i = 0; i < selected.length; i++) {
+    for (let i=0; i<selected.length; i++) {
       const empId = selected[i];
       updateLoader(i, selected.length, empId);
-      tryUpdateWinLoader(win, i, selected.length, empId);
-
-      // এখন কোনো DB call নেই — শুধু memory থেকে calculate
-      const d = buildPayslipData(empId, dFromVal, dToVal, rangeData);
+      try {
+        if (win && !win.closed) {
+          win.document.getElementById("cc").textContent = i;
+          win.document.getElementById("pb").style.width = (i/selected.length*100) + "%";
+          win.document.getElementById("st").textContent = `Processing: ${empId}`;
+        }
+      } catch(e2) {}
+      const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
       allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
-
-      updateLoader(i + 1, selected.length, empId);
+      updateLoader(i+1, selected.length, empId);
     }
-
     const fullHtml = `<!doctype html><html><head>
       <meta charset="UTF-8"><title>Payslips — ${period}</title>
       <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -569,20 +580,19 @@ async function generateFromPanel() {
     </head><body>
       <div class="no-print">
         <button onclick="window.print()">🖨️ Print </button>
-        &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip(s) — ${period}</span>
+        &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip — ${period}</span>
       </div>
       ${allPages}
     </body></html>`;
-
     win.document.open(); win.document.write(fullHtml); win.document.close();
   } catch(e) {
     win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
-    showMsg(`Error: ${e.message}`, { title: "Generation Error", type: "err" });
+    showMsg(`Error: ${e.message}`, {title:"Generation Error", type:"err"});
   }
-
   document.getElementById("genLoader").classList.remove("active");
-  genBtn.disabled = false; genBtn.textContent = "⚡ Generate Payslip";
+  genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
 }
+
 
 function updateLoader(current, total, empId) {
   document.getElementById("genCountCurrent").textContent = current;
