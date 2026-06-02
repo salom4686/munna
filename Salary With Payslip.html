@@ -586,6 +586,33 @@
       flatpickr("#otDateFrom",    { dateFormat: "Y-m-d" });
       flatpickr("#otDateTo",      { dateFormat: "Y-m-d" });
 
+      async function getWorkingDays(dateStr) {
+  const d = new Date(dateStr);
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+
+  // রবিবার গণনা
+  let sundays = 0;
+  for (let i = 1; i <= totalDays; i++) {
+    if (new Date(year, month, i).getDay() === 0) sundays++;
+  }
+
+  // পাবলিক হলিডে গণনা (ঐ মাসের)
+  const db = firebase.firestore();
+  const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+  let holidays = 0;
+  holidaySnap.forEach(doc => {
+    const hDate = new Date(doc.id);
+    if (hDate.getFullYear() === year && hDate.getMonth() === month) {
+      // রবিবার যদি হলিডেতে পড়ে, দুইবার বাদ না দিতে
+      if (new Date(doc.id).getDay() !== 0) holidays++;
+    }
+  });
+
+  return totalDays - sundays - holidays;
+}  
+
       function syncPanelDates() {
         const f = document.getElementById("dateFrom").value;
         const t = document.getElementById("dateTo").value;
@@ -697,52 +724,54 @@
         return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
       }
 
-      function buildPayslipData(empId, dFromVal, dToVal, rangeData) {
-        const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
-        const salary    = emp.salary;
-        const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
-        const monthDays = getDaysInMonth(dFromVal);
-        const dailyRate = isCook ? salary / monthDays : parseFloat((salary / 26).toFixed(2));
-        const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
-        const totalOT      = rangeData.otMap[empId]   || 0;
-        const totalAdvance = _cache.advMap[empId]      || 0;
-        const normalAmt = dailyRate * att.norm;
-        const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
-        const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
-        const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
-        const totalDed  = csgEmp + npsEmp + totalAdvance + (att.fine || 0);
-        const netPay    = gross - totalDed;
-        const now = new Date();
-        let serviceLength = "";
-        if (emp.joining) {
-          const parts = emp.joining.split(/[\/\-\.]/);
-          let jDate;
-          if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-          else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
-          if (!isNaN(jDate)) {
-            let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
-            if (now.getDate()<jDate.getDate()) months--;
-            if (months < 0) months = 0;
-            const years = Math.floor(months/12), rem = months%12;
-            const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
-              rem===0 ? `${years} Year${years!==1?'s':''}` :
-              `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
-            serviceLength = { total: months, formatted };
-          }
-        }
-        return {
-          empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
-          joining: emp.joining, entryDate: now.toLocaleDateString("en-GB"),
-          time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-          serviceLength, normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
-          sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
-          others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
-          csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
-          advanceRefund: totalAdvance.toFixed(2), fine: (att.fine||0).toFixed(2),
-          absentDays: att.abs, totalDed: totalDed.toFixed(2),
-          netPay: netPay.toFixed(2), netPayWords: numToWords(netPay),
-        };
-      }
+    async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays) {
+  const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
+  const salary    = emp.salary;
+  const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
+  const monthDays = getDaysInMonth(dFromVal);
+  const dailyRate = isCook 
+    ? parseFloat((salary / monthDays).toFixed(2)) 
+    : parseFloat((salary / workingDays).toFixed(2));
+  const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
+  const totalOT      = rangeData.otMap[empId]   || 0;
+  const totalAdvance = _cache.advMap[empId]      || 0;
+  const normalAmt = dailyRate * att.norm;
+  const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
+  const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
+  const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
+  const totalDed  = csgEmp + npsEmp + totalAdvance + (att.fine || 0);
+  const netPay    = gross - totalDed;
+  const now = new Date();
+  let serviceLength = "";
+  if (emp.joining) {
+    const parts = emp.joining.split(/[\/\-\.]/);
+    let jDate;
+    if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+    if (!isNaN(jDate)) {
+      let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
+      if (now.getDate()<jDate.getDate()) months--;
+      if (months < 0) months = 0;
+      const years = Math.floor(months/12), rem = months%12;
+      const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
+        rem===0 ? `${years} Year${years!==1?'s':''}` :
+        `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
+      serviceLength = { total: months, formatted };
+    }
+  }
+  return {
+    empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
+    joining: emp.joining, entryDate: now.toLocaleDateString("en-GB"),
+    time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+    serviceLength, normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
+    sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
+    others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
+    csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
+    advanceRefund: totalAdvance.toFixed(2), fine: (att.fine||0).toFixed(2),
+    absentDays: att.abs, totalDed: totalDed.toFixed(2),
+    netPay: netPay.toFixed(2), netPayWords: numToWords(netPay),
+  };
+}
 
      // ══════════════════════════════════════════
 //  TAB SWITCHING
@@ -1320,66 +1349,67 @@ let _attEmpLoaded = false;
       // ══════════════════════════════════════════
       //  GENERATE PAYSLIPS
       // ══════════════════════════════════════════
-      async function generateFromPanel() {
-        const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
-        if (!selected.length) return;
-        const dFromVal = document.getElementById("panelDateFrom").value;
-        const dToVal   = document.getElementById("panelDateTo").value;
-        if (!dFromVal || !dToVal) {
-          showMsg(" date range required ", {title:"Date Range Required", type:"warn"});
-          return;
+     async function generateFromPanel() {
+  const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
+  if (!selected.length) return;
+  const dFromVal = document.getElementById("panelDateFrom").value;
+  const dToVal   = document.getElementById("panelDateTo").value;
+  if (!dFromVal || !dToVal) {
+    showMsg(" date range required ", {title:"Date Range Required", type:"warn"});
+    return;
+  }
+  const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+  const genBtn = document.getElementById("panelGenBtn");
+  genBtn.disabled=true; genBtn.textContent="⏳ Generating...";
+  document.getElementById("genLoader").classList.add("active");
+  updateLoader(0, selected.length, "");
+  document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
+  const win = window.open("", "_blank");
+  if (!win) {
+    showMsg("Popup blocked! Browser-এ popup allow করুন।", {title:"Popup Blocked", type:"warn"});
+    document.getElementById("genLoader").classList.remove("active");
+    genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
+    return;
+  }
+  win.document.write(loaderPageHTML(selected.length));
+  try {
+    if (!_cache.loaded) await preloadStaticData();
+    const rangeData = await fetchRangeData(dFromVal, dToVal);
+    const workingDays = await getWorkingDays(dFromVal);
+    let allPages = "";
+    for (let i=0; i<selected.length; i++) {
+      const empId = selected[i];
+      updateLoader(i, selected.length, empId);
+      try {
+        if (win && !win.closed) {
+          win.document.getElementById("cc").textContent = i;
+          win.document.getElementById("pb").style.width = (i/selected.length*100) + "%";
+          win.document.getElementById("st").textContent = `Processing: ${empId}`;
         }
-        const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
-        const genBtn = document.getElementById("panelGenBtn");
-        genBtn.disabled=true; genBtn.textContent="⏳ Generating...";
-        document.getElementById("genLoader").classList.add("active");
-        updateLoader(0, selected.length, "");
-        document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
-        const win = window.open("", "_blank");
-        if (!win) {
-          showMsg("Popup blocked! Browser-এ popup allow করুন।", {title:"Popup Blocked", type:"warn"});
-          document.getElementById("genLoader").classList.remove("active");
-          genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
-          return;
-        }
-        win.document.write(loaderPageHTML(selected.length));
-        try {
-          if (!_cache.loaded) await preloadStaticData();
-          const rangeData = await fetchRangeData(dFromVal, dToVal);
-          let allPages = "";
-          for (let i=0; i<selected.length; i++) {
-            const empId = selected[i];
-            updateLoader(i, selected.length, empId);
-            try {
-              if (win && !win.closed) {
-                win.document.getElementById("cc").textContent = i;
-                win.document.getElementById("pb").style.width = (i/selected.length*100) + "%";
-                win.document.getElementById("st").textContent = `Processing: ${empId}`;
-              }
-            } catch(e2) {}
-            const d = buildPayslipData(empId, dFromVal, dToVal, rangeData);
-            allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
-            updateLoader(i+1, selected.length, empId);
-          }
-          const fullHtml = `<!doctype html><html><head>
-            <meta charset="UTF-8"><title>Payslips — ${period}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
-            ${payslipWindowCSS()}
-          </head><body>
-            <div class="no-print">
-              <button onclick="window.print()">🖨️ Print </button>
-              &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip — ${period}</span>
-            </div>
-            ${allPages}
-          </body></html>`;
-          win.document.open(); win.document.write(fullHtml); win.document.close();
-        } catch(e) {
-          win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
-          showMsg(`Error: ${e.message}`, {title:"Generation Error", type:"err"});
-        }
-        document.getElementById("genLoader").classList.remove("active");
-        genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
-      }
+      } catch(e2) {}
+      const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
+      allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
+      updateLoader(i+1, selected.length, empId);
+    }
+    const fullHtml = `<!doctype html><html><head>
+      <meta charset="UTF-8"><title>Payslips — ${period}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+      ${payslipWindowCSS()}
+    </head><body>
+      <div class="no-print">
+        <button onclick="window.print()">🖨️ Print </button>
+        &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip — ${period}</span>
+      </div>
+      ${allPages}
+    </body></html>`;
+    win.document.open(); win.document.write(fullHtml); win.document.close();
+  } catch(e) {
+    win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
+    showMsg(`Error: ${e.message}`, {title:"Generation Error", type:"err"});
+  }
+  document.getElementById("genLoader").classList.remove("active");
+  genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
+}
 
       function updateLoader(current, total, empId) {
         document.getElementById("genCountCurrent").textContent = current;
@@ -1555,8 +1585,9 @@ let _attEmpLoaded = false;
         win.document.write(loaderPageHTML(1));
         try {
           if (!_cache.loaded) await preloadStaticData();
-          const rangeData = await fetchRangeData(dFromVal, dToVal);
-          const d = buildPayslipData(empId, dFromVal, dToVal, rangeData);
+         const rangeData = await fetchRangeData(dFromVal, dToVal);
+         const workingDays = await getWorkingDays(dFromVal);
+         const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
           const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
           const html = `<!doctype html><html><head>
             <meta charset="UTF-8"><title>Payslip — ${d.empId}</title>
@@ -1653,11 +1684,14 @@ output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-
           return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
         }
         const monthDays = getDaysInMonthLocal(dFromVal);
+        const workingDays = await getWorkingDays(dFromVal);
 
-        function getDailyRate(salary, designation) {
-          const des = (designation||"").trim().toUpperCase();
-          return des==="COOK" ? salary/monthDays : parseFloat((salary/26).toFixed(2));
-        }
+       function getDailyRate(salary, designation, workingDays) {
+  const des = (designation||"").trim().toUpperCase();
+  return des==="COOK" 
+    ? parseFloat((salary / monthDays).toFixed(2)) 
+    : parseFloat((salary / workingDays).toFixed(2));
+}
 
         function numberToWords(amount) {
           const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
@@ -1695,12 +1729,13 @@ output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-
             if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
             if (!workers[d.ID]) {
               const sal = parseInt(d.SALARY)||0;
-              workers[d.ID] = {
-                id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
-                sal:sal, daily:getDailyRate(sal, d.DESIGNATION),
-                norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
-                others:parseInt(d.OTHERS)||0
-              };
+             workers[d.ID] = {
+  id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
+  sal:sal,
+  daily: getDailyRate(sal, d.DESIGNATION, workingDays),
+  norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
+  others:parseInt(d.OTHERS)||0
+};
             }
             if (d.STATUS==="PRESENT") workers[d.ID].pres++;
             else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
@@ -1754,7 +1789,7 @@ output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-
               <td style="text-align:center">${count++}</td>
               <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
               <td class="text-left"><div style="font-weight:700;font-size:11px">${w.name}</div><div style="font-size:9px;color:#666;font-style:italic">${w.passport}</div></td>
-              <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
+             <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
               <td class="text-right">
                 <div style="font-weight:bold">${rowTotalBasic.toFixed(2)}</div>
                 <div style="font-size:9px;color:#666;font-style:italic">(${dailyDisplay})</div>
