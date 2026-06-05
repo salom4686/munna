@@ -110,6 +110,12 @@
             border:3px solid var(--accent-gold); object-fit:cover;
             box-shadow:0 0 60px rgba(0,0,0,0.5);
         }
+        /* Sub-menu active link */
+.sub-menu li a.active {
+    background: var(--accent-gold);
+    color: var(--primary-blue);
+    font-weight: 600;
+}
 
         /* --- Main Content --- */
         .home-section { height:100vh; display:flex; flex-direction:column; position:relative; background-color:var(--unified-bg); }
@@ -295,6 +301,16 @@
         function closeZoom() {
             document.getElementById('imgZoomOverlay').classList.remove('active');
         }
+
+        // Sub-menu link active
+document.querySelectorAll('.sub-menu li a').forEach(link => {
+    link.addEventListener('click', function() {
+        // সব sub-menu link থেকে active সরাও
+        document.querySelectorAll('.sub-menu li a').forEach(l => l.classList.remove('active'));
+        // ক্লিক করা লিংকে active যোগ করো
+        this.classList.add('active');
+    });
+});
     </script>
 </body>
 </html>
