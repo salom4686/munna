@@ -2,256 +2,287 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+   <!-- attendance_summary - কুকের সেলারী ত্রিশ দিনকে বেসিক দিয়ে ভাগ করা হয়েছে, present sheet এ শনি ও হলিডে বাদ দিয়ে সবগুলো normal P করা হয়েছে এখানে -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Attendance Summary</title>
+    <title>Attendance & Salary</title>
 
-    <link
-      rel="icon"
-      type="image/png"
-      href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css"
-    />
-
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css"
-    />
+    <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-      :root {
-        --brand-blue: #1d3a6d;
-        --header-text: #ffffff;
-        --bg-light: #f4f6f9;
-        --accent-yellow: #fff9e6;
-        --btn-reset: #dc3545;
-        --highlight-green: #e6fffa;
-      }
-      body {
-        background-color: var(--bg-light);
-        padding: 10px;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-      .main-card {
-        background: #ffffff;
-        border-radius: 12px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        margin: 0 auto;
-        border: 1px solid #e0e0e0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        max-height: 96vh;
-      }
+  :root {
+    --brand-blue: #001d3d;
+    --brand-gold: #ffd700;
+    --header-text: #ffffff;
+    --bg-light: #001d3d;
+    --accent-yellow: #fff9e6;
+    --btn-reset: #dc3545;
+    --highlight-green: #e6fffa;
+  }
+  body {
+    background-color: var(--brand-blue);
+    padding: 10px;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  }
+  .main-card {
+    background: #001d3d;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    margin: 0 auto;
+    border: 2px solid var(--brand-gold);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    max-height: 96vh;
+  }
+  .page-header {
+    background: linear-gradient(135deg, #001d3d 0%, #003580 60%, #001530 100%);
+    padding: 10px 20px;
+    border-bottom: 4px solid var(--brand-gold);
+    display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+  }
+  .brand-title h2 {
+    background: linear-gradient(135deg,#bf953f 0%,#fcf6ba 25%,#b38728 50%,#fbf5b7 75%,#aa771c 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-weight: 800; margin: 0; font-size: 1.5rem;
+    filter: drop-shadow(1px 1px 3px rgba(255,215,0,0.3));
+  }
+  .brand-title span {
+    background: linear-gradient(135deg,#b38728 0%,#fcf6ba 50%,#aa771c 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-weight: 700; font-size: 0.85rem !important; display: inline-block;
+  }
 
-      /* বাটন ডিজাইন */
-      .btn-reset.btn-action {
-        background-color: #ffc107;
-        color: #000;
-        border: 1px solid #000;
-        transition: all 0.3s ease;
-      }
+  /* ── Buttons ── */
+  .btn-action { font-size: 10px; padding: 4px 10px; font-weight: 600; }
+  .btn-reset  { background-color: var(--btn-reset); color: white; border: none; }
+  .btn-reset.btn-action {
+    background-color: #ffc107; color: #000; border: 1px solid #000; transition: all 0.3s ease;
+  }
+  .btn-reset.btn-action:hover {
+    background-color: #ff2802 !important; color: #fff !important;
+    border-color: #fff !important;
+  }
+  .btn-reset.btn-action:active { background-color: #d39e00 !important; transform: translateY(2px); }
+  .btn-outline-success { color: var(--brand-gold) !important; border-color: var(--brand-gold) !important; }
+  .btn-outline-success:hover { background: var(--brand-gold) !important; color: #001d3d !important; }
+  .btn-outline-primary { color: #90caf9 !important; border-color: #90caf9 !important; }
+  .btn-outline-primary:hover { background: #90caf9 !important; color: #001d3d !important; }
+  .btn-primary { background: var(--brand-gold) !important; color: #001d3d !important; border-color: var(--brand-gold) !important; font-weight: 700; }
+  .btn-primary:hover { background: #ffe840 !important; }
 
-      .btn-reset.btn-action:hover {
-        background-color: #ff2802 !important;
-        color: #000000 !important;
-        border-color: #f8f7f7 !important;
-        box-shadow: 0 2px 5px rgba(228, 221, 221, 0.2);
-      }
+  /* ── Filter Section ── */
+  .filter-section {
+    padding: 12px;
+    background: #002147;
+    border-bottom: 2px solid var(--brand-gold);
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr));
+    gap: 8px; align-items: end; flex-shrink: 0;
+  }
+  .filter-group label {
+    font-size: 9px; font-weight: 700; color: var(--brand-gold);
+    margin-bottom: 2px; display: block; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .form-control, .form-select {
+    background-color: #001530 !important;
+    color: #e0e8f4 !important;
+    border: 1.5px solid #3a5a8a !important;
+    font-size: 11px;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--brand-gold) !important;
+    box-shadow: 0 0 0 2px rgba(255,215,0,0.2) !important;
+  }
+  .form-control::placeholder { color: #6a88aa !important; }
+  .custom-date-input { cursor: pointer !important; font-weight: 600; }
 
-      .btn-reset.btn-action:active {
-        background-color: #d39e00 !important;
-        transform: translateY(5px);
-      }
-      .page-header {
-        background-color: #ffffff;
-        padding: 10px 20px;
-        border-bottom: 4px solid var(--brand-blue);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-shrink: 0;
-      }
+  /* ── Summary Bar ── */
+  .summary-bar {
+    padding: 8px 20px;
+    background: #002147;
+    border-bottom: 2px solid var(--brand-gold);
+    display: flex; gap: 16px; font-weight: bold;
+    color: var(--brand-gold);
+    font-size: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .stat-box {
+    background: #001530;
+    color: var(--brand-gold);
+    padding: 2px 10px; border-radius: 4px;
+    border: 1px solid var(--brand-gold);
+  }
 
-      /* গোল্ডেন কালার টেক্সট ও গ্রেডিয়েন্ট শাইন ইফেক্ট */
-      .brand-title h2 {
-        background: linear-gradient(
-          135deg,
-          #bf953f 0%,
-          #fcf6ba 25%,
-          #b38728 50%,
-          #fbf5b7 75%,
-          #aa771c 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 800;
-        margin: 0;
-        font-size: 1.5rem;
-        filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.15));
-      }
-      .brand-title span {
-        background: linear-gradient(
-          135deg,
-          #b38728 0%,
-          #fcf6ba 50%,
-          #aa771c 100%
-        );
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 700;
-        font-size: 0.85rem !important;
-        display: inline-block;
-      }
+  /* ── Working Days Badge ── */
+  .wd-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(255,215,0,0.08);
+    border: 1.5px solid var(--brand-gold);
+    border-radius: 6px; padding: 3px 10px; font-size: 10px;
+  }
+  .wd-badge label { font-size: 9px; font-weight: 700; color: var(--brand-gold); margin: 0; white-space: nowrap; }
+  .wd-badge input[type="number"] {
+    width: 52px; padding: 2px 5px; font-size: 11px; font-weight: 700;
+    border: 1.5px solid var(--brand-gold); border-radius: 4px;
+    text-align: center; color: var(--brand-gold);
+    background: #001530;
+  }
+  .wd-badge .wd-status { font-size: 10px; font-weight: 700; color: #4ade80; white-space: nowrap; }
+  .wd-badge button {
+    background: #0d9488; color: white; border: none;
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer;
+  }
+  .wd-badge button:hover { background: #065f46; }
 
-      .filter-section {
-        padding: 12px;
-        background: #f8f9fc;
-        border-bottom: 1px solid #eee;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-        gap: 8px;
-        align-items: end;
-        flex-shrink: 0;
-      }
-      .filter-group label {
-        font-size: 9px;
-        font-weight: 700;
-        color: var(--brand-blue);
-        margin-bottom: 2px;
-        display: block;
-        text-transform: uppercase;
-      }
-      .custom-date-input {
-        background-color: #ffffff !important;
-        cursor: pointer !important;
-        font-weight: 600;
-        font-size: 11px;
-      }
-      .btn-action {
-        font-size: 10px;
-        padding: 4px 10px;
-        font-weight: 600;
-      }
-      .btn-reset {
-        background-color: var(--btn-reset);
-        color: white;
-        border: none;
-      }
-      .summary-bar {
-        padding: 8px 20px;
-        background: #eef2f7;
-        border-bottom: 1px solid #ddd;
-        display: flex;
-        gap: 20px;
-        font-weight: bold;
-        color: var(--brand-blue);
-        font-size: 13px;
-        align-items: center;
-      }
-      .stat-box {
-        background: #fff;
-        padding: 2px 10px;
-        border-radius: 4px;
-        border: 1px solid #cbd5e0;
-      }
-      .table-responsive {
-        overflow: auto;
-        flex-grow: 1;
-        position: relative;
-      }
-      .attendance-table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-      }
-      .attendance-table thead th {
-        background-color: var(--brand-blue) !important;
-        color: var(--header-text) !important;
-        padding: 6px 4px;
-        text-align: center;
-        font-size: 9px;
-        position: sticky;
-        top: 0;
-        z-index: 20;
-        border: 1px solid #142a50;
-        text-transform: uppercase;
-        white-space: nowrap;
-      }
+  /* ── Table ── */
+  .table-responsive { overflow: auto; flex-grow: 1; position: relative; background: #fff; }
+  .attendance-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+  .attendance-table thead th {
+    background-color: #001d3d !important;
+    color: #ffffff !important;
+    padding: 6px 4px; text-align: center; font-size: 9px;
+    position: sticky; top: 0; z-index: 20;
+    border: 1px solid #335185 !important;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .attendance-table tbody td {
+    padding: 4px 3px; text-align: center; font-size: 10px;
+    border: 1px solid #e0e0e0; white-space: nowrap;
+    background: #fff;
+  }
+  .attendance-table tbody tr:nth-child(even) td { background: #f0f4f8; }
+  .attendance-table tbody tr:hover td { background: #fff9e6 !important; }
+  .total-attendance-col { background-color: var(--accent-yellow); font-weight: 700; color: #001d3d; }
+  .highlight-col { background-color: var(--highlight-green); font-weight: 700; color: #0d685b; }
+  .grand-total-row td {
+    background-color: #001d3d !important;
+    color: var(--brand-gold) !important;
+    font-weight: 900 !important;
+    border: 1px solid #335185 !important;
+  }
 
-      .attendance-table tbody td {
-        padding: 4px 3px;
-        text-align: center;
-        font-size: 10px;
-        border: 1px solid #e0e0e0;
-        white-space: nowrap;
-      }
+  /* ── Loader ── */
+  #loader {
+    padding: 40px; text-align: center;
+    color: var(--brand-gold); display: none;
+    background: #001d3d;
+  }
+  #loader p { color: var(--brand-gold); }
 
-      .total-attendance-col {
-        background-color: var(--accent-yellow);
-        font-weight: 700;
-        color: var(--brand-blue);
-      }
-      .highlight-col {
-        background-color: var(--highlight-green);
-        font-weight: 700;
-        color: #0d685b;
-      }
-      .deduction-col {
-        background-color: #fff0f0;
-      }
+  /* ── Search Input ── */
+  .search-input-group { display: flex; }
+  .search-input-group select { border-top-right-radius: 0; border-bottom-right-radius: 0; width: 80px; font-size: 10px; }
+  .search-input-group input  { border-top-left-radius: 0; border-bottom-left-radius: 0; font-size: 10px; }
 
-      #loader {
-        padding: 40px;
-        text-align: center;
-        color: var(--brand-blue);
-        display: none;
-      }
+  /* ── Modals ── */
+  .modal-content {
+    background: #001d3d !important;
+    border: 2px solid var(--brand-gold) !important;
+    color: #e0e8f4;
+  }
+  .modal-header { border-bottom: 2px solid var(--brand-gold) !important; }
+  .modal-footer { border-top: 2px solid var(--brand-gold) !important; }
+  .modal-title { color: var(--brand-gold) !important; font-weight: 700; }
+  .form-label { color: var(--brand-gold) !important; }
+  .modal .form-control, .modal .form-select {
+    background: #001530 !important; color: #e0e8f4 !important;
+    border-color: #3a5a8a !important;
+  }
+  .modal .btn-light {
+    background: transparent !important; color: var(--brand-gold) !important;
+    border: 1px solid var(--brand-gold) !important;
+  }
+  .modal .btn-light:hover { background: var(--brand-gold) !important; color: #001d3d !important; }
+  .text-primary { color: var(--brand-gold) !important; }
+/* ══ Flatpickr — Navy Blue & Golden Theme ══ */
+/* ══ Flatpickr — Navy Blue & Golden Theme ══ */
+.flatpickr-calendar { 
+  background: #001d3d !important; 
+  border: 2px solid var(--brand-gold) !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5) !important;
+}
+.flatpickr-day { 
+  color: #a0c4ff !important; 
+  border-radius: 4px !important;
+}
+.flatpickr-day.selected, 
+.flatpickr-day.today { 
+  background: var(--brand-gold) !important; 
+  color: #001d3d !important; 
+  border-color: var(--brand-gold) !important; 
+  font-weight: 700 !important;
+}
+.flatpickr-day:hover { 
+  background: rgba(255,215,0,0.25) !important; 
+  color: var(--brand-gold) !important; 
+  border-color: var(--brand-gold) !important; 
+}
+.flatpickr-months .flatpickr-month, 
+.flatpickr-weekdays, 
+span.flatpickr-weekday { 
+  background: #001d3d !important; 
+  color: var(--brand-gold) !important; 
+  font-weight: 700 !important;
+}
+.flatpickr-day.prevMonthDay, 
+.flatpickr-day.nextMonthDay { 
+  visibility: hidden !important; 
+}
+.flatpickr-prev-month, 
+.flatpickr-next-month { 
+  color: var(--brand-gold) !important; 
+  fill: var(--brand-gold) !important;
+  padding: 5px !important;
+}
+.flatpickr-prev-month svg, 
+.flatpickr-next-month svg { 
+  fill: var(--brand-gold) !important; 
+  stroke: var(--brand-gold) !important; 
+}
+.flatpickr-prev-month:hover, 
+.flatpickr-next-month:hover { 
+  background: rgba(255,215,0,0.15) !important; 
+  border-radius: 4px !important;
+}
+.flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { 
+  background: #001d3d !important; 
+  color: var(--brand-gold) !important; 
+  border: none !important; 
+}
+.flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { 
+  background: #001d3d !important; 
+  color: var(--brand-gold) !important; 
+}
+/* রবিবার লাল */
+.flatpickr-day:nth-child(7n+1) { 
+  color: #ff4d4d !important; 
+  font-weight: 700 !important; 
+}
+/* হলিডে লাল */
+.flatpickr-day.is-holiday { 
+  color: #ff4d4d !important; 
+  font-weight: 700 !important; 
+}
+/* রবিবার লাল */
+.flatpickr-day:nth-child(7n+1) { color: #ff4d4d !important; font-weight: 700 !important; }
+/* হলিডে লাল */
+.flatpickr-day.is-holiday { color: #ff4d4d !important; font-weight: 700 !important; }
 
-      .search-input-group {
-        display: flex;
-      }
-      .search-input-group select {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        width: 80px;
-        font-size: 10px;
-      }
-      .search-input-group input {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-        font-size: 10px;
-      }
-
-      .grand-total-row td {
-        background-color: #f0f4f8 !important;
-        font-weight: 900 !important;
-        color: var(--brand-blue);
-      }
-      @media print {
-        .hide-on-print {
-          display: none !important;
-        }
-      }
-      .hide-on-print {
-        /* ব্রাউজারে দেখাবে কিন্তু প্রিন্টে নয় */
-      }
-    </style>
+  /* ── Print ── */
+  @media print {
+    .hide-on-print { display: none !important; }
+    body { background: #fff !important; }
+    .main-card { border: none !important; box-shadow: none !important; }
+    .filter-section, .summary-bar, .page-header { display: none !important; }
+    .table-responsive { overflow: visible !important; }
+    .attendance-table thead th { background: #f2f2f2 !important; color: #000 !important; border: 1px solid #000 !important; }
+    .grand-total-row td { background: #eee !important; color: #000 !important; border: 1px solid #000 !important; }
+    tbody tr:last-child td { page-break-inside: avoid !important; }
+  }
+</style>
   </head>
   <body id="bodyRoot">
     <div class="container-fluid">
@@ -259,24 +290,12 @@
         <div class="page-header">
           <div class="brand-title">
             <h2>ALAMHOW CO LTD</h2>
-            <span>Attendance & Summary Report</span>
+            <span>Attendance & Salary Report</span>
           </div>
           <div class="d-flex gap-2">
-            <button
-              class="btn btn-action btn-outline-success"
-              onclick="showAttendanceFilter()"
-            >
-              Attendance Sheet
-            </button>
-            <button
-              class="btn btn-action btn-outline-primary"
-              onclick="openPreview()"
-            >
-              Salary Report
-            </button>
-            <button class="btn btn-action btn-primary" onclick="refreshData()">
-              Refresh
-            </button>
+            <button class="btn btn-action btn-outline-success" onclick="showAttendanceFilter()">Attendance Sheet</button>
+            <button class="btn btn-action btn-outline-primary" onclick="openPreview()">Salary Report</button>
+            <button class="btn btn-action btn-primary" onclick="refreshData()">Refresh</button>
           </div>
         </div>
 
@@ -285,73 +304,37 @@
           <div class="filter-group" style="grid-column: span 2">
             <label>Search By:</label>
             <div class="search-input-group">
-              <select
-                id="searchType"
-                class="form-select form-select-sm"
-                onchange="processData()"
-              >
+              <select id="searchType" class="form-select form-select-sm" onchange="processData()">
                 <option value="ALL">ALL</option>
                 <option value="EMPLOYEE ID">ID</option>
                 <option value="EMPLOYEE NAME">NAME</option>
                 <option value="PASSPORT NO">PASSPORT</option>
               </select>
-              <input
-                type="text"
-                id="searchInput"
-                class="form-control form-control-sm"
-                placeholder="Type info..."
-                onkeyup="processData()"
-              />
+              <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Type info..." onkeyup="processData()" />
             </div>
           </div>
           <div class="filter-group">
             <label>Start Date:</label>
-            <input
-              type="text"
-              id="startDate"
-              class="form-control form-control-sm custom-date-input"
-            />
+            <input type="text" id="startDate" class="form-control form-control-sm custom-date-input" />
           </div>
           <div class="filter-group">
             <label>End Date:</label>
-            <input
-              type="text"
-              id="endDate"
-              class="form-control form-control-sm custom-date-input"
-            />
+            <input type="text" id="endDate" class="form-control form-control-sm custom-date-input" />
           </div>
-          
           <div class="filter-group">
             <label>Employee NAME:</label>
-            <select
-              id="empFilter"
-              class="form-select form-select-sm"
-              onchange="processData()"
-            ></select>
+            <select id="empFilter" class="form-select form-select-sm" onchange="processData()"></select>
           </div>
           <div class="filter-group">
-            <button
-              class="btn btn-sm btn-primary btn-action w-100"
-              onclick="handleViewReport()"
-            >
-              Search
-            </button>
+            <button class="btn btn-sm btn-primary btn-action w-100" onclick="handleViewReport()">Search</button>
           </div>
           <div class="filter-group">
             <label>PROJECT NAME:</label>
-            <select
-              id="sideFilter"
-              class="form-select form-select-sm"
-              onchange="processData()"
-            ></select>
+            <select id="sideFilter" class="form-select form-select-sm" onchange="processData()"></select>
           </div>
           <div class="filter-group">
             <label>Status Filter:</label>
-            <select
-              id="columnSelector"
-              class="form-select form-select-sm"
-              onchange="handleTypeChange()"
-            >
+            <select id="columnSelector" class="form-select form-select-sm" onchange="handleTypeChange()">
               <option value="">Select</option>
               <option value="STATUS">STATUS</option>
               <option value="HOLIDAY">HOLIDAY</option>
@@ -360,41 +343,32 @@
           </div>
           <div class="filter-group" id="typeValueGroup" style="display: none">
             <label id="typeValueLabel">Value:</label>
-            <select
-              id="typeValueSelect"
-              class="form-select form-select-sm"
-              onchange="processData()"
-            ></select>
+            <select id="typeValueSelect" class="form-select form-select-sm" onchange="processData()"></select>
           </div>
           <div class="filter-group">
-            <button
-              class="btn btn-sm btn-reset btn-action w-100"
-              onclick="resetFilters()"
-            >
-              Clear
-            </button>
+            <button class="btn btn-sm btn-reset btn-action w-100" onclick="resetFilters()">Clear</button>
           </div>
         </div>
 
         <div class="summary-bar" id="summaryBar">
-          <span
-            >Total Employee: <span id="statEmp" class="stat-box"></span
-          ></span>
-          <span
-            >Total Present: <span id="statPresent" class="stat-box"></span
-          ></span>
-          <span
-            id="salarySheetTitle"
-            class="ms-auto"
-            style="display: none; font-weight: 800; color: #1d3a6d"
-          ></span>
+          <span>Total Employee: <span id="statEmp" class="stat-box"></span></span>
+          <span>Total Present: <span id="statPresent" class="stat-box"></span></span>
+
+          <!-- ══ Working Days Control (নতুন ২) ══ -->
+          <div class="wd-badge hide-on-print">
+            <label>⚙️ Working Days Input:</label>
+            <input type="number" id="manualWDInput" placeholder="Type" min="1" max="31"
+              title="Warking Day Manual Input Then Hit The Ok Button" />
+            <button onclick="applyManualWD()">✔ OK</button>
+            <span class="wd-status" id="wdStatus">⏳ Loading...</span>
+          </div>
+
+          <span id="salarySheetTitle" class="ms-auto" style="display:none;font-weight:800;color:#1d3a6d"></span>
         </div>
 
         <div id="loader">
           <div class="spinner-border spinner-border-sm" role="status"></div>
-          <p class="mt-2" style="font-size: 11px">
-            Data Loading 
-          </p>
+          <p class="mt-2" style="font-size:11px">Data Loading</p>
         </div>
 
         <div class="table-responsive">
@@ -413,11 +387,7 @@
         <div class="modal-content">
           <div class="modal-header bg-dark text-white">
             <h6 class="modal-title">Quick Edit Record</h6>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-            ></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <form id="editForm">
@@ -435,49 +405,22 @@
                 </div>
                 <div class="col-6">
                   <label class="form-label small fw-bold">OT HOURS</label>
-                  <input
-                    type="number"
-                    id="editOT"
-                    class="form-control form-control-sm"
-                    step="0.5"
-                  />
+                  <input type="number" id="editOT" class="form-control form-control-sm" step="0.5" />
                 </div>
                 <div class="col-6">
                   <label class="form-label small fw-bold">HOLIDAY WORK</label>
-                  <input
-                    type="number"
-                    id="editHoliday"
-                    class="form-control form-control-sm"
-                    step="0.5"
-                  />
+                  <input type="number" id="editHoliday" class="form-control form-control-sm" step="0.5" />
                 </div>
                 <div class="col-6">
                   <label class="form-label small fw-bold">ADVANCE AMOUNT</label>
-                  <input
-                    type="number"
-                    id="editAdvance"
-                    class="form-control form-control-sm"
-                    step="100"
-                  />
+                  <input type="number" id="editAdvance" class="form-control form-control-sm" step="100" />
                 </div>
               </div>
             </form>
           </div>
           <div class="modal-footer p-2">
-            <button
-              type="button"
-              class="btn btn-light btn-sm"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              class="btn btn-primary btn-sm"
-              onclick="saveEdit()"
-            >
-              Update
-            </button>
+            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="saveEdit()">Update</button>
           </div>
         </div>
       </div>
@@ -489,67 +432,30 @@
         <div class="modal-content">
           <div class="modal-header bg-success text-white">
             <h6 class="modal-title">Generate Attendance Report</h6>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-            ></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
           </div>
           <div class="modal-body">
             <div class="row g-3">
               <div class="col-12">
-                <label class="form-label small fw-bold"
-                  >Select Month & Year</label
-                >
-                <input
-                  type="text"
-                  id="matrixMonth"
-                  class="form-control form-control-sm custom-date-input"
-                  placeholder="Select Month"
-                />
+                <label class="form-label small fw-bold">Select Month & Year</label>
+                <input type="text" id="matrixMonth" class="form-control form-control-sm custom-date-input" placeholder="Select Month" />
               </div>
-
               <div class="col-12">
-                <label class="form-label small fw-bold"
-                  >Select Employee ID (Optional)</label
-                >
-                <input
-                  list="employeeIdList"
-                  id="matrixIdFilter"
-                  class="form-control form-control-sm"
-                  placeholder="Type or click to select ID"
-                />
-                <datalist id="employeeIdList"> </datalist>
+                <label class="form-label small fw-bold">Select Employee ID (Optional)</label>
+                <input list="employeeIdList" id="matrixIdFilter" class="form-control form-control-sm" placeholder="Type or click to select ID" />
+                <datalist id="employeeIdList"></datalist>
               </div>
-
               <div class="col-12">
-                <label class="form-label small fw-bold"
-                  >Filter by Project
-                </label>
-                <select
-                  id="matrixSideFilter"
-                  class="form-select form-select-sm"
-                >
+                <label class="form-label small fw-bold">Filter by Project</label>
+                <select id="matrixSideFilter" class="form-select form-select-sm">
                   <option value="">All Project</option>
                 </select>
               </div>
             </div>
           </div>
           <div class="modal-footer p-2">
-            <button
-              type="button"
-              class="btn btn-light btn-sm"
-              data-bs-dismiss="modal"
-            >
-              Close
-            </button>
-            <button
-              type="button"
-              class="btn btn-success btn-sm"
-              onclick="generateFilteredAttendanceSheet()"
-            >
-              VIEW ATTENDANCE
-            </button>
+            <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-success btn-sm" onclick="generateFilteredAttendanceSheet()">VIEW ATTENDANCE</button>
           </div>
         </div>
       </div>
@@ -559,139 +465,139 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
 
-    <!-- Firebase SDK Modules Integration -->
+    <!-- Firebase SDK -->
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+      import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
       import {
-        getAuth,
-        signInAnonymously,
-      } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-      import {
-        getFirestore,
-        doc,
-        setDoc,
-        getDoc,
-        collection,
-        query,
-        getDocs,
-        updateDoc,
-        onSnapshot,
-        collectionGroup,
-        where,
+        getFirestore, doc, setDoc, getDoc, collection, query,
+        getDocs, updateDoc, onSnapshot, collectionGroup, where,
       } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
       import {
-        getDatabase,
-        ref,
-        set,
-        get,
-        child,
-        onValue,
-        update,
+        getDatabase, ref, set, get, child, onValue, update,
       } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
 
       window.initializeApp = initializeApp;
-      window.getAuth = getAuth;
-      window.signInAnonymously = signInAnonymously;
-      window.getFirestore = getFirestore;
-      window.doc = doc;
-      window.setDoc = setDoc;
-      window.getDoc = getDoc;
-      window.collection = collection;
-      window.query = query;
-      window.getDocs = getDocs;
-      window.updateDoc = updateDoc;
-      window.onSnapshot = onSnapshot;
-      window.collectionGroup = collectionGroup;
-      window.where = where;
-
-      window.getDatabase = getDatabase;
-      window.dbRef = ref;
-      window.dbSet = set;
-      window.dbGet = get;
-      window.dbChild = child;
-      window.dbOnValue = onValue;
-      window.dbUpdate = update;
-
-      // ফায়ারবেস অথেনটিকেশন, ফায়ারস্টোর এবং আরটিডিবি সিঙ্ক ইনিশিয়েট
+      window.getAuth = getAuth; window.signInAnonymously = signInAnonymously;
+      window.getFirestore = getFirestore; window.doc = doc; window.setDoc = setDoc;
+      window.getDoc = getDoc; window.collection = collection; window.query = query;
+      window.getDocs = getDocs; window.updateDoc = updateDoc;
+      window.onSnapshot = onSnapshot; window.collectionGroup = collectionGroup; window.where = where;
+      window.getDatabase = getDatabase; window.dbRef = ref; window.dbSet = set;
+      window.dbGet = get; window.dbChild = child; window.dbOnValue = onValue; window.dbUpdate = update;
       initFirebaseAndLoad();
     </script>
 
     <script>
       let rawData = [];
       let colIndexMap = {};
-      let rtdbOvertimeMap = {}; // RTDB থেকে ওটি আওয়ারস ট্র্যাকিং ম্যাপ
-      let rtdbAdvanceMap = {}; // RTDB থেকে অ্যাডভান্স অ্যামাউন্ট ট্র্যাকিং ম্যাপ
-      let globalEmployeeListMap = {}; // ফায়ারস্টোরের গ্লোবাল /EMPLOYEE_LIST এমপ্লয়ী ম্যাপ
-     const DAYS_IN_MONTH = 30;
+      let rtdbOvertimeMap = {};
+      let rtdbAdvanceMap  = {};
+      let globalEmployeeListMap = {};
 
-function getDailyRate(salary, designation, dateStr) {
-  const des = (designation || "").trim().toUpperCase();
-  if (des === "COOK") {
-    if (dateStr) {
-      const d = new Date(dateStr);
-      if (!isNaN(d.getTime())) {
-        const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-        return salary / daysInMonth;
-      }
-    }
-    return salary / 30;
-  }
-  return parseFloat((salary / 26).toFixed(2));
-}
+      // ══════════════════════════════════════════════════════
+      // নতুন ১ — Holiday Set
+      // Firebase HOLIDAY_LIST কালেকশন থেকে লোড হবে
+      // ══════════════════════════════════════════════════════
+      let _holidaySet = new Set();
 
-let startPicker,
-      
-      
-        endPicker,
-        matrixPicker,
-        isSyncStarted = false,
-        bootstrapModal,
-        matrixModal;
+      // ══════════════════════════════════════════════════════
+      // নতুন ২ — Working Days ক্যালকুলেশন
+      //   সাধারণ কর্মচারী: Basic ÷ (মোট দিন − রবিবার − পাবলিক হলিডে)
+      //   Cook:             Basic ÷ মাসের মোট দিন
+      // ══════════════════════════════════════════════════════
+      let _autoWorkingDays = 26; // Firebase লোডের আগে fallback
+      let _manualWD = null;       // ম্যানুয়াল ওভাররাইড
 
-      // ফায়ারবেস ফিল্ড স্কিমার সাথে সিঙ্ক করা ফিক্সড হেডার সেট
-      const FIXED_HEADERS = [
-        "ISSUE DATE",
-        "ISSUE TIME",
-        "ATTENDANCE DATE",
-        "EMPLOYEE ID",
-        "EMPLOYEE NAME",
-        "DESIGNATION",
-        "PASSPORT NO",
-        "JOINING DATE",
-        "BASIC SALARY",
-        "OT RATE",
-        "TOTAL OT HOURS",
-        "OT AMOUNT",
-        "SUNDAY WORK",
-        "HOLIDAY",
-        "ATTENDANCE BONUS",
-        "PERFORMANCE BONUS",
-        "GROS SALARY",
-        "ADVANCE",
-        "FINE",
-        "STATUS",
-        "SIDE NAME",
-        "REMARK",
-      ];
+      // একটি মাসের কার্যদিবস হিসাব করা (রবিবার + পাবলিক হলিডে বাদে)
+      function calcWorkingDays(dateStr) {
+        const d     = new Date(dateStr);
+        const year  = d.getFullYear();
+        const month = d.getMonth();
+        const total = new Date(year, month + 1, 0).getDate();
 
-      // "View Report" বাটনের ফাংশন - যা অহেতুক রিড খরচ বাঁচাবে
-      window.handleViewReport = async function () {
-        const startStr = document.getElementById("startDate").value;
-        const endStr = document.getElementById("endDate").value;
-
-        if (!startStr || !endStr) {
-          Swal.fire({
-            icon: "warning",
-            title: "select date range",
-            text: "",
-            confirmButtonColor: "#1d3a6d",
-          });
-          return;
+        let sundays = 0;
+        for (let i = 1; i <= total; i++) {
+          if (new Date(year, month, i).getDay() === 0) sundays++;
         }
 
+        let holidays = 0;
+        _holidaySet.forEach(hd => {
+          const hDate = new Date(hd);
+          if (hDate.getFullYear() === year && hDate.getMonth() === month) {
+            if (hDate.getDay() !== 0) holidays++; // রবিবার পড়লে দুইবার বাদ না দিতে
+          }
+        });
+
+        return total - sundays - holidays;
+      }
+
+      // Working Days স্ট্যাটাস UI তে দেখানো
+      function refreshWdStatus(dateStr) {
+        if (!dateStr) return;
+        if (_manualWD && _manualWD > 0) {
+          document.getElementById("wdStatus").textContent = "✅ Manual: " + _manualWD + " days";
+          return;
+        }
+        const wd = calcWorkingDays(dateStr);
+        _autoWorkingDays = wd;
+        document.getElementById("wdStatus").textContent = "⚡ " + wd + " days";
+      }
+
+      // Manual working days apply বাটন
+      window.applyManualWD = function () {
+        const v = parseInt(document.getElementById("manualWDInput").value);
+        if (v > 0 && v <= 31) {
+          _manualWD = v;
+          document.getElementById("wdStatus").textContent = "✅ Manual: " + v + " days";
+        } else {
+          _manualWD = null;
+          document.getElementById("manualWDInput").value = "";
+          const startStr = document.getElementById("startDate").value;
+          if (startStr) refreshWdStatus(startStr);
+          else document.getElementById("wdStatus").textContent = "⚡" + _autoWorkingDays + " days";
+        }
+        processData();
+      };
+
+      // getDailyRate — Cook→÷মাসের দিন, অন্য→÷workingDays (নতুন লজিক)
+      function getDailyRate(salary, designation, dateStr) {
+        const des = (designation || "").trim().toUpperCase();
+        if (des === "COOK") {
+          if (dateStr) {
+            const d = new Date(dateStr);
+            if (!isNaN(d.getTime())) {
+              const daysInMonth = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+              return parseFloat((salary / daysInMonth).toFixed(2));
+            }
+          }
+          return parseFloat((salary / 30).toFixed(2));
+        }
+        const workingDays = (_manualWD && _manualWD > 0) ? _manualWD : _autoWorkingDays;
+        return parseFloat((salary / workingDays).toFixed(2));
+      }
+
+      let startPicker, endPicker, matrixPicker, bootstrapModal, matrixModal;
+
+      const FIXED_HEADERS = [
+        "ISSUE DATE","ISSUE TIME","ATTENDANCE DATE","EMPLOYEE ID","EMPLOYEE NAME",
+        "DESIGNATION","PASSPORT NO","JOINING DATE","BASIC SALARY","OT RATE",
+        "TOTAL OT HOURS","OT AMOUNT","SUNDAY WORK","HOLIDAY","ATTENDANCE BONUS",
+        "PERFORMANCE BONUS","GROS SALARY","ADVANCE","FINE","STATUS","SIDE NAME","REMARK",
+      ];
+
+      window.handleViewReport = async function () {
+        const startStr = document.getElementById("startDate").value;
+        const endStr   = document.getElementById("endDate").value;
+        if (!startStr || !endStr) {
+          Swal.fire({ icon: "warning", title: "Select date range", confirmButtonColor: "#1d3a6d" });
+          return;
+        }
         document.getElementById("loader").style.display = "block";
         try {
           await setupOneTimeFetch(startStr, endStr);
+          // Working days auto-refresh (নতুন)
+          if (!_manualWD) refreshWdStatus(startStr);
         } catch (err) {
           console.error("Fetch Error:", err);
         } finally {
@@ -699,235 +605,104 @@ let startPicker,
         }
       };
 
-      // Robust date standardizer handling both YYYY-MM-DD and DD-MM-YYYY formats without UTC day shift
       function standardDateStr(s) {
         if (!s) return "";
         s = s.toString().trim();
-
-        // Handle DD-MM-YYYY or DD/MM/YYYY
-        const ddmmyyyyMatch = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
-        if (ddmmyyyyMatch) {
-          return `${ddmmyyyyMatch[3]}-${ddmmyyyyMatch[2].padStart(2, "0")}-${ddmmyyyyMatch[1].padStart(2, "0")}`;
-        }
-
-        // Handle YYYY-MM-DD
-        const yyyymmddMatch = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
-        if (yyyymmddMatch) {
-          return `${yyyymmddMatch[1]}-${yyyymmddMatch[2].padStart(2, "0")}-${yyyymmddMatch[3].padStart(2, "0")}`;
-        }
+        const dd = s.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})$/);
+        if (dd) return `${dd[3]}-${dd[2].padStart(2,"0")}-${dd[1].padStart(2,"0")}`;
+        const yy = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (yy) return `${yy[1]}-${yy[2].padStart(2,"0")}-${yy[3].padStart(2,"0")}`;
         return s;
       }
+      function normalizeDateKey(v) { return standardDateStr(v) || ""; }
 
-      function normalizeDateKey(dateValue) {
-        const standard = standardDateStr(dateValue);
-        if (!standard) return "";
-        return standard;
-      }
-
-      function buildOTMap(otRows) {
-        if (!Array.isArray(otRows) || otRows.length < 2) return {};
-        const headers = otRows[0].map((h) => h.toString().trim().toUpperCase());
-        const idIndex = headers.findIndex((h) =>
-          ["EMPLOYEE ID", "ID", "EMPLOYEEID", "WORKER ID"].includes(h),
-        );
-        const dateIndex = headers.findIndex((h) =>
-          ["OT DATE", "DATE", "ATTENDANCE DATE", "WORK DATE"].includes(h),
-        );
-        const otIndex = headers.findIndex((h) =>
-          ["TOTAL OT HOURS", "OT HOURS", "OVERTIME", "OT"].includes(h),
-        );
-        const otRateIndex = headers.findIndex((h) =>
-          ["OT RATE", "OVERTIME RATE", "RATE"].includes(h),
-        );
-        globalOTHeaderMap = { idIndex, dateIndex, otIndex, otRateIndex };
-        if (idIndex === -1 || dateIndex === -1 || otIndex === -1) return {};
-
-        return otRows.slice(1).reduce((map, row) => {
-          const id = (row[idIndex] || "").toString().trim().toUpperCase();
-          const dateKey = normalizeDateKey(row[dateIndex]);
-          const hours = parseFloat(row[otIndex]) || 0;
-          const otRate =
-            globalOTHeaderMap.otRateIndex !== -1
-              ? parseFloat(row[globalOTHeaderMap.otRateIndex]) || 0
-              : 0;
-          if (!id || !dateKey || hours === 0) return map;
-          const key = `${id}_${dateKey}`;
-          if (!map[key]) map[key] = { hours: 0, otRate: 0, row };
-          map[key].hours += hours;
-          if (otRate > 0) map[key].otRate = otRate;
-          return map;
-        }, {});
-      }
-
-      // ফায়ারবেস কনফিগারেশন এবং আরটিডিবি ইন্টিগ্রেশন প্রিপারেশন
+      // ══ Firebase Init ══
       async function initFirebaseAndLoad() {
         try {
           document.getElementById("loader").style.display = "block";
-
           const firebaseConfig = {
             apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
             authDomain: "munna-acl-fda7c.firebaseapp.com",
-            databaseURL:
-              "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
             projectId: "munna-acl-fda7c",
             storageBucket: "munna-acl-fda7c.firebasestorage.app",
             messagingSenderId: "371130316468",
             appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
           };
-
-          const app = window.initializeApp(firebaseConfig);
-          const db = window.getFirestore(app);
+          const app  = window.initializeApp(firebaseConfig);
+          const db   = window.getFirestore(app);
           const rtdb = window.getDatabase(app);
           const auth = window.getAuth(app);
+          window.db = db; window.rtdb = rtdb; window.auth = auth;
+          try { await window.signInAnonymously(auth); } catch(e) {}
 
-          window.db = db;
-          window.rtdb = rtdb;
-          window.auth = auth;
-
-          try {
-            await window.signInAnonymously(auth);
-          } catch (authError) {
-            console.warn(
-              "Bypassing Firebase Auth configuration restriction:",
-              authError.message,
-            );
-          }
-
-          // শুধুমাত্র এমপ্লয়ি লিস্ট লোড হবে (এটি রিড খরচ খুব কম বাড়ায়)
           await syncGlobalEmployeeList();
 
-          // অটোমেটিক ডেটা লোড (setupRealtimeDatabaseSync) বন্ধ করা হলো
+          // ══ নতুন ১: Holiday List লোড ══
+          try {
+            const holSnap = await window.getDocs(window.collection(db, "HOLIDAY_LIST"));
+            holSnap.forEach(d => _holidaySet.add(d.id));
+            // Flatpickr redraw — holiday গুলো এখন লাল হবে
+            document.querySelectorAll(".flatpickr-input").forEach(inp => {
+              if (inp._flatpickr) inp._flatpickr.redraw();
+            });
+            document.getElementById("wdStatus").textContent = "⚡ready";
+          } catch(e) {
+            console.warn("Holiday list load failed:", e.message);
+          }
+
           document.getElementById("loader").style.display = "none";
-        } catch (error) {
-          console.error("Firebase Base Initialization Error:", error);
+        } catch (err) {
+          console.error("Firebase Init Error:", err);
           document.getElementById("loader").style.display = "none";
         }
       }
 
-      // ফায়ারস্টোর থেকে গ্লোবাল /EMPLOYEE_LIST কালেকশন লোড করার নিখুঁত ব্যবস্থা
       async function syncGlobalEmployeeList() {
         try {
-          const empListColRef = window.collection(window.db, "EMPLOYEE_LIST");
-          const snapshot = await window.getDocs(empListColRef);
-
+          const snap = await window.getDocs(window.collection(window.db, "EMPLOYEE_LIST"));
           globalEmployeeListMap = {};
-          snapshot.forEach((doc) => {
-            const empData = doc.data();
-            const id = empData.id || empData.ID || doc.id;
+          snap.forEach(d => {
+            const e = d.data();
+            const id = e.id || e.ID || d.id;
             if (id) {
               globalEmployeeListMap[id.toUpperCase().trim()] = {
-                id: id,
-                name: empData.name || empData.EMPLOYEE_NAME || "",
-                designation: empData.designation || empData.DESIGNATION || "",
-                otRate: parseFloat(
-                  empData.otRate ||
-                    empData.OT_RATE ||
-                    empData["OT RATE"] ||
-                    empData["OT RATE (PER HOUR)"] ||
-                    empData.ot_rate ||
-                    0,
-                ),
-                salary:
-                  parseFloat(empData.salary) || parseFloat(empData.SALARY) || 0,
-                passport: empData.passport || empData.PASSPORT || "",
-                joining: empData.joining || empData.JOINING_DATE || "",
+                id, name: e.name || e.EMPLOYEE_NAME || "",
+                designation: e.designation || e.DESIGNATION || "",
+                otRate: parseFloat(e.otRate || e.OT_RATE || e["OT RATE"] || 0),
+                salary: parseFloat(e.salary) || parseFloat(e.SALARY) || 0,
+                passport: e.passport || e.PASSPORT || "",
+                joining: e.joining || e.JOINING_DATE || "",
               };
             }
           });
-          console.log(
-            "Global Employee List Mapped successfully:",
-            Object.keys(globalEmployeeListMap).length,
-            "employees found.",
-          );
-        } catch (e) {
-          console.warn(
-            "Global /EMPLOYEE_LIST load failed, trying Collection Group fallback:",
-            e.message,
-          );
-          try {
-            const empGroupQuery = window.collectionGroup(
-              window.db,
-              "EMPLOYEE_LIST",
-            );
-            const snap = await window.getDocs(empGroupQuery);
-            snap.forEach((doc) => {
-              const empData = doc.data();
-              const id = empData.id || empData.ID || doc.id;
-              if (id) {
-                globalEmployeeListMap[id.toUpperCase().trim()] = {
-                  id: id,
-                  name: empData.name || empData.EMPLOYEE_NAME || "",
-                  designation: empData.designation || empData.DESIGNATION || "",
-                  otRate:
-                    parseFloat(empData.otRate) ||
-                    parseFloat(empData.OT_RATE) ||
-                    0,
-                  salary:
-                    parseFloat(empData.salary) ||
-                    parseFloat(empData.SALARY) ||
-                    0,
-                  passport: empData.passport || empData.PASSPORT || "",
-                  joining: empData.joining || empData.JOINING_DATE || "",
-                };
-              }
-            });
-          } catch (err) {
-            console.error(
-              "Critical: Could not load global employees from Firestore:",
-              err.message,
-            );
-          }
-        }
+        } catch(e) { console.warn("EMPLOYEE_LIST load failed:", e.message); }
       }
 
-      // রিড খরচ বাঁচাতে এককালীন ডাটা ফেচিং (One-time fetch with query filters)
       async function setupOneTimeFetch(startDate, endDate) {
-        const overtimeRef = window.dbRef(window.rtdb, "OVER_TIME");
-        const advanceRef = window.dbRef(window.rtdb, "ADVANCE");
-
-        // RTDB ফেচিং
         const [otSnap, advSnap] = await Promise.all([
-          window.dbGet(overtimeRef),
-          window.dbGet(advanceRef),
+          window.dbGet(window.dbRef(window.rtdb, "OVER_TIME")),
+          window.dbGet(window.dbRef(window.rtdb, "ADVANCE")),
         ]);
 
         rtdbOvertimeMap = {};
         if (otSnap.exists()) {
-          const overtimeData = otSnap.val();
-          // ফরম্যাট: OVER_TIME -> Month_Year (e.g. April-2026) -> Date (e.g. 2026-04-01) -> docId (e.g. ACL-0006_2026-04-01) { TOTAL_OT_HOURS, ID, OT_Date }
-          Object.keys(overtimeData).forEach((monthYear) => {
-            const dates = overtimeData[monthYear];
-            if (!dates || typeof dates !== "object") return;
-            Object.keys(dates).forEach((dateKey) => {
-              const docs = dates[dateKey];
-              if (!docs || typeof docs !== "object") return;
-              Object.keys(docs).forEach((docId) => {
-                const record = docs[docId];
-                if (!record) return;
-
-                const empId = record.ID || record.id;
-                const otDate = record.OT_Date || record.otDate || dateKey;
-                const otHours = parseFloat(record.TOTAL_OT_HOURS) || 0;
-                const otRate =
-                  parseFloat(record.OT_Rate || record.OT_RATE) || 0;
-
-                // তারিখ ফিল্টার করা হচ্ছে যাতে অপ্রয়োজনীয় ডেটা প্রসেস না হয়
-                if (
-                  empId &&
-                  otDate &&
-                  otDate >= startDate &&
-                  otDate <= endDate
-                ) {
-                  const cleanEmpId = empId.toUpperCase().trim();
-                  const cleanDate = normalizeDateKey(otDate);
-                  if (!rtdbOvertimeMap[cleanEmpId])
-                    rtdbOvertimeMap[cleanEmpId] = {};
-
-                  // মাস ও তারিখ অনুযায়ী কর্মচারীর ওটি আওয়ার এবং রেট ম্যাপে অ্যাসাইন করা হচ্ছে
-                  rtdbOvertimeMap[cleanEmpId][cleanDate] = {
-                    hours: otHours,
-                    rate: otRate,
-                  };
+          const otData = otSnap.val();
+          Object.keys(otData).forEach(monthYear => {
+            const dates = otData[monthYear]; if (!dates || typeof dates !== "object") return;
+            Object.keys(dates).forEach(dateKey => {
+              const docs = dates[dateKey]; if (!docs || typeof docs !== "object") return;
+              Object.keys(docs).forEach(docId => {
+                const rec = docs[docId]; if (!rec) return;
+                const empId  = rec.ID || rec.id;
+                const otDate = rec.OT_Date || rec.otDate || dateKey;
+                const otHrs  = parseFloat(rec.TOTAL_OT_HOURS) || 0;
+                const otRate = parseFloat(rec.OT_Rate || rec.OT_RATE) || 0;
+                if (empId && otDate && otDate >= startDate && otDate <= endDate) {
+                  const cId = empId.toUpperCase().trim();
+                  const cDate = normalizeDateKey(otDate);
+                  if (!rtdbOvertimeMap[cId]) rtdbOvertimeMap[cId] = {};
+                  rtdbOvertimeMap[cId][cDate] = { hours: otHrs, rate: otRate };
                 }
               });
             });
@@ -936,29 +711,22 @@ let startPicker,
 
         rtdbAdvanceMap = {};
         if (advSnap.exists()) {
-          const advanceData = advSnap.val();
-          // ফরম্যাট: ADVANCE -> Month_Year -> Date -> docId { id, recordDate, amount }
-          Object.keys(advanceData).forEach((monthYear) => {
-            const dates = advanceData[monthYear];
-            if (!dates || typeof dates !== "object") return;
-            Object.keys(dates).forEach((dateKey) => {
-              const docs = dates[dateKey];
-              if (!docs || typeof docs !== "object") return;
-              Object.keys(docs).forEach((docId) => {
-                const record = docs[docId];
-                if (!record) return;
-                const empId = record.id || record.ID;
-                const recDate = record.recordDate || dateKey;
-                const amt = parseFloat(record.amount) || 0;
-
+          const advData = advSnap.val();
+          Object.keys(advData).forEach(monthYear => {
+            const dates = advData[monthYear]; if (!dates || typeof dates !== "object") return;
+            Object.keys(dates).forEach(dateKey => {
+              const docs = dates[dateKey]; if (!docs || typeof docs !== "object") return;
+              Object.keys(docs).forEach(docId => {
+                const rec = docs[docId]; if (!rec) return;
+                const empId   = rec.id || rec.ID;
+                const recDate = rec.recordDate || dateKey;
+                const amt     = parseFloat(rec.amount) || 0;
                 if (empId && recDate) {
-                  const cleanEmpId = empId.toUpperCase().trim();
-                  const standardizedDate = normalizeDateKey(recDate);
-
-                  if (standardizedDate) {
-                    if (!rtdbAdvanceMap[cleanEmpId])
-                      rtdbAdvanceMap[cleanEmpId] = {};
-                    rtdbAdvanceMap[cleanEmpId][standardizedDate] = amt;
+                  const cId   = empId.toUpperCase().trim();
+                  const cDate = normalizeDateKey(recDate);
+                  if (cDate) {
+                    if (!rtdbAdvanceMap[cId]) rtdbAdvanceMap[cId] = {};
+                    rtdbAdvanceMap[cId][cDate] = amt;
                   }
                 }
               });
@@ -966,334 +734,161 @@ let startPicker,
           });
         }
 
-        // Firestore ফেচিং (Query ব্যবহার করে রিড খরচ কমানো হচ্ছে)
         try {
           const attQuery = window.query(
             window.collectionGroup(window.db, "Present_Absent"),
             window.where("DATE", ">=", startDate),
             window.where("DATE", "<=", endDate),
           );
-
-          const fsSnapshot = await window.getDocs(attQuery);
-
-          if (fsSnapshot.empty) {
+          const fsSnap = await window.getDocs(attQuery);
+          if (fsSnap.empty) {
             rawData = [FIXED_HEADERS];
           } else {
-            let attendanceDocs = [];
-            fsSnapshot.forEach((doc) => {
-              attendanceDocs.push({
-                id: doc.id,
-                path: doc.ref.path,
-                data: doc.data(),
-              });
-            });
-            rawData = convertDocsToRawData(attendanceDocs);
+            let docs = [];
+            fsSnap.forEach(d => docs.push({ id: d.id, path: d.ref.path, data: d.data() }));
+            rawData = convertDocsToRawData(docs);
           }
-
           mapSheetColumns(rawData[0]);
           populateStaticFilters(rawData);
           processData();
-        } catch (err) {
-          console.error("Firestore optimized fetch failed:", err);
-          // যদি ইনডেক্স না থাকে, তবে একটি লিঙ্ক দিবে কনসোলে।
-          Swal.fire(
-            "Error",
-            "ডাটা ফেচ করতে সমস্যা হয়েছে। কনসোল চেক করুন।",
-            "error",
-          );
+        } catch(err) {
+          console.error("Firestore fetch failed:", err);
+          Swal.fire("Error", "ডাটা ফেচ করতে সমস্যা হয়েছে।", "error");
         }
       }
 
-      // অন-স্ন্যাপশট কোনো কারণে ফেইল হলে লোকাল বাফার ডেমো রেন্ডার করার মেথড
-      function fallbackToDemoData() {
-        console.warn("Using offline demo fallback data...");
-        const demoDocs = [
-          {
-            id: "ACL-0006_2026-04-01_PLAISANCE-SHOPPING-VILLAGE",
-            path: "/DailyAttendance/APRIL_2026/DATES/DATE_2026-04-01/Present_Absent/ACL-0006_2026-04-01_PLAISANCE-SHOPPING-VILLAGE",
-            data: {
-              DATE: "2026-04-01",
-              DESIGNATION: "MASON GRADE 11",
-              EMPLOYEE_NAME: "Devendra Rasailli",
-              HOLIDAY_WORK: 0,
-              ID: "ACL-0006",
-              JOINING_DATE: "Thu Dec 12 2024",
-              OT_RATE: 105,
-              PASSPORT: "PA2229358",
-              REMARK: "NORMAL WORK",
-              SALARY: 22735,
-              SIDE_NAME: "PLAISANCE SHOPPING VILLAGE",
-              STATUS: "Present",
-              SUNDAY_WORK: 0,
-            },
-          },
-          {
-            id: "ACL-0002_2026-04-01_PLAISANCE-SHOPPING-VILLAGE",
-            path: "/DailyAttendance/APRIL_2026/DATES/DATE_2026-04-01/Present_Absent/ACL-0002_2026-04-01_PLAISANCE-SHOPPING-VILLAGE",
-            data: {
-              DATE: "2026-04-01",
-              DESIGNATION: "CARPENTER GRADE 10",
-              EMPLOYEE_NAME: "Md Sharif Hossain",
-              HOLIDAY_WORK: 0,
-              ID: "ACL-0002",
-              JOINING_DATE: "Fri Jan 15 2024",
-              OT_RATE: 120,
-              PASSPORT: "PA9876543",
-              REMARK: "NORMAL WORK",
-              SALARY: 31000,
-              SIDE_NAME: "PLAISANCE SHOPPING VILLAGE",
-              STATUS: "Present",
-              SUNDAY_WORK: 0,
-            },
-          },
-        ];
-        rawData = convertDocsToRawData(demoDocs);
-        mapSheetColumns(rawData[0]);
-        populateStaticFilters(rawData);
-        document.getElementById("loader").style.display = "none";
-        processData();
-      }
-
-      // ফায়ারবেস ফিল্ড স্ট্রাকচার থেকে লোকাল গ্রিড ফরম্যাটে রূপান্তর (গ্লোবাল EMPLOYEE_LIST ওভাররাইড ম্যাপিং সহ)
       function convertDocsToRawData(attendanceDocs) {
         const data = [FIXED_HEADERS];
-        attendanceDocs.forEach((docObj) => {
+        attendanceDocs.forEach(docObj => {
           const item = docObj.data;
-
-          const pathSegments = docObj.path.split("/");
+          const segs = docObj.path.split("/");
           let dateFromPath = "2026-04-01";
-          for (let i = 0; i < pathSegments.length; i++) {
-            if (pathSegments[i].startsWith("DATE_")) {
-              dateFromPath = pathSegments[i].replace("DATE_", "");
-              break;
-            }
+          for (let i = 0; i < segs.length; i++) {
+            if (segs[i].startsWith("DATE_")) { dateFromPath = segs[i].replace("DATE_",""); break; }
           }
-
           const empId = (item.ID || "ACL-0000").toUpperCase().trim();
           const dateKey = item.DATE || dateFromPath;
-          const standardizedDate = normalizeDateKey(dateKey);
+          const stdDate = normalizeDateKey(dateKey);
+          const gEmp    = globalEmployeeListMap[empId] || {};
 
-          // গ্লোবাল এমপ্লয়ী ম্যাপ থেকে সঠিক ডাটা রিসিভ করা (OT RATE, BASIC SALARY, NAME, DESIGNATION, PASSPORT, JOINING)
-          const globalEmpMeta = globalEmployeeListMap[empId] || {};
+          const docBasicSalary = (gEmp.salary > 0) ? gEmp.salary : (item.SALARY || item.salary || 0);
+          const docOtRate      = (gEmp.otRate > 0)  ? gEmp.otRate  : (item.OT_RATE || item.ot_rate || item["OT RATE"] || 0);
 
-          const empName = globalEmpMeta.name || item.EMPLOYEE_NAME || "Unknown";
-          const designation =
-            globalEmpMeta.designation || item.DESIGNATION || "WORKER";
-          const passportNo = globalEmpMeta.passport || item.PASSPORT || "";
-          const joiningDate = globalEmpMeta.joining || item.JOINING_DATE || "";
-
-          // গ্লোবাল কালেকশন থেকে OT RATE এবং BASIC SALARY ওভাররাইড
-          const docBasicSalary =
-            globalEmpMeta.salary !== undefined && globalEmpMeta.salary > 0
-              ? globalEmpMeta.salary
-              : item.SALARY !== undefined
-                ? item.SALARY
-                : item.salary !== undefined
-                  ? item.salary
-                  : 0;
-          const docOtRate =
-            globalEmpMeta.otRate !== undefined && globalEmpMeta.otRate > 0
-              ? globalEmpMeta.otRate
-              : item.OT_RATE !== undefined
-                ? item.OT_RATE
-                : item.ot_rate !== undefined
-                  ? item.ot_rate
-                  : item["OT RATE"] !== undefined
-                    ? item["OT RATE"]
-                    : 0;
-
-          // RTDB ওভারটাইম ডেটা থেকে ঘণ্টা রিসিভ (মাস ও তারিখ নিখুঁতভাবে ম্যাচিং করা হচ্ছে)
           let otHours = item.TOTAL_OT_HOURS || item.OT_HOURS || 0;
-          let rtdbRate = 0;
-          if (
-            rtdbOvertimeMap[empId] &&
-            rtdbOvertimeMap[empId][standardizedDate] !== undefined
-          ) {
-            const otInfo = rtdbOvertimeMap[empId][standardizedDate];
-            if (typeof otInfo === "object") {
-              otHours = otInfo.hours;
-              rtdbRate = otInfo.rate;
-            } else {
-              otHours = parseFloat(otInfo) || 0;
-            }
+          if (rtdbOvertimeMap[empId]?.[stdDate] !== undefined) {
+            const oi = rtdbOvertimeMap[empId][stdDate];
+            otHours = typeof oi === "object" ? oi.hours : parseFloat(oi) || 0;
           }
 
-          // RTDB অ্যাডভান্স ডেটা থেকে অ্যাডভান্স রিসিভ
           let advanceAmt = item.ADVANCE || 0;
-          if (
-            rtdbAdvanceMap[empId] &&
-            rtdbAdvanceMap[empId][standardizedDate] !== undefined
-          ) {
-            advanceAmt =
-              parseFloat(rtdbAdvanceMap[empId][standardizedDate]) || 0;
+          if (rtdbAdvanceMap[empId]?.[stdDate] !== undefined) {
+            advanceAmt = parseFloat(rtdbAdvanceMap[empId][stdDate]) || 0;
           }
-
-          const docHolidayWork =
-            item.HOLIDAY_WORK !== undefined
-              ? item.HOLIDAY_WORK
-              : item.holiday_work !== undefined
-                ? item.holiday_work
-                : item.HOLIDAY !== undefined
-                  ? item.HOLIDAY
-                  : 0;
-          const docSundayWork =
-            item.SUNDAY_WORK !== undefined
-              ? item.SUNDAY_WORK
-              : item.sunday_work !== undefined
-                ? item.sunday_work
-                : 0;
 
           const mappedItem = {
             "ISSUE DATE": dateKey,
-            "ISSUE TIME": item.SYNC_TIME
-              ? new Date(item.SYNC_TIME.seconds * 1000).toLocaleTimeString()
-              : "12:00:00",
+            "ISSUE TIME": item.SYNC_TIME ? new Date(item.SYNC_TIME.seconds * 1000).toLocaleTimeString() : "12:00:00",
             "ATTENDANCE DATE": dateKey,
             "EMPLOYEE ID": empId,
-            "EMPLOYEE NAME": empName,
-            DESIGNATION: designation,
-            "PASSPORT NO": passportNo,
-            "JOINING DATE": joiningDate,
+            "EMPLOYEE NAME": gEmp.name || item.EMPLOYEE_NAME || "Unknown",
+            "DESIGNATION": gEmp.designation || item.DESIGNATION || "WORKER",
+            "PASSPORT NO": gEmp.passport || item.PASSPORT || "",
+            "JOINING DATE": gEmp.joining  || item.JOINING_DATE || "",
             "BASIC SALARY": docBasicSalary,
             "OT RATE": docOtRate,
             "TOTAL OT HOURS": otHours,
-            "SUNDAY WORK": docSundayWork,
-            HOLIDAY: docHolidayWork,
-            "ATTENDANCE BONUS": item.ATTENDANCE_BONUS || 0,
+            "SUNDAY WORK":  item.SUNDAY_WORK  ?? item.sunday_work  ?? 0,
+            "HOLIDAY":      item.HOLIDAY_WORK ?? item.holiday_work ?? item.HOLIDAY ?? 0,
+            "ATTENDANCE BONUS":  item.ATTENDANCE_BONUS  || 0,
             "PERFORMANCE BONUS": item.PERFORMANCE_BONUS || 0,
-            ADVANCE: advanceAmt,
-            FINE: item.FINE || 0,
-            STATUS: item.STATUS || "Present",
+            "ADVANCE": advanceAmt,
+            "FINE": item.FINE || 0,
+            "STATUS": item.STATUS || "Present",
             "SIDE NAME": item.SIDE_NAME || "MAIN SITE",
-            REMARK: item.REMARK || "",
+            "REMARK": item.REMARK || "",
           };
-
-          const row = FIXED_HEADERS.map((header) => {
-            let val = mappedItem[header];
-            return val !== undefined ? val : "";
-          });
-          row._docId = docObj.id;
-          row._fullPath = docObj.path;
+          const row = FIXED_HEADERS.map(h => mappedItem[h] ?? "");
+          row._docId = docObj.id; row._fullPath = docObj.path;
           data.push(row);
         });
         return data;
       }
 
-      // ডেমো ডাটা সিডার (রিয়েল ফায়ারবেস স্কিমা অনুযায়ী)
-      async function seedSampleData() {
-        const sampleRecord = {
-          DATE: "2026-04-01",
-          DESIGNATION: "MASON GRADE 11",
-          EMPLOYEE_NAME: "Devendra Rasailli",
-          HOLIDAY_WORK: 0,
-          ID: "ACL-0006",
-          JOINING_DATE: "Thu Dec 12 2024",
-          OT_RATE: 105,
-          PASSPORT: "PA2229358",
-          REMARK: "NORMAL WORK",
-          SALARY: 22735,
-          SIDE_NAME: "PLAISANCE SHOPPING VILLAGE",
-          STATUS: "Present",
-          SUNDAY_WORK: 0,
-          SYNC_TIME: new Date(),
-        };
-
-        try {
-          const targetDocRef = window.doc(
-            window.db,
-            "DailyAttendance",
-            "APRIL_2026",
-            "DATES",
-            "DATE_2026-04-01",
-            "Present_Absent",
-            "ACL-0006_2026-04-01_PLAISANCE-SHOPPING-VILLAGE",
-          );
-          await window.setDoc(targetDocRef, sampleRecord);
-        } catch (e) {
-          console.error("Failed to seed dummy data to Firebase:", e);
-        }
-      }
-
-      const leftAlignCols = ["EMPLOYEE NAME", "DESIGNATION", "PROJECT NAME"];
-
+      const leftAlignCols = ["EMPLOYEE NAME","DESIGNATION","PROJECT NAME"];
       const displayHeaders = [
-        "ISSUE DATE",
-        "ISSUE TIME",
-        "ATTENDANCE DATE",
-        "EMPLOYEE ID",
-        "EMPLOYEE NAME",
-        "DESIGNATION",
-        "PASSPORT NO",
-        "JOINING DATE",
-        "BASIC SALARY",
-        "OT RATE",
-        "TOTAL OT HOURS",
-        "OT AMOUNT",
-        "SUNDAY WORK",
-        "HOLIDAY",
-        "ATTENDANCE BONUS",
-        "PERFORMANCE BONUS",
-        "GROS SALARY",
-        "ADVANCE",
-        "FINE",
-        "NPS 1%",
-        "CSG 1.5%",
-        "TOTAL DEDUCTION",
-        "NEED SALARY",
-        "STATUS",
-        "SIDE NAME",
-        "REMARK",
+        "ISSUE DATE","ISSUE TIME","ATTENDANCE DATE","EMPLOYEE ID","EMPLOYEE NAME","DESIGNATION",
+        "PASSPORT NO","JOINING DATE","BASIC SALARY","OT RATE","TOTAL OT HOURS","OT AMOUNT",
+        "SUNDAY WORK","HOLIDAY","ATTENDANCE BONUS","PERFORMANCE BONUS","GROS SALARY",
+        "ADVANCE","FINE","NPS 1%","CSG 1.5%","TOTAL DEDUCTION","NEED SALARY","STATUS","SIDE NAME","REMARK",
       ];
 
       window.onload = function () {
         initCustomDatePickers();
-        bootstrapModal = new bootstrap.Modal(
-          document.getElementById("editModal"),
-        );
-        matrixModal = new bootstrap.Modal(
-          document.getElementById("matrixFilterModal"),
-        );
+        bootstrapModal = new bootstrap.Modal(document.getElementById("editModal"));
+        matrixModal    = new bootstrap.Modal(document.getElementById("matrixFilterModal"));
       };
 
-      function initCustomDatePickers() {
-        const config = {
-          dateFormat: "Y-m-d",
-          altInput: true,
-          altFormat: "d-m-Y",
-          onChange: () => processData(),
-        };
-        startPicker = flatpickr("#startDate", config);
-        endPicker = flatpickr("#endDate", config);
+      // ══════════════════════════════════════════════════════
+      // নতুন ৩ — Flatpickr: রবিবার + পাবলিক হলিডে লাল
+     function initCustomDatePickers() {
+  const redDayConfig = {
+    dateFormat: "Y-m-d",
+    altInput: true,
+    altFormat: "d-m-Y",
+    disableMobile: true,
+    onReady: function(dObj, dStr, fp) {
+      fp.calendarContainer.style.fontFamily = "Segoe UI, sans-serif";
+    },
+    onDayCreate: function(dObj, dStr, fp, dayElem) {
+      const d = dayElem.dateObj;
+      if (!d) return;
 
-        matrixPicker = flatpickr("#matrixMonth", {
-          plugins: [
-            new monthSelectPlugin({
-              shorthand: true,
-              dateFormat: "Y-m",
-              altFormat: "F Y",
-              theme: "material_blue",
-            }),
-          ],
-        });
-
-        const now = new Date();
-        matrixPicker.setDate(
-          `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}`,
-        );
+      // আগের ও পরের মাস hide
+      if (dayElem.classList.contains("prevMonthDay") ||
+          dayElem.classList.contains("nextMonthDay")) {
+        dayElem.style.visibility = "hidden";
+        return;
       }
 
-      async function loadDataFromAPI() {
-        if (window.db) {
-          setupRealtimeSync();
-        }
+      // রবিবার লাল
+      if (d.getDay() === 0) {
+        dayElem.style.color = "#ff4d4d";
+        dayElem.style.fontWeight = "700";
       }
+
+      // পাবলিক হলিডে লাল
+      const y   = d.getFullYear();
+      const m   = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      if (_holidaySet.has(`${y}-${m}-${day}`)) {
+        dayElem.classList.add("is-holiday");
+        dayElem.style.color = "#ff4d4d";
+        dayElem.style.fontWeight = "700";
+      }
+    },
+    onChange: function(selectedDates, dateStr) {
+      processData();
+      if (dateStr && !_manualWD) refreshWdStatus(dateStr);
+    },
+  };
+
+  startPicker = flatpickr("#startDate", redDayConfig);
+  endPicker   = flatpickr("#endDate",   redDayConfig);
+
+  matrixPicker = flatpickr("#matrixMonth", {
+    plugins: [
+      new monthSelectPlugin({
+        shorthand: true, dateFormat: "Y-m", altFormat: "F Y", theme: "material_blue",
+      }),
+    ],
+  });
+  const now = new Date();
+  matrixPicker.setDate(`${now.getFullYear()}-${(now.getMonth()+1).toString().padStart(2,"0")}`);
+}
 
       function mapSheetColumns(headers) {
         colIndexMap = {};
-        headers.forEach((h, i) => {
-          colIndexMap[h.toString().trim().toUpperCase()] = i;
-        });
-        // BASIC SALARY এর ডাবল ম্যাপিং ফিক্স
+        headers.forEach((h, i) => { colIndexMap[h.toString().trim().toUpperCase()] = i; });
         colIndexMap["BASIC SALARY "] = colIndexMap["BASIC SALARY"];
       }
 
@@ -1310,115 +905,62 @@ let startPicker,
         return s === "P" || s === "PRESENT" || s === "";
       }
 
-      // আরটিডিবি তে ওটি/অ্যাডভান্স থাকা কিন্তু ফায়ারস্টোরে এটেনডেন্স না থাকা (Missing Employees) সিঙ্ক করার মেথড
       function mergeMissingRtdbRecords(currentRows) {
         const presentIds = new Set();
-        const eIdx = colIndexMap["EMPLOYEE ID"];
-        const dIdx = colIndexMap["ATTENDANCE DATE"];
-
-        currentRows.forEach((row) => {
+        const eIdx = colIndexMap["EMPLOYEE ID"], dIdx = colIndexMap["ATTENDANCE DATE"];
+        currentRows.forEach(row => {
           const id = row[eIdx]?.toString().toUpperCase().trim();
           if (id) presentIds.add(id);
         });
-
-        // আরটিডিবি ওভারটাইম কালেকশনের আইডির সাথে ম্যাচিং রান
-        Object.keys(rtdbOvertimeMap).forEach((empId) => {
-          const cleanId = empId.toUpperCase().trim();
-          if (!presentIds.has(cleanId)) {
-            const datesObj = rtdbOvertimeMap[empId];
-            Object.keys(datesObj).forEach((dateStr) => {
-              const otEntry = datesObj[dateStr];
-              const otHours =
-                typeof otEntry === "object"
-                  ? otEntry.hours
-                  : parseFloat(otEntry) || 0;
-              const rtdbRate = typeof otEntry === "object" ? otEntry.rate : 0;
-
+        Object.keys(rtdbOvertimeMap).forEach(empId => {
+          const cId = empId.toUpperCase().trim();
+          if (!presentIds.has(cId)) {
+            Object.keys(rtdbOvertimeMap[empId]).forEach(dateStr => {
+              const oi = rtdbOvertimeMap[empId][dateStr];
+              const otHours = typeof oi === "object" ? oi.hours : parseFloat(oi) || 0;
+              const rtdbRate = typeof oi === "object" ? oi.rate : 0;
               if (otHours > 0) {
-                const globalEmpMeta = globalEmployeeListMap[cleanId] || {};
+                const gEmp = globalEmployeeListMap[cId] || {};
                 const newRow = Array(FIXED_HEADERS.length).fill("");
-
-                const docBasicSalary = globalEmpMeta.salary || 0;
-                const docOtRate = globalEmpMeta.otRate || rtdbRate || 0;
-
-                newRow[colIndexMap["EMPLOYEE ID"]] = cleanId;
-                newRow[colIndexMap["EMPLOYEE NAME"]] =
-                  globalEmpMeta.name || "Unknown (RTDB Only)";
-                newRow[colIndexMap["DESIGNATION"]] =
-                  globalEmpMeta.designation || "WORKER";
-                newRow[colIndexMap["PASSPORT NO"]] =
-                  globalEmpMeta.passport || "";
-                newRow[colIndexMap["JOINING DATE"]] =
-                  globalEmpMeta.joining || "";
-                newRow[colIndexMap["ATTENDANCE DATE"]] = dateStr;
-                newRow[colIndexMap["ISSUE DATE"]] = dateStr;
-                newRow[colIndexMap["BASIC SALARY"]] = docBasicSalary;
-                newRow[colIndexMap["BASIC SALARY "]] = docBasicSalary;
-                newRow[colIndexMap["OT RATE"]] = docOtRate;
+                newRow[colIndexMap["EMPLOYEE ID"]]    = cId;
+                newRow[colIndexMap["EMPLOYEE NAME"]]  = gEmp.name || "Unknown (RTDB Only)";
+                newRow[colIndexMap["DESIGNATION"]]    = gEmp.designation || "WORKER";
+                newRow[colIndexMap["PASSPORT NO"]]    = gEmp.passport || "";
+                newRow[colIndexMap["JOINING DATE"]]   = gEmp.joining  || "";
+                newRow[colIndexMap["ATTENDANCE DATE"]]= dateStr;
+                newRow[colIndexMap["ISSUE DATE"]]     = dateStr;
+                newRow[colIndexMap["BASIC SALARY"]]   = gEmp.salary || 0;
+                newRow[colIndexMap["OT RATE"]]        = gEmp.otRate || rtdbRate || 0;
                 newRow[colIndexMap["TOTAL OT HOURS"]] = otHours;
-                newRow[colIndexMap["STATUS"]] = "Absent"; // নো উপস্থিতি রেকর্ড
-                newRow[colIndexMap["SIDE NAME"]] = "RTDB SITE";
-                newRow[colIndexMap["REMARK"]] = "OT RECORD ONLY";
-
-                // আরটিডিবি অ্যাডভান্স চেক
-                let advAmt = 0;
-                if (
-                  rtdbAdvanceMap[cleanId] &&
-                  rtdbAdvanceMap[cleanId][dateStr] !== undefined
-                ) {
-                  advAmt = parseFloat(rtdbAdvanceMap[cleanId][dateStr]) || 0;
-                }
-                newRow[colIndexMap["ADVANCE"]] = advAmt;
-
-                newRow._docId = `MISSING_${cleanId}_${dateStr}`;
-                newRow._fullPath = ""; // ডাটাবেজে নেই
+                newRow[colIndexMap["STATUS"]]         = "Absent";
+                newRow[colIndexMap["SIDE NAME"]]      = "RTDB SITE";
+                newRow[colIndexMap["REMARK"]]         = "OT RECORD ONLY";
+                newRow[colIndexMap["ADVANCE"]] = rtdbAdvanceMap[cId]?.[dateStr] || 0;
+                newRow._docId = `MISSING_${cId}_${dateStr}`; newRow._fullPath = "";
                 currentRows.push(newRow);
               }
             });
           }
         });
-
-        // আরটিডিবি অ্যাডভান্স কালেকশনের আইডির সাথে ম্যাচিং রান
-        Object.keys(rtdbAdvanceMap).forEach((empId) => {
-          const cleanId = empId.toUpperCase().trim();
-          if (!presentIds.has(cleanId)) {
-            const datesObj = rtdbAdvanceMap[empId];
-            Object.keys(datesObj).forEach((dateStr) => {
-              const advAmt = parseFloat(datesObj[dateStr]) || 0;
+        Object.keys(rtdbAdvanceMap).forEach(empId => {
+          const cId = empId.toUpperCase().trim();
+          if (!presentIds.has(cId)) {
+            Object.keys(rtdbAdvanceMap[empId]).forEach(dateStr => {
+              const advAmt = parseFloat(rtdbAdvanceMap[empId][dateStr]) || 0;
               if (advAmt > 0) {
-                // এটি ইতিমধ্যে ওভারটাইম মার্জে যুক্ত হয়েছে কিনা তা ভেরিফাই করার লজিক
-                const alreadyAdded = currentRows.some(
-                  (row) => row[eIdx] === cleanId && row[dIdx] === dateStr,
-                );
+                const alreadyAdded = currentRows.some(r => r[eIdx] === cId && r[dIdx] === dateStr);
                 if (!alreadyAdded) {
-                  const globalEmpMeta = globalEmployeeListMap[cleanId] || {};
+                  const gEmp = globalEmployeeListMap[cId] || {};
                   const newRow = Array(FIXED_HEADERS.length).fill("");
-
-                  const docBasicSalary = globalEmpMeta.salary || 0;
-                  const docOtRate = globalEmpMeta.otRate || 0;
-
-                  newRow[colIndexMap["EMPLOYEE ID"]] = cleanId;
-                  newRow[colIndexMap["EMPLOYEE NAME"]] =
-                    globalEmpMeta.name || "Unknown (RTDB Only)";
-                  newRow[colIndexMap["DESIGNATION"]] =
-                    globalEmpMeta.designation || "WORKER";
-                  newRow[colIndexMap["PASSPORT NO"]] =
-                    globalEmpMeta.passport || "";
-                  newRow[colIndexMap["JOINING DATE"]] =
-                    globalEmpMeta.joining || "";
-                  newRow[colIndexMap["ATTENDANCE DATE"]] = dateStr;
-                  newRow[colIndexMap["ISSUE DATE"]] = dateStr;
-                  newRow[colIndexMap["BASIC SALARY"]] = docBasicSalary;
-                  newRow[colIndexMap["BASIC SALARY "]] = docBasicSalary;
-                  newRow[colIndexMap["OT RATE"]] = docOtRate;
-                  newRow[colIndexMap["TOTAL OT HOURS"]] = 0;
-                  newRow[colIndexMap["STATUS"]] = "Absent";
-                  newRow[colIndexMap["SIDE NAME"]] = "RTDB SITE";
-                  newRow[colIndexMap["REMARK"]] = "ADVANCE RECORD ONLY";
-                  newRow[colIndexMap["ADVANCE"]] = advAmt;
-
-                  newRow._docId = `MISSING_${cleanId}_${dateStr}`;
-                  newRow._fullPath = "";
+                  newRow[colIndexMap["EMPLOYEE ID"]]    = cId;
+                  newRow[colIndexMap["EMPLOYEE NAME"]]  = gEmp.name || "Unknown";
+                  newRow[colIndexMap["DESIGNATION"]]    = gEmp.designation || "WORKER";
+                  newRow[colIndexMap["ATTENDANCE DATE"]]= dateStr;
+                  newRow[colIndexMap["ISSUE DATE"]]     = dateStr;
+                  newRow[colIndexMap["BASIC SALARY"]]   = gEmp.salary || 0;
+                  newRow[colIndexMap["STATUS"]]         = "Absent";
+                  newRow[colIndexMap["ADVANCE"]]        = advAmt;
+                  newRow._docId = `MISSING_${cId}_${dateStr}`; newRow._fullPath = "";
                   currentRows.push(newRow);
                 }
               }
@@ -1429,1117 +971,672 @@ let startPicker,
 
       function processData() {
         const startStr = document.getElementById("startDate").value;
-        const endStr = document.getElementById("endDate").value;
-
-        let startDate = startStr ? new Date(startStr) : null;
-        if (startDate) startDate.setHours(0, 0, 0, 0);
-
+        const endStr   = document.getElementById("endDate").value;
+        let startDate  = startStr ? new Date(startStr) : null;
+        if (startDate) startDate.setHours(0,0,0,0);
         let endDate = endStr ? new Date(endStr) : null;
-        if (endDate) endDate.setHours(23, 59, 59, 999);
+        if (endDate) endDate.setHours(23,59,59,999);
 
-        const search = document
-          .getElementById("searchInput")
-          .value.toLowerCase();
+        const search     = document.getElementById("searchInput").value.toLowerCase();
         const searchType = document.getElementById("searchType").value;
-        const fEmp = document.getElementById("empFilter").value;
-        const fSide = document.getElementById("sideFilter").value;
-        const fType = document.getElementById("columnSelector").value;
-        const fTypeVal = document
-          .getElementById("typeValueSelect")
-          .value.toLowerCase();
+        const fEmp   = document.getElementById("empFilter").value;
+        const fSide  = document.getElementById("sideFilter").value;
+        const fType  = document.getElementById("columnSelector").value;
+        const fTypeVal = document.getElementById("typeValueSelect").value.toLowerCase();
 
         const titleSpan = document.getElementById("salarySheetTitle");
-        if (startStr && endStr) {
-          titleSpan.innerText = `Records: ${startStr} to ${endStr}`;
-          titleSpan.style.display = "inline";
-        } else {
-          titleSpan.style.display = "none";
-        }
+        if (startStr && endStr) { titleSpan.innerText = `Records: ${startStr} to ${endStr}`; titleSpan.style.display = "inline"; }
+        else titleSpan.style.display = "none";
 
-        const dIdx =
-          colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
+        const dIdx = colIndexMap["ATTENDANCE DATE"] || colIndexMap["ISSUE DATE"];
         const eIdx = colIndexMap["EMPLOYEE ID"];
         const sIdx = colIndexMap["SIDE NAME"];
 
-        // ১. mian উপস্থিতি থাকা রেকর্ড ফিল্টারিং
-        let filteredRows = rawData.slice(1).filter((row) => {
-          const rId = row[eIdx]?.toString().toUpperCase() || "";
+        let filteredRows = rawData.slice(1).filter(row => {
+          const rId   = row[eIdx]?.toString().toUpperCase() || "";
           const rSide = row[sIdx]?.toString().toUpperCase() || "";
-
           const rDate = parseDate(row[dIdx]);
-          const compareDate = new Date(rDate.getTime());
-          compareDate.setHours(0, 0, 0, 0);
-
+          const cDate = new Date(rDate.getTime()); cDate.setHours(0,0,0,0);
           let match = true;
-          if (startDate && compareDate < startDate) match = false;
-          if (match && endDate && compareDate > endDate) match = false;
-
+          if (startDate && cDate < startDate) match = false;
+          if (match && endDate && cDate > endDate) match = false;
           if (match && search) {
-            if (searchType === "ALL")
-              match = row.join(" ").toLowerCase().includes(search);
-            else
-              match = (row[colIndexMap[searchType]] || "")
-                .toString()
-                .toLowerCase()
-                .includes(search);
+            match = searchType === "ALL"
+              ? row.join(" ").toLowerCase().includes(search)
+              : (row[colIndexMap[searchType]] || "").toString().toLowerCase().includes(search);
           }
-          if (match && fEmp && rId !== fEmp) match = false;
-          if (match && fSide && rSide !== fSide) match = false;
+          if (match && fEmp  && rId   !== fEmp)  match = false;
+          if (match && fSide && rSide !== fSide)  match = false;
           if (match && fType && fTypeVal) {
-            const cellVal = (row[colIndexMap[fType]] || "")
-              .toString()
-              .toLowerCase();
-            if (cellVal !== fTypeVal) match = false;
+            if ((row[colIndexMap[fType]] || "").toString().toLowerCase() !== fTypeVal) match = false;
           }
           return match;
         });
 
-        // ২. আরটিডিবি রেকর্ড মার্জিং (অনুপস্থিত এমপ্লয়ীদের ডেটা সিঙ্ক)
         mergeMissingRtdbRecords(filteredRows);
-
         filteredRows.sort((a, b) => parseDate(b[dIdx]) - parseDate(a[dIdx]));
 
-        const isSummary =
-          startStr || endStr || fEmp || fSide || (fType && fTypeVal);
+        const isSummary = startStr || endStr || fEmp || fSide || (fType && fTypeVal);
         if (isSummary) renderSummaryView(filteredRows);
         else renderDetailedView(filteredRows);
-
         updateStats(filteredRows);
       }
 
-     function renderDetailedView(rows) {
-  const thead = document.getElementById("tableHead");
-  const tbody = document.getElementById("tableBody");
-  document.getElementById("tableFoot").innerHTML = "";
-  document.getElementById("bodyRoot").classList.remove("summary-mode");
+      function renderDetailedView(rows) {
+        const thead = document.getElementById("tableHead");
+        const tbody = document.getElementById("tableBody");
+        document.getElementById("tableFoot").innerHTML = "";
+        document.getElementById("bodyRoot").classList.remove("summary-mode");
 
-  thead.innerHTML = `<tr>
-  <th style="width: 40px; background-color: #f8f9fa; vertical-align: middle;" class="text-center">SL</th>
-  ${displayHeaders
-    .filter((h) => h !== "JOINING DATE")
-    .map((h) => {
-      let extraStyle =
-        "vertical-align: middle; text-align: center; white-space: normal; word-wrap: break-word; min-width: 70px; max-width: 110px; line-height: 1.1; padding: 5px;";
-
-      if (h.includes("BONUS"))
-        extraStyle += "background-color: #e6fffa; color: #006655;";
-      else if (["ADVANCE", "FINE", "NPS 1%", "CSG 1.5%"].includes(h))
-        extraStyle += "background-color: #fff5f5; color: #c53030;";
-      else if (h === "TOTAL DEDUCTION")
-        extraStyle += "background-color: #ffebeb; color: #b91c1c; font-weight: bold;";
-      else if (h === "NEED SALARY")
-        extraStyle += "background-color: #1d3a6d; color: #ffffff; font-weight: bold;";
-      else if (h === "TOTAL OT HOURS")
-        extraStyle += "background-color: #fff9e6; color: #856404; font-weight: bold;";
-      else if (h === "GROS SALARY")
-        extraStyle += "background-color: #ebf8ff; color: #2b6cb0;";
-
-      let headerHtml = `<th style="${extraStyle}">${h}</th>`;
-      if (h === "BASIC SALARY" || h === "BASIC SALARY ") {
-        headerHtml =
-          `<th style="background-color: #f0fdf4; color: #166534; vertical-align: middle; text-align: center; white-space: normal; min-width: 70px; line-height: 1.1;">DAILY BASIC</th>` +
-          headerHtml;
-      }
-      return headerHtml;
-    })
-    .join("")}
-  <th class="no-print text-center" style="background-color: #f8f9fa; vertical-align: middle;">ACTION</th>
-</tr>`;
-
-  tbody.innerHTML = rows
-    .map((row, idx) => {
-      const originalIndex = rawData.indexOf(row);
-      const reverseSerial = rows.length - idx;
-
-      const otHours = parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
-
-      const basicSalary =
-        parseFloat(row[colIndexMap["BASIC SALARY"]]) ||
-        parseFloat(row[colIndexMap["BASIC SALARY "]]) ||
-        0;
-      const holidayAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
-      const sundayAmt  = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
-      const status = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
-
-      // ── Cook এর জন্য মাসের দিন দিয়ে ভাগ, বাকিদের ÷26 ──
-      const designation  = (row[colIndexMap["DESIGNATION"]] || "").toString();
-      const attendanceDate = (row[colIndexMap["ATTENDANCE DATE"]] || row[colIndexMap["ISSUE DATE"]] || "").toString();
-      const dailyBasicDisplay = getDailyRate(basicSalary, designation, attendanceDate);
-
-      let normalPresentPayment = 0;
-      if (isPresent(status)) {
-        if (holidayAmt > 0) {
-          normalPresentPayment = holidayAmt;
-        } else if (sundayAmt > 0) {
-          normalPresentPayment = sundayAmt;
-        } else {
-          normalPresentPayment = dailyBasicDisplay;
-        }
-      }
-
-      const otRate = parseFloat(row[colIndexMap["OT RATE"]]) || 0;
-      const otAmt  = otHours * otRate;
-      const grossSalary =
-        normalPresentPayment +
-        otAmt +
-        (parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0) +
-        (parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0);
-      const nps = grossSalary * 0.01;
-      const csg = grossSalary * 0.015;
-
-      const advanceAmt = parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
-
-      const totalDeduction =
-        nps + csg + advanceAmt + (parseFloat(row[colIndexMap["FINE"]]) || 0);
-      const needSalary = grossSalary - totalDeduction;
-
-      return `<tr>
-        <td class="text-center" style="font-weight: bold;">${reverseSerial}</td>
-        ${displayHeaders
-          .filter((h) => h !== "JOINING DATE")
-          .map((h) => {
-            let val = row[colIndexMap[h]];
-            const isNumeric = [
-              "BASIC SALARY ", "DAILY BASIC", "OT AMOUNT", "HOLIDAY",
-              "SUNDAY WORK", "GROS SALARY", "NEED SALARY", "TOTAL OT HOURS",
-              "NPS 1%", "CSG 1.5%", "TOTAL DEDUCTION", "ADVANCE", "FINE",
-            ].includes(h.toUpperCase());
-            const align = isNumeric
-              ? "text-end"
-              : leftAlignCols.includes(h)
-                ? "text-start"
-                : "text-center";
-
-            if (h === "TOTAL OT HOURS") val = otHours > 0 ? otHours : "-";
-            else if (h === "OT AMOUNT")       val = otAmt > 0 ? otAmt.toFixed(2) : "-";
-            else if (h === "NPS 1%")          val = nps.toFixed(2);
-            else if (h === "CSG 1.5%")        val = csg.toFixed(2);
-            else if (h === "TOTAL DEDUCTION") val = totalDeduction.toFixed(2);
-            else if (h === "GROS SALARY")     val = grossSalary.toFixed(2);
-            else if (h === "NEED SALARY")     val = needSalary.toFixed(2);
-            else if (h === "ADVANCE")         val = advanceAmt > 0 ? advanceAmt.toFixed(0) : "-";
-            else if (typeof val === "number") val = val.toFixed(2);
-
-            if (val === undefined || val === null || val === "") val = "-";
-
-            let cellBg = "";
-            if (h === "STATUS") cellBg = "background-color: #dcfce7; font-weight: 500;";
-
-            let cellHtml = `<td class="${align}" style="white-space: nowrap; padding: 4px 8px; ${cellBg}">${val}</td>`;
-
+        thead.innerHTML = `<tr>
+          <th style="width:40px">SL</th>
+          ${displayHeaders.filter(h => h !== "JOINING DATE").map(h => {
+            let s = "vertical-align:middle;text-align:center;white-space:normal;min-width:70px;max-width:110px;line-height:1.1;padding:5px;";
+            if (h.includes("BONUS")) s += "background-color:#e6fffa;color:#006655;";
+            else if (["ADVANCE","FINE","NPS 1%","CSG 1.5%"].includes(h)) s += "background-color:#fff5f5;color:#c53030;";
+            else if (h === "TOTAL DEDUCTION") s += "background-color:#ffebeb;color:#b91c1c;font-weight:bold;";
+            else if (h === "NEED SALARY")     s += "background-color:#1d3a6d;color:#ffffff;font-weight:bold;";
+            else if (h === "TOTAL OT HOURS")  s += "background-color:#fff9e6;color:#856404;font-weight:bold;";
+            else if (h === "GROS SALARY")     s += "background-color:#ebf8ff;color:#2b6cb0;";
+            let html = `<th style="${s}">${h}</th>`;
             if (h === "BASIC SALARY" || h === "BASIC SALARY ") {
-              let bg = "#f0fdf4";
-              cellHtml =
-                `<td class="text-end" style="background-color: ${bg}; font-weight: bold; white-space: nowrap; padding: 4px 8px;">${dailyBasicDisplay.toFixed(2)}</td>` +
-                cellHtml;
+              html = `<th style="background-color:#f0fdf4;color:#166534;vertical-align:middle;text-align:center;white-space:normal;min-width:70px;line-height:1.1;">DAILY BASIC</th>` + html;
             }
-            return cellHtml;
-          })
-          .join("")}
-        <td class="no-print text-center">
-          ${row._fullPath
-            ? `<button class="btn btn-warning btn-sm" onclick="openEditModal(${originalIndex})">EDIT</button>`
-            : `<span class="badge bg-secondary">RTDB Only</span>`}
-        </td>
-      </tr>`;
-    })
-    .join("");
-}
-     function renderSummaryView(rows) {
-  const thead = document.getElementById("tableHead");
-  const bodyRoot = document.getElementById("bodyRoot");
-  bodyRoot.classList.add("summary-mode");
+            return html;
+          }).join("")}
+          <th class="no-print text-center">ACTION</th>
+        </tr>`;
 
-  globalSummary = {};
+        tbody.innerHTML = rows.map((row, idx) => {
+          const origIdx   = rawData.indexOf(row);
+          const revSerial = rows.length - idx;
+          const otHours   = parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
+          const basicSal  = parseFloat(row[colIndexMap["BASIC SALARY"]]) || parseFloat(row[colIndexMap["BASIC SALARY "]]) || 0;
+          const holAmt    = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
+          const sunAmt    = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
+          const status    = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
+          const desig     = (row[colIndexMap["DESIGNATION"]] || "").toString();
+          const attDate   = (row[colIndexMap["ATTENDANCE DATE"]] || row[colIndexMap["ISSUE DATE"]] || "").toString();
+          const dailyRate = getDailyRate(basicSal, desig, attDate);
 
-  rows.forEach((row) => {
-    const id = row[colIndexMap["EMPLOYEE ID"]];
-    if (!id) return;
+          let normalPay = 0;
+          if (isPresent(status)) {
+            normalPay = holAmt > 0 ? holAmt : sunAmt > 0 ? sunAmt : dailyRate;
+          }
+          const otRate   = parseFloat(row[colIndexMap["OT RATE"]]) || 0;
+          const otAmt    = otHours * otRate;
+          const gross    = normalPay + otAmt
+            + (parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0)
+            + (parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0);
+          const nps = gross * 0.01, csg = gross * 0.015;
+          const adv = parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
+          const totDed   = nps + csg + adv + (parseFloat(row[colIndexMap["FINE"]]) || 0);
+          const needSal  = gross - totDed;
 
-    if (!globalSummary[id]) {
-      const attDateRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-      let daysInMonth = 30;
-      if (attDateRaw && attDateRaw.getTime() !== 0) {
-        daysInMonth = new Date(
-          attDateRaw.getFullYear(),
-          attDateRaw.getMonth() + 1,
-          0,
-        ).getDate();
+          return `<tr>
+            <td class="text-center" style="font-weight:bold">${revSerial}</td>
+            ${displayHeaders.filter(h => h !== "JOINING DATE").map(h => {
+              let val = row[colIndexMap[h]];
+              const isNum = ["BASIC SALARY ","DAILY BASIC","OT AMOUNT","HOLIDAY","SUNDAY WORK",
+                "GROS SALARY","NEED SALARY","TOTAL OT HOURS","NPS 1%","CSG 1.5%","TOTAL DEDUCTION","ADVANCE","FINE"]
+                .includes(h.toUpperCase());
+              const align = isNum ? "text-end" : leftAlignCols.includes(h) ? "text-start" : "text-center";
+              if (h === "TOTAL OT HOURS")     val = otHours > 0 ? otHours : "-";
+              else if (h === "OT AMOUNT")     val = otAmt > 0 ? otAmt.toFixed(2) : "-";
+              else if (h === "NPS 1%")        val = nps.toFixed(2);
+              else if (h === "CSG 1.5%")      val = csg.toFixed(2);
+              else if (h === "TOTAL DEDUCTION") val = totDed.toFixed(2);
+              else if (h === "GROS SALARY")   val = gross.toFixed(2);
+              else if (h === "NEED SALARY")   val = needSal.toFixed(2);
+              else if (h === "ADVANCE")       val = adv > 0 ? adv.toFixed(0) : "-";
+              else if (typeof val === "number") val = val.toFixed(2);
+              if (val === undefined || val === null || val === "") val = "-";
+              let bg = h === "STATUS" ? "background-color:#dcfce7;font-weight:500;" : "";
+              let cell = `<td class="${align}" style="white-space:nowrap;padding:4px 8px;${bg}">${val}</td>`;
+              if (h === "BASIC SALARY" || h === "BASIC SALARY ") {
+                cell = `<td class="text-end" style="background-color:#f0fdf4;font-weight:bold;white-space:nowrap;padding:4px 8px;">${dailyRate.toFixed(2)}</td>` + cell;
+              }
+              return cell;
+            }).join("")}
+            <td class="no-print text-center">
+              ${row._fullPath
+                ? `<button class="btn btn-warning btn-sm" onclick="openEditModal(${origIdx})">EDIT</button>`
+                : `<span class="badge bg-secondary">RTDB Only</span>`}
+            </td>
+          </tr>`;
+        }).join("");
       }
 
-      globalSummary[id] = {
-        id,
-        name: row[colIndexMap["EMPLOYEE NAME"]],
-        designation: row[colIndexMap["DESIGNATION"]] || "-",
-        mBasic:
-          parseFloat(row[colIndexMap["BASIC SALARY"]]) ||
-          parseFloat(row[colIndexMap["BASIC SALARY "]]) ||
-          0,
-        daysInMonth: daysInMonth,
-        refDate: row[colIndexMap["ATTENDANCE DATE"]] || "",
-        narDays: 0,
-        sunDays: 0,
-        holiDays: 0,
-        absentDays: 0,
-        totalAtt: 0,
-        otHrs: 0,
-        otRate: parseFloat(row[colIndexMap["OT RATE"]]) || 0,
-        holAmt: 0,
-        sunAmt: 0,
-        adv: 0,
-        fine: 0,
-        attBonus: parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0,
-        perfBonus: parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0,
-      };
-    }  // ← if (!globalSummary[id]) এর closing brace
-
-    const status = (row[colIndexMap["STATUS"]] || "")
-      .toString()
-      .toUpperCase();
-    const hAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
-    const sAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
-    const isP = isPresent(status);
-          // ডাবল পেমেন্ট প্রতিরোধের জন্য সানডে ও হলিডে এন্ট্রি মেইন উপস্থিতি (narDays) থেকে নিখুঁত মাইনাস ক্যালকুলেশন
+      function renderSummaryView(rows) {
+        const thead = document.getElementById("tableHead");
+        document.getElementById("bodyRoot").classList.add("summary-mode");
+        globalSummary = {};
+        rows.forEach(row => {
+          const id = row[colIndexMap["EMPLOYEE ID"]]; if (!id) return;
+          if (!globalSummary[id]) {
+            const attDateRaw  = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+            let daysInMonth   = 30;
+            if (attDateRaw && attDateRaw.getTime() !== 0)
+              daysInMonth = new Date(attDateRaw.getFullYear(), attDateRaw.getMonth() + 1, 0).getDate();
+            globalSummary[id] = {
+              id, name: row[colIndexMap["EMPLOYEE NAME"]],
+              designation: row[colIndexMap["DESIGNATION"]] || "-",
+              mBasic: parseFloat(row[colIndexMap["BASIC SALARY"]]) || parseFloat(row[colIndexMap["BASIC SALARY "]]) || 0,
+              daysInMonth, refDate: row[colIndexMap["ATTENDANCE DATE"]] || "",
+              narDays:0, sunDays:0, holiDays:0, absentDays:0, totalAtt:0,
+              otHrs:0, otRate: parseFloat(row[colIndexMap["OT RATE"]]) || 0,
+              holAmt:0, sunAmt:0, adv:0, fine:0,
+              attBonus:  parseFloat(row[colIndexMap["ATTENDANCE BONUS"]]) || 0,
+              perfBonus: parseFloat(row[colIndexMap["PERFORMANCE BONUS"]]) || 0,
+            };
+          }
+          const status = (row[colIndexMap["STATUS"]] || "").toString().toUpperCase();
+          const hAmt = parseFloat(row[colIndexMap["HOLIDAY"]]) || 0;
+          const sAmt = parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0;
+          const isP  = isPresent(status);
           if (isP) {
             globalSummary[id].totalAtt += 1;
-            if (hAmt > 0) {
-              globalSummary[id].holiDays += 1;
-              globalSummary[id].holAmt += hAmt;
-            } else if (sAmt > 0) {
-              globalSummary[id].sunDays += 1;
-              globalSummary[id].sunAmt += sAmt;
-            } else {
-              globalSummary[id].narDays += 1; // রবিবার ও ছুটি বাদে সাধারণ কার্যদিবস
-            }
+            if (hAmt > 0)      { globalSummary[id].holiDays += 1; globalSummary[id].holAmt += hAmt; }
+            else if (sAmt > 0) { globalSummary[id].sunDays  += 1; globalSummary[id].sunAmt += sAmt; }
+            else                { globalSummary[id].narDays  += 1; }
           } else if (status === "ABSENT") {
             globalSummary[id].absentDays += 1;
           }
-
-          globalSummary[id].otHrs +=
-            parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
-          globalSummary[id].adv += parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
-          globalSummary[id].fine += parseFloat(row[colIndexMap["FINE"]]) || 0;
+          globalSummary[id].otHrs += parseFloat(row[colIndexMap["TOTAL OT HOURS"]]) || 0;
+          globalSummary[id].adv   += parseFloat(row[colIndexMap["ADVANCE"]]) || 0;
+          globalSummary[id].fine  += parseFloat(row[colIndexMap["FINE"]]) || 0;
         });
 
         thead.innerHTML = `<tr>
-              <th rowspan="2">SL</th>
-              <th rowspan="2" style="width: 240px; min-width: 240px;">EMPLOYEE INFO</th>
-              <th rowspan="2" class="hide-on-print">BASIC</th>
-              <th colspan="3" class="hide-on-print">ATTENDANCE TYPE</th><th colspan="2">TOTAL</th>
-              <th rowspan="2">T.BASIC</th><th rowspan="2">OT AMT</th><th rowspan="2">HOLIDAY</th><th rowspan="2">SUNDAY</th>
-              <th colspan="2" style="background-color: #fffbeb;">BONUS</th>
-              <th rowspan="2">GROSS SALARY</th><th colspan="4">DEDUCTION</th>
-              <th rowspan="2">NEED SALARY</th>
-              <th rowspan="2" class="sig-cell">SIGNATURE</th>
-          </tr>
-          <tr>
-              <th class="hide-on-print">N</th><th class="hide-on-print">S</th><th class="hide-on-print">H</th>
-              <th>P</th><th>A</th>
-              <th style="background-color: #fef3c7;">ATT.</th><th style="background-color: #fef3c7;">PERF.</th>
-              <th>ADV.</th><th>FINE</th><th>NPS 1%</th><th>CSG 1.5%</th>
-          </tr>`;
-
+          <th rowspan="2">SL</th>
+          <th rowspan="2" style="width:240px;min-width:240px;">EMPLOYEE INFO</th>
+          <th rowspan="2" class="hide-on-print">BASIC</th>
+          <th colspan="3" class="hide-on-print">ATTENDANCE TYPE</th>
+          <th colspan="2">TOTAL</th>
+          <th rowspan="2">T.BASIC</th><th rowspan="2">OT AMT</th>
+          <th rowspan="2">HOLIDAY</th><th rowspan="2">SUNDAY</th>
+          <th colspan="2" style="background-color:#fffbeb;">BONUS</th>
+          <th rowspan="2">GROSS SALARY</th>
+          <th colspan="4">DEDUCTION</th>
+          <th rowspan="2">NEED SALARY</th>
+          <th rowspan="2" class="sig-cell">SIGNATURE</th>
+        </tr>
+        <tr>
+          <th class="hide-on-print">N</th><th class="hide-on-print">S</th><th class="hide-on-print">H</th>
+          <th>P</th><th>A</th>
+          <th style="background-color:#fef3c7;">ATT.</th><th style="background-color:#fef3c7;">PERF.</th>
+          <th>ADV.</th><th>FINE</th><th>NPS 1%</th><th>CSG 1.5%</th>
+        </tr>`;
         refreshSummaryTable();
       }
 
-     function refreshSummaryTable() {
-  const tbody = document.getElementById("tableBody");
-  const sortedSummary = Object.values(globalSummary).sort((a, b) =>
-    a.id.toString().localeCompare(b.id.toString(), undefined, { numeric: true })
-  );
+      function refreshSummaryTable() {
+        const tbody = document.getElementById("tableBody");
+        const sorted = Object.values(globalSummary).sort((a,b) =>
+          a.id.toString().localeCompare(b.id.toString(), undefined, { numeric:true })
+        );
+        tbody.innerHTML = sorted.map((emp, i) => {
+          const dr    = getDailyRate(emp.mBasic, emp.designation, emp.refDate);
+          const actB  = dr * emp.narDays;
+          const otA   = emp.otHrs * emp.otRate;
+          const gross = actB + otA + emp.holAmt + emp.sunAmt + emp.attBonus + emp.perfBonus;
+          const nps   = gross * 0.01, csg = gross * 0.015;
+          const need  = gross - (emp.adv + emp.fine + nps + csg);
+          return `<tr class="text-center" id="row-${emp.id}">
+            <td>${i+1}</td>
+            <td class="text-start emp-info-cell">
+              <div><strong>${emp.id}</strong> - ${emp.name}</div>
+              <div style="font-size:9px;color:#666">${emp.designation}</div>
+            </td>
+            <td class="hide-on-print">${emp.mBasic.toFixed(0)}</td>
+            <td class="hide-on-print">${emp.narDays}</td>
+            <td class="hide-on-print">${emp.sunDays}</td>
+            <td class="hide-on-print">${emp.holiDays}</td>
+            <td>${emp.totalAtt}</td>
+            <td style="color:#d9534f">${emp.absentDays}</td>
+            <td>${actB.toFixed(0)}</td><td>${otA.toFixed(0)}</td>
+            <td>${emp.holAmt.toFixed(0)}</td><td>${emp.sunAmt.toFixed(0)}</td>
+            <td style="background-color:#fefce8"><input type="number" class="text-center bonus-input" value="${emp.attBonus}" oninput="updateSingleRow('${emp.id}','attBonus',this.value)" style="width:50px"></td>
+            <td style="background-color:#fefce8"><input type="number" class="text-center bonus-input" value="${emp.perfBonus}" oninput="updateSingleRow('${emp.id}','perfBonus',this.value)" style="width:50px"></td>
+            <td style="font-weight:bold">${gross.toFixed(2)}</td>
+            <td>${emp.adv.toFixed(0)}</td><td>${emp.fine.toFixed(0)}</td>
+            <td>${nps.toFixed(2)}</td><td>${csg.toFixed(2)}</td>
+            <td class="highlight-col" style="font-weight:bold">${need.toFixed(2)}</td>
+            <td></td>
+          </tr>`;
+        }).join("");
+        recalculateGrandTotal();
+      }
 
-  tbody.innerHTML = sortedSummary
-    .map((emp, i) => {
-      // ── Cook এর জন্য মাসের দিন দিয়ে ভাগ, বাকিদের ÷26 ──
-      const dailyRate = getDailyRate(emp.mBasic, emp.designation, emp.refDate);
-      const actB  = dailyRate * emp.narDays;
-      const otA   = emp.otHrs * emp.otRate;
-      const gross = actB + otA + emp.holAmt + emp.sunAmt + emp.attBonus + emp.perfBonus;
-      const nps   = gross * 0.01;
-      const csg   = gross * 0.015;
-      const need  = gross - (emp.adv + emp.fine + nps + csg);
-
-      return `<tr class="text-center" id="row-${emp.id}">
-        <td>${i + 1}</td>
-        <td class="text-start emp-info-cell">
-          <div class="id-name-line"><strong>${emp.id}</strong> - ${emp.name}</div>
-          <div class="desig-line">${emp.designation}</div>
-        </td>
-        <td class="hide-on-print">${emp.mBasic.toFixed(0)}</td>
-        <td class="hide-on-print">${emp.narDays}</td>
-        <td class="hide-on-print">${emp.sunDays}</td>
-        <td class="hide-on-print">${emp.holiDays}</td>
-        <td>${emp.totalAtt}</td>
-        <td style="color: #d9534f;">${emp.absentDays}</td>
-        <td>${actB.toFixed(0)}</td>
-        <td>${otA.toFixed(0)}</td>
-        <td>${emp.holAmt.toFixed(0)}</td>
-        <td>${emp.sunAmt.toFixed(0)}</td>
-        <td style="background-color: #fefce8;"><input type="number" class="text-center bonus-input" value="${emp.attBonus}" oninput="updateSingleRow('${emp.id}', 'attBonus', this.value)" style="width: 50px;"></td>
-        <td style="background-color: #fefce8;"><input type="number" class="text-center bonus-input" value="${emp.perfBonus}" oninput="updateSingleRow('${emp.id}', 'perfBonus', this.value)" style="width: 50px;"></td>
-        <td class="row-gross" style="font-weight: bold;">${gross.toFixed(2)}</td>
-        <td>${emp.adv.toFixed(0)}</td>
-        <td>${emp.fine.toFixed(0)}</td>
-        <td>${nps.toFixed(2)}</td>
-        <td>${csg.toFixed(2)}</td>
-        <td class="row-need highlight-col" style="font-weight: bold;">${need.toFixed(2)}</td>
-        <td class="sig-cell"></td>
-      </tr>`;
-    })
-    .join("");
-
-  recalculateGrandTotal();
-}
-      
-function recalculateGrandTotal() {
-  let g = {
-    mB:0, nar:0, sunD:0, holD:0, totP:0, totA:0,
-    actB:0, otA:0, hA:0, sA:0, attB:0, perfB:0,
-    gross:0, adv:0, fine:0, nps:0, csg:0, need:0,
-  };
-
-  Object.values(globalSummary).forEach((emp) => {
-    // ── Cook এর জন্য মাসের দিন দিয়ে ভাগ, বাকিদের ÷26 ──
-    const dailyRate = getDailyRate(emp.mBasic, emp.designation, emp.refDate);
-    const actB  = dailyRate * emp.narDays;
-    const otA   = emp.otHrs * emp.otRate;
-    const gross = actB + otA + emp.holAmt + emp.sunAmt + emp.attBonus + emp.perfBonus;
-    const nps   = gross * 0.01;
-    const csg   = gross * 0.015;
-    const need  = gross - (emp.adv + emp.fine + nps + csg);
-
-    g.mB    += emp.mBasic;
-    g.nar   += emp.narDays;
-    g.sunD  += emp.sunDays;
-    g.holD  += emp.holiDays;
-    g.totP  += emp.totalAtt;
-    g.totA  += emp.absentDays;
-    g.actB  += actB;
-    g.otA   += otA;
-    g.hA    += emp.holAmt;
-    g.sA    += emp.sunAmt;
-    g.attB  += emp.attBonus;
-    g.perfB += emp.perfBonus;
-    g.gross += gross;
-    g.adv   += emp.adv;
-    g.fine  += emp.fine;
-    g.nps   += nps;
-    g.csg   += csg;
-    g.need  += need;
-  });
-
-  const tfoot = document.getElementById("tableFoot");
-  tfoot.innerHTML = `<tr class="grand-total-row text-center" style="font-weight: bold; background-color: #f1f5f9;">
-    <td colspan="2">GRAND TOTAL:</td>
-    <td class="hide-on-print">${g.mB.toFixed(0)}</td>
-    <td class="hide-on-print">${g.nar}</td>
-    <td class="hide-on-print">${g.sunD}</td>
-    <td class="hide-on-print">${g.holD}</td>
-    <td>${g.totP}</td>
-    <td style="color: #d9534f;">${g.totA}</td>
-    <td>${g.actB.toFixed(0)}</td>
-    <td>${g.otA.toFixed(0)}</td>
-    <td>${g.hA.toFixed(0)}</td>
-    <td>${g.sA.toFixed(0)}</td>
-    <td>${g.attB.toFixed(0)}</td>
-    <td>${g.perfB.toFixed(0)}</td>
-    <td style="background-color: #ebf8ff;">${g.gross.toFixed(2)}</td>
-    <td>${g.adv.toFixed(0)}</td>
-    <td>${g.fine.toFixed(0)}</td>
-    <td>${g.nps.toFixed(2)}</td>
-    <td>${g.csg.toFixed(2)}</td>
-    <td class="highlight-col">${g.need.toFixed(2)}</td>
-    <td></td>
-  </tr>`;
-}
+      function recalculateGrandTotal() {
+        let g = {mB:0,nar:0,sunD:0,holD:0,totP:0,totA:0,actB:0,otA:0,hA:0,sA:0,attB:0,perfB:0,gross:0,adv:0,fine:0,nps:0,csg:0,need:0};
+        Object.values(globalSummary).forEach(emp => {
+          const dr    = getDailyRate(emp.mBasic, emp.designation, emp.refDate);
+          const actB  = dr * emp.narDays;
+          const otA   = emp.otHrs * emp.otRate;
+          const gross = actB + otA + emp.holAmt + emp.sunAmt + emp.attBonus + emp.perfBonus;
+          const nps   = gross * 0.01, csg = gross * 0.015;
+          const need  = gross - (emp.adv + emp.fine + nps + csg);
+          g.mB+=emp.mBasic; g.nar+=emp.narDays; g.sunD+=emp.sunDays; g.holD+=emp.holiDays;
+          g.totP+=emp.totalAtt; g.totA+=emp.absentDays; g.actB+=actB; g.otA+=otA;
+          g.hA+=emp.holAmt; g.sA+=emp.sunAmt; g.attB+=emp.attBonus; g.perfB+=emp.perfBonus;
+          g.gross+=gross; g.adv+=emp.adv; g.fine+=emp.fine; g.nps+=nps; g.csg+=csg; g.need+=need;
+        });
+        document.getElementById("tableFoot").innerHTML = `<tr class="grand-total-row text-center" style="font-weight:bold;background-color:#f1f5f9;page-break-before:always;">
+          <td colspan="2">GRAND TOTAL:</td>
+          <td class="hide-on-print">${g.mB.toFixed(0)}</td>
+          <td class="hide-on-print">${g.nar}</td><td class="hide-on-print">${g.sunD}</td><td class="hide-on-print">${g.holD}</td>
+          <td>${g.totP}</td><td style="color:#d9534f">${g.totA}</td>
+          <td>${g.actB.toFixed(0)}</td><td>${g.otA.toFixed(0)}</td>
+          <td>${g.hA.toFixed(0)}</td><td>${g.sA.toFixed(0)}</td>
+          <td>${g.attB.toFixed(0)}</td><td>${g.perfB.toFixed(0)}</td>
+          <td style="background-color:#ebf8ff">${g.gross.toFixed(2)}</td>
+          <td>${g.adv.toFixed(0)}</td><td>${g.fine.toFixed(0)}</td>
+          <td>${g.nps.toFixed(2)}</td><td>${g.csg.toFixed(2)}</td>
+          <td class="highlight-col">${g.need.toFixed(2)}</td>
+          <td></td>
+        </tr>`;
+      }
 
       function openEditModal(rowIndex) {
         const row = rawData[rowIndex];
         document.getElementById("editRowIndex").value = rowIndex;
-        document.getElementById("displayEmpName").innerText =
-          row[colIndexMap["EMPLOYEE NAME"]];
-        document.getElementById("editStatus").value =
-          row[colIndexMap["STATUS"]] || "Present";
-        document.getElementById("editOT").value =
-          row[colIndexMap["TOTAL OT HOURS"]] || 0;
-        document.getElementById("editHoliday").value =
-          row[colIndexMap["HOLIDAY"]] || 0;
-        document.getElementById("editAdvance").value =
-          row[colIndexMap["ADVANCE"]] || 0;
+        document.getElementById("displayEmpName").innerText = row[colIndexMap["EMPLOYEE NAME"]];
+        document.getElementById("editStatus").value  = row[colIndexMap["STATUS"]] || "Present";
+        document.getElementById("editOT").value      = row[colIndexMap["TOTAL OT HOURS"]] || 0;
+        document.getElementById("editHoliday").value = row[colIndexMap["HOLIDAY"]] || 0;
+        document.getElementById("editAdvance").value = row[colIndexMap["ADVANCE"]] || 0;
         bootstrapModal.show();
       }
 
-      // এডিট করা ওভারটাইম এবং অ্যাডভান্স সরাসরি RTDB-তে ডাইনামিক পাথে আপডেট করার নিখুঁত পদ্ধতি
       async function saveEdit() {
-        const idx = parseInt(document.getElementById("editRowIndex").value);
-        const row = rawData[idx];
+        const idx     = parseInt(document.getElementById("editRowIndex").value);
+        const row     = rawData[idx];
         const docPath = row._fullPath;
-        const empId = row[colIndexMap["EMPLOYEE ID"]];
-        const dateKey =
-          row[colIndexMap["ATTENDANCE DATE"]] || row[colIndexMap["ISSUE DATE"]];
-
-        const updatedStatus = document.getElementById("editStatus").value;
-        const updatedOT =
-          parseFloat(document.getElementById("editOT").value) || 0;
-        const updatedHoliday =
-          parseFloat(document.getElementById("editHoliday").value) || 0;
-        const updatedAdvance =
-          parseFloat(document.getElementById("editAdvance").value) || 0;
-
+        const empId   = row[colIndexMap["EMPLOYEE ID"]];
+        const dateKey = row[colIndexMap["ATTENDANCE DATE"]] || row[colIndexMap["ISSUE DATE"]];
+        const updStatus  = document.getElementById("editStatus").value;
+        const updOT      = parseFloat(document.getElementById("editOT").value) || 0;
+        const updHoliday = parseFloat(document.getElementById("editHoliday").value) || 0;
+        const updAdvance = parseFloat(document.getElementById("editAdvance").value) || 0;
         bootstrapModal.hide();
         document.getElementById("loader").style.display = "block";
-
         try {
-          // ১. ফায়ারস্টোরে মূল রেকর্ড আপডেট
           if (window.db && docPath) {
-            const attDocRef = window.doc(window.db, docPath);
-            await window.updateDoc(attDocRef, {
-              STATUS: updatedStatus,
-              HOLIDAY_WORK: updatedHoliday,
-              HOLIDAY: updatedHoliday,
+            await window.updateDoc(window.doc(window.db, docPath), {
+              STATUS: updStatus, HOLIDAY_WORK: updHoliday, HOLIDAY: updHoliday,
             });
           }
-
-          // ২. ফায়ারবেস Realtime Database (RTDB) - এ ডাইনামিক ডেট/মান্থ ফোল্ডার জেনারেট করে আপডেট করা
           if (window.rtdb && empId && dateKey) {
-            const dateObj = new Date(dateKey);
-
-            const monthNames = [
-              "January",
-              "February",
-              "March",
-              "April",
-              "May",
-              "June",
-              "July",
-              "August",
-              "September",
-              "October",
-              "November",
-              "December",
-            ];
-            const monthName = monthNames[dateObj.getMonth()];
-            const yearVal = dateObj.getFullYear();
-
-            const otMonthFolder = `${monthName}-${yearVal}`; // e.g. "April-2026"
-            const advMonthFolder = `${monthName.toUpperCase()}_${yearVal}`; // e.g. "APRIL_2026"
-
-            const dayStr = dateObj.getDate().toString().padStart(2, "0");
-            const monthStr = (dateObj.getMonth() + 1)
-              .toString()
-              .padStart(2, "0");
-            const advDateKey = `${dayStr}-${monthStr}-${yearVal}`;
-
-            const otDocId = `${empId}_${dateKey}`; // e.g. "ACL-0006_2026-04-01"
-            const advDocId = `${empId}_${advDateKey}`;
-
-            const otPathRef = window.dbRef(
-              window.rtdb,
-              `DailyAttendance/OVER_TIME/${otMonthFolder}/${dateKey}/${otDocId}`,
-            );
-            const advancePathRef = window.dbRef(
-              window.rtdb,
-              `DailyAttendance/ADVANCE/${advMonthFolder}/${advDateKey}/${advDocId}`,
-            );
-
-            // ওভারটাইম ডেটা রাইট (আপনার দেওয়া পূর্ণ স্কিমা ও মাস-তারিখ অনুযায়ী আপডেট)
-            await window.dbSet(otPathRef, {
+            const dateObj   = new Date(dateKey);
+            const mNames    = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+            const mName     = mNames[dateObj.getMonth()];
+            const yr        = dateObj.getFullYear();
+            const dayS      = dateObj.getDate().toString().padStart(2,"0");
+            const monS      = (dateObj.getMonth()+1).toString().padStart(2,"0");
+            const advDateKey = `${dayS}-${monS}-${yr}`;
+            const otDocId   = `${empId}_${dateKey}`, advDocId = `${empId}_${advDateKey}`;
+            await window.dbSet(window.dbRef(window.rtdb, `DailyAttendance/OVER_TIME/${mName}-${yr}/${dateKey}/${otDocId}`), {
               Designation: row[colIndexMap["DESIGNATION"]] || "WORKER",
-              Entry_Date: new Date().toString(),
-              Entry_Time: new Date().toString(),
-              ID: empId,
-              Name: row[colIndexMap["EMPLOYEE NAME"]] || "",
-              OT_Date: dateKey,
-              OT_Rate: row[colIndexMap["OT RATE"]] || 0,
-              Passport: row[colIndexMap["PASSPORT NO"]] || "",
-              Remark: row[colIndexMap["REMARK"]] || "-",
+              Entry_Date: new Date().toString(), Entry_Time: new Date().toString(),
+              ID: empId, Name: row[colIndexMap["EMPLOYEE NAME"]] || "",
+              OT_Date: dateKey, OT_Rate: row[colIndexMap["OT RATE"]] || 0,
+              Passport: row[colIndexMap["PASSPORT NO"]] || "", Remark: row[colIndexMap["REMARK"]] || "-",
               Site: row[colIndexMap["SIDE NAME"]] || "MAIN SITE",
-              TOTAL_OT_HOURS: updatedOT.toString(),
-              Total_Taka: (
-                updatedOT * (parseFloat(row[colIndexMap["OT RATE"]]) || 0)
-              ).toString(),
+              TOTAL_OT_HOURS: updOT.toString(),
+              Total_Taka: (updOT * (parseFloat(row[colIndexMap["OT RATE"]]) || 0)).toString(),
             });
-
-            // অ্যাডভান্স ডেটা রাইট (পূর্ণ স্কিমাসহ)
-            await window.dbSet(advancePathRef, {
-              advanceNo: `${empId}-ADV-${yearVal}${monthStr}-NEW`,
-              amount: updatedAdvance,
-              amountWords: "",
+            await window.dbSet(window.dbRef(window.rtdb, `DailyAttendance/ADVANCE/${mName.toUpperCase()}_${yr}/${advDateKey}/${advDocId}`), {
+              advanceNo: `${empId}-ADV-${yr}${monS}-NEW`,
+              amount: updAdvance, amountWords: "",
               desig: row[colIndexMap["DESIGNATION"]] || "WORKER",
-              entryType: "advance",
-              id: empId,
-              name: row[colIndexMap["EMPLOYEE NAME"]] || "",
-              newPending: updatedAdvance,
-              newPendingWords: "",
+              entryType: "advance", id: empId, name: row[colIndexMap["EMPLOYEE NAME"]] || "",
+              newPending: updAdvance, newPendingWords: "",
               passport: row[colIndexMap["PASSPORT NO"]] || "",
-              prevPending: 0,
-              recordDate: advDateKey,
-              reference: "Alam",
-              remark: "To send Money",
+              prevPending: 0, recordDate: advDateKey, reference: "Alam", remark: "To send Money",
               tsDate: new Date().toLocaleDateString("en-GB"),
-              tsTime: new Date().toLocaleTimeString("en-US", { hour12: false }),
+              tsTime: new Date().toLocaleTimeString("en-US",{hour12:false}),
             });
           }
-
-          Swal.fire({
-            icon: "success",
-            title: "Updated Successfully",
-            timer: 1500,
-            showConfirmButton: false,
-          });
-        } catch (e) {
-          console.error("Save Edit Error:", e);
-          Swal.fire({
-            icon: "error",
-            title: "Update Failed",
-            text: e.message,
-          });
+          Swal.fire({ icon:"success", title:"Updated Successfully", timer:1500, showConfirmButton:false });
+        } catch(e) {
+          Swal.fire({ icon:"error", title:"Update Failed", text:e.message });
+        } finally {
           document.getElementById("loader").style.display = "none";
         }
       }
 
       function handleTypeChange() {
-        const sel = document.getElementById("columnSelector"),
-          valG = document.getElementById("typeValueGroup"),
-          valS = document.getElementById("typeValueSelect");
+        const sel = document.getElementById("columnSelector");
+        const valG = document.getElementById("typeValueGroup");
+        const valS = document.getElementById("typeValueSelect");
         if (sel.value !== "") {
           valG.style.display = "block";
-          const vals = [
-            ...new Set(
-              rawData
-                .slice(1)
-                .map((r) =>
-                  (r[colIndexMap[sel.value]] || "").toString().trim(),
-                ),
-            ),
-          ].filter((v) => v && v !== "-");
-          valS.innerHTML =
-            '<option value="">-- All --</option>' +
-            vals
-              .sort()
-              .map((v) => `<option value="${v}">${v}</option>`)
-              .join("");
-          document.getElementById("typeValueLabel").innerText =
-            sel.options[sel.selectedIndex].text + ":";
+          const vals = [...new Set(rawData.slice(1).map(r => (r[colIndexMap[sel.value]] || "").toString().trim()))].filter(v => v && v !== "-");
+          valS.innerHTML = '<option value="">-- All --</option>' + vals.sort().map(v => `<option value="${v}">${v}</option>`).join("");
+          document.getElementById("typeValueLabel").innerText = sel.options[sel.selectedIndex].text + ":";
         } else valG.style.display = "none";
         processData();
       }
 
-      function updateStats(filteredRows) {
-        if (!filteredRows || filteredRows.length === 0) {
-          document.getElementById("statEmp").innerText = "0";
-          document.getElementById("statPresent").innerText = "0";
-          return;
-        }
-        const eIdx = colIndexMap["EMPLOYEE ID"];
-        const sIdx = colIndexMap["STATUS"];
-        const isSum = document
-          .getElementById("bodyRoot")
-          .classList.contains("summary-mode");
-        let uniqueEmpIds = new Set();
-        filteredRows.forEach((row) => {
-          const id = row[eIdx]?.toString().trim();
-          if (id && id !== "-" && id !== "") uniqueEmpIds.add(id);
-        });
-        let totalAttendance = 0;
-        if (isSum) {
-          const tbody = document.getElementById("tableBody");
-          for (let r of tbody.rows)
-            if (!r.classList.contains("grand-total-row"))
-              totalAttendance += parseInt(r.cells[5]?.innerText) || 0;
-        } else {
-          filteredRows.forEach((row) => {
-            if (isPresent(row[sIdx])) totalAttendance++;
-          });
-        }
-        document.getElementById("statEmp").innerText = uniqueEmpIds.size;
-        document.getElementById("statPresent").innerText = totalAttendance;
-      }
+    function updateStats(filteredRows) {
+  if (!filteredRows?.length) {
+    document.getElementById("statEmp").innerText = "0";
+    document.getElementById("statPresent").innerText = "0";
+    return;
+  }
+
+  const eIdx = colIndexMap["EMPLOYEE ID"], sIdx = colIndexMap["STATUS"];
+  const isSum = document.getElementById("bodyRoot").classList.contains("summary-mode");
+
+  let uniqueIds = new Set();
+  filteredRows.forEach(r => {
+    const id = r[eIdx]?.toString().trim();
+    if (id && id !== "-" && id !== "") uniqueIds.add(id);
+  });
+
+  let totalAtt = 0;
+  if (isSum) {
+    // globalSummary থেকে সরাসরি totalAtt যোগ করুন
+    Object.values(globalSummary).forEach(emp => {
+      totalAtt += emp.totalAtt || 0;
+    });
+  } else {
+    filteredRows.forEach(r => { if (isPresent(r[sIdx])) totalAtt++; });
+  }
+
+  document.getElementById("statEmp").innerText = uniqueIds.size;
+  document.getElementById("statPresent").innerText = totalAtt;
+}
 
       function populateStaticFilters(data) {
-        const eSel = document.getElementById("empFilter"),
-          sSel = document.getElementById("sideFilter"),
-          mSide = document.getElementById("matrixSideFilter");
-        const emps = new Map(),
-          sides = new Set();
-        data.slice(1).forEach((r) => {
-          if (r[colIndexMap["EMPLOYEE ID"]])
-            emps.set(
-              r[colIndexMap["EMPLOYEE ID"]].toString().toUpperCase(),
-              r[colIndexMap["EMPLOYEE NAME"]],
-            );
-          if (r[colIndexMap["SIDE NAME"]])
-            sides.add(r[colIndexMap["SIDE NAME"]].toString().toUpperCase());
+        const eSel = document.getElementById("empFilter");
+        const sSel = document.getElementById("sideFilter");
+        const mSide = document.getElementById("matrixSideFilter");
+        const emps = new Map(), sides = new Set();
+        data.slice(1).forEach(r => {
+          if (r[colIndexMap["EMPLOYEE ID"]]) emps.set(r[colIndexMap["EMPLOYEE ID"]].toString().toUpperCase(), r[colIndexMap["EMPLOYEE NAME"]]);
+          if (r[colIndexMap["SIDE NAME"]])   sides.add(r[colIndexMap["SIDE NAME"]].toString().toUpperCase());
         });
-        const sideOptions = [...sides]
-          .sort()
-          .map((s) => `<option value="${s}">${s}</option>`)
-          .join("");
-        eSel.innerHTML =
-          '<option value="">All Employees</option>' +
-          [...emps.entries()]
-            .sort((a, b) =>
-              a[0].localeCompare(b[0], undefined, { numeric: true }),
-            )
-            .map(
-              ([id, name]) => `<option value="${id}">${id} | ${name}</option>`,
-            )
-            .join("");
-        sSel.innerHTML = '<option value="">All Projects</option>' + sideOptions;
-        mSide.innerHTML =
-          '<option value="">All Projects</option>' + sideOptions;
+        const sideOpts = [...sides].sort().map(s => `<option value="${s}">${s}</option>`).join("");
+        eSel.innerHTML  = '<option value="">All Employees</option>' + [...emps.entries()].sort((a,b) => a[0].localeCompare(b[0],undefined,{numeric:true})).map(([id,name]) => `<option value="${id}">${id} | ${name}</option>`).join("");
+        sSel.innerHTML  = '<option value="">All Projects</option>' + sideOpts;
+        mSide.innerHTML = '<option value="">All Projects</option>' + sideOpts;
       }
 
       function parseDate(s) {
         if (!s && s !== 0) return new Date(0);
         if (s instanceof Date) return s;
-
-        const asString = s.toString().trim();
-        if (asString === "" || asString === "-") return new Date(0);
-
-        const gvizDateMatch = asString.match(
-          /^Date\((\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+))?)?\)$/i,
-        );
-        if (gvizDateMatch) {
-          const year = Number(gvizDateMatch[1]);
-          const month = Number(gvizDateMatch[2]);
-          const day = Number(gvizDateMatch[3]);
-          const hour = gvizDateMatch[4] ? Number(gvizDateMatch[4]) : 0;
-          const minute = gvizDateMatch[5] ? Number(gvizDateMatch[5]) : 0;
-          const second = gvizDateMatch[6] ? Number(gvizDateMatch[6]) : 0;
-          return new Date(year, month, day, hour, minute, second);
+        const str = s.toString().trim();
+        if (!str || str === "-") return new Date(0);
+        let ds = str.replace(/\//g,"-");
+        const p = ds.split("-");
+        if (p.length === 3) {
+          if (p[0].length === 4) return new Date(p[0], p[1]-1, p[2]);
+          if (p[2].length === 4) return new Date(p[2], p[1]-1, p[0]);
         }
-
-        let dateString = asString.replace(/\//g, "-");
-        const parts = dateString.split("-");
-
-        if (parts.length === 3) {
-          if (parts[0].length === 4)
-            return new Date(parts[0], parts[1] - 1, parts[2]);
-          if (parts[2].length === 4)
-            return new Date(parts[2], parts[1] - 1, parts[0]);
-        }
-        const finalDate = new Date(dateString);
-        return isNaN(finalDate.getTime()) ? new Date(0) : finalDate;
+        const fd = new Date(ds);
+        return isNaN(fd.getTime()) ? new Date(0) : fd;
       }
 
-      function refreshData() {
-        window.handleViewReport();
-      }
+      function refreshData() { window.handleViewReport(); }
 
-      function resetFilters() {
-        document.getElementById("searchInput").value = "";
-        if (startPicker) startPicker.clear();
-        if (endPicker) endPicker.clear();
-        document.getElementById("empFilter").value = "";
-        document.getElementById("sideFilter").value = "";
-        document.getElementById("columnSelector").value = "";
-        document.getElementById("typeValueGroup").style.display = "none";
-        processData();
-      }
-
+     function resetFilters() {
+  document.getElementById("searchInput").value = "";
+  if (startPicker) startPicker.clear();
+  if (endPicker)   endPicker.clear();
+  document.getElementById("empFilter").value = "";
+  document.getElementById("sideFilter").value = "";
+  document.getElementById("columnSelector").value = "";
+  document.getElementById("typeValueGroup").style.display = "none";
+  _manualWD = null;
+  document.getElementById("manualWDInput").value = "";
+  document.getElementById("wdStatus").textContent = "⚡ " + _autoWorkingDays + " days";
+  
+  // ── এই অংশ যোগ করুন ──
+  rawData = [];
+  globalSummary = {};
+  document.getElementById("tableHead").innerHTML = "";
+  document.getElementById("tableBody").innerHTML = "";
+  document.getElementById("tableFoot").innerHTML = "";
+  document.getElementById("statEmp").innerText = "0";
+  document.getElementById("statPresent").innerText = "0";
+  document.getElementById("salarySheetTitle").style.display = "none";
+  // ── processData() কল সরিয়ে দিন ──
+}
       function openPreview() {
-        const start =
-          document.getElementById("startDate").value || "NO DATE SELECT";
-        const end =
-          document.getElementById("endDate").value || "NO DATE SELECT";
-        const side =
-          document.getElementById("sideFilter")?.options[
-            document.getElementById("sideFilter").selectedIndex
-          ]?.text || "All Projects";
-        const printDateTime = new Date().toLocaleString();
-
-        const tableHeader = document.getElementById("tableHead").innerHTML;
-        const tableBody = document.getElementById("tableBody").innerHTML;
-        const tableFoot = document.getElementById("tableFoot").innerHTML;
-
-        const previewWindow = window.open("", "_blank");
-        previewWindow.document.write(`
-    <html>
-        <head>
-            <title>Salary Report Preview</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-            <style>
-                @page { size: landscape; margin: 5mm; } 
-                body { padding: 10px; font-family: sans-serif; color: #000; background: #fff; }
-
-                table { 
-                    width: 100% !important; 
-                    border-collapse: collapse !important;
-                    table-layout: auto !important; 
-                    margin-top: 10px;
-                }
-
-                th, td { 
-                    border: 1px solid #000 !important; 
-                    padding: 10px 8px !important; /* সেলের ভেতর পর্যাপ্ত জায়গা */
-                    font-size: 10px !important; 
-                    text-align: center;
-                    vertical-align: middle !important;
-                    line-height: 1.6 !important; /* লাইনগুলোর মাঝে গ্যাপ তৈরি করবে */
-                }
-
-                /* নাম এবং ডেজিগনেশন কলামের স্টাইল */
-                td:nth-child(2) { 
-                    text-align: left !important; 
-                    padding-left: 20px !important;
-                }
-
-                /* নামের নিচে ডেজিগনেশনের জন্য লাইন ব্রেক থাকলে সেটি সুন্দর দেখাবে */
-                .designation { 
-                    display: block; 
-                    font-size: 8px !important; 
-                    color: #444; 
-                    margin-top: 3px; /* নামের সাথে ডেজিগনেশনের গ্যাপ */
-                    border-top: 0.5px solid #eee; /* চাইলে আলাদা করার জন্য হালকা বর্ডার */
-                }
-
-                th { background-color: #f2f2f2 !important; font-weight: bold !important; }
-
-                .info-line { display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; border-bottom: 1.5px solid #000; margin-bottom: 5px; }
-                .report-header { text-align: center; margin-bottom: 5px; }
-                .report-header h2 { font-size: 18px; margin: 0; font-weight: 800; color: black; }
-
-                .signature-container { margin-top: 80px; display: flex; justify-content: space-between; padding: 0 20px; }
-                .sig-box { border-top: 1.5px solid #000; width: 140px; text-align: center; font-size: 9px; font-weight: bold; padding-top: 5px; }
-@media print { 
-    .no-print-btn { display: none !important; } 
-
-    /* এটি ইনপুট ফিল্ডের জন্য চূড়ান্ত সমাধান */
-    input {
-        border: none !important;
-        background: transparent !important;
-        color: #000 !important;
-        
-        /* লেখা যাতে কাটবে না তার জন্য এই লাইনগুলো জরুরি */
-        width: 100% !important; 
-        min-width: 40px !important; /* কলাম ছোট হলেও যেন লেখা দেখায় */
-        display: inline-block !important;
-        text-align: center !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        
-        /* ফন্ট সাইজ কমিয়ে দিন যাতে বেশি লেখা আটায় */
-        font-size: 9px !important; 
-        font-family: Arial, sans-serif !important;
-        
-        /* লেখা যদি বড় হয় তাহলে বক্সের সাইজ বেড়ে যাবে */
-        box-sizing: border-box !important;
-        white-space: nowrap !important;
-        overflow: visible !important; 
-        outline: none !important;
-    }
-
-    /* টেবিল সেল যেন ইনপুটকে জায়গা দেয় */
-    td {
-        padding: 2px !important; /* সেলের ভেতর জায়গা তৈরি করবে */
-        overflow: hidden !important;
-    }
-}
+        const start  = document.getElementById("startDate").value || "NO DATE";
+        const end    = document.getElementById("endDate").value   || "NO DATE";
+        const side   = document.getElementById("sideFilter")?.options[document.getElementById("sideFilter").selectedIndex]?.text || "All Projects";
+        const now    = new Date().toLocaleString();
+        const thead  = document.getElementById("tableHead").innerHTML;
+        const tbody  = document.getElementById("tableBody").innerHTML;
+        const tfoot  = document.getElementById("tableFoot").innerHTML;
+        const pw = window.open("", "_blank");
+        pw.document.write(`<html><head>
+          <title>Salary Report</title>
+          <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+          <style>
+            @page { size: landscape; margin: 5mm; }
+            body { padding: 10px; font-family: sans-serif; color: #000; background: #fff; }
+            table { width:100%!important; border-collapse:collapse!important; margin-top:10px; }
+            th, td { border:1px solid #000!important; padding:10px 8px!important; font-size:10px!important; text-align:center; vertical-align:middle!important; line-height:1.6!important; }
+            td:nth-child(2) { text-align:left!important; padding-left:20px!important; }
+            th { background-color:#f2f2f2!important; font-weight:bold!important; }
+            .info-line { display:flex; justify-content:space-between; font-size:10px; font-weight:bold; border-bottom:1.5px solid #000; margin-bottom:5px; }
+            .sig-container { margin-top:80px; display:flex; justify-content:space-between; padding:0 20px; }
+            .sig-box { border-top:1.5px solid #000; width:140px; text-align:center; font-size:9px; font-weight:bold; padding-top:5px; }
+            @media print { .no-print { display:none!important; } input { border:none!important; background:transparent!important; } }
           </style>
-        </head>
-        <body>
-            <button class="no-print-btn"  onclick="window.print()" style="text-align: right;">PRINT REPORT</button>
-            <div class="report-header">
-                <h2>ALAMHOW CO LTD</h2>
-                
-            </div>
-            <div class="info-line">
-              <div style="font-weight:bold; text-decoration:underline; font-size:15px;">MONTHLY SALARY STATEMENT</div>
-                <span>Project Name: ${side}</span>
-                <span>Period: ${start} — ${end}</span>
-                <span>Date: ${printDateTime}</span>
-            </div>
-            <table>
-                <thead>${tableHeader}</thead>
-                <tbody>${tableBody}</tbody>
-                <tfoot>${tableFoot}</tfoot>
-            </table>
-            <div class="signature-container">
-                <div class="sig-box">Prepared By</div>
-                <div class="sig-box">Checked By</div>
-                <div class="sig-box">Authorized Signature</div>
-            </div>
-        </body>
-    </html>
-    `);
-        previewWindow.document.close();
-      }
-      function showAttendanceFilter() {
-        matrixModal.show();
-      }
-     function generateFilteredAttendanceSheet() {
-  const monthInput = document.getElementById("matrixMonth").value;
-  const sideFilter = document.getElementById("matrixSideFilter").value;
-  if (!monthInput) {
-    alert("Please select a month.");
-    return;
-  }
-
-  const [year, month0] = monthInput.split("-").map(Number);
-  const month = month0 - 1;
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const dateRange = [];
-  for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1))
-    dateRange.push(new Date(d));
-
-  const publicHolidayDates = new Set();
-  rawData.slice(1).forEach((row) => {
-    const dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-    const rem = (row[colIndexMap["REMARK"]] || "").toString().toUpperCase();
-    if (dRaw && (rem.includes("HOLIDAY") || rem.includes("PUBLIC HOLIDAY"))) {
-      publicHolidayDates.add(dRaw.toISOString().split("T")[0]);
-    }
-  });
-
-  const now = new Date();
-  const printDateTime = now.toLocaleString("en-GB", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit", hour12: true,
-  });
-
-  // ── attendanceMap: stat + sunWork + holWork store করা ──
-  const attendanceMap = {}, employees = {};
-  rawData.slice(1).forEach((row) => {
-    const id   = row[colIndexMap["EMPLOYEE ID"]];
-    const dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
-    const rSide = (row[colIndexMap["SIDE NAME"]] || "").toString().toUpperCase();
-    if (!id || !dRaw) return;
-    if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
-      if (sideFilter && rSide !== sideFilter.toUpperCase()) return;
-      const dateStr = dRaw.toISOString().split("T")[0];
-      if (!employees[id]) employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
-      if (!attendanceMap[id]) attendanceMap[id] = {};
-
-      let st = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
-      let shortStat = "-";
-      if (isPresent(st))        shortStat = "P";
-      else if (st.startsWith("A")) shortStat = "A";
-      else if (st.startsWith("L")) shortStat = "L";
-      else if (st.startsWith("H")) shortStat = "H";
-
-      // SUNDAY_WORK ও HOLIDAY_WORK আলাদা store
-      attendanceMap[id][dateStr] = {
-        stat:     shortStat,
-        sunWork:  parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0,
-        holWork:  parseFloat(row[colIndexMap["HOLIDAY"]])     || 0,
-      };
-    }
-  });
-
-  const monthName = firstDay.toLocaleString("default", { month: "long" });
-  const sortedIds = Object.keys(employees).sort((a, b) =>
-    a.localeCompare(b, undefined, { numeric: true })
-  );
-
-  let dayTotalsP   = Array(dateRange.length).fill(0);
-  let dayTotalsSun = Array(dateRange.length).fill(0);
-  let dayTotalsHol = Array(dateRange.length).fill(0);
-  let dayTotalsA   = Array(dateRange.length).fill(0);
-  let grandTotalP = 0, grandTotalA = 0, grandTotalSun = 0, grandTotalHol = 0;
-
-  // ── Table Header ──
-  const tableHeader = `<thead>
-    <tr style="height:22px;">
-      <th rowspan="2" style="width:20px;padding:1px;">SL</th>
-      <th rowspan="2" style="width:160px;padding:1px;">EMPLOYEE ID &amp; Name</th>
-      <th colspan="${dateRange.length}" style="padding:0 10px;font-size:11px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-          <div style="flex:2;text-align:center;font-weight:bold;">
-            Attendance Summary: ${monthName} ${year}${sideFilter ? ` - ${sideFilter.toUpperCase()}` : " - ALL PROJECT"}
+        </head><body>
+          <button class="no-print" onclick="window.print()">PRINT REPORT</button>
+          <div style="text-align:center;margin-bottom:5px"><h2 style="font-size:18px;font-weight:800">ALAMHOW CO LTD</h2></div>
+          <div class="info-line">
+            <div style="font-weight:bold;text-decoration:underline;font-size:15px">MONTHLY SALARY STATEMENT</div>
+            <span>Project: ${side}</span><span>Period: ${start} — ${end}</span><span>Date: ${now}</span>
           </div>
-          <div style="flex:1;text-align:right;font-size:9px;font-weight:normal;">
-            Printed on: ${printDateTime}
+          <table><thead>${thead}</thead><tbody>${tbody}</tbody><tfoot>${tfoot}</tfoot></table>
+          <div class="sig-container">
+            <div class="sig-box">Prepared By</div>
+            <div class="sig-box">Checked By</div>
+            <div class="sig-box">Authorized Signature</div>
           </div>
-        </div>
-      </th>
-      <th colspan="4" style="background:#0d685b;padding:1px;font-size:10px;">SUMMARY</th>
-    </tr>
-    <tr style="height:35px;">
-      ${dateRange.map((d) => {
-        const dayName  = d.toLocaleDateString("en-US", { weekday: "short" }).substring(0, 2);
-        const isSun    = d.getDay() === 0;
-        const isPubHol = publicHolidayDates.has(d.toISOString().split("T")[0]);
-        const hStyle   = isSun || isPubHol ? "color:#ff4d4d!important;" : "";
-        let content    = `<div style="line-height:1;">${d.getDate()}<br><span style="font-size:7px">${dayName}</span></div>`;
-        if (isPubHol) {
-          content = `<div class="holiday-box" style="width:25px;height:25px;">
-            <svg viewBox="0 0 100 100" class="holiday-svg">
-              <circle cx="50" cy="50" r="47" style="fill:none;stroke:#ff4d4d;stroke-width:6;"/>
-              <path id="curve${d.getDate()}" d="M 15,55 A 35,35 0 0,1 85,55" fill="transparent"/>
-              <text style="fill:#ff4d4d;font-weight:900;font-size:16px;">
-                <textPath xlink:href="#curve${d.getDate()}" startOffset="50%" text-anchor="middle">Holiday</textPath>
-              </text>
-              <text x="50" y="62" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:40px;">${d.getDate()}</text>
-              <text x="50" y="88" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:24px;">${dayName}</text>
-            </svg>
-          </div>`;
-        }
-        return `<th style="width:25px;padding:1px 0;vertical-align:middle;${hStyle}">${content}</th>`;
-      }).join("")}
-      <th style="width:25px;background:#198754;padding:1px;">P</th>
-      <th style="width:25px;background:#dc3545;padding:1px;">A</th>
-      <th style="width:25px;background:#ffc107;color:#000;padding:1px;">SUN</th>
-      <th style="width:25px;background:#6c757d;padding:1px;">HOL</th>
-    </tr>
-  </thead>`;
-
-  // ── Table Body ──
-  const tableBody = sortedIds.map((id, idx) => {
-    let countP = 0, countA = 0, countSun = 0, countHol = 0;
-
-    const daysHtml = dateRange.map((d, dIdx) => {
-      const ds       = d.toISOString().split("T")[0];
-      const isSunday = d.getDay() === 0;
-      const isPubHol = publicHolidayDates.has(ds);
-
-      // attendanceMap থেকে stat, sunWork, holWork নেওয়া
-      const attEntry = attendanceMap[id] && attendanceMap[id][ds]
-        ? attendanceMap[id][ds] : null;
-      const stat    = attEntry ? attEntry.stat    : "-";
-      const sunWork = attEntry ? attEntry.sunWork : 0;
-      const holWork = attEntry ? attEntry.holWork : 0;
-
-      // ── Count logic: শুধু Firebase field এর উপর নির্ভর ──
-      if (stat === "P") {
-        if (sunWork > 0) {
-          dayTotalsSun[dIdx]++;
-          countSun++;
-        } else if (holWork > 0) {
-          dayTotalsHol[dIdx]++;
-          countHol++;
-        } else {
-          dayTotalsP[dIdx]++;
-          countP++;
-        }
-      }
-      if (stat === "A") {
-        dayTotalsA[dIdx]++;
-        countA++;
+        </body></html>`);
+        pw.document.close();
       }
 
-      // ── Cell rendering ──
-      // Sunday বা Public Holiday দিন — লাল background (শুধু visual)
-     if (isSunday || isPubHol) {
-  const bg = isSunday ? "#fff0f0" : "#fff9e6";
-  const textColor = stat === "P" ? "#16a34a" : stat === "A" ? "#cc0000" : isSunday ? "#cc0000" : "#b45309";
-  return `<td style="background-color:${bg};color:${textColor};font-weight:bold;border:1px solid #000;">${stat !== "-" ? stat : ""}</td>`;
-}
+      function showAttendanceFilter() { matrixModal.show(); }
 
-     if (stat === "P") return `<td style="background:#fff;color:#16a34a;font-weight:bold;">P</td>`;
-if (stat === "A") return `<td style="background:#fef9c3;color:#cc0000;font-weight:bold;">A</td>`;
-      if (stat === "H" || stat === "L") return `<td style="color:#1d4ed8;font-weight:bold;">${stat}</td>`;
-      return `<td></td>`;
-    }).join("");
+      function generateFilteredAttendanceSheet() {
+        const monthInput = document.getElementById("matrixMonth").value;
+        const sideFilter = document.getElementById("matrixSideFilter").value;
+        if (!monthInput) { alert("Please select a month."); return; }
 
-    grandTotalP   += countP;
-    grandTotalA   += countA;
-    grandTotalSun += countSun;
-    grandTotalHol += countHol;
+        const [year, month0] = monthInput.split("-").map(Number);
+        const month    = month0 - 1;
+        const firstDay = new Date(year, month, 1);
+        const lastDay  = new Date(year, month+1, 0);
+        const dateRange = [];
+        for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate()+1)) dateRange.push(new Date(d));
 
-    return `<tr>
-      <td>${idx + 1}</td>
-      <td class="text-start">${id} - ${employees[id]}</td>
-      ${daysHtml}
-      <td style="font-weight:bold;background:#e6fffa;color:#065f46;">${countP}</td>
-      <td style="font-weight:bold;background:#fff0f0;color:#991b1b;">${countA}</td>
-      <td style="font-weight:bold;background:#fff9e6;color:#92400e;">${countSun}</td>
-      <td style="font-weight:bold;background:#ede9fe;color:#5b21b6;">${countHol}</td>
-    </tr>`;
-  }).join("");
+        // ══ Holiday set থেকেও পাবলিক হলিডে (নতুন) ══
+        const publicHolidayDates = new Set();
+        rawData.slice(1).forEach(row => {
+          const dRaw = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+          const rem  = (row[colIndexMap["REMARK"]] || "").toString().toUpperCase();
+          if (dRaw && (rem.includes("HOLIDAY") || rem.includes("PUBLIC HOLIDAY")))
+            publicHolidayDates.add(dRaw.toISOString().split("T")[0]);
+        });
+        _holidaySet.forEach(hd => {
+          const hDate = new Date(hd);
+          if (hDate.getFullYear() === year && hDate.getMonth() === month)
+            publicHolidayDates.add(hd);
+        });
 
-  // ── Table Footer ──
-  const tableFooter = `<tr>
-    <td colspan="2" style="text-align:left;padding:4px 8px;font-weight:bold;background:#1d3a6d;color:#ffd700;">DAILY TOTAL</td>
-    ${dayTotalsP.map((_, idx) => {
-      const allP = dayTotalsP[idx] + dayTotalsSun[idx] + dayTotalsHol[idx];
-      return `<td style="text-align:center;font-weight:bold;background:#f8f9fa;font-size:9px;">${allP || ""}</td>`;
-    }).join("")}
-    <td style="font-weight:bold;background:#e6fffa;color:#065f46;">${grandTotalP}</td>
-    <td style="font-weight:bold;background:#fff0f0;color:#991b1b;">${grandTotalA}</td>
-    <td style="font-weight:bold;background:#fff9e6;color:#92400e;">${grandTotalSun}</td>
-    <td style="font-weight:bold;background:#ede9fe;color:#5b21b6;">${grandTotalHol}</td>
-  </tr>`;
+        const now = new Date();
+        const printDT = now.toLocaleString("en-GB",{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true});
 
-  // ── Print Window ──
-  const preview = window.open("", "_blank");
-  preview.document.write(`
-  <html>
-    <head>
-      <title>Attendance Summary</title>
-      <style>
-        @page { size: A4 landscape; margin: 5mm 5mm 0mm 5mm; }
-        body { font-family: sans-serif; padding: 10px; margin: 0; zoom: 1.4; }
-        .company-name {
-          text-align: center; margin: 0; font-size: 26px; font-weight: bold;
-          background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
-          -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-          filter: drop-shadow(1px 1px 1.5px rgba(0,0,0,0.15));
-        }
-        table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2px solid #000; margin-top:10px; }
-        th, td { border:1px solid #000; text-align:center; font-size:10px; padding:1px 0; }
-        th { background:#1d3a6d; color:#fff; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-        .text-start { text-align:left !important; padding-left:5px; white-space:nowrap; overflow:hidden; }
-        .holiday-box { margin:0 auto; display:flex; align-items:center; justify-content:center; }
-        .holiday-svg { width:100%; height:100%; }
-        .no-print { position:fixed; top:10px; right:10px; padding:10px; background:#002147; color:#ffd700; border:2px solid #ffd700; border-radius:5px; cursor:pointer; z-index:1000; font-weight:bold; }
+        const attendanceMap = {}, employees = {};
+        rawData.slice(1).forEach(row => {
+          const id    = row[colIndexMap["EMPLOYEE ID"]];
+          const dRaw  = parseDate(row[colIndexMap["ATTENDANCE DATE"]]);
+          const rSide = (row[colIndexMap["SIDE NAME"]] || "").toString().toUpperCase();
+          if (!id || !dRaw) return;
+          if (dRaw.getFullYear() === year && dRaw.getMonth() === month) {
+            if (sideFilter && rSide !== sideFilter.toUpperCase()) return;
+            const ds = dRaw.toISOString().split("T")[0];
+            if (!employees[id]) employees[id] = row[colIndexMap["EMPLOYEE NAME"]];
+            if (!attendanceMap[id]) attendanceMap[id] = {};
+            let st = (row[colIndexMap["STATUS"]] || "").toString().trim().toUpperCase();
+            let shortStat = "-";
+            if (isPresent(st))          shortStat = "P";
+            else if (st.startsWith("A")) shortStat = "A";
+            else if (st.startsWith("L")) shortStat = "L";
+            else if (st.startsWith("H")) shortStat = "H";
+            attendanceMap[id][ds] = {
+              stat:    shortStat,
+              sunWork: parseFloat(row[colIndexMap["SUNDAY WORK"]]) || 0,
+              holWork: parseFloat(row[colIndexMap["HOLIDAY"]])     || 0,
+            };
+          }
+        });
 
-        /* Summary table */
-        .summary-table { margin-top:14px; border-collapse:collapse; width:auto; min-width:240px; }
-        .summary-table th { background:#1d3a6d !important; color:#fff !important; padding:5px 12px; font-size:10px; border:1px solid #335185; text-align:left; }
-        .summary-table td { padding:5px 12px; font-size:11px; font-weight:700; border:1px solid #ddd; }
+        const monthName = firstDay.toLocaleString("default",{month:"long"});
+        const sortedIds = Object.keys(employees).sort((a,b) => a.localeCompare(b,undefined,{numeric:true}));
+        let dayTotalsP = Array(dateRange.length).fill(0);
+        let dayTotalsSun = Array(dateRange.length).fill(0);
+        let dayTotalsHol = Array(dateRange.length).fill(0);
+        let dayTotalsA   = Array(dateRange.length).fill(0);
+        let gP=0, gA=0, gSun=0, gHol=0;
 
-        /* Signature */
-        .sig-row { display:flex; justify-content:space-between; margin-top:40px; padding:0 40px; }
-        .sig-item { border-top:1px solid #000; width:140px; text-align:center; font-size:10px; font-weight:bold; padding-top:4px; }
-
-        /* Print color fix */
-        td[style*="background"] { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-
-        @media print {
-          body { zoom:0.95; }
-          th, td { font-size:8.5px; }
-          .no-print { display:none; }
-        }
-      </style>
-    </head>
-    <body>
-      <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
-      <h1 class="company-name">ALAMHOW CO LTD</h1>
-      <table>${tableHeader}<tbody>${tableBody}</tbody><tfoot>${tableFooter}</tfoot></table>
-
-      <table class="summary-table">
-        <thead><tr><th colspan="2">PRESENT SUMMARY</th></tr></thead>
-        <tbody>
-          <tr style="background:#f0fff4;">
-            <td>Total Normal Working Days</td>
-            <td style="color:#065f46;">${grandTotalP}</td>
+        const tableHeader = `<thead>
+          <tr style="height:22px;">
+            <th rowspan="2" style="width:20px;padding:1px;">SL</th>
+            <th rowspan="2" style="width:160px;padding:1px;">EMPLOYEE ID &amp; Name</th>
+            <th colspan="${dateRange.length}" style="padding:0 10px;font-size:11px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+                <div style="flex:2;text-align:center;font-weight:bold;">Attendance Summary: ${monthName} ${year}${sideFilter ? ` - ${sideFilter.toUpperCase()}` : " - ALL PROJECT"}</div>
+                <div style="flex:1;text-align:right;font-size:9px;font-weight:normal;">Printed on: ${printDT}</div>
+              </div>
+            </th>
+            <th colspan="4" style="background:#0d685b;padding:1px;font-size:10px;">SUMMARY</th>
           </tr>
-          <tr style="background:#fffbeb;">
-            <td style="color:#b58900;">Total Sunday Working Days</td>
-            <td style="color:#b58900;">${grandTotalSun}</td>
+          <tr style="height:35px;">
+            ${dateRange.map(d => {
+              const dn  = d.toLocaleDateString("en-US",{weekday:"short"}).substring(0,2);
+              const isSun = d.getDay() === 0;
+              const isPH  = publicHolidayDates.has(d.toISOString().split("T")[0]);
+              const hs  = isSun || isPH ? "color:#ff4d4d!important;" : "";
+              if (isPH) return `<th style="width:25px;padding:1px 0;vertical-align:middle;${hs}">
+                <div style="width:25px;height:25px;margin:0 auto;">
+                  <svg viewBox="0 0 100 100" style="width:100%;height:100%;">
+                    <circle cx="50" cy="50" r="47" style="fill:none;stroke:#ff4d4d;stroke-width:6;"/>
+                    <path id="c${d.getDate()}" d="M 15,55 A 35,35 0 0,1 85,55" fill="transparent"/>
+                    <text style="fill:#ff4d4d;font-weight:900;font-size:16px;"><textPath xlink:href="#c${d.getDate()}" startOffset="50%" text-anchor="middle">Holiday</textPath></text>
+                    <text x="50" y="62" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:40px;">${d.getDate()}</text>
+                    <text x="50" y="88" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:24px;">${dn}</text>
+                  </svg>
+                </div></th>`;
+              return `<th style="width:25px;padding:1px 0;vertical-align:middle;${hs}">
+                <div style="line-height:1;">${d.getDate()}<br><span style="font-size:7px">${dn}</span></div></th>`;
+            }).join("")}
+            <th style="width:25px;background:#198754;padding:1px;">P</th>
+            <th style="width:25px;background:#dc3545;padding:1px;">A</th>
+            <th style="width:25px;background:#ffc107;color:#000;padding:1px;">SUN</th>
+            <th style="width:25px;background:#6c757d;padding:1px;">HOL</th>
           </tr>
-          <tr style="background:#f5f3ff;">
-            <td>Total Holiday Working Days</td>
-            <td style="color:#5b21b6;">${grandTotalHol}</td>
-          </tr>
-          <tr style="background:#fff0f0;">
-            <td style="color:#cc0000;">Total Absent</td>
-            <td style="color:#cc0000;">${grandTotalA}</td>
-          </tr>
-        </tbody>
-      </table>
+        </thead>`;
 
-      <div class="sig-row">
-        <div class="sig-item">Prepared By</div>
-        <div class="sig-item">Checked By</div>
-        <div class="sig-item">Authorized Signature</div>
-      </div>
-    </body>
-  </html>`);
-  preview.document.close();
-}
+        const tableBody = sortedIds.map((id, idx) => {
+          let cP=0, cA=0, cSun=0, cHol=0;
+          const daysHtml = dateRange.map((d, di) => {
+            const ds   = d.toISOString().split("T")[0];
+            const isSun = d.getDay() === 0;
+            const isPH  = publicHolidayDates.has(ds);
+            const att   = attendanceMap[id]?.[ds] || null;
+            const stat  = att ? att.stat    : "-";
+            const sw    = att ? att.sunWork : 0;
+            const hw    = att ? att.holWork : 0;
+            if (stat === "P") {
+              if (sw > 0)      { dayTotalsSun[di]++; cSun++; }
+              else if (hw > 0) { dayTotalsHol[di]++; cHol++; }
+              else              { dayTotalsP[di]++;   cP++;   }
+            }
+            if (stat === "A") { dayTotalsA[di]++; cA++; }
+            if (isSun || isPH) {
+              const bg  = isSun ? "#fff0f0" : "#fff9e6";
+              const tc  = stat === "P" ? "#16a34a" : stat === "A" ? "#cc0000" : isSun ? "#cc0000" : "#b45309";
+              return `<td style="background-color:${bg};color:${tc};font-weight:bold;border:1px solid #000;">${stat !== "-" ? stat : ""}</td>`;
+            }
+            if (stat === "P") return `<td style="color:#16a34a;font-weight:bold;">P</td>`;
+            if (stat === "A") return `<td style="background:#fef9c3;color:#cc0000;font-weight:bold;">A</td>`;
+            if (stat === "H" || stat === "L") return `<td style="color:#1d4ed8;font-weight:bold;">${stat}</td>`;
+            return `<td></td>`;
+          }).join("");
+          gP+=cP; gA+=cA; gSun+=cSun; gHol+=cHol;
+          return `<tr>
+            <td>${idx+1}</td>
+            <td class="text-start">${id} - ${employees[id]}</td>
+            ${daysHtml}
+            <td style="font-weight:bold;background:#e6fffa;color:#065f46;">${cP}</td>
+            <td style="font-weight:bold;background:#fff0f0;color:#991b1b;">${cA}</td>
+            <td style="font-weight:bold;background:#fff9e6;color:#92400e;">${cSun}</td>
+            <td style="font-weight:bold;background:#ede9fe;color:#5b21b6;">${cHol}</td>
+          </tr>`;
+        }).join("");
+
+        const tableFooter = `<tr>
+          <td colspan="2" style="text-align:left;padding:4px 8px;font-weight:bold;background:#1d3a6d;color:#ffd700;">DAILY TOTAL</td>
+          ${dayTotalsP.map((_,i) => {
+            const all = dayTotalsP[i]+dayTotalsSun[i]+dayTotalsHol[i];
+            return `<td style="text-align:center;font-weight:bold;background:#f8f9fa;font-size:9px;">${all||""}</td>`;
+          }).join("")}
+          <td style="font-weight:bold;background:#e6fffa;color:#065f46;">${gP}</td>
+          <td style="font-weight:bold;background:#fff0f0;color:#991b1b;">${gA}</td>
+          <td style="font-weight:bold;background:#fff9e6;color:#92400e;">${gSun}</td>
+          <td style="font-weight:bold;background:#ede9fe;color:#5b21b6;">${gHol}</td>
+        </tr>`;
+
+        const preview = window.open("","_blank");
+        preview.document.write(`<!DOCTYPE html><html><head>
+          <title>Attendance Summary</title>
+          <style>
+            *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+            @page{size:A4 landscape;margin:5mm 5mm 0mm 5mm;}
+            body{font-family:sans-serif;padding:10px;margin:0;zoom:1.4;}
+            .co-name{text-align:center;margin:0;font-size:26px;font-weight:bold;
+              background:linear-gradient(135deg,#bf953f 0%,#fcf6ba 25%,#b38728 50%,#fbf5b7 75%,#aa771c 100%);
+              -webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+            table{width:100%;border-collapse:collapse;table-layout:fixed;border:1.2px solid #000;margin-top:10px;}
+            th,td{border:1px solid #000;text-align:center;font-size:10px;padding:1px 0;}
+            th{background:#1d3a6d;color:#fff;}
+            .text-start{text-align:left!important;padding-left:5px;white-space:nowrap;overflow:hidden;}
+            .no-print{position:fixed;top:10px;right:10px;padding:10px;background:#002147;color:#ffd700;border:2px solid #ffd700;border-radius:5px;cursor:pointer;z-index:1000;font-weight:bold;}
+            .sig-row{display:flex;justify-content:space-between;margin-top:40px;padding:0 40px;}
+            .sig-item{border-top:1px solid #000;width:140px;text-align:center;font-size:10px;font-weight:bold;padding-top:4px;}
+            @media print{body{zoom:0.95;}th,td{font-size:8.5px;}.no-print{display:none;}}
+          </style>
+        </head><body>
+          <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+          <h1 class="co-name">ALAMHOW CO LTD</h1>
+          <table>${tableHeader}<tbody>${tableBody}</tbody><tfoot>${tableFooter}</tfoot></table>
+          <table style="margin-top:14px;border-collapse:collapse;width:auto;min-width:240px;">
+            <thead><tr><th colspan="2" style="background:#1d3a6d;color:#ffd700;padding:4px 10px;font-size:11px;text-align:left;">PRESENT SUMMARY</th></tr></thead>
+            <tbody>
+              <tr style="background:#f0fff4;"><td style="padding:3px 10px;font-weight:bold;border:1px solid #ccc;">Total Normal Working Days</td><td style="font-weight:bold;width:60px;border:1px solid #ccc;text-align:center;">${gP}</td></tr>
+              <tr style="background:#fffbeb;"><td style="padding:3px 10px;font-weight:bold;color:#b58900;border:1px solid #ccc;">Total Sunday Working Days</td><td style="font-weight:bold;color:#b58900;border:1px solid #ccc;text-align:center;">${gSun}</td></tr>
+              <tr style="background:#f5f3ff;"><td style="padding:3px 10px;font-weight:bold;border:1px solid #ccc;">Total Holiday Working Days</td><td style="font-weight:bold;border:1px solid #ccc;text-align:center;">${gHol}</td></tr>
+              <tr style="background:#fff0f0;"><td style="padding:3px 10px;font-weight:bold;color:red;border:1px solid #ccc;">Total Absent</td><td style="font-weight:bold;color:red;border:1px solid #ccc;text-align:center;">${gA}</td></tr>
+            </tbody>
+          </table>
+          <div class="sig-row">
+            <div class="sig-item">Prepared By</div>
+            <div class="sig-item">Checked By</div>
+            <div class="sig-item">Authorized Signature</div>
+          </div>
+        </body></html>`);
+        preview.document.close();
+      }
     </script>
   </body>
 </html>
