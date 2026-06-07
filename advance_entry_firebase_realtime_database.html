@@ -1,0 +1,1167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advance & Fine Entry System</title>
+    <link class="no-print" rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <style>
+      :root { --brand-blue:#1e3a5f; --brand-gold:#d4af37; --bg-dark-blue:#0f1e33; --brand-red:#c0392b; }
+      .page-wrapper { max-width:1200px; margin:0 auto; width:100%; padding-left:1.5rem; padding-right:1.5rem; }
+      .flatpickr-calendar { background:#001d3d !important; border:1px solid var(--brand-gold) !important; }
+      .flatpickr-day { color:#cce !important; }
+      .flatpickr-day.selected,.flatpickr-day.today { background:var(--brand-gold) !important; color:var(--brand-blue) !important; border-color:var(--brand-gold) !important; }
+      .flatpickr-day:hover { background:var(--brand-gold) !important; color:black !important; border-color:var(--brand-gold) !important; }
+      .flatpickr-months .flatpickr-month,.flatpickr-weekdays,span.flatpickr-weekday { background:var(--brand-blue) !important; color:var(--brand-gold) !important; }
+      .flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay { visibility:hidden; }
+      .flatpickr-prev-month,.flatpickr-next-month { color:var(--brand-gold) !important; fill:var(--brand-gold) !important; }
+      .flatpickr-prev-month svg,.flatpickr-next-month svg { fill:var(--brand-gold) !important; stroke:var(--brand-gold) !important; }
+      .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { background:var(--brand-blue) !important; color:var(--brand-gold) !important; border:none !important; }
+      .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { background:var(--brand-blue) !important; color:var(--brand-gold) !important; }
+      .loading-spinner { border:3px solid rgba(212,175,55,0.2); width:28px; height:28px; border-radius:50%; border-left-color:var(--brand-gold); animation:spin 1s linear infinite; }
+      @keyframes spin { to { transform:rotate(360deg); } }
+      .search-results { max-height:290px; overflow-y:auto; position:absolute; width:150%; min-width:325px; max-width:500px; z-index:999; background:var(--brand-blue); border:2px solid var(--brand-gold); border-radius:0.75rem; display:none; box-shadow:0 15px 35px rgba(0,0,0,0.4); margin-top:5px; }
+      .search-item { padding:12px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; flex-direction:column; align-items:flex-start; transition:all 0.2s ease; color:#ffffff; box-sizing:border-box; width:100%; }
+      .search-item:hover { background-color:var(--brand-gold) !important; color:#000000 !important; }
+      .search-item:hover .id-badge { background-color:var(--brand-blue) !important; color:#ffffff !important; }
+      .search-item:hover .pending-text-badge { color:#000000 !important; border-color:rgba(0,0,0,0.4) !important; }
+      .id-badge { background-color:rgba(255,255,255,0.12); color:var(--brand-gold); font-weight:900; font-size:10px; padding:3px 8px; border-radius:4px; margin-right:12px; min-width:65px; text-align:center; transition:all 0.2s ease; display:inline-block; flex-shrink:0; }
+      @media print {
+        @page { size:A4 landscape; margin:5mm; }
+        body { background:white !important; }
+        body * { visibility:hidden; }
+        #receipt-print-area,#receipt-print-area * { visibility:visible; -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+        #receipt-print-area { position:absolute; left:0; top:0; width:100%; display:block !important; }
+        .no-print { display:none !important; }
+      }
+      .receipt-slip { width:47%; height:680px; padding:25px; border:3px solid #1e3a5f; position:relative; background:white !important; box-sizing:border-box; display:flex; flex-direction:column; border-radius:12px; }
+      .dual-receipt-wrapper { display:flex; justify-content:space-between; align-items:center; width:100%; padding:10px; background:white !important; }
+      .input-label { font-size:10px; font-weight:900; color:#ffffff; }
+      #page-init-loader { position:fixed; inset:0; background:#1e3a5f; z-index:9999; display:flex; flex-direction:column; align-items:center; justify-content:center; color:white; transition:opacity 0.5s ease; }
+      .refresh-btn { cursor:pointer; transition:all 0.3s ease; }
+      .refresh-btn:hover { color:var(--brand-gold); transform:rotate(180deg); }
+      .refresh-btn.spinning { animation:spin 1s linear infinite; }
+      .custom-scrollbar::-webkit-scrollbar { width:8px; height:8px; }
+      .custom-scrollbar::-webkit-scrollbar-track { background:rgba(30,58,95,0.2); border-radius:10px; }
+      .custom-scrollbar::-webkit-scrollbar-thumb { background:var(--brand-gold); border-radius:10px; }
+    </style>
+  </head>
+  <body class="bg-[#0f1e33] min-h-screen py-6 text-white">
+
+    <div id="page-init-loader">
+      <div class="mb-6 bg-white p-3 rounded-2xl border-2 border-[#d4af37]">
+        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-16 w-auto" />
+      </div>
+      <div class="loading-spinner mb-4"></div>
+      <h2 class="text-lg font-black uppercase tracking-[0.2em] text-[#d4af37]">Loading Data Please Wait...</h2>
+      <p class="text-[10px] mt-2 opacity-70">Synchronizing with Cloud Firestore & Realtime Database</p>
+    </div>
+
+    <header class="page-wrapper mb-6 no-print">
+      <div class="bg-[#1e3a5f] rounded-2xl shadow-lg border-2 border-[#d4af37]">
+        <div class="px-6 py-4 flex justify-between items-center text-white">
+          <div class="flex items-center space-x-4">
+            <div class="bg-white p-1 rounded-lg border border-[#d4af37]">
+              <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="ALAMHOW" class="h-10 w-auto" />
+            </div>
+            <div>
+              <h1 class="text-xl font-black uppercase tracking-tight">ALAMHOW <span class="text-[#d4af37]">CO LTD</span></h1>
+              <p class="text-[9px] font-bold opacity-60 tracking-[0.2em] mt-1">ADVANCE, ADJUSTMENT & FINE SYSTEM</p>
+            </div>
+          </div>
+          <div id="header-date" class="font-mono font-bold uppercase text-[#d4af37]" style="font-size:20px"></div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-wrapper no-print">
+
+      <!-- UNIFIED TAB ROW -->
+      <div class="flex flex-wrap gap-2 mb-6">
+        <button id="tab-advance" onclick="switchMode('advance')"
+          class="flex-1 min-w-[130px] bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95">
+          <i class="fas fa-hand-holding-usd mr-1"></i> New Advance
+        </button>
+        <button id="tab-adjustment" onclick="switchMode('adjustment')"
+          class="flex-1 min-w-[130px] bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
+          <i class="fas fa-calculator mr-1 text-[#d4af37]"></i> Adjustment
+        </button>
+        <button id="tab-fine-entry" onclick="switchMode('fine-entry')"
+          class="flex-1 min-w-[130px] bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
+          <i class="fas fa-exclamation-circle mr-1 text-[#d4af37]"></i> Fine Entry
+        </button>
+        <button id="tab-pending-list" onclick="switchMode('pending-list')"
+          class="flex-1 min-w-[130px] bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
+          <i class="fas fa-list-ol mr-1 text-[#d4af37]"></i> Pending List
+        </button>
+        <button id="tab-history" onclick="switchMode('history')"
+          class="flex-1 min-w-[130px] bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95">
+          <i class="fas fa-history mr-1 text-[#d4af37]"></i> History
+        </button>
+      </div>
+
+      <!-- ADVANCE / ADJUSTMENT FORM CARD -->
+      <div id="form-container-card" class="bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80">
+        <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 id="form-title" class="font-black text-white uppercase text-sm tracking-wider whitespace-nowrap">New Advance Entry</h2>
+            <div class="flex flex-wrap items-center gap-2 bg-[#0f1e33] border border-slate-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wide">
+              <span class="text-sky-400 uppercase">ADV=<span id="header-stat-total" class="text-white ml-1">0</span></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-emerald-400 uppercase">ADJ=<span id="header-stat-adj" class="text-white ml-1">0</span></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-[#d4af37] uppercase">PENDING=<span id="header-stat-pending" class="text-white ml-1">0</span></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-red-400 uppercase">FINE=<span id="fine-header-stat-total" class="text-white ml-1">0</span></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-orange-400 uppercase">F.PENDING=<span id="fine-header-stat-pending" class="text-white ml-1">0</span></span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 self-end lg:self-auto">
+            <button type="button" onclick="refreshSystemData()" title="Refresh" class="refresh-btn text-white hover:text-[#d4af37]">
+              <i id="refresh-icon" class="fas fa-sync-alt text-sm"></i>
+            </button>
+            <span id="voucher-label" class="text-[10px] font-bold text-white uppercase ml-2">ADVANCE NO:</span>
+            <span id="next-adv-no" class="text-xs font-mono font-black text-white bg-[#0f1e33] border border-[#d4af37] px-2 py-1 rounded">Select Date</span>
+          </div>
+        </div>
+
+        <!-- Employee Balance Summary Card -->
+        <div id="balance-summary-card" class="hidden px-8 py-5 bg-[#10223b] border-b-2 border-slate-700/50 flex flex-wrap gap-4 justify-around text-center">
+          <div class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[170px]">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">TOTAL ADV</p>
+            <p id="summary-lifetime-advance" class="text-lg font-black text-[#d4af37]">0.00 /-</p>
+          </div>
+          <div class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[170px]">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">ADJ</p>
+            <p id="summary-lifetime-adjusted" class="text-lg font-black text-green-400">0.00 /-</p>
+          </div>
+          <div class="px-4 py-2 bg-[#1e3a5f] rounded-xl shadow-md border-2 border-[#d4af37] min-w-[200px]">
+            <p class="text-[10px] font-black text-amber-200 uppercase tracking-wider">ADV PENDING</p>
+            <p id="summary-pending-balance" class="text-xl font-black text-[#d4af37]">0.00 /-</p>
+          </div>
+          <div class="px-4 py-2 bg-[#2d1a1a] rounded-xl shadow-md border-2 border-red-600/60 min-w-[200px]">
+            <p class="text-[10px] font-black text-red-200 uppercase tracking-wider">FINE PENDING</p>
+            <p id="summary-fine-pending" class="text-xl font-black text-red-400">0.00 /-</p>
+          </div>
+        </div>
+
+        <form id="advance-form" onsubmit="return false;" class="p-8 lg:p-10">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="md:col-span-3 relative">
+              <label class="input-label">Search Employee ID</label>
+              <input type="text" id="emp-search" autocomplete="off" placeholder="Type ID or Name..."
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none border-slate-600 focus:border-[#d4af37] text-white transition-all" />
+              <div id="search-results" class="search-results"></div>
+              <input type="hidden" id="selected-emp-id" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Employee Name</label>
+              <input type="text" id="display-name" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Passport No</label>
+              <input type="text" id="auto-passport" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-mono text-slate-300" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Designation</label>
+              <input type="text" id="display-desig" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase" />
+            </div>
+            <div class="md:col-span-3 relative">
+              <label id="date-label" class="input-label">Received Date</label>
+              <div class="relative">
+                <input type="text" id="record-date" placeholder="Select Date" readonly
+                  class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none cursor-pointer border-slate-600 text-white focus:border-[#d4af37]" />
+                <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-[#d4af37] pointer-events-none"></i>
+              </div>
+            </div>
+            <div class="md:col-span-3">
+              <label id="amount-label" class="input-label">Advance Amount</label>
+              <input type="number" id="advance-amount" oninput="updateAmountInWords(this.value)"
+                class="w-full p-2.5 rounded-lg border-2 font-black text-white bg-[#0f1e33] text-lg border-slate-600 focus:border-[#d4af37] outline-none" />
+              <p id="amount-in-words" class="text-[9px] text-[#d4af37] font-black mt-1 uppercase italic h-4"></p>
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Reference</label>
+              <input type="text" id="reference" class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Remark</label>
+              <input type="text" id="remark" class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none" />
+            </div>
+            <div class="md:col-span-12 mt-4">
+              <button type="button" id="submit-btn" onclick="directSaveToSheet()"
+                class="w-full bg-[#1e3a5f] hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]">
+                Confirm & Save Advance
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- FINE ENTRY FORM CARD — same style as Advance -->
+      <div id="fine-form-card" class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80">
+        <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+          <div class="flex flex-wrap items-center gap-3">
+            <h2 class="font-black text-white uppercase text-sm tracking-wider whitespace-nowrap">
+              <i class="fas fa-exclamation-circle text-[#d4af37] mr-2"></i>New Fine Entry
+            </h2>
+            <div class="flex flex-wrap items-center gap-2 bg-[#0f1e33] border border-slate-700 px-3 py-1.5 rounded-xl text-[10px] font-black tracking-wide">
+              <span class="text-red-400 uppercase">TOTAL FINE=<span id="fine-stat-total2" class="text-white ml-1">0</span></span>
+              <span class="text-slate-600">|</span>
+              <span class="text-orange-400 uppercase">PENDING=<span id="fine-stat-pending2" class="text-white ml-1">0</span></span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-3 self-end lg:self-auto">
+            <button type="button" onclick="refreshSystemData()" title="Refresh" class="refresh-btn text-white hover:text-[#d4af37]">
+              <i class="fas fa-sync-alt text-sm"></i>
+            </button>
+            <span class="text-[10px] font-bold text-white uppercase ml-2">FINE NO:</span>
+            <span id="next-fine-no" class="text-xs font-mono font-black text-white bg-[#0f1e33] border border-[#d4af37] px-2 py-1 rounded">Select Date</span>
+          </div>
+        </div>
+
+        <!-- Fine Employee Balance Card — same style as Advance -->
+        <div id="fine-balance-card" class="hidden px-8 py-5 bg-[#10223b] border-b-2 border-slate-700/50 flex flex-wrap gap-4 justify-around text-center">
+          <div class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[170px]">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">ADV PENDING</p>
+            <p id="fine-view-adv-pending" class="text-lg font-black text-[#d4af37]">0.00 /-</p>
+          </div>
+          <div class="px-4 py-2 bg-[#1c3352] rounded-xl shadow-sm border border-slate-700 min-w-[170px]">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider">TOTAL FINE</p>
+            <p id="fine-summary-total" class="text-lg font-black text-red-400">0.00 /-</p>
+          </div>
+          <div class="px-4 py-2 bg-[#1e3a5f] rounded-xl shadow-md border-2 border-[#d4af37] min-w-[200px]">
+            <p class="text-[10px] font-black text-amber-200 uppercase tracking-wider">FINE PENDING</p>
+            <p id="fine-summary-pending" class="text-xl font-black text-[#d4af37]">0.00 /-</p>
+          </div>
+        </div>
+
+        <form id="fine-form" onsubmit="return false;" class="p-8 lg:p-10">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div class="md:col-span-3 relative">
+              <label class="input-label">Search Employee ID</label>
+              <input type="text" id="fine-emp-search" autocomplete="off" placeholder="Type ID or Name..."
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none border-slate-600 focus:border-[#d4af37] text-white transition-all" />
+              <div id="fine-search-results" class="search-results"></div>
+              <input type="hidden" id="fine-selected-emp-id" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Employee Name</label>
+              <input type="text" id="fine-display-name" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Passport No</label>
+              <input type="text" id="fine-auto-passport" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-mono text-slate-300" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Designation</label>
+              <input type="text" id="fine-display-desig" readonly class="w-full p-2.5 rounded-lg border border-slate-600 bg-[#1e2d42] font-bold text-slate-300 uppercase" />
+            </div>
+            <div class="md:col-span-3 relative">
+              <label class="input-label">Fine Date</label>
+              <div class="relative">
+                <input type="text" id="fine-record-date" placeholder="Select Date" readonly
+                  class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] font-bold outline-none cursor-pointer border-slate-600 text-white focus:border-[#d4af37]" />
+                <i class="fas fa-calendar-alt absolute right-3 top-1/2 -translate-y-1/2 text-[#d4af37] pointer-events-none"></i>
+              </div>
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Fine Amount</label>
+              <input type="number" id="fine-amount" oninput="updateFineAmountInWords(this.value)"
+                class="w-full p-2.5 rounded-lg border-2 font-black text-white bg-[#0f1e33] text-lg border-slate-600 focus:border-[#d4af37] outline-none" />
+              <p id="fine-amount-in-words" class="text-[9px] text-[#d4af37] font-black mt-1 uppercase italic h-4"></p>
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Fine Reason</label>
+              <input type="text" id="fine-reason" placeholder="e.g. Late arrival, misconduct..."
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none" />
+            </div>
+            <div class="md:col-span-3">
+              <label class="input-label">Remark</label>
+              <input type="text" id="fine-remark"
+                class="w-full p-2.5 rounded-lg border-2 bg-[#0f1e33] border-slate-600 text-white focus:border-[#d4af37] outline-none" />
+            </div>
+            <div class="md:col-span-12 mt-4">
+              <button type="button" onclick="saveFineEntry()"
+                class="w-full bg-[#1e3a5f] hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]">
+                <i class="fas fa-exclamation-circle mr-2"></i> Confirm & Save Fine Entry
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- UNIFIED PENDING LIST CARD -->
+      <div id="pending-list-container-card" class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80">
+        <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div>
+            <h2 class="font-black text-white uppercase text-sm tracking-wider">Employee Pending Outstandings</h2>
+            <p class="text-[10px] text-slate-400 mt-1 uppercase">Advance & Fine outstanding balances — combined view</p>
+          </div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <select id="pending-type-filter" onchange="renderPendingTable()"
+              class="p-2 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-black text-[#d4af37] outline-none cursor-pointer focus:border-[#d4af37]">
+              <option value="ALL">ALL TYPES</option>
+              <option value="ADVANCE">ADVANCE ONLY</option>
+              <option value="FINE">FINE ONLY</option>
+            </select>
+            <div class="relative w-full md:w-72">
+              <input type="text" id="pending-table-search" oninput="filterPendingTable(this.value)" placeholder="Search ID or Name..."
+                class="w-full p-2 pl-9 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-bold text-white outline-none focus:border-[#d4af37]" />
+              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 overflow-x-auto custom-scrollbar">
+          <div class="flex flex-wrap gap-3 mb-4">
+            <div class="bg-[#1c3352] border border-slate-700 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2">
+              <span class="text-[#d4af37]">ADV TOTAL:</span><span id="adv-grand-total-badge" class="text-white font-mono">0 /-</span>
+            </div>
+            <div class="bg-[#2d1a1a] border border-red-900/40 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2">
+              <span class="text-red-400">FINE TOTAL:</span><span id="fine-grand-total-badge" class="text-white font-mono">0 /-</span>
+            </div>
+            <div class="bg-[#0f1e33] border-2 border-[#d4af37] px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2">
+              <span class="text-[#d4af37]">COMBINED:</span><span id="combined-grand-total-badge" class="text-[#d4af37] font-mono">0 /-</span>
+            </div>
+          </div>
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700 text-[#d4af37] text-[11px] uppercase tracking-wider font-black">
+                <th class="py-3 px-4">ID</th><th class="py-3 px-4">Employee Name</th>
+                <th class="py-3 px-4">Designation</th><th class="py-3 px-4">Passport No</th>
+                <th class="py-3 px-4">Last Date</th>
+                <th class="py-3 px-4 text-center">Type</th>
+                <th class="py-3 px-4 text-right">Pending MUR</th>
+              </tr>
+            </thead>
+            <tbody id="pending-table-rows" class="text-xs font-semibold divide-y divide-slate-800">
+              <tr><td colspan="7" class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest"><i class="fas fa-spinner fa-spin mr-2"></i> Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- UNIFIED HISTORY CARD -->
+      <div id="history-container-card" class="hidden bg-[#142842] rounded-2xl shadow-2xl overflow-hidden border border-slate-700/80">
+        <div class="bg-[#1c3352]/70 px-8 py-5 border-b-2 border-[#d4af37] flex flex-col md:flex-row md:justify-between md:items-center gap-4">
+          <div>
+            <h2 class="font-black text-white uppercase text-sm tracking-wider">Full Transaction History (Last 100)</h2>
+            <p class="text-[10px] text-slate-400 mt-1 uppercase">Advance, Adjustment & Fine — all in one view</p>
+          </div>
+          <div class="flex items-center gap-2 w-full md:w-auto flex-wrap">
+            <select id="history-type-filter" onchange="filterHistoryTypeAndSearch()"
+              class="p-2 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-black text-[#d4af37] outline-none cursor-pointer focus:border-[#d4af37]">
+              <option value="ALL">ALL TYPES</option>
+              <option value="advance">ADVANCE</option>
+              <option value="adjustment">ADJUSTMENT</option>
+              <option value="fine">FINE</option>
+            </select>
+            <button type="button" onclick="recalculateAndSyncAllLedger()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white p-2 rounded-lg border border-emerald-500 transition-all font-bold text-xs flex items-center gap-1">
+              <i class="fas fa-calculator"></i><span class="hidden md:inline">Sync Adv</span>
+            </button>
+            <button type="button" onclick="recalculateAndSyncFineLedger()"
+              class="bg-red-700 hover:bg-red-600 text-white p-2 rounded-lg border border-red-600 transition-all font-bold text-xs flex items-center gap-1">
+              <i class="fas fa-calculator"></i><span class="hidden md:inline">Sync Fine</span>
+            </button>
+            <div class="relative w-full md:w-64">
+              <input type="text" id="history-table-search" oninput="filterHistoryTypeAndSearch()" placeholder="Search No, ID, Name..."
+                class="w-full p-2 pl-9 rounded-lg border border-slate-600 bg-[#0f1e33] text-xs font-bold text-white outline-none focus:border-[#d4af37]" />
+              <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b border-slate-700 text-[#d4af37] text-[11px] uppercase tracking-wider font-black">
+                <th class="py-3 px-4">Voucher No</th><th class="py-3 px-4">Record Date</th>
+                <th class="py-3 px-4">ID</th><th class="py-3 px-4">Employee Name</th>
+                <th class="py-3 px-4 text-center">Type</th>
+                <th class="py-3 px-4">Reason/Ref</th>
+                <th class="py-3 px-4 text-right">Amount</th>
+                <th class="py-3 px-4 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="history-table-rows" class="text-xs font-semibold divide-y divide-slate-800">
+              <tr><td colspan="8" class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest"><i class="fas fa-spinner fa-spin mr-2"></i> Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Success Modal -->
+    <div id="success-modal" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[60] backdrop-blur-sm">
+      <div class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-[#d4af37] shadow-2xl text-white">
+        <div class="w-16 h-16 bg-amber-500/10 text-[#d4af37] rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-[#d4af37]"><i class="fas fa-check-circle"></i></div>
+        <h3 id="success-title" class="text-xl font-black text-white mb-2 uppercase">Entry Saved!</h3>
+        <p id="success-subtitle" class="text-slate-400 text-[11px] font-bold mb-6 uppercase">Syncing to Cloud Realtime Database successful</p>
+        <div class="grid grid-cols-2 gap-3 w-full">
+          <button onclick="prepareAndPrint()" class="bg-[#1e3a5f] hover:bg-[#142842] text-white font-black py-3 rounded-xl uppercase text-[10px] tracking-widest border-b-2 border-[#d4af37]">Print Receipt</button>
+          <button onclick="resetEntry()" class="bg-[#0f1e33] hover:bg-slate-900 text-slate-300 border border-slate-600 font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">New Entry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fine Success Modal -->
+    <div id="fine-success-modal" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[60] backdrop-blur-sm">
+      <div class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-[#d4af37] shadow-2xl text-white">
+        <div class="w-16 h-16 bg-amber-500/10 text-[#d4af37] rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-[#d4af37]"><i class="fas fa-check-circle"></i></div>
+        <h3 class="text-xl font-black text-white mb-2 uppercase">Fine Saved!</h3>
+        <p id="fine-success-subtitle" class="text-slate-400 text-[11px] font-bold mb-6 uppercase">Fine entry synced to Cloud Realtime Database</p>
+        <div class="grid grid-cols-2 gap-3 w-full">
+          <button onclick="printFineReceipt()" class="bg-[#1e3a5f] hover:bg-[#142842] text-white font-black py-3 rounded-xl uppercase text-[10px] tracking-widest border-b-2 border-[#d4af37]">Print Fine Receipt</button>
+          <button onclick="resetFineEntry()" class="bg-[#0f1e33] hover:bg-slate-900 text-slate-300 border border-slate-600 font-black py-3 rounded-xl uppercase text-[10px] tracking-widest">New Fine Entry</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alert-modal" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-[70] backdrop-blur-sm">
+      <div class="bg-[#142842] rounded-3xl p-8 max-w-md w-full mx-4 text-center border-t-8 border-red-500 shadow-2xl text-white">
+        <div class="w-16 h-16 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto border-2 border-red-500"><i class="fas fa-exclamation-triangle"></i></div>
+        <h3 class="text-lg font-black text-white mb-2 uppercase">Attention!</h3>
+        <p id="alert-msg" class="text-slate-300 text-[11px] font-bold mb-6 uppercase tracking-wider leading-relaxed">Required fields are missing.</p>
+        <button onclick="closeAlert()" class="w-full bg-[#1e3a5f] text-white font-black py-3 rounded-xl uppercase text-[11px] tracking-widest hover:bg-[#142842]">Got It</button>
+      </div>
+    </div>
+
+    <!-- Loader -->
+    <div id="loader" class="fixed inset-0 bg-[#0f1e33]/90 hidden flex items-center justify-center z-50 backdrop-blur-sm">
+      <div class="bg-[#142842] p-8 rounded-3xl flex flex-col items-center border-2 border-[#d4af37] text-white">
+        <div class="loading-spinner mb-4"></div>
+        <p id="loader-text" class="text-white font-black uppercase text-xs tracking-widest">Saving to Cloud RTB...</p>
+      </div>
+    </div>
+
+    <div id="receipt-print-area" class="hidden"></div>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+        authDomain: "munna-acl-fda7c.firebaseapp.com",
+        databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "munna-acl-fda7c",
+        storageBucket: "munna-acl-fda7c.firebasestorage.app",
+        messagingSenderId: "371130316468",
+        appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+      };
+      firebase.initializeApp(firebaseConfig);
+      const firestore = firebase.firestore();
+      const rtb = firebase.database();
+
+      let employees = [];
+      let lastSavedEntries = [];
+      let lastSavedFineEntry = null;
+      let globalSummary = { totalAdvance:0, totalAdjusted:0, pending:0 };
+      let employeeBalances = {};
+      let allTransactionsList = [];
+      let allFineTransactionsList = [];
+      let fineGlobalSummary = { totalFine:0, pending:0 };
+      let fineEmployeeBalances = {};
+      let currentMode = "advance";
+      window._mergedHistory = [];
+
+      // ─── Holiday Set (loaded from Firestore HOLIDAY_LIST) ────────────────────
+      let _holidaySet = new Set();
+
+      function redDayCreate(dayElem) {
+        const d = dayElem.dateObj;
+        if (!d) return;
+        // রবিবার লাল
+        if (d.getDay() === 0) {
+          dayElem.style.color = "#ff4d4d";
+          dayElem.style.fontWeight = "800";
+        }
+        // Holiday লাল
+        const y = d.getFullYear();
+        const m = String(d.getMonth()+1).padStart(2,"0");
+        const day = String(d.getDate()).padStart(2,"0");
+        const ds = `${y}-${m}-${day}`;
+        if (_holidaySet.has(ds)) {
+          dayElem.style.color = "#ff4d4d";
+          dayElem.style.fontWeight = "800";
+          dayElem.title = "Holiday";
+        }
+      }
+
+      async function loadHolidays() {
+        try {
+          const snap = await firestore.collection("HOLIDAY_LIST").get();
+          snap.forEach(doc => _holidaySet.add(doc.id));
+          // Redraw all flatpickr instances after holidays loaded
+          ["record-date","fine-record-date"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el && el._flatpickr) el._flatpickr.redraw();
+          });
+        } catch(e) { console.warn("Holiday load failed:", e); }
+      }
+
+      window.onload = async () => {
+        const now = new Date();
+        document.getElementById("header-date").innerText = now.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase();
+
+        // Advance / Adjustment datepicker
+        flatpickr("#record-date", {
+          dateFormat: "d-m-Y",
+          defaultDate: null,
+          allowInput: true,
+          onDayCreate: function(dObj, dStr, fp, dayElem) { redDayCreate(dayElem); },
+          onChange: function(s, dateStr) { if(dateStr){ calculateDynamicVoucher(dateStr); fetchEmployeeBalance(); } }
+        });
+
+        // Fine datepicker
+        flatpickr("#fine-record-date", {
+          dateFormat: "d-m-Y",
+          defaultDate: null,
+          allowInput: true,
+          onDayCreate: function(dObj, dStr, fp, dayElem) { redDayCreate(dayElem); },
+          onChange: function(s, dateStr) { if(dateStr){ calculateFineVoucher(dateStr); fetchFineEmployeeBalance(); } }
+        });
+
+        await refreshSystemData(true);
+        loadHolidays(); // async, no await — loads in background
+        setupSearch();
+        setupFineSearch();
+        setTimeout(()=>{document.getElementById("page-init-loader").style.opacity="0";setTimeout(()=>{document.getElementById("page-init-loader").style.display="none";},500);},800);
+      };
+
+      async function switchMode(mode) {
+        currentMode = mode;
+        const allTabs = ["tab-advance","tab-adjustment","tab-fine-entry","tab-pending-list","tab-history"];
+        const allCards = ["form-container-card","fine-form-card","pending-list-container-card","history-container-card"];
+        allTabs.forEach(id=>{
+          const btn=document.getElementById(id); if(!btn)return;
+          btn.className="flex-1 min-w-[130px] bg-[#1c3352] text-slate-300 hover:bg-[#254166] font-bold py-3 rounded-xl uppercase tracking-wider text-xs border border-slate-600 transition-all transform active:scale-95";
+        });
+        allCards.forEach(id=>{const el=document.getElementById(id);if(el)el.classList.add("hidden");});
+        const aG="flex-1 min-w-[130px] bg-[#d4af37] text-[#0f1e33] font-black py-3 rounded-xl uppercase tracking-wider text-xs border-b-4 border-amber-600 transition-all shadow-md transform active:scale-95";
+        if(mode==="advance"){
+          document.getElementById("tab-advance").className=aG;
+          document.getElementById("form-container-card").classList.remove("hidden");
+          document.getElementById("form-title").innerText="New Advance Entry";
+          document.getElementById("date-label").innerText="Received Date";
+          document.getElementById("amount-label").innerText="Advance Amount";
+          document.getElementById("voucher-label").innerText="ADVANCE NO:";
+          const sb=document.getElementById("submit-btn");
+          sb.innerText="Confirm & Save Advance";
+          sb.className="w-full bg-[#1e3a5f] hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]";
+        } else if(mode==="adjustment"){
+          document.getElementById("tab-adjustment").className=aG;
+          document.getElementById("form-container-card").classList.remove("hidden");
+          document.getElementById("form-title").innerText="Advance Adjustment Entry";
+          document.getElementById("date-label").innerText="Adjustment Date";
+          document.getElementById("amount-label").innerText="Adjusted Amount";
+          document.getElementById("voucher-label").innerText="ADJUSTMENT NO:";
+          const sb=document.getElementById("submit-btn");
+          sb.innerText="Confirm & Save Adjustment";
+          sb.className="w-full bg-green-700 hover:bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest text-sm transition-all transform active:scale-[0.99] border-b-4 border-[#d4af37]";
+        } else if(mode==="fine-entry"){
+          document.getElementById("tab-fine-entry").className=aG;
+          document.getElementById("fine-form-card").classList.remove("hidden");
+        } else if(mode==="pending-list"){
+          document.getElementById("tab-pending-list").className=aG;
+          document.getElementById("pending-list-container-card").classList.remove("hidden");
+          document.getElementById("pending-type-filter").value="ALL";
+          document.getElementById("pending-table-search").value="";
+          renderPendingTable();
+        } else if(mode==="history"){
+          document.getElementById("tab-history").className=aG;
+          document.getElementById("history-container-card").classList.remove("hidden");
+          document.getElementById("history-type-filter").value="ALL";
+          document.getElementById("history-table-search").value="";
+          await loadAllHistoryFromCloud();
+          renderHistoryTable();
+        }
+        const sd=document.getElementById("record-date").value;
+        await calculateDynamicVoucher(sd);
+        fetchEmployeeBalance();
+      }
+
+      async function refreshSystemData(silent=false){
+        const icon=document.getElementById("refresh-icon");
+        if(!silent)icon.classList.add("spinning");
+        try{
+          await fetchEmployees();
+          await syncPreCalculatedAggregates();
+          await syncFineAggregates();
+          const sd=document.getElementById("record-date").value;
+          await calculateDynamicVoucher(sd);
+          await fetchEmployeeBalance();
+          if(currentMode==="pending-list")renderPendingTable();
+          else if(currentMode==="history"){await loadAllHistoryFromCloud();renderHistoryTable();}
+        }finally{if(!silent)setTimeout(()=>icon.classList.remove("spinning"),500);}
+      }
+
+      function showAlert(msg){document.getElementById("alert-msg").innerText=msg;document.getElementById("alert-modal").classList.remove("hidden");}
+      function closeAlert(){document.getElementById("alert-modal").classList.add("hidden");}
+
+      async function syncPreCalculatedAggregates(){
+        try{
+          const gSnap=await rtb.ref("ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL").once("value");
+          globalSummary=gSnap.val()||{totalAdvance:0,totalAdjusted:0,pending:0};
+          const uSnap=await rtb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
+          employeeBalances=uSnap.val()||{};
+          document.getElementById("header-stat-total").innerText=(globalSummary.totalAdvance||0).toLocaleString()+" /-";
+          document.getElementById("header-stat-adj").innerText=(globalSummary.totalAdjusted||0).toLocaleString()+" /-";
+          document.getElementById("header-stat-pending").innerText=(globalSummary.pending||0).toLocaleString()+" /-";
+        }catch(e){console.error(e);}
+      }
+
+      async function syncFineAggregates(){
+        try{
+          const gSnap=await rtb.ref("FINE_SUMMARY/GLOBAL").once("value");
+          fineGlobalSummary=gSnap.val()||{totalFine:0,pending:0};
+          const uSnap=await rtb.ref("FINE_SUMMARY/USERS").once("value");
+          fineEmployeeBalances=uSnap.val()||{};
+          ["fine-header-stat-total","fine-stat-total2"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerText=(fineGlobalSummary.totalFine||0).toLocaleString()+" /-";});
+          ["fine-header-stat-pending","fine-stat-pending2"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerText=(fineGlobalSummary.pending||0).toLocaleString()+" /-";});
+        }catch(e){console.error(e);}
+      }
+
+      async function loadAllHistoryFromCloud(){
+        try{
+          const aSnap=await rtb.ref("ADVANCE_ADJUSTMENT_TRANSACTIONS").orderByKey().limitToLast(50).once("value");
+          allTransactionsList=[];
+          aSnap.forEach(ms=>{ms.forEach(ds=>{ds.forEach(ts=>{allTransactionsList.push(ts.val());});});});
+          const fSnap=await rtb.ref("FINE_TRANSACTIONS").orderByKey().limitToLast(50).once("value");
+          allFineTransactionsList=[];
+          fSnap.forEach(ms=>{ms.forEach(ds=>{ds.forEach(ts=>{allFineTransactionsList.push(ts.val());});});});
+          const merged=[
+            ...allTransactionsList.map(i=>({...i,_voucherKey:i.advanceNo,_typeRaw:i.entryType})),
+            ...allFineTransactionsList.map(i=>({...i,_voucherKey:i.fineNo,_typeRaw:"fine"}))
+          ];
+          merged.sort((a,b)=>{const da=parseDateString(a.recordDate),db=parseDateString(b.recordDate);if(db-da!==0)return db-da;return(b._voucherKey||"").localeCompare(a._voucherKey||"");});
+          window._mergedHistory=merged;
+        }catch(e){console.error(e);}
+      }
+
+      function parseDateString(ds){
+        if(!ds)return new Date(0);
+        const p=ds.split("-");
+        if(p.length===3)return new Date(p[2],p[1]-1,p[0]);
+        return new Date(0);
+      }
+
+      async function calculateDynamicVoucher(targetDate){
+        if(!targetDate){document.getElementById("next-adv-no").innerText="Select Date";return;}
+        if(currentMode==="advance")await fetchNextVoucher(targetDate);
+        else if(currentMode==="adjustment")await fetchNextAdjustmentVoucher(targetDate);
+      }
+
+      // ─── FIXED: Atomic counter for Advance Voucher ───────────────────────────
+      async function fetchNextVoucher(td){
+        const vs=document.getElementById("next-adv-no");if(!td)return;
+        try{
+          const dp=td.split("-"),yr=dp[2],mo=dp[1].padStart(2,"0"),ymk=`${yr}${mo}`;
+          const counterRef=rtb.ref(`COUNTERS/ADVANCE/${yr}${mo}`);
+          const nv=await counterRef.transaction(cur=>(cur||0)+1).then(res=>{
+            const seq=res.snapshot.val();
+            return `ACL-ADV-${ymk}-${String(seq).padStart(4,"0")}`;
+          });
+          // Rollback: just show, don't commit until actual save
+          // We preview only — decrement back
+          await counterRef.transaction(cur=>(cur||1)-1);
+          vs.innerText=nv;return nv;
+        }catch(e){vs.innerText="ACL-ADV-TEMP-0001";}
+      }
+
+      // ─── FIXED: Atomic counter for Adjustment Voucher ────────────────────────
+      async function fetchNextAdjustmentVoucher(td){
+        const vs=document.getElementById("next-adv-no");if(!td)return;
+        try{
+          const dp=td.split("-"),yr=dp[2],mo=dp[1].padStart(2,"0"),ymk=`${yr}${mo}`;
+          const counterRef=rtb.ref(`COUNTERS/ADJUSTMENT/${yr}${mo}`);
+          const nv=await counterRef.transaction(cur=>(cur||0)+1).then(res=>{
+            const seq=res.snapshot.val();
+            return `ACL-ADJ-${ymk}-${String(seq).padStart(4,"0")}`;
+          });
+          await counterRef.transaction(cur=>(cur||1)-1);
+          vs.innerText=nv;return nv;
+        }catch(e){vs.innerText="ACL-ADJ-TEMP-0001";}
+      }
+
+      async function calculateFineVoucher(td){if(!td){document.getElementById("next-fine-no").innerText="Select Date";return;}await fetchNextFineVoucher(td);}
+
+      // ─── FIXED: Atomic counter for Fine Voucher ──────────────────────────────
+      async function fetchNextFineVoucher(td){
+        const vs=document.getElementById("next-fine-no");if(!td)return;
+        try{
+          const dp=td.split("-"),yr=dp[2],mo=dp[1].padStart(2,"0"),ymk=`${yr}${mo}`;
+          const counterRef=rtb.ref(`COUNTERS/FINE/${yr}${mo}`);
+          const nv=await counterRef.transaction(cur=>(cur||0)+1).then(res=>{
+            const seq=res.snapshot.val();
+            return `ACL-FINE-${ymk}-${String(seq).padStart(4,"0")}`;
+          });
+          await counterRef.transaction(cur=>(cur||1)-1);
+          vs.innerText=nv;return nv;
+        }catch(e){vs.innerText="ACL-FINE-TEMP-0001";}
+      }
+
+      // ─── FIXED: Save Advance — atomically claim counter then save ─────────────
+      async function directSaveToSheet(){
+        const id=document.getElementById("selected-emp-id").value;
+        const av=document.getElementById("advance-amount").value;
+        const rd=document.getElementById("record-date").value;
+        if(!id)return showAlert("Please select an employee first.");
+        if(!rd)return showAlert("Please select a date.");
+        if(!av||parseFloat(av)<=0)return showAlert("Please enter a valid amount.");
+        const amt=parseFloat(av);
+        document.getElementById("loader-text").innerText="Saving to Cloud RTB...";
+        document.getElementById("loader").classList.remove("hidden");
+        const dp=rd.split("-"),yr=dp[2],mo=dp[1].padStart(2,"0"),ymk=`${yr}${mo}`;
+        const mn=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"],moName=mn[parseInt(mo,10)-1]||"TEMP",my=`${moName}_${yr}`;
+
+        // Atomically claim the next voucher number
+        const counterKey=currentMode==="advance"?"ADVANCE":"ADJUSTMENT";
+        const prefix=currentMode==="advance"?"ACL-ADV":"ACL-ADJ";
+        const counterRef=rtb.ref(`COUNTERS/${counterKey}/${yr}${mo}`);
+        let seq;
+        try{
+          const res=await counterRef.transaction(cur=>(cur||0)+1);
+          seq=res.snapshot.val();
+        }catch(e){document.getElementById("loader").classList.add("hidden");showAlert("Voucher generation failed! Check connection.");return;}
+        const nv=`${prefix}-${ymk}-${String(seq).padStart(4,"0")}`;
+
+        const li=employeeBalances[id]||{totalAdvance:0,totalAdjusted:0,pending:0};
+        const pp=li.pending,cp=currentMode==="advance"?pp+amt:pp-amt;
+        const entry={advanceNo:nv,tsDate:new Date().toLocaleDateString("en-GB"),tsTime:new Date().toLocaleTimeString("en-GB"),recordDate:rd,id:id,name:document.getElementById("display-name").value,desig:document.getElementById("display-desig").value,passport:document.getElementById("auto-passport").value,amount:amt,amountWords:numberToWords(amt),reference:document.getElementById("reference").value||"",remark:document.getElementById("remark").value||"",entryType:currentMode,prevPending:pp,newPending:cp,newPendingWords:numberToWords(cp)};
+        lastSavedEntries=[entry];
+        const rn=currentMode==="advance"?"ADVANCE":"ADJUSTMENT";
+        const updates={};
+        updates[`${rn}/${my}/${rd}/${id}_${nv}`]=entry;
+        updates[`ADVANCE_ADJUSTMENT_TRANSACTIONS/${my}/${rd}/${id}_${nv}`]=entry;
+        if(currentMode==="advance"){updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/totalAdvance`]=Number(globalSummary.totalAdvance||0)+amt;updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/pending`]=Number(globalSummary.pending||0)+amt;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/totalAdvance`]=Number(li.totalAdvance||0)+amt;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/pending`]=Number(li.pending||0)+amt;}
+        else{updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/totalAdjusted`]=Number(globalSummary.totalAdjusted||0)+amt;updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/pending`]=Number(globalSummary.pending||0)-amt;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/totalAdjusted`]=Number(li.totalAdjusted||0)+amt;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/pending`]=Number(li.pending||0)-amt;}
+        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/name`]=entry.name;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/desig`]=entry.desig;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/passport`]=entry.passport;updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/lastDate`]=rd;
+        try{await rtb.ref().update(updates);await syncPreCalculatedAggregates();document.getElementById("success-title").innerText=currentMode==="advance"?"Advance Saved!":"Adjustment Saved!";document.getElementById("success-subtitle").innerText=`${currentMode==="advance"?"Advance":"Adjustment"} saved successfully as ${nv}`;document.getElementById("loader").classList.add("hidden");document.getElementById("success-modal").classList.remove("hidden");}
+        catch(e){
+          // Rollback counter if save failed
+          await counterRef.transaction(cur=>(cur||1)-1);
+          document.getElementById("loader").classList.add("hidden");showAlert("Sync failed! Check Firebase Connection.");
+        }
+      }
+
+      // ─── FIXED: Save Fine — atomically claim counter then save ────────────────
+      async function saveFineEntry(){
+        const id=document.getElementById("fine-selected-emp-id").value;
+        const av=document.getElementById("fine-amount").value;
+        const rd=document.getElementById("fine-record-date").value;
+        const re=document.getElementById("fine-reason").value;
+        if(!id)return showAlert("Please select an employee first.");
+        if(!rd)return showAlert("Please select a fine date.");
+        if(!av||parseFloat(av)<=0)return showAlert("Please enter a valid fine amount.");
+        if(!re.trim())return showAlert("Please enter a fine reason.");
+        const amt=parseFloat(av);
+        document.getElementById("loader-text").innerText="Saving Fine to Cloud RTB...";
+        document.getElementById("loader").classList.remove("hidden");
+        const dp=rd.split("-"),yr=dp[2],mo=dp[1].padStart(2,"0"),ymk=`${yr}${mo}`;
+        const mn=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"],moName=mn[parseInt(mo,10)-1]||"TEMP",my=`${moName}_${yr}`;
+
+        // Atomically claim fine counter
+        const counterRef=rtb.ref(`COUNTERS/FINE/${yr}${mo}`);
+        let seq;
+        try{
+          const res=await counterRef.transaction(cur=>(cur||0)+1);
+          seq=res.snapshot.val();
+        }catch(e){document.getElementById("loader").classList.add("hidden");showAlert("Fine voucher generation failed! Check connection.");return;}
+        const fn=`ACL-FINE-${ymk}-${String(seq).padStart(4,"0")}`;
+
+        const fi=fineEmployeeBalances[id]||{totalFine:0,pending:0};
+        const pp=fi.pending,np=pp+amt;
+        const entry={fineNo:fn,tsDate:new Date().toLocaleDateString("en-GB"),tsTime:new Date().toLocaleTimeString("en-GB"),recordDate:rd,id:id,name:document.getElementById("fine-display-name").value,desig:document.getElementById("fine-display-desig").value,passport:document.getElementById("fine-auto-passport").value,amount:amt,amountWords:numberToWords(amt),reason:re,remark:document.getElementById("fine-remark").value||"",entryType:"fine",prevPending:pp,newPending:np,newPendingWords:numberToWords(np)};
+        lastSavedFineEntry=entry;
+        const updates={};
+        updates[`FINE/${my}/${rd}/${id}_${fn}`]=entry;
+        updates[`FINE_TRANSACTIONS/${my}/${rd}/${id}_${fn}`]=entry;
+        updates[`FINE_SUMMARY/GLOBAL/totalFine`]=Number(fineGlobalSummary.totalFine||0)+amt;
+        updates[`FINE_SUMMARY/GLOBAL/pending`]=Number(fineGlobalSummary.pending||0)+amt;
+        updates[`FINE_SUMMARY/USERS/${id}/totalFine`]=Number(fi.totalFine||0)+amt;
+        updates[`FINE_SUMMARY/USERS/${id}/pending`]=Number(fi.pending||0)+amt;
+        updates[`FINE_SUMMARY/USERS/${id}/name`]=entry.name;updates[`FINE_SUMMARY/USERS/${id}/desig`]=entry.desig;updates[`FINE_SUMMARY/USERS/${id}/passport`]=entry.passport;updates[`FINE_SUMMARY/USERS/${id}/lastDate`]=rd;
+        try{await rtb.ref().update(updates);await syncFineAggregates();document.getElementById("fine-success-subtitle").innerText=`Fine saved successfully as ${fn}`;document.getElementById("loader").classList.add("hidden");document.getElementById("fine-success-modal").classList.remove("hidden");}
+        catch(e){
+          // Rollback counter if save failed
+          await counterRef.transaction(cur=>(cur||1)-1);
+          document.getElementById("loader").classList.add("hidden");showAlert("Fine sync failed! Check Firebase Connection.");
+        }
+      }
+
+      async function fetchEmployeeBalance(){
+        const id=document.getElementById("selected-emp-id").value;
+        const sc=document.getElementById("balance-summary-card");
+        if(!id){sc.classList.add("hidden");return;}
+        try{
+          const ai=employeeBalances[id]||{totalAdvance:0,totalAdjusted:0,pending:0};
+          const fi=fineEmployeeBalances[id]||{totalFine:0,pending:0};
+          document.getElementById("summary-lifetime-advance").innerText=(ai.totalAdvance||0).toLocaleString()+" /-";
+          document.getElementById("summary-lifetime-adjusted").innerText=(ai.totalAdjusted||0).toLocaleString()+" /-";
+          const pe=document.getElementById("summary-pending-balance");
+          if(ai.pending>0){pe.className="text-xl font-black text-[#d4af37]";pe.innerText=(ai.pending||0).toLocaleString()+" /-";}
+          else if(ai.pending<0){pe.className="text-xl font-black text-green-400";pe.innerText=Math.abs(ai.pending).toLocaleString()+" /- (Paid Extra)";}
+          else{pe.className="text-xl font-black text-slate-300";pe.innerText="0 /-";}
+          document.getElementById("summary-fine-pending").innerText=(fi.pending||0).toLocaleString()+" /-";
+          sc.classList.remove("hidden");
+        }catch(e){}
+      }
+
+      async function fetchFineEmployeeBalance(){
+        const id=document.getElementById("fine-selected-emp-id").value;
+        const fc=document.getElementById("fine-balance-card");
+        if(!id){fc.classList.add("hidden");return;}
+        try{
+          const ai=employeeBalances[id]||{pending:0};
+          const fi=fineEmployeeBalances[id]||{totalFine:0,pending:0};
+          document.getElementById("fine-view-adv-pending").innerText=(ai.pending||0).toLocaleString()+" /-";
+          document.getElementById("fine-summary-total").innerText=(fi.totalFine||0).toLocaleString()+" /-";
+          document.getElementById("fine-summary-pending").innerText=(fi.pending||0).toLocaleString()+" /-";
+          fc.classList.remove("hidden");
+        }catch(e){}
+      }
+
+      async function fetchEmployees(){
+        try{
+          const snap=await firestore.collection("EMPLOYEE_LIST").get();
+          employees=[];
+          snap.forEach(doc=>{const e=doc.data();employees.push({id:e.id||doc.id,name:e.name||e["employee name"]||"",passport:e.passport||e["passport no"]||"",designation:e.designation||e.workingAs||e.desig||""});});
+        }catch(e){showAlert("Critical: Could not load employee list from Firestore.");}
+      }
+
+      function setupSearch(){
+        const inp=document.getElementById("emp-search"),res=document.getElementById("search-results");
+        inp.addEventListener("focus",()=>showFilteredResults(inp.value));
+        inp.addEventListener("input",e=>showFilteredResults(e.target.value));
+        document.addEventListener("click",e=>{if(!inp.contains(e.target)&&!res.contains(e.target))res.style.display="none";});
+      }
+
+      function showFilteredResults(val){
+        const res=document.getElementById("search-results");
+        const lv=val.trim().toLowerCase();
+        const filtered=employees.filter(e=>(e.name||"").toLowerCase().includes(lv)||(e.id||"").toLowerCase().includes(lv)).slice(0,20);
+        if(filtered.length>0){
+          res.innerHTML=filtered.map(emp=>{
+            const bi=employeeBalances[emp.id]||{pending:0};
+            const fi=fineEmployeeBalances[emp.id]||{pending:0};
+            const ab=bi.pending>0?`<span class="pending-text-badge font-black text-[10px] text-[#d4af37] border border-[#d4af37]/30 px-2 py-0.5 rounded flex-shrink-0">Adv:${bi.pending.toLocaleString()}/-</span>`:`<span class="pending-text-badge font-bold text-[10px] text-slate-400 border border-slate-500/30 px-2 py-0.5 rounded flex-shrink-0">Adv:Clear</span>`;
+            const fb=fi.pending>0?`<span class="pending-text-badge font-black text-[10px] text-red-400 border border-red-500/30 px-2 py-0.5 rounded flex-shrink-0">Fine:${fi.pending.toLocaleString()}/-</span>`:`<span class="pending-text-badge font-bold text-[10px] text-slate-400 border border-slate-500/30 px-2 py-0.5 rounded flex-shrink-0">Fine:Clear</span>`;
+            return `<div class="search-item" onclick="selectEmployee('${emp.id}')"><div class="flex items-center w-full justify-start whitespace-nowrap overflow-visible"><span class="id-badge">${emp.id}</span><span class="font-black text-xs uppercase tracking-wide" style="white-space:nowrap;">${emp.name||"Unknown"}</span></div><div class="mt-2 w-full flex justify-between items-center border-t border-white/5 pt-2"><span class="text-[9px] font-black opacity-60 uppercase truncate mr-2">${emp.designation||"---"}</span><div class="flex gap-1">${ab}${fb}</div></div></div>`;
+          }).join("");
+          res.style.display="block";
+        }else{res.style.display="none";}
+      }
+
+      function selectEmployee(id){
+        const emp=employees.find(e=>e.id==id);
+        if(emp){
+          document.getElementById("emp-search").value=id;
+          document.getElementById("selected-emp-id").value=id;
+          document.getElementById("display-name").value=(emp.name||"No Name").toString().toUpperCase();
+          document.getElementById("auto-passport").value=(emp.passport||"---").toString();
+          document.getElementById("display-desig").value=(emp.designation||"---").toString().toUpperCase();
+          document.getElementById("search-results").style.display="none";
+          fetchEmployeeBalance();
+          document.getElementById("advance-amount").focus();
+        }
+      }
+
+      function setupFineSearch(){
+        const inp=document.getElementById("fine-emp-search"),res=document.getElementById("fine-search-results");
+        inp.addEventListener("focus",()=>showFineFilteredResults(inp.value));
+        inp.addEventListener("input",e=>showFineFilteredResults(e.target.value));
+        document.addEventListener("click",e=>{if(!inp.contains(e.target)&&!res.contains(e.target))res.style.display="none";});
+      }
+
+      function showFineFilteredResults(val){
+        const res=document.getElementById("fine-search-results");
+        const lv=val.trim().toLowerCase();
+        const filtered=employees.filter(e=>(e.name||"").toLowerCase().includes(lv)||(e.id||"").toLowerCase().includes(lv)).slice(0,20);
+        if(filtered.length>0){
+          res.innerHTML=filtered.map(emp=>{
+            const ai=employeeBalances[emp.id]||{pending:0};
+            const fi=fineEmployeeBalances[emp.id]||{pending:0};
+            const ab=ai.pending>0?`<span class="pending-text-badge font-black text-[10px] text-[#d4af37] border border-[#d4af37]/30 px-2 py-0.5 rounded flex-shrink-0">Adv:${ai.pending.toLocaleString()}/-</span>`:"";
+            const fb=fi.pending>0?`<span class="pending-text-badge font-black text-[10px] text-red-400 border border-red-500/30 px-2 py-0.5 rounded flex-shrink-0">Fine:${fi.pending.toLocaleString()}/-</span>`:`<span class="pending-text-badge font-bold text-[10px] text-slate-400 border border-slate-500/30 px-2 py-0.5 rounded flex-shrink-0">Fine:Clear</span>`;
+            return `<div class="search-item" onclick="selectFineEmployee('${emp.id}')"><div class="flex items-center w-full justify-start whitespace-nowrap overflow-visible"><span class="id-badge">${emp.id}</span><span class="font-black text-xs uppercase tracking-wide" style="white-space:nowrap;">${emp.name||"Unknown"}</span></div><div class="mt-2 w-full flex justify-between items-center border-t border-white/5 pt-2"><span class="text-[9px] font-black opacity-60 uppercase truncate mr-2">${emp.designation||"---"}</span><div class="flex gap-1">${ab}${fb}</div></div></div>`;
+          }).join("");
+          res.style.display="block";
+        }else{res.style.display="none";}
+      }
+
+      function selectFineEmployee(id){
+        const emp=employees.find(e=>e.id==id);
+        if(emp){
+          document.getElementById("fine-emp-search").value=id;
+          document.getElementById("fine-selected-emp-id").value=id;
+          document.getElementById("fine-display-name").value=(emp.name||"No Name").toString().toUpperCase();
+          document.getElementById("fine-auto-passport").value=(emp.passport||"---").toString();
+          document.getElementById("fine-display-desig").value=(emp.designation||"---").toString().toUpperCase();
+          document.getElementById("fine-search-results").style.display="none";
+          fetchFineEmployeeBalance();
+          document.getElementById("fine-amount").focus();
+        }
+      }
+
+      function updateAmountInWords(v){const d=document.getElementById("amount-in-words");if(!v||isNaN(v)||parseFloat(v)===0){d.innerText="";return;}d.innerText="In Word: "+numberToWords(parseFloat(v));}
+      function updateFineAmountInWords(v){const d=document.getElementById("fine-amount-in-words");if(!v||isNaN(v)||parseFloat(v)===0){d.innerText="";return;}d.innerText="In Word: "+numberToWords(parseFloat(v));}
+
+      function renderPendingTable(){
+        const rc=document.getElementById("pending-table-rows");
+        const ft=document.getElementById("pending-type-filter").value;
+        let rows=[];
+        if(ft==="ALL"||ft==="ADVANCE"){
+          employees.forEach(emp=>{
+            const b=employeeBalances[emp.id]||{pending:0,lastDate:"N/A"};
+            if(b.pending>0)rows.push({...emp,pending:b.pending,lastDate:b.lastDate||"N/A",type:"advance"});
+          });
+        }
+        if(ft==="ALL"||ft==="FINE"){
+          employees.forEach(emp=>{
+            const b=fineEmployeeBalances[emp.id]||{pending:0,lastDate:"N/A"};
+            if(b.pending>0)rows.push({...emp,pending:b.pending,lastDate:b.lastDate||"N/A",type:"fine"});
+          });
+        }
+        rows.sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+        if(rows.length===0){
+          rc.innerHTML=`<tr><td colspan="7" class="py-10 text-center text-slate-400 uppercase font-bold tracking-wider"><i class="fas fa-check-double text-[#d4af37] text-lg mr-2"></i> All Clear! No outstanding pendings found.</td></tr>`;
+          updatePendingTotals([]);return;
+        }
+        rc.innerHTML=rows.map(item=>{
+          const isA=item.type==="advance";
+          const tb=isA?`<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-900/40 text-blue-300 border border-blue-800/50">Advance</span>`:`<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-red-900/40 text-red-400 border border-red-800/50">Fine</span>`;
+          const ac=isA?"text-[#d4af37]":"text-red-400";
+          return `<tr class="pending-row hover:bg-[#1c3352]/40 transition-all border-b border-slate-800 text-slate-300" data-pending="${item.pending}" data-type="${item.type}" data-id="${(item.id||"").toLowerCase()}" data-name="${(item.name||"").toLowerCase()}">
+            <td class="py-3.5 px-4 font-mono font-bold ${ac}">${item.id}</td>
+            <td class="py-3.5 px-4 uppercase font-bold text-white">${item.name}</td>
+            <td class="py-3.5 px-4 uppercase opacity-85">${item.designation||"---"}</td>
+            <td class="py-3.5 px-4 font-mono opacity-80">${item.passport||"---"}</td>
+            <td class="py-3.5 px-4 font-mono opacity-80">${item.lastDate}</td>
+            <td class="py-3.5 px-4 text-center">${tb}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black ${ac}">${item.pending.toLocaleString()} /-</td>
+          </tr>`;
+        }).join("");
+        updatePendingTotals(rows);
+      }
+
+      function updatePendingTotals(rows){
+        let at=0,ft=0;
+        rows.forEach(r=>{if(r.type==="advance")at+=r.pending;else ft+=r.pending;});
+        document.getElementById("adv-grand-total-badge").innerText=at.toLocaleString()+" /-";
+        document.getElementById("fine-grand-total-badge").innerText=ft.toLocaleString()+" /-";
+        document.getElementById("combined-grand-total-badge").innerText=(at+ft).toLocaleString()+" /-";
+      }
+
+      function filterPendingTable(q){
+        const v=q.trim().toLowerCase();let at=0,ft=0;
+        document.querySelectorAll(".pending-row").forEach(row=>{
+          const visible=v===""||row.getAttribute("data-id").includes(v)||row.getAttribute("data-name").includes(v);
+          row.style.display=visible?"":"none";
+          if(visible){const t=row.getAttribute("data-type"),p=parseFloat(row.getAttribute("data-pending")||0);if(t==="advance")at+=p;else ft+=p;}
+        });
+        document.getElementById("adv-grand-total-badge").innerText=at.toLocaleString()+" /-";
+        document.getElementById("fine-grand-total-badge").innerText=ft.toLocaleString()+" /-";
+        document.getElementById("combined-grand-total-badge").innerText=(at+ft).toLocaleString()+" /-";
+      }
+
+      function renderHistoryTable(){
+        const rc=document.getElementById("history-table-rows");
+        const merged=window._mergedHistory||[];
+        if(merged.length===0){rc.innerHTML=`<tr><td colspan="8" class="py-10 text-center text-slate-400 uppercase font-bold tracking-widest"><i class="fas fa-history mr-2"></i> No transaction history found.</td></tr>`;return;}
+        rc.innerHTML=merged.map(item=>{
+          const type=item._typeRaw||item.entryType||"advance";
+          let tb,vn,rr,ac;
+          if(type==="advance"){tb=`<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-blue-900/40 text-blue-400 border border-blue-800/50">Advance</span>`;vn=item.advanceNo||item._voucherKey;rr=item.reference||"---";ac="text-blue-300";}
+          else if(type==="adjustment"){tb=`<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-emerald-900/40 text-emerald-400 border border-emerald-800/50">Adjusted</span>`;vn=item.advanceNo||item._voucherKey;rr=item.reference||"---";ac="text-emerald-400";}
+          else{tb=`<span class="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-red-900/40 text-red-400 border border-red-800/50">Fine</span>`;vn=item.fineNo||item._voucherKey;rr=item.reason||"---";ac="text-red-400";}
+          return `<tr class="history-row hover:bg-[#1c3352]/40 transition-all border-b border-slate-800 text-slate-300" data-type="${type}" data-id="${(item.id||"").toLowerCase()}" data-name="${(item.name||"").toLowerCase()}" data-voucher="${(vn||"").toLowerCase()}">
+            <td class="py-3.5 px-4 font-mono font-bold text-[#d4af37] text-xs">${vn}</td>
+            <td class="py-3.5 px-4 font-mono opacity-80">${item.recordDate}</td>
+            <td class="py-3.5 px-4 font-mono font-bold text-slate-400">${item.id}</td>
+            <td class="py-3.5 px-4 uppercase font-bold text-white">${item.name}</td>
+            <td class="py-3.5 px-4 text-center">${tb}</td>
+            <td class="py-3.5 px-4 text-slate-400 max-w-[120px] truncate" title="${rr}">${rr}</td>
+            <td class="py-3.5 px-4 text-right font-mono font-black ${ac}">${parseFloat(item.amount||0).toLocaleString()} /-</td>
+            <td class="py-3.5 px-4 text-center"><button type="button" onclick="reprintHistoryItem('${vn}','${type}')" class="bg-[#1e3a5f] hover:bg-slate-700 text-[#d4af37] border border-[#d4af37]/30 p-2 rounded-lg border transition-all"><i class="fas fa-print text-xs"></i></button></td>
+          </tr>`;
+        }).join("");
+      }
+
+      function reprintHistoryItem(vn,type){
+        if(type==="fine"){const f=allFineTransactionsList.find(i=>i.fineNo===vn);if(f){lastSavedFineEntry=f;printFineReceipt();}else showAlert("Fine record not found.");}
+        else{const f=allTransactionsList.find(i=>i.advanceNo===vn);if(f){lastSavedEntries=[f];prepareAndPrint();}else showAlert("Advance/Adjustment record not found.");}
+      }
+
+      function filterHistoryTypeAndSearch(){
+        const st=document.getElementById("history-type-filter").value.toLowerCase();
+        const sq=document.getElementById("history-table-search").value.trim().toLowerCase();
+        document.querySelectorAll(".history-row").forEach(row=>{
+          const mt=st==="all"||(row.getAttribute("data-type")||"")=== st;
+          const ms=sq===""||row.getAttribute("data-voucher").includes(sq)||row.getAttribute("data-id").includes(sq)||row.getAttribute("data-name").includes(sq);
+          row.style.display=(mt&&ms)?"":"none";
+        });
+      }
+
+      function resetEntry(){
+        document.getElementById("advance-form").reset();
+        document.getElementById("selected-emp-id").value="";document.getElementById("display-name").value="";document.getElementById("auto-passport").value="";document.getElementById("display-desig").value="";
+        document.getElementById("success-modal").classList.add("hidden");document.getElementById("balance-summary-card").classList.add("hidden");
+        const di=document.getElementById("record-date");if(di._flatpickr)di._flatpickr.clear();
+        document.getElementById("next-adv-no").innerText="Select Date";document.getElementById("amount-in-words").innerText="";
+        refreshSystemData(true);
+      }
+
+      function resetFineEntry(){
+        document.getElementById("fine-form").reset();
+        document.getElementById("fine-selected-emp-id").value="";document.getElementById("fine-display-name").value="";document.getElementById("fine-auto-passport").value="";document.getElementById("fine-display-desig").value="";
+        document.getElementById("fine-success-modal").classList.add("hidden");document.getElementById("fine-balance-card").classList.add("hidden");
+        const di=document.getElementById("fine-record-date");if(di._flatpickr)di._flatpickr.clear();
+        document.getElementById("next-fine-no").innerText="Select Date";document.getElementById("fine-amount-in-words").innerText="";
+        refreshSystemData(true);
+      }
+
+      async function recalculateAndSyncAllLedger(){
+        if(!confirm("Recalculate and sync all advance/adjustment summaries from historical logs?"))return;
+        document.getElementById("loader-text").innerText="Rebuilding Advance Summary Data...";document.getElementById("loader").classList.remove("hidden");
+        try{
+          const snap=await rtb.ref("ADVANCE_ADJUSTMENT_TRANSACTIONS").once("value");
+          if(!snap.exists()){document.getElementById("loader").classList.add("hidden");showAlert("No historical transactions found.");return;}
+          const sd={};let ga=0,gj=0;
+          snap.forEach(ms=>{ms.forEach(ds=>{ds.forEach(ts=>{const tx=ts.val(),ei=tx.id;if(!ei)return;const am=parseFloat(tx.amount||0),ty=tx.entryType;if(!sd[ei])sd[ei]={name:tx.name||"Unknown",desig:tx.desig||"---",passport:tx.passport||"---",lastDate:tx.recordDate||"---",totalAdvance:0,totalAdjusted:0,pending:0};if(ty==="advance"){sd[ei].totalAdvance+=am;sd[ei].pending+=am;ga+=am;}else if(ty==="adjustment"){sd[ei].totalAdjusted+=am;sd[ei].pending-=am;gj+=am;}if(parseDateString(tx.recordDate)>parseDateString(sd[ei].lastDate))sd[ei].lastDate=tx.recordDate;});});});
+          const u={};u["ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL"]={totalAdvance:ga,totalAdjusted:gj,pending:ga-gj};u["ADVANCE_ADJUSTMENT_SUMMARY/USERS"]=sd;
+          await rtb.ref().update(u);await refreshSystemData(true);document.getElementById("loader").classList.add("hidden");alert("All advance/adjustment summaries rebuilt successfully!");
+        }catch(e){document.getElementById("loader").classList.add("hidden");showAlert("Sync failed! Check internet connection.");}
+      }
+
+      async function recalculateAndSyncFineLedger(){
+        if(!confirm("Recalculate and sync all fine summaries from historical logs?"))return;
+        document.getElementById("loader-text").innerText="Rebuilding Fine Summary Data...";document.getElementById("loader").classList.remove("hidden");
+        try{
+          const snap=await rtb.ref("FINE_TRANSACTIONS").once("value");
+          if(!snap.exists()){document.getElementById("loader").classList.add("hidden");showAlert("No fine transactions found.");return;}
+          const sd={};let gt=0;
+          snap.forEach(ms=>{ms.forEach(ds=>{ds.forEach(ts=>{const tx=ts.val(),ei=tx.id;if(!ei)return;const am=parseFloat(tx.amount||0);if(!sd[ei])sd[ei]={name:tx.name||"Unknown",desig:tx.desig||"---",passport:tx.passport||"---",lastDate:tx.recordDate||"---",totalFine:0,pending:0};sd[ei].totalFine+=am;sd[ei].pending+=am;gt+=am;if(parseDateString(tx.recordDate)>parseDateString(sd[ei].lastDate))sd[ei].lastDate=tx.recordDate;});});});
+          const u={};u["FINE_SUMMARY/GLOBAL"]={totalFine:gt,pending:gt};u["FINE_SUMMARY/USERS"]=sd;
+          await rtb.ref().update(u);await refreshSystemData(true);document.getElementById("loader").classList.add("hidden");alert("All fine summaries rebuilt successfully!");
+        }catch(e){document.getElementById("loader").classList.add("hidden");showAlert("Fine sync failed! Check internet connection.");}
+      }
+
+      function numberToWords(num){
+        const neg=num<0,abs=Math.abs(num);
+        const a=["","One ","Two ","Three ","Four ","Five ","Six ","Seven ","Eight ","Nine ","Ten ","Eleven ","Twelve ","Thirteen ","Fourteen ","Fifteen ","Sixteen ","Seventeen ","Eighteen ","Nineteen "];
+        const b=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+        if(abs>999999999)return "Amount too large";
+        let n=("000000000"+abs.toString()).substr(-9).match(/^(\d{2})(\d{2})(\d{2})(\d{1})(\d{2})$/);
+        if(!n)return "";let s="";
+        s+=Number(n[1])!=0?(a[Number(n[1])]||b[n[1][0]]+" "+a[n[1][1]])+"Crore ":"";
+        s+=Number(n[2])!=0?(a[Number(n[2])]||b[n[2][0]]+" "+a[n[2][1]])+"Lakh ":"";
+        s+=Number(n[3])!=0?(a[Number(n[3])]||b[n[3][0]]+" "+a[n[3][1]])+"Thousand ":"";
+        s+=Number(n[4])!=0?(a[Number(n[4])]||b[n[4][0]]+" "+a[n[4][1]])+"Hundred ":"";
+        s+=Number(n[5])!=0?(s!=""?"and ":"")+(a[Number(n[5])]||b[n[5][0]]+" "+a[n[5][1]]):"";
+        const fs=s?s+"MUR Only":"Zero MUR Only";
+        return neg?"Minus "+fs:fs;
+      }
+
+      function getReceiptHTML(item,ct){
+        const ia=item.entryType==="adjustment";
+        const gc="#d4af37",nc="#1e3a5f";
+        const pv=Number(item.prevPending||0),cv=Number(item.newPending||0),tv=Number(item.amount||0);
+        const cw=item.newPendingWords||numberToWords(cv);
+        return `<div class="receipt-slip" style="border:3px solid ${nc} !important;">
+          <div style="position:absolute;top:15px;right:15px;font-size:10px;font-weight:bold;text-transform:uppercase;border:2px solid ${gc};padding:2px 8px;border-radius:4px;background:${nc} !important;color:${gc} !important;">${ct} Copy</div>
+          <div style="display:flex;align-items:center;justify-content:center;border-bottom:3.5px solid ${nc};padding-bottom:12px;margin-bottom:15px;gap:10px;">
+            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="height:35px;">
+            <div><h2 style="margin:0;font-size:22px;font-weight:900;color:${nc} !important;">ALAMHOW <span style="color:${gc} !important;">CO LTD</span></h2><p style="margin:0;font-size:9px;text-transform:uppercase;font-weight:800;color:#333 !important;">${ia?"Advance Adjustment Receipt":"Advance Money Receipt"}</p></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:15px;font-weight:900;color:${nc} !important;"><span>ADVANCE NO: ${item.advanceNo}</span><span>DATE: ${item.recordDate}</span></div>
+          <div style="font-size:13px;line-height:2.2;">
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">ID</span>: <strong style="color:#000 !important;">${item.id}</strong></div>
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">NAME</span>: <strong style="color:#000 !important;">${item.name}</strong></div>
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">DESIG</span>: <span style="color:#000 !important;">${item.desig}</span></div>
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">PASSPORT</span>: <span style="color:#000 !important;">${item.passport}</span></div>
+            <div style="margin-top:15px;background:${nc} !important;color:#fff !important;padding:10px;border:3px solid ${gc} !important;text-align:center;border-radius:8px;-webkit-print-color-adjust:exact;"><span style="font-size:15px;font-weight:900;color:#fff !important;">${ia?"ADJUSTED AMT":"ADVANCE RECEIVED AMOUNT"}: ${tv.toLocaleString()} /-</span></div>
+            <div style="font-size:11px;font-weight:bold;text-transform:uppercase;color:#444;margin:4px 0;font-style:italic;border-left:3px solid ${gc} !important;padding-left:8px;">In Words: ${item.amountWords}</div>
+          </div>
+          <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:2px solid ${nc};border-radius:8px;font-size:12px;font-family:monospace;-webkit-print-color-adjust:exact;">
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;margin-bottom:4px;"><span style="font-weight:bold;color:#475569;">Prev Advance pending:</span><span style="font-weight:900;color:${nc};">${pv.toLocaleString()} /-</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;margin-bottom:4px;"><span style="font-weight:bold;color:#475569;">${ia?"Adjusted Now":"Advance Received"}:</span><span style="font-weight:900;color:${ia?"#16a34a":"#2563eb"};">${tv.toLocaleString()} /-</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:900;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;margin-bottom:4px;"><span style="color:${nc};">Net Pending:</span><span style="color:${gc};">${cv.toLocaleString()} /-</span></div>
+            <div style="font-size:9.5px;font-weight:bold;color:#555;text-transform:uppercase;font-style:italic;">(In Words: ${cw})</div>
+          </div>
+          <div style="flex-grow:1;margin-top:10px;">
+            <div style="font-size:9px;font-weight:900;color:${nc} !important;">REFERENCE: ${item.reference||"No Reference Entry"}</div>
+            <div style="font-size:9px;font-weight:900;margin-top:3px;color:${nc} !important;">REMARKS: ${item.remark||"No Remarks Entry"}</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:auto;padding-bottom:20px;">
+            <div style="text-align:center;width:100px;"><div style="border-top:1.5px solid ${nc} !important;"></div><span style="font-size:9px;font-weight:900;color:${nc} !important;">RECEIVER</span></div>
+            <div style="text-align:center;width:100px;"><div style="border-top:1.5px solid ${nc} !important;"></div><span style="font-size:9px;font-weight:900;color:${nc} !important;">ACCOUNTS</span></div>
+            <div style="text-align:center;width:100px;"><div style="border-top:1.5px solid ${nc} !important;"></div><span style="font-size:9px;font-weight:900;color:${nc} !important;">AUTHORIZED</span></div>
+          </div>
+          <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:8px;color:#888 !important;">OFFICIAL SYSTEM RECORD • ${item.tsDate} | ${item.tsTime}</div>
+        </div>`;
+      }
+
+      function getFineReceiptHTML(item,ct){
+        const nc="#1e3a5f",gc="#d4af37";
+        const pv=Number(item.prevPending||0),cv=Number(item.newPending||0),tv=Number(item.amount||0);
+        const cw=item.newPendingWords||numberToWords(cv);
+        return `<div class="receipt-slip" style="border:3px solid ${nc} !important;">
+          <div style="position:absolute;top:15px;right:15px;font-size:10px;font-weight:bold;text-transform:uppercase;border:2px solid ${gc};padding:2px 8px;border-radius:4px;background:${nc} !important;color:${gc} !important;">${ct} Copy</div>
+          <div style="display:flex;align-items:center;justify-content:center;border-bottom:3.5px solid ${nc};padding-bottom:12px;margin-bottom:15px;gap:10px;">
+            <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="height:35px;">
+            <div><h2 style="margin:0;font-size:22px;font-weight:900;color:${nc} !important;">ALAMHOW <span style="color:${gc} !important;">CO LTD</span></h2><p style="margin:0;font-size:9px;text-transform:uppercase;font-weight:800;color:#333 !important;">EMPLOYEE FINE RECEIPT</p></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:15px;font-weight:900;color:${nc} !important;"><span>FINE NO: ${item.fineNo}</span><span>DATE: ${item.recordDate}</span></div>
+          <div style="font-size:13px;line-height:2.2;">
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">ID</span>: <strong style="color:#000 !important;">${item.id}</strong></div>
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">NAME</span>: <strong style="color:#000 !important;">${item.name}</strong></div>
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">DESIG</span>: <span style="color:#000 !important;">${item.desig}</span></div>
+            <div style="display:flex;border-bottom:1px dashed #ccc;"><span style="width:100px;font-weight:800;color:${nc} !important;">PASSPORT</span>: <span style="color:#000 !important;">${item.passport}</span></div>
+            <div style="margin-top:15px;background:${nc} !important;color:#fff !important;padding:10px;border:3px solid ${gc} !important;text-align:center;border-radius:8px;-webkit-print-color-adjust:exact;"><span style="font-size:15px;font-weight:900;color:#fff !important;">FINE AMOUNT: ${tv.toLocaleString()} /-</span></div>
+            <div style="font-size:11px;font-weight:bold;text-transform:uppercase;color:#444;margin:4px 0;font-style:italic;border-left:3px solid ${gc} !important;padding-left:8px;">In Words: ${item.amountWords}</div>
+          </div>
+          <div style="margin-top:10px;padding:10px 12px;background:#f8fafc;border:2px solid ${nc};border-radius:8px;font-size:12px;font-family:monospace;-webkit-print-color-adjust:exact;">
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;margin-bottom:4px;"><span style="font-weight:bold;color:#475569;">Prev Fine Pending:</span><span style="font-weight:900;color:${nc};">${pv.toLocaleString()} /-</span></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;margin-bottom:4px;"><span style="font-weight:bold;color:#475569;">Fine Imposed:</span><span style="font-weight:900;color:#dc2626;">${tv.toLocaleString()} /-</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:900;border-bottom:1px dashed #cbd5e1;padding-bottom:4px;margin-bottom:4px;"><span style="color:${nc};">Net Fine Pending:</span><span style="color:${nc};">${cv.toLocaleString()} /-</span></div>
+            <div style="font-size:9.5px;font-weight:bold;color:#555;text-transform:uppercase;font-style:italic;">(In Words: ${cw})</div>
+          </div>
+          <div style="flex-grow:1;margin-top:10px;">
+            <div style="font-size:9px;font-weight:900;color:#dc2626 !important;">FINE REASON: ${item.reason||"---"}</div>
+            <div style="font-size:9px;font-weight:900;margin-top:3px;color:${nc} !important;">REMARKS: ${item.remark||"No Remarks Entry"}</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:auto;padding-bottom:20px;">
+            <div style="text-align:center;width:100px;"><div style="border-top:1.5px solid ${nc} !important;"></div><span style="font-size:9px;font-weight:900;color:${nc} !important;">RECEIVER</span></div>
+            <div style="text-align:center;width:100px;"><div style="border-top:1.5px solid ${nc} !important;"></div><span style="font-size:9px;font-weight:900;color:${nc} !important;">ACCOUNTS</span></div>
+            <div style="text-align:center;width:100px;"><div style="border-top:1.5px solid ${nc} !important;"></div><span style="font-size:9px;font-weight:900;color:${nc} !important;">AUTHORIZED</span></div>
+          </div>
+          <div style="position:absolute;bottom:10px;left:0;right:0;text-align:center;font-size:8px;color:#888 !important;">OFFICIAL SYSTEM RECORD • ${item.tsDate} | ${item.tsTime}</div>
+        </div>`;
+      }
+
+      function prepareAndPrint(){
+        const pa=document.getElementById("receipt-print-area");
+        let h="";
+        lastSavedEntries.forEach(item=>{h+=`<div class="dual-receipt-wrapper">${getReceiptHTML(item,"Office")}<div style="width:5%;height:680px;position:relative;"><div style="border-left:2px dotted #1e3a5f;height:100%;position:absolute;left:50%;"></div></div>${getReceiptHTML(item,"Employee")}</div>`;});
+        pa.innerHTML=h;pa.classList.remove("hidden");
+        setTimeout(()=>{window.print();pa.classList.add("hidden");},500);
+      }
+
+      function printFineReceipt(){
+        if(!lastSavedFineEntry)return;
+        const pa=document.getElementById("receipt-print-area"),item=lastSavedFineEntry;
+        pa.innerHTML=`<div class="dual-receipt-wrapper">${getFineReceiptHTML(item,"Office")}<div style="width:5%;height:680px;position:relative;"><div style="border-left:2px dotted #1e3a5f;height:100%;position:absolute;left:50%;"></div></div>${getFineReceiptHTML(item,"Employee")}</div>`;
+        pa.classList.remove("hidden");
+        setTimeout(()=>{window.print();pa.classList.add("hidden");},500);
+      }
+    </script>
+  </body>
+</html>
