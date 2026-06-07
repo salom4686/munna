@@ -76,6 +76,7 @@
         background: white; margin: 2% auto; padding: 30px;
         border-radius: 15px; width: 550px; position: relative;
         box-shadow: 0 10px 40px rgba(0,0,0,0.2); color: #333333;
+        max-height: 90vh; overflow-y: auto;
       }
       .close-modal { position: absolute; right: 25px; top: 20px; font-size: 28px; cursor: pointer; color: #999; }
       .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
@@ -105,23 +106,19 @@
       .pdf-mode-active .action-section, .pdf-mode-active .add-btn, .pdf-mode-active .search-box, .pdf-mode-active .logo-img { display: none !important; }
       .pdf-mode-active tr { page-break-inside: avoid !important; }
 
-      /* Flatpickr Custom Theme */
-      .flatpickr-calendar { background: #ffffff; border: 2px solid #ffd700 !important; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-      .flatpickr-months, .flatpickr-month { background: #002147 !important; color: #ffd700 !important; }
-      .flatpickr-current-month .flatpickr-monthDropdown-months { background: #002147 !important; color: #ffd700 !important; }
-      .flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color: #ffd700 !important; }
-      .flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color: #ffd700 !important; }
-      .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: #ffd700 !important; fill: #ffd700 !important; }
-      .flatpickr-weekdays { background: #002147 !important; }
-      span.flatpickr-weekday { background: #002147 !important; color: #ffd700 !important; font-weight: bold; }
-      .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected:hover, .flatpickr-day.selected:focus { background: #002147 !important; border-color: #ffd700 !important; color: #ffd700 !important; }
-      .flatpickr-day:hover { background: #ffd700 !important; color: #002147 !important; border-color: #002147 !important; }
-      .flatpickr-day.today { border-color: #002147 !important; color: #002147 !important; font-weight: bold; }
-      .flatpickr-day.today:hover { background: #002147 !important; color: #ffd700 !important; }
-      .flatpickr-day { color: #002147 !important; }
-      .flatpickr-day.prevMonthDay,
-      .flatpickr-day.nextMonthDay { color: transparent !important; pointer-events: none !important; background: transparent !important; border: none !important; }
-      .flatpickr-calendar.arrowTop:after, .flatpickr-calendar.arrowTop:before { border-bottom-color: #002147 !important; }
+      .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
+      .flatpickr-day { color: #cce !important; }
+      .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
+      .flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; border-color: var(--brand-gold) !important; }
+      .flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+      .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
+      .flatpickr-prev-month, .flatpickr-next-month { color: var(--brand-gold) !important; fill: var(--brand-gold) !important; }
+      .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: var(--brand-gold) !important; stroke: var(--brand-gold) !important; }
+      .flatpickr-prev-month:hover, .flatpickr-next-month:hover { background: rgba(255, 215, 0, 0.15) !important; }
+      .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; border: none !important; }
+      .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+      .flatpickr-day:nth-child(7n+1) { color: #ff4d4d !important; font-weight: 700 !important; }
+      .flatpickr-day.is-holiday { color: #ff4d4d !important; font-weight: 700 !important; }
     </style>
   </head>
   <body>
@@ -154,6 +151,8 @@
             <div class="form-group"><label class="required">POST / DESIGNATION</label><input type="text" id="regPost" required /></div>
             <div class="form-group"><label class="required">WORKING AS</label><input type="text" id="regWorkAs" required /></div>
             <div class="form-group"><label class="required">PASSPORT NO</label><input type="text" id="regPassport" required /></div>
+            <div class="form-group"><label class="required">WP NO</label><input type="text" id="regWP" /></div>
+            <div class="form-group"><label class="required">RP UID NO</label><input type="text" id="regRPUID" /></div>
             <div class="form-group"><label class="required">BASIC SALARY</label><input type="number" id="regSalary" required /></div>
             <div class="form-group"><label class="required">OT RATE (HOUR)</label><input type="number" id="regOT" step="0.01" required /></div>
             <button type="submit" class="submit-btn" id="saveBtn">SAVE</button>
@@ -176,7 +175,6 @@
       </div>
     </div>
 
-    <!-- ✅ নির্দিষ্ট version সহ Flatpickr (হ্যাং সমস্যা fix) -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -220,7 +218,7 @@
         document.getElementById("loader").style.display = "none";
         document.getElementById("table-display").style.display = "block";
 
-        const headers = ["SL","ID","Name","Period","Post","Join Date","Work As","Passport","Salary","OT","Action"];
+        const headers = ["SL","ID","Name","Period","Post","Join Date","Work As","Passport","WP NO","RP UID NO","Salary","OT","Action"];
         head.innerHTML = `<tr>${headers.map(h => `<th>${h.toUpperCase()}</th>`).join("")}</tr>`;
 
         body.innerHTML = dataRows.map(item => `
@@ -233,6 +231,8 @@
             <td>${item.row[5]}</td>
             <td>${item.row[6]}</td>
             <td>${item.row[7]}</td>
+            <td>${item.row[10]}</td>
+            <td>${item.row[11]}</td>
             <td>${item.row[8]}</td>
             <td>${item.row[9]}</td>
             <td>
@@ -249,7 +249,20 @@
             const d = doc.data();
             return {
               key: doc.id,
-              row: [index+1, d.id||"-", d.name||"-", "", d.designation||"-", d.joining||"-", d.workingAs||"-", d.passport||"-", d.salary||"0", d.otRate||"0"],
+              row: [
+                index+1,
+                d.id||"-",
+                d.name||"-",
+                "",
+                d.designation||"-",
+                d.joining||"-",
+                d.workingAs||"-",
+                d.passport||"-",
+                d.salary||"0",
+                d.otRate||"0",
+                d.wpNo||"-",
+                d.rpUidNo||"-"
+              ],
             };
           });
           rows.sort((a,b) => String(a.row[1]).localeCompare(String(b.row[1]), undefined, {numeric:true}));
@@ -283,15 +296,17 @@
 
         document.querySelector("#entryModal h3").innerText = "EDIT EMPLOYEE FORM";
         document.getElementById("saveBtn").innerText = "UPDATE RECORD";
-        document.getElementById("regSL").value    = item.row[0];
-        document.getElementById("regID").value    = item.row[1];
-        document.getElementById("regName").value  = item.row[2];
+        document.getElementById("regSL").value       = item.row[0];
+        document.getElementById("regID").value       = item.row[1];
+        document.getElementById("regName").value     = item.row[2];
         document.getElementById("regJoinDate").value = item.row[5];
-        document.getElementById("regPost").value  = item.row[4];
-        document.getElementById("regWorkAs").value = item.row[6];
+        document.getElementById("regPost").value     = item.row[4];
+        document.getElementById("regWorkAs").value   = item.row[6];
         document.getElementById("regPassport").value = item.row[7];
-        document.getElementById("regSalary").value = item.row[8];
-        document.getElementById("regOT").value    = item.row[9];
+        document.getElementById("regWP").value       = item.row[10] === "-" ? "" : item.row[10];
+        document.getElementById("regRPUID").value    = item.row[11] === "-" ? "" : item.row[11];
+        document.getElementById("regSalary").value   = item.row[8];
+        document.getElementById("regOT").value       = item.row[9];
         document.getElementById("entryModal").style.display = "block";
       }
 
@@ -307,6 +322,8 @@
           designation: document.getElementById("regPost").value,
           workingAs:   document.getElementById("regWorkAs").value,
           passport:    document.getElementById("regPassport").value,
+          wpNo:        document.getElementById("regWP").value,
+          rpUidNo:     document.getElementById("regRPUID").value,
           salary:      document.getElementById("regSalary").value,
           otRate:      document.getElementById("regOT").value,
         };
@@ -356,7 +373,8 @@
         const html = history.reverse().map(h => `
           <div style="border-bottom:1px solid #ddd; padding:8px; text-align:left; font-size:12px;">
             <b>Edited: ${h.editedAt}</b><br>
-            Name: ${h.name} | Salary: ${h.salary} | OT: ${h.otRate}
+            Name: ${h.name} | Salary: ${h.salary} | OT: ${h.otRate}<br>
+            Passport: ${h.passport||"-"} | WP No: ${h.wpNo||"-"} | RP UID: ${h.rpUidNo||"-"}
           </div>
         `).join("");
 
@@ -378,8 +396,12 @@
       });
 
       function downloadExcel() {
-        const headers = ["SL","ID","Name","Period","Post","Join Date","Work As","Passport","Salary","OT"];
-        const data = [headers, ...cachedRows.map(item => item.row)];
+        const headers = ["SL","ID","Name","Period","Post","Join Date","Work As","Passport","WP NO","RP UID NO","Salary","OT"];
+        const data = [headers, ...cachedRows.map(item => [
+          item.row[0], item.row[1], item.row[2], calculatePeriod(item.row[5]),
+          item.row[4], item.row[5], item.row[6], item.row[7],
+          item.row[10], item.row[11], item.row[8], item.row[9]
+        ])];
         const ws = XLSX.utils.aoa_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Employees");
