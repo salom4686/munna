@@ -14,100 +14,511 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css"
-    />
+    <!-- material_blue.css সরানো হয়েছে -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
-:root{--brand-blue:#002147;--brand-gold:#ffd700;}
-body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%,#001a38 100%);color:#ffffff;overflow-x:hidden;}
-#loadingOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,var(--brand-blue) 0%,#001a38 100%);color:#ffffff;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:9999;transition:all 0.6s cubic-bezier(0.4,0,0.2,1);}
-#loadingOverlay.processing-mode{background:rgba(255,255,255,0.4);backdrop-filter:blur(8px) saturate(150%);display:flex!important;}
-.screen-lock-blur{filter:blur(3px);pointer-events:none;user-select:none;transition:all 0.4s ease;}
-@keyframes slideIn{from{opacity:0;transform:translateY(-20px) scale(0.9);}to{opacity:1;transform:translateY(0) scale(1);}}
-@keyframes slideOut{from{opacity:1;transform:translateY(0) scale(1);}to{opacity:0;transform:translateY(-20px) scale(0.9);}}
-@keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-@keyframes rotation{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
-.alert-show{display:flex!important;animation:slideIn 0.4s ease-out forwards;}
-.alert-hide{animation:slideOut 0.4s ease-in forwards;}
-.modern-alert{opacity:0;transform:translateY(-30px) scale(0.8);transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
-.modern-alert.show{opacity:1;transform:translateY(0) scale(1);}
-.glass-effect{background:rgba(255,255,255,0.7)!important;backdrop-filter:blur(20px) saturate(180%)!important;-webkit-backdrop-filter:blur(20px) saturate(180%)!important;border:1px solid rgba(255,255,255,0.4)!important;box-shadow:0 20px 50px rgba(0,0,0,0.15)!important;}
-.card{background:white;border-radius:12px;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1);border:1px solid var(--brand-gold);color:#333333;}
-.input-group label{display:block;font-size:0.7rem;font-weight:700;color:var(--brand-blue);margin-bottom:0.15rem;text-transform:uppercase;}
-.input-field{width:100%;padding:0.4rem 0.5rem;border:1px solid var(--brand-gold);border-radius:0.375rem;outline:none;font-size:0.8rem;background-color:white;color:var(--brand-blue);}
-.input-field:focus{border-color:var(--brand-gold);box-shadow:0 0 0 2px rgba(255,215,0,0.2);}
-.custom-select-wrapper{position:relative;width:100%;}
-.custom-select-trigger{background-color:var(--brand-blue);color:white;border:2px solid var(--brand-gold);border-radius:0.375rem;padding:0.4rem 0.5rem;font-weight:bold;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;}
-.custom-select-options{position:absolute;top:100%;left:0;right:0;background-color:var(--brand-blue);border:2px solid var(--brand-gold);border-top:none;border-radius:0 0 12px 12px;z-index:1000;display:none;overflow:visible;box-shadow:0 10px 25px rgba(0,0,0,0.3);}
-.custom-select-option{padding:10px 15px;color:white;cursor:pointer;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.1);transition:all 0.2s ease;}
-.custom-select-option:hover{background-color:var(--brand-gold);color:var(--brand-blue);font-weight:bold;}
-.suggestion-box{position:absolute;left:0;right:0;overflow:visible;background:var(--brand-blue);border:2px solid var(--brand-gold);border-radius:12px;z-index:1000;box-shadow:0 10px 25px -5px rgba(0,0,0,0.2);display:none;margin-top:4px;color:white;}
-.suggestion-item{padding:14px 18px;cursor:pointer;border-bottom:1px solid rgba(255,255,255,0.1);transition:background-color 0.2s ease;font-weight:500;font-size:15px;}
-.suggestion-item:hover,.suggestion-item.active{background-color:var(--brand-gold);color:var(--brand-blue);}
-.loader-circle{border:4px solid var(--brand-gold);border-top:4px solid #ffffff;border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;}
-.spinner{width:14px;height:14px;border:2px solid #ffffff;border-bottom-color:transparent;border-radius:50%;display:inline-block;animation:rotation 1s linear infinite;margin-right:8px;vertical-align:middle;}
-.fade-out{opacity:0;pointer-events:none;visibility:hidden;}
-.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,0.8);display:none;justify-content:center;align-items:center;z-index:10000;backdrop-filter:blur(4px);}
-.bulk-modal-popup{background:linear-gradient(135deg,#002147 0%,#001a38 100%)!important;border:2px solid #ffd700!important;border-radius:16px!important;box-shadow:0 20px 40px rgba(0,0,0,0.5)!important;}
-.bulk-modal-title{color:#ffd700!important;font-weight:700!important;font-size:1.5rem!important;text-shadow:0 2px 4px rgba(0,0,0,0.3)!important;}
-.bulk-modal-popup .swal2-html-container{background:transparent!important;color:#ffffff!important;}
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
 
-/* ── Flatpickr Dark Navy Theme ── */
-.flatpickr-calendar{background:#001d3d!important;border:2px solid var(--brand-gold)!important;border-radius:12px!important;box-shadow:0 8px 24px rgba(0,0,0,0.4)!important;}
-.flatpickr-months{background:var(--brand-blue)!important;border-radius:10px 10px 0 0!important;}
-.flatpickr-months .flatpickr-month,.flatpickr-weekdays,span.flatpickr-weekday{background:var(--brand-blue)!important;color:var(--brand-gold)!important;fill:var(--brand-gold)!important;}
-.flatpickr-current-month{color:var(--brand-gold)!important;font-weight:700!important;}
-.flatpickr-current-month input.cur-year{color:var(--brand-gold)!important;background:transparent!important;font-weight:700!important;}
-.flatpickr-current-month .numInputWrapper span{border-color:rgba(255,215,0,0.3)!important;}
-.flatpickr-current-month .numInputWrapper span svg,.numInput{fill:var(--brand-gold)!important;}
-.numInput{background:var(--brand-blue)!important;color:var(--brand-gold)!important;}
-.flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months{background:var(--brand-blue)!important;color:var(--brand-gold)!important;border:none!important;}
-.flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option{background:var(--brand-blue)!important;color:var(--brand-gold)!important;}
-.flatpickr-prev-month,.flatpickr-next-month{color:var(--brand-gold)!important;fill:var(--brand-gold)!important;}
-.flatpickr-prev-month svg,.flatpickr-next-month svg{fill:var(--brand-gold)!important;stroke:var(--brand-gold)!important;}
-.flatpickr-prev-month:hover,.flatpickr-next-month:hover{background:rgba(255,215,0,0.15)!important;}
-.flatpickr-days,.dayContainer{background:#001d3d!important;}
-.flatpickr-day{color:#ccccee!important;border:none!important;border-radius:50%!important;transition:all 0.2s ease!important;}
-.flatpickr-day:hover{background:rgba(255,215,0,0.2)!important;color:var(--brand-gold)!important;border:1px solid var(--brand-gold)!important;}
-.flatpickr-day.selected,.flatpickr-day.selected:hover{background:var(--brand-gold)!important;color:var(--brand-blue)!important;border-color:var(--brand-gold)!important;font-weight:700!important;box-shadow:0 0 0 3px rgba(255,215,0,0.3)!important;}
-.flatpickr-day.today{border:2px solid var(--brand-gold)!important;color:var(--brand-gold)!important;font-weight:700!important;background:rgba(255,215,0,0.1)!important;}
-.flatpickr-day.today:hover{background:var(--brand-gold)!important;color:var(--brand-blue)!important;}
-.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay{visibility:hidden;}
-.flatpickr-day.disabled,.flatpickr-day.disabled:hover{color:rgba(255,255,255,0.15)!important;background:transparent!important;}
-.flatpickr-innerContainer{background:#001d3d!important;border-radius:0 0 10px 10px!important;}
+      :root {
+        --brand-blue: #002147;
+        --brand-gold: #ffd700;
+      }
 
-/* ── Sunday ── */
-.flatpickr-day.sunday-date{color:#ff6b6b!important;font-weight:700!important;}
-.flatpickr-day.sunday-date:hover{background:rgba(255,107,107,0.2)!important;border:1px solid #ff6b6b!important;}
-.flatpickr-day.sunday-date.selected{background:#ff6b6b!important;color:#ffffff!important;border-color:#ff6b6b!important;}
+      body {
+        font-family: "Inter", sans-serif;
+        background: linear-gradient(135deg, #002147 0%, #001a38 100%);
+        color: #ffffff;
+        overflow-x: hidden;
+      }
 
-/* ── Public Holiday ── */
-.flatpickr-day.holiday-date{position:relative!important;background-color:rgba(239,68,68,0.18)!important;color:#ff6b6b!important;border:1px solid rgba(239,68,68,0.5)!important;border-radius:50%!important;font-weight:700!important;display:flex!important;align-items:center!important;justify-content:center!important;z-index:1;transition:all 0.3s ease;}
-.flatpickr-day.holiday-date:hover{transform:translateY(-3px)!important;background-color:rgba(239,68,68,0.35)!important;box-shadow:0 6px 15px rgba(239,68,68,0.4)!important;z-index:100!important;}
-.flatpickr-day.holiday-date.selected{background:#ef4444!important;color:#ffffff!important;border-color:#ef4444!important;}
-.holiday-label-svg{position:absolute;width:130%;height:130%;top:-15%;left:-15%;pointer-events:none;opacity:0;transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);}
-.flatpickr-day.holiday-date:hover .holiday-label-svg{opacity:1;}
-.holiday-label-svg text{fill:#ff6b6b;font-size:10px;font-weight:bold;text-transform:uppercase;letter-spacing:1px;}
+      #loadingOverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ffffff;
+        background: linear-gradient(135deg, var(--brand-blue) 0%, #001a38 100%);
+        color: #ffffff; /* লোডিং স্ক্রিনের সব টেক্সট সাদা হবে */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      }
 
-@media print{.no-print{display:none!important;}body{background:white;padding:0;overflow:visible!important;}.card{box-shadow:none;border:1px solid #e5e7eb;}#fullPreviewModal{position:relative;background:white;display:block!important;padding:0;margin:0;}.modal-overlay{background:white;position:static;}#fullPreviewModal .bg-white{box-shadow:none;width:100%;max-height:none;overflow:visible;}#fullPreviewContent{overflow:visible!important;}table{font-size:10px;border-collapse:collapse;width:100%;}th,td{border:0.5pt solid #444!important;padding:4px!important;}}
-</style>
+      #loadingOverlay.processing-mode {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(4px);
+      }
+
+      .screen-lock-blur {
+        filter: blur(3px);
+        pointer-events: none;
+        user-select: none;
+        transition: all 0.4s ease;
+      }
+      /* ????????? ?????? ???? ?????????? */
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes slideOut {
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+        to {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.9);
+        }
+      }
+
+      /* ??? ????????? ?????? */
+      .alert-show {
+        display: flex !important;
+        animation: slideIn 0.4s ease-out forwards;
+      }
+
+      /* ??? ????????? ??? ???? */
+      .alert-hide {
+        animation: slideOut 0.4s ease-in forwards;
+      }
+      /* ?????? ??????????? ????? ?????? */
+      /* ????? ??????? ??? ????? ??? ??? */
+      .modern-alert {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.8); /* ??? ???? ??? ??? ???? */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .modern-alert.show {
+        opacity: 1;
+        transform: translateY(0) scale(1); /* ????????? ???????? ???? */
+      }
+
+      /* ?????????????? ????? ?????? */
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.6) !important;
+        backdrop-filter: blur(15px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(15px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border: 1px solid var(--brand-gold);
+        color: #333333;
+      }
+      .input-group label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--brand-blue);
+        margin-bottom: 0.15rem;
+        text-transform: uppercase;
+      }
+      .input-field {
+        width: 100%;
+        padding: 0.4rem 0.5rem;
+        border: 1px solid var(--brand-gold);
+        border-radius: 0.375rem;
+        outline: none;
+        font-size: 0.8rem;
+        background-color: white;
+        color: var(--brand-blue);
+      }
+      .input-field:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2);
+      }
+
+      /* Custom Dropdown Styling for Golden Hover */
+      .custom-select-wrapper {
+        position: relative;
+        width: 100%;
+      }
+      .custom-select-trigger {
+        background-color: var(--brand-blue);
+        color: white;
+        border: 2px solid var(--brand-gold);
+        border-radius: 0.375rem;
+        padding: 0.4rem 0.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+      }
+
+      /* ── Flatpickr Dark Navy Theme ── */
+      .flatpickr-calendar {
+        background: #001d3d !important;
+        border: 1px solid var(--brand-gold) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+      }
+      .flatpickr-day {
+        color: #cce !important;
+      }
+      .flatpickr-day.selected,
+      .flatpickr-day.today {
+        background: var(--brand-gold) !important;
+        color: var(--brand-blue) !important;
+        border-color: var(--brand-gold) !important;
+      }
+      .flatpickr-day:hover {
+        background: var(--brand-gold) !important;
+        color: black !important;
+        border-color: var(--brand-gold) !important;
+      }
+      .flatpickr-months .flatpickr-month,
+      .flatpickr-weekdays,
+      span.flatpickr-weekday {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+      }
+      .flatpickr-day.prevMonthDay,
+      .flatpickr-day.nextMonthDay {
+        visibility: hidden;
+      }
+      .flatpickr-prev-month,
+      .flatpickr-next-month {
+        color: var(--brand-gold) !important;
+        fill: var(--brand-gold) !important;
+      }
+      .flatpickr-prev-month svg,
+      .flatpickr-next-month svg {
+        fill: var(--brand-gold) !important;
+        stroke: var(--brand-gold) !important;
+      }
+      .flatpickr-prev-month:hover,
+      .flatpickr-next-month:hover {
+        background: rgba(255, 215, 0, 0.15) !important;
+      }
+      .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+        border: none !important;
+      }
+      .flatpickr-months
+        .flatpickr-month
+        select.flatpickr-monthDropdown-months
+        option {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+      }
+      .flatpickr-current-month input.cur-year {
+        color: var(--brand-gold) !important;
+      }
+      .flatpickr-current-month .numInputWrapper span {
+        border-color: rgba(255, 215, 0, 0.3) !important;
+      }
+      .flatpickr-current-month .numInputWrapper span svg {
+        fill: var(--brand-gold) !important;
+      }
+      .numInput {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+      }
+      .custom-select-options {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        z-index: 1000;
+        display: none;
+        overflow: visible;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      }
+      .custom-select-option {
+        padding: 10px 15px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+      }
+      .custom-select-option:hover {
+        background-color: var(--brand-gold);
+        color: var(--brand-blue);
+        font-weight: bold;
+      }
+
+      .suggestion-box {
+        position: absolute;
+        left: 0;
+        right: 0;
+        overflow: visible;
+        background: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        border-radius: 12px;
+        z-index: 1000;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+        display: none;
+        margin-top: 4px;
+        color: white;
+      }
+      .suggestion-item {
+        padding: 10px 14px;
+        padding: 14px 18px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        transition: background-color 0.2s ease;
+        font-weight: 500;
+        font-size: 15px;
+      }
+      .suggestion-item:hover,
+      .suggestion-item.active {
+        background-color: var(--brand-gold);
+        color: var(--brand-blue);
+      }
+
+      .loader-circle {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--brand-blue);
+        border: 4px solid var(--brand-gold); /* গোল্ডেন বর্ডার */
+        border-top: 4px solid #ffffff; /* সাদা টপ বর্ডার */
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+      }
+
+      /* ?. ??? ??????? ????????? ???? (??????? ?? ??? ?????) */
+      #loadingOverlay.processing-mode {
+        background: rgba(255, 255, 255, 0.4); /* ?????? ????????????? */
+        backdrop-filter: blur(8px) saturate(150%); /* ????????? ????? ?????? */
+        display: flex !important;
+      }
+
+      /* ?. ?????? ????????? ?????????? */
+      .modern-alert {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      .modern-alert.show {
+        transform: scale(1);
+        opacity: 1;
+      }
+      /* ????? ???? ??? ?????? */
+      .holiday-date {
+        position: relative !important;
+        background-color: #fee2e2 !important;
+        color: #b91c1c !important;
+        border-radius: 50% !important;
+        font-weight: bold !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 1;
+        transition: all 0.3s ease;
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.35);
+      }
+
+      /* ??? ?????? ?????????? ??? ??? ????? ????? */
+      .holiday-label-svg {
+        position: absolute;
+        width: 130%; /* ????????? ???? ???? ?? */
+        height: 130%;
+        top: -15%;
+        left: -15%;
+        pointer-events: none;
+        opacity: 0.9;
+        transform: scale(0.9); /* ?????????? ???? ??? ????? */
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      .holiday-label-svg text {
+        fill: #050101;
+        font-size: 10px;
+        font-weight: bold;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      /* --- ???? ???? (Hover) ?????? --- */
+      .holiday-date:hover {
+        transform: translateY(-5px); /* ???? ????????? ??????? ???? ???? */
+        z-index: 100; /* ???? ??????? ???? ??????? ???? */
+        box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.4);
+      }
+
+      .holiday-date:hover .holiday-label-svg {
+        opacity: 1;
+        transform: scale(1.2) rotate(45deg); /* ??? ??? ??? ??????? ????? */
+      }
+
+      /* ????? ?? ?????? ??? ?? */
+      .sunday-date {
+        color: #ef4444 !important;
+        font-weight: bold !important;
+      }
+
+      /* ?. ?????????????? ????? ?????? (??????? ??? ??????) */
+      .glass-effect {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.4) !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #ffffff;
+        border-bottom-color: transparent;
+        border-radius: 50%;
+        display: inline-block;
+        animation: rotation 1s linear infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      @keyframes rotation {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .fade-out {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+      }
+
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.8);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+      }
+
+      @media print {
+        .no-print {
+          display: none !important;
+        }
+        body {
+          background: white;
+          padding: 0;
+          overflow: visible !important;
+        }
+        .card {
+          box-shadow: none;
+          border: 1px solid #e5e7eb;
+        }
+        #fullPreviewModal {
+          position: relative;
+          background: white;
+          display: block !important;
+          padding: 0;
+          margin: 0;
+        }
+        .modal-overlay {
+          background: white;
+          position: static;
+        }
+        #fullPreviewModal .bg-white {
+          box-shadow: none;
+          width: 100%;
+          max-height: none;
+          overflow: visible;
+        }
+        #fullPreviewContent {
+          overflow: visible !important;
+        }
+        table {
+          font-size: 10px;
+          border-collapse: collapse;
+          width: 100%;
+        }
+        th,
+        td {
+          border: 0.5pt solid #444 !important;
+          padding: 4px !important;
+        }
+      }
+
+      /* Bulk Entry Modal Theme */
+      .bulk-modal-popup {
+        background: linear-gradient(
+          135deg,
+          #002147 0%,
+          #001a38 100%
+        ) !important;
+        border: 2px solid #ffd700 !important;
+        border-radius: 16px !important;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+      }
+
+      .bulk-modal-title {
+        color: #ffd700 !important;
+        font-weight: 700 !important;
+        font-size: 1.5rem !important;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+      }
+
+      .bulk-modal-popup .swal2-html-container {
+        background: transparent !important;
+        color: #ffffff !important;
+      }
+    </style>
   </head>
   <body class="p-2 md:p-4">
     <div id="loadingOverlay">
-      <div class="loader-circle mb-6"></div>
-      <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+      <img
+        src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+        alt="ALAMHOW Logo"
+        class="w-24 h-24 object-contain mb-4"
+      />
+      <div class="loader-circle mb-4"></div>
+      <h2 class="text-xl font-bold tracking-tight">
         <span class="text-white">ALAMHOW</span>
         <span class="text-yellow-400">CO LTD</span>
       </h2>
-        Please Wait...
-      </p>
+      <p class="text-sm text-white mt-2 font-medium">Please Wait...</p>
     </div>
+
     <div id="loadingOverlay" style="display: none !important">
-      <div class="loader-circle mb-6"></div>
-      <h2 class="text-xl font-bold text-slate-800 tracking-tight">
+      <img
+        src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
+        alt="ALAMHOW Logo"
+        class="w-24 h-24 object-contain mb-4"
+      />
+      <div class="loader-circle mb-4"></div>
+      <h2 class="text-xl font-bold tracking-tight">
         <span class="text-white">ALAMHOW</span>
         <span class="text-yellow-400">CO LTD</span>
       </h2>
@@ -690,7 +1101,7 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             <tfoot class="bg-[#1e3a5f]/5 font-black">
               <tr>
                 <td colspan="4" class="p-3 text-right uppercase">
-                    Grand Total:
+                  Grand Total:
                 </td>
                 <td class="p-3 text-center text-[#1e3a5f]" id="totalHrs">0</td>
                 <td class="p-3 text-center text-orange-600" id="totalHoli">
@@ -719,14 +1130,14 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
       console.log("Script started");
       try {
         // --- ?????????? ---
-       const firebaseConfig = {
-  apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
-  authDomain: "munna-acl-fda7c.firebaseapp.com",
-  projectId: "munna-acl-fda7c",
-  storageBucket: "munna-acl-fda7c.firebasestorage.app",
-  messagingSenderId: "371130316468",
-  appId: "1:371130316468:web:61b4cba0dbbd5f027589e1"
-};
+        const firebaseConfig = {
+          apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+          authDomain: "munna-acl-fda7c.firebaseapp.com",
+          projectId: "munna-acl-fda7c",
+          storageBucket: "munna-acl-fda7c.firebasestorage.app",
+          messagingSenderId: "371130316468",
+          appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+        };
 
         // Google Apps Script Web App URL (????? URL ?? ????? ????)
         const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
@@ -886,8 +1297,14 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
 
             const updateBulkProjectName = () => {
               const bulkStatus = document.getElementById("bulkStatus").value;
-              const selectedEmps = Array.from(selectedEmployeeIndexes).map(i => employees[i]);
-              const allCooks = selectedEmps.length > 0 && selectedEmps.every(emp => (emp.designation || "").toLowerCase().includes("cook"));
+              const selectedEmps = Array.from(selectedEmployeeIndexes).map(
+                (i) => employees[i],
+              );
+              const allCooks =
+                selectedEmps.length > 0 &&
+                selectedEmps.every((emp) =>
+                  (emp.designation || "").toLowerCase().includes("cook"),
+                );
               const bulkSideName = document.getElementById("bulkSideName");
               if (bulkStatus === "PRESENT") {
                 if (allCooks) {
@@ -929,11 +1346,15 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
                 bulkSideName.disabled = false;
               }
               // Update UI
-              const wrapper = bulkSideName.parentElement.querySelector(".custom-select-wrapper");
+              const wrapper = bulkSideName.parentElement.querySelector(
+                ".custom-select-wrapper",
+              );
               if (wrapper) {
                 const trigger = wrapper.querySelector(".custom-select-trigger");
                 if (trigger) {
-                  trigger.style.pointerEvents = bulkSideName.disabled ? "none" : "auto";
+                  trigger.style.pointerEvents = bulkSideName.disabled
+                    ? "none"
+                    : "auto";
                   trigger.style.opacity = bulkSideName.disabled ? "0.5" : "1";
                 }
               }
@@ -1005,18 +1426,19 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
                 .map((emp) => {
                   const fId = normalizeEmpId(emp.id);
                   const shouldCheckDuplicate = bulkStatus !== "OTHERS";
-                  const isAlreadyExists = selectedDate && shouldCheckDuplicate
-                    ? attendanceData.some(
-                        (d) =>
-                          normalizeEmpId(d.empId) === fId &&
-                          d.date === selectedDate,
-                      ) ||
-                      currentMonthAttendance.some(
-                        (s) =>
-                          normalizeEmpId(s.ID || s.empId) === fId &&
-                          s.DATE === selectedDate,
-                      )
-                    : false;
+                  const isAlreadyExists =
+                    selectedDate && shouldCheckDuplicate
+                      ? attendanceData.some(
+                          (d) =>
+                            normalizeEmpId(d.empId) === fId &&
+                            d.date === selectedDate,
+                        ) ||
+                        currentMonthAttendance.some(
+                          (s) =>
+                            normalizeEmpId(s.ID || s.empId) === fId &&
+                            s.DATE === selectedDate,
+                        )
+                      : false;
 
                   if (isAlreadyExists) {
                     return "";
@@ -1178,6 +1600,36 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
                         : "";
                       buildEmployeeRows(dateStr, currentFilter);
                     },
+                    onDayCreate: (dObj, dStr, fp, dayElem) => {
+                      const dateProp = dayElem.dateObj;
+                      const year = dateProp.getFullYear();
+                      const month = String(dateProp.getMonth() + 1).padStart(
+                        2,
+                        "0",
+                      );
+                      const day = String(dateProp.getDate()).padStart(2, "0");
+                      const formattedDate = `${year}-${month}-${day}`;
+
+                      const isSunday = dateProp.getDay() === 0;
+                      const isPublicHoliday = HOLIDAY_LIST.some(
+                        (h) => h.date === formattedDate,
+                      );
+
+                      if (isPublicHoliday) {
+                        dayElem.classList.add("holiday-date");
+                        dayElem.innerHTML += `
+          <svg viewBox="0 0 100 100" class="holiday-label-svg">
+            <circle cx="50" cy="50" r="45" fill="rgba(239, 68, 68, 0.05)" stroke="#ef4444" stroke-width="5" />
+            <path id="bcurve${dateProp.getDate()}" d="M 12,55 A 38,38 0 0,1 88,55" fill="transparent" />
+            <text style="fill: #ef4444; font-weight: 800; font-size: 10px;">
+              <textPath xlink:href="#bcurve${dateProp.getDate()}" startOffset="50%" text-anchor="middle">PUBLIC HOLIDAY</textPath>
+            </text>
+            <text x="50" y="62" style="fill: #ef4444; font-weight: bold; text-anchor: middle; font-size: 38px;">${dateProp.getDate()}</text>
+          </svg>`;
+                      } else if (isSunday) {
+                        dayElem.classList.add("sunday-date");
+                      }
+                    },
                   });
                 }
 
@@ -1201,7 +1653,8 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
                 }
 
                 const bulkStatusSelect = document.getElementById("bulkStatus");
-                const bulkAmountGroup = document.getElementById("bulkAmountGroup");
+                const bulkAmountGroup =
+                  document.getElementById("bulkAmountGroup");
                 if (bulkStatusSelect) {
                   bulkStatusSelect.addEventListener("change", () => {
                     bulkStatus = bulkStatusSelect.value;
@@ -1344,7 +1797,7 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             let skipped = 0;
             const dateObj = new Date(selectedDate);
             const isSunday = dateObj.getDay() === 0;
-            const isInHoli = HOLIDAY_LIST.includes(selectedDate);
+            const isInHoli = HOLIDAY_LIST.some((h) => h.date === selectedDate);
 
             selectedIndexes.forEach((index) => {
               const emp = employees[index];
@@ -1468,7 +1921,9 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
               const formattedDate = `${year}-${month}-${day}`;
 
               const isSunday = dateProp.getDay() === 0;
-              const isPublicHoliday = HOLIDAY_LIST.includes(formattedDate);
+              const isPublicHoliday = HOLIDAY_LIST.some(
+                (h) => h.date === formattedDate,
+              );
 
               if (isPublicHoliday) {
                 dayElem.classList.add("holiday-date");
@@ -1878,10 +2333,13 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             }
 
             // ?. ????? ????? ???????? (????? ????????? ??????? ???????)
-            HOLIDAY_LIST = (Array.isArray(holRawData) ? holRawData : Object.values(holRawData))
+            HOLIDAY_LIST = (
+              Array.isArray(holRawData) ? holRawData : Object.values(holRawData)
+            )
               .map((item) => {
                 if (!item) return null;
-                const dateValue = item.DATE || item.date || item.Date || item.DateString;
+                const dateValue =
+                  item.DATE || item.date || item.Date || item.DateString;
                 if (!dateValue) return null;
                 const parts = dateValue.includes("/")
                   ? dateValue.split("/")
@@ -1895,7 +2353,17 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
                     month = parts[1].padStart(2, "0");
                     day = parts[2].padStart(2, "0");
                   }
-                  return `${year}-${month}-${day}`;
+                  return {
+                    date: `${year}-${month}-${day}`,
+                    name:
+                      item.NAME_OF_HOLIDAY ||
+                      item.name ||
+                      item.Name ||
+                      item.holiday_name ||
+                      "",
+                    status:
+                      item.HOLIDAY_STATUS || item.status || "Public Holiday",
+                  };
                 }
                 return null;
               })
@@ -1907,8 +2375,9 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             // ?. ???? ???? ???????? (??????? ? ????)
             if (Array.isArray(empRawData)) {
               employees = empRawData.map((emp) => ({
-                id: String(emp.ID || emp.id || emp.documentId || emp.id || "")
-                  .padStart(4, "0"),
+                id: String(
+                  emp.ID || emp.id || emp.documentId || emp.id || "",
+                ).padStart(4, "0"),
                 name:
                   emp["EMPLOYEE NAME"] ||
                   emp.EMPLOYEE_NAME ||
@@ -2290,7 +2759,9 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
           const amountGroup = document.getElementById("amountGroup");
           const remarkEl = document.getElementById("attRemark");
 
-          const designation = (document.getElementById("designation").value || "").toLowerCase();
+          const designation = (
+            document.getElementById("designation").value || ""
+          ).toLowerCase();
           if (designation.includes("cook")) {
             // Add Kitchen option if needed
             let exists = Array.from(sideSelect.options).some(
@@ -2331,7 +2802,9 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
           if (wrapper) {
             const trigger = wrapper.querySelector(".custom-select-trigger");
             if (trigger) {
-              trigger.style.pointerEvents = sideSelect.disabled ? "none" : "auto";
+              trigger.style.pointerEvents = sideSelect.disabled
+                ? "none"
+                : "auto";
               trigger.style.opacity = sideSelect.disabled ? "0.5" : "1";
             }
           }
@@ -2415,11 +2888,10 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
               "Holiday dates are not loaded yet or no public holidays found.";
             return;
           }
-
           const formatted = HOLIDAY_LIST.slice(0, 15)
-            .map((date) => {
-              const d = new Date(date);
-              if (isNaN(d.getTime())) return date;
+            .map((item) => {
+              const d = new Date(item.date);
+              if (isNaN(d.getTime())) return item.date;
               return d.toLocaleDateString("en-GB", {
                 day: "2-digit",
                 month: "short",
@@ -2427,36 +2899,37 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
               });
             })
             .join(", ");
-
           el.innerText = `Public Holidays: ${formatted}`;
         }
+
         function toggleHolidayList() {
-          // HOLIDAY_LIST অ্যারে থেকে তারিখগুলোকে সুন্দরভাবে সাজিয়ে নিচ্ছি
           const holidayContent =
             HOLIDAY_LIST.length > 0
               ? `<ul style="text-align: left; list-style: none; padding: 0;">
           ${HOLIDAY_LIST.map(
-            (date) =>
-              `<li style="padding: 8px; border-bottom: 1px solid #eee; color: #333;">
-              📅 ${new Date(date).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-            </li>`,
+            (item) =>
+              `<li style="padding: 10px 12px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <span style="color: #e53e3e; font-weight: bold; min-width: 110px;">
+                  📅 ${new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+                </span>
+                <span style="color: #002147; font-weight: 600; flex: 1;">${item.name || "—"}</span>
+                <span style="color: #888; font-size: 11px; white-space: nowrap;">${item.status || ""}</span>
+              </li>`,
           ).join("")}
-         </ul>`
+        </ul>`
               : '<p style="color: #666;">No holidays listed.</p>';
 
           Swal.fire({
-            title: '<span style="color: #002147;">Public Holiday List</span>',
-            html: `<div style="max-height: 300px; overflow-y: auto;">${holidayContent}</div>`,
+            title:
+              '<span style="color: #002147;">📋 Public Holiday List</span>',
+            html: `<div style="max-height: 350px; overflow-y: auto;">${holidayContent}</div>`,
             icon: "info",
             confirmButtonText: "Close",
             confirmButtonColor: "#002147",
-            width: "400px",
-            customClass: {
-              popup: "rounded-xl",
-            },
+            width: "520px",
+            customClass: { popup: "rounded-xl" },
           });
         }
-
         // --- ???? ? ???? ????? ---
         async function fetchDataForEdit() {
           const date = document.getElementById("editQueryDate").value;
@@ -2614,7 +3087,7 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             document.getElementById("designation").value || ""
           ).toLowerCase();
           const isSunday = dateObj.getDay() === 0,
-            isInHoli = HOLIDAY_LIST.includes(dateStr);
+            isInHoli = HOLIDAY_LIST.some((h) => h.date === dateStr);
 
           if (status === "ABSENT") {
             if (sunEl) sunEl.value = "";
@@ -2750,7 +3223,9 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
         function setSelectValueCaseInsensitive(select, targetValue) {
           if (!select || !targetValue) return;
           const match = Array.from(select.options).find(
-            (opt) => String(opt.value).toLowerCase() === String(targetValue).toLowerCase(),
+            (opt) =>
+              String(opt.value).toLowerCase() ===
+              String(targetValue).toLowerCase(),
           );
           select.value = match ? match.value : targetValue;
         }
@@ -3000,11 +3475,13 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
           const selectedStatus = document.getElementById("attStatus").value;
           const shouldCheckDuplicate = selectedStatus !== "OTHERS";
 
-          const isLocalDuplicate = shouldCheckDuplicate && attendanceData.some(
-            (e) =>
-              normalizeCheck(e.empId) === normalizeCheck(formattedId) &&
-              e.date === attDate,
-          );
+          const isLocalDuplicate =
+            shouldCheckDuplicate &&
+            attendanceData.some(
+              (e) =>
+                normalizeCheck(e.empId) === normalizeCheck(formattedId) &&
+                e.date === attDate,
+            );
           if (isLocalDuplicate) {
             return Swal.fire({
               title: "Duplicate Found",
@@ -3015,11 +3492,13 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             });
           }
 
-          const isServerDuplicate = shouldCheckDuplicate && currentMonthAttendance.some(
-            (s) =>
-              normalizeCheck(s.ID || s.empId) === normalizeCheck(formattedId) &&
-              s.DATE === attDate,
-          );
+          const isServerDuplicate =
+            shouldCheckDuplicate &&
+            currentMonthAttendance.some(
+              (s) =>
+                normalizeCheck(s.ID || s.empId) ===
+                  normalizeCheck(formattedId) && s.DATE === attDate,
+            );
           if (isServerDuplicate) {
             return Swal.fire({
               title: "Already Exists",
@@ -3030,8 +3509,9 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
             });
           }
 
-          const amountInputValue =
-            document.getElementById("amountInput").value.trim();
+          const amountInputValue = document
+            .getElementById("amountInput")
+            .value.trim();
           if (selectedStatus === "OTHERS" && amountInputValue === "") {
             return Swal.fire({
               title: "Other Amount required",
@@ -3169,31 +3649,37 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
           }
         }
         function openFullPreview() {
-  const body = document.getElementById("fullPreviewBody");
-  const foot = document.getElementById("fullPreviewFoot");
+          const body = document.getElementById("fullPreviewBody");
+          const foot = document.getElementById("fullPreviewFoot");
 
-  if (!attendanceData || attendanceData.length === 0) {
-    Swal.fire("No Data", "No attendance records found.", "warning");
-    return;
-  }
+          if (!attendanceData || attendanceData.length === 0) {
+            Swal.fire("No Data", "No attendance records found.", "warning");
+            return;
+          }
 
-  let tOt = 0, tHol = 0, tSun = 0;
+          let tOt = 0,
+            tHol = 0,
+            tSun = 0;
 
-  body.innerHTML = attendanceData.map((item, index) => {
-    const otVal = parseFloat(item.ot) || 0;
-    const holVal = parseFloat(item.holidayWork) || 0;
-    const sunVal = parseFloat(item.sundayWork) || 0;
-    
-    tOt += otVal;
-    tHol += holVal;
-    tSun += sunVal;
+          body.innerHTML = attendanceData
+            .map((item, index) => {
+              const otVal = parseFloat(item.ot) || 0;
+              const holVal = parseFloat(item.holidayWork) || 0;
+              const sunVal = parseFloat(item.sundayWork) || 0;
 
-    const displayID = (typeof normalizeEmpId === "function") ? normalizeEmpId(item.empId) : item.empId;
+              tOt += otVal;
+              tHol += holVal;
+              tSun += sunVal;
 
-    // টেক্সট কালার নিশ্চিত করতে text-slate-900 এবং font-bold ব্যবহার করা হয়েছে
-    return `
+              const displayID =
+                typeof normalizeEmpId === "function"
+                  ? normalizeEmpId(item.empId)
+                  : item.empId;
+
+              // টেক্সট কালার নিশ্চিত করতে text-slate-900 এবং font-bold ব্যবহার করা হয়েছে
+              return `
       <tr class="border-b border-gray-300">
-        <td class="p-4 border text-center text-slate-900">${item.slNo || (index + 1)}</td>
+        <td class="p-4 border text-center text-slate-900">${item.slNo || index + 1}</td>
         <td class="p-4 border font-bold text-slate-900">${item.date || ""}</td>
         <td class="p-4 border font-black text-[#1e3a5f]">${displayID || ""}</td>
         <td class="p-4 border uppercase font-bold text-slate-900">${item.empName || "N/A"}</td>
@@ -3207,9 +3693,10 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
         </td>
         <td class="p-4 border italic font-bold text-slate-600">${item.remark || ""}</td>
       </tr>`;
-  }).join("");
+            })
+            .join("");
 
-  foot.innerHTML = `
+          foot.innerHTML = `
     <tr class="bg-slate-100 font-black">
         <td colspan="5" class="p-4 border text-right text-slate-900 uppercase">Grand Total:</td>
         <td class="p-4 border text-center text-[#1e3a5f]">${tOt.toFixed(1)}</td>
@@ -3218,9 +3705,10 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
         <td colspan="3" class="border"></td>
     </tr>`;
 
-  document.getElementById("printReportDate").innerText = "Reported: " + new Date().toLocaleString();
-  document.getElementById("fullPreviewModal").style.display = "flex";
-}
+          document.getElementById("printReportDate").innerText =
+            "Reported: " + new Date().toLocaleString();
+          document.getElementById("fullPreviewModal").style.display = "flex";
+        }
         function closeFullPreview() {
           document.getElementById("fullPreviewModal").style.display = "none";
         }
@@ -3245,169 +3733,188 @@ body{font-family:"Inter",sans-serif;background:linear-gradient(135deg,#002147 0%
         /**
          * Firestore-এ ডাটা সেভ করার ফাংশন
          */
-       // --- এই ফাংশনটি আপনার ফাইলের মাঝখানে bulkEntry ফাংশনের নিচে বসিয়ে দিন ---
+        // --- এই ফাংশনটি আপনার ফাইলের মাঝখানে bulkEntry ফাংশনের নিচে বসিয়ে দিন ---
 
-async function saveAllToFirestore() {
-  // ১. ডাটা আছে কি না চেক করা
-  if (!attendanceData || attendanceData.length === 0) {
-    return Swal.fire({
-      title: "No Data",
-      text: "No data available to save.",
-      icon: "warning",
-      confirmButtonColor: "#002147"
-    });
-  }
+        async function saveAllToFirestore() {
+          // ১. ডাটা আছে কি না চেক করা
+          if (!attendanceData || attendanceData.length === 0) {
+            return Swal.fire({
+              title: "No Data",
+              text: "No data available to save.",
+              icon: "warning",
+              confirmButtonColor: "#002147",
+            });
+          }
 
-  // ২. কনফার্মেশন চাওয়া
-  const confirm = await Swal.fire({
-    title: 'Are you sure?',
-    text: `${attendanceData.length} entries will be processed. New entries will be saved.`,
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#002147',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Yes, Save New!'
-  });
+          // ২. কনফার্মেশন চাওয়া
+          const confirm = await Swal.fire({
+            title: "Are you sure?",
+            text: `${attendanceData.length} entries will be processed. New entries will be saved.`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#002147",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, Save New!",
+          });
 
-  if (!confirm.isConfirmed) return;
+          if (!confirm.isConfirmed) return;
 
-  // ৩. লোডিং এনিমেশন দেখানো
-  Swal.fire({
-    title: "Processing & Saving...",
-    text: "Please wait, filtering duplicates and saving new records...",
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading(),
-  });
+          // ৩. লোডিং এনিমেশন দেখানো
+          Swal.fire({
+            title: "Processing & Saving...",
+            text: "Please wait, filtering duplicates and saving new records...",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+          });
 
-  try {
-    const batch = firestoreDb.batch();
-    
-    let duplicateEntries = [];
-    let savedCount = 0;
-    
-    // নতুন ডাটা যেগুলো সেভ হবে (ডুপ্লিকেটগুলো এই লিস্টে ঢুকবে না)
-    let remainingAttendanceData = [];
+          try {
+            const batch = firestoreDb.batch();
 
-    // ৪. প্যারালাল চেকিং এবং ফিল্টারিং
-    const checkPromises = attendanceData.map(async (entry) => {
-      // ১. তারিখ থেকে মাসের নাম এবং বছর বের করা (যেমন: APRIL_2026)
-      const dateParts = entry.date.split("-"); // YYYY-MM-DD
-      const year = dateParts[0];
-      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-      const monthName = monthNames[parseInt(dateParts[1]) - 1];
-      const monthYear = `${monthName}_${year}`;
+            let duplicateEntries = [];
+            let savedCount = 0;
 
-      // ২. তারিখের ডক আইডি (যেমন: DATE_2026-04-01)
-      const dateDocId = "DATE_" + entry.date.replace(/[\/\s]/g, "-"); 
-      const projectClean = (entry.site || "No-Project").replace(/[\/\s]/g, "-");
-      
-      // ক) ওদার্স (OTHERS) হলে সরাসরি "Others" কালেকশনে সেভ (কোনো ডুপ্লিকেট চেক নাই)
-      if (entry.status === "OTHERS") {
-        const uniqueDocId = `${entry.empId}_${entry.date}_${projectClean}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-        const othersDocRef = firestoreDb
-          .collection("DailyAttendance")
-          .doc(monthYear)
-          .collection("DATES")
-          .doc(dateDocId)
-          .collection("Others") 
-          .doc(uniqueDocId);     
+            // নতুন ডাটা যেগুলো সেভ হবে (ডুপ্লিকেটগুলো এই লিস্টে ঢুকবে না)
+            let remainingAttendanceData = [];
 
-        batch.set(othersDocRef, {
-          ID: entry.empId,
-          EMPLOYEE_NAME: entry.empName,
-          PASSPORT: entry.passport || "",
-          DATE: entry.date,
-          STATUS: "OTHERS",
-          SIDE_NAME: entry.site || "",
-          DESIGNATION: entry.designation || "",
-          JOINING_DATE: entry.joiningDate || "",
-          WORKING_AS: entry.workingAs || "",
-          SALARY: Number(entry.salary) || 0,
-          OT_HOURS: Number(entry.ot) || 0,                // ➔ যুক্ত করা হলো
-          HOLIDAY_WORK: Number(entry.holidayWork) || 0,    // ➔ যুক্ত করা হলো
-          SUNDAY_WORK: Number(entry.sundayWork) || 0,      // ➔ যুক্ত করা হলো
-          REMARK: entry.remark || "",
-          AMOUNT: Number(entry.amount) || 0,
-          CREATED_AT: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        savedCount++;
-        return; 
-      }
+            // ৪. প্যারালাল চেকিং এবং ফিল্টারিং
+            const checkPromises = attendanceData.map(async (entry) => {
+              // ১. তারিখ থেকে মাসের নাম এবং বছর বের করা (যেমন: APRIL_2026)
+              const dateParts = entry.date.split("-"); // YYYY-MM-DD
+              const year = dateParts[0];
+              const monthNames = [
+                "JANUARY",
+                "FEBRUARY",
+                "MARCH",
+                "APRIL",
+                "MAY",
+                "JUNE",
+                "JULY",
+                "AUGUST",
+                "SEPTEMBER",
+                "OCTOBER",
+                "NOVEMBER",
+                "DECEMBER",
+              ];
+              const monthName = monthNames[parseInt(dateParts[1]) - 1];
+              const monthYear = `${monthName}_${year}`;
 
-      // খ) সাধারণ হাজিরা (PRESENT/ABSENT) - ডুপ্লিকেট চেক হবে
-      const customDocId = `${entry.empId}_${entry.date}_${projectClean}`;
-      const docRef = firestoreDb
-        .collection("DailyAttendance")
-        .doc(monthYear)
-        .collection("DATES")
-        .doc(dateDocId)
-        .collection("Present_Absent") 
-        .doc(customDocId);
+              // ২. তারিখের ডক আইডি (যেমন: DATE_2026-04-01)
+              const dateDocId = "DATE_" + entry.date.replace(/[\/\s]/g, "-");
+              const projectClean = (entry.site || "No-Project").replace(
+                /[\/\s]/g,
+                "-",
+              );
 
-      const docSnap = await docRef.get();
-      
-      if (docSnap.exists) {
-        // ডুপ্লিকেট ডাটা পাওয়া গেলে এই এন্ট্রির অবজেক্টটি ডুপ্লিকেট লিস্টে যাবে
-        duplicateEntries.push({
-          id: entry.empId,
-          name: entry.empName,
-          site: entry.site || "No-Project"
-        });
-        // ডুপ্লিকেট ডাটাটি টেবিলে রেখে দেওয়ার জন্য এই অ্যারেতে পুশ করছি
-        remainingAttendanceData.push(entry);
-      } else {
-        // ডুপ্লিকেট না হলে ব্যাচে সেভ হবে
-        batch.set(docRef, {
-         ID: entry.empId,
-          EMPLOYEE_NAME: entry.empName,
-          PASSPORT: entry.passport || "",
-          DATE: entry.date,
-          STATUS: entry.status || "PRESENT",
-          SIDE_NAME: entry.site || "",
-          DESIGNATION: entry.designation || "",
-          JOINING_DATE: entry.joiningDate || "",
-          WORKING_AS: entry.workingAs || "",
-          SALARY: Number(entry.salary) || 0,
-          OT_HOURS: Number(entry.ot) || 0,                // ➔ যুক্ত করা হলো
-          HOLIDAY_WORK: Number(entry.holidayWork) || 0,    // ➔ যুক্ত করা হলো
-          SUNDAY_WORK: Number(entry.sundayWork) || 0,      // ➔ যুক্ত করা হলো
-          REMARK: entry.remark || "",
-          CREATED_AT: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        savedCount++;
-      }
-    });
+              // ক) ওদার্স (OTHERS) হলে সরাসরি "Others" কালেকশনে সেভ (কোনো ডুপ্লিকেট চেক নাই)
+              if (entry.status === "OTHERS") {
+                const uniqueDocId = `${entry.empId}_${entry.date}_${projectClean}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+                const othersDocRef = firestoreDb
+                  .collection("DailyAttendance")
+                  .doc(monthYear)
+                  .collection("DATES")
+                  .doc(dateDocId)
+                  .collection("Others")
+                  .doc(uniqueDocId);
 
-    // সব চেকিং শেষ হওয়া পর্যন্ত অপেক্ষা
-    await Promise.all(checkPromises);
+                batch.set(othersDocRef, {
+                  ID: entry.empId,
+                  EMPLOYEE_NAME: entry.empName,
+                  PASSPORT: entry.passport || "",
+                  DATE: entry.date,
+                  STATUS: "OTHERS",
+                  SIDE_NAME: entry.site || "",
+                  DESIGNATION: entry.designation || "",
+                  JOINING_DATE: entry.joiningDate || "",
+                  WORKING_AS: entry.workingAs || "",
+                  SALARY: Number(entry.salary) || 0,
+                  OT_HOURS: Number(entry.ot) || 0, // ➔ যুক্ত করা হলো
+                  HOLIDAY_WORK: Number(entry.holidayWork) || 0, // ➔ যুক্ত করা হলো
+                  SUNDAY_WORK: Number(entry.sundayWork) || 0, // ➔ যুক্ত করা হলো
+                  REMARK: entry.remark || "",
+                  AMOUNT: Number(entry.amount) || 0,
+                  CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                savedCount++;
+                return;
+              }
 
-    // ৫. যদি নতুন কোনো ডাটা সেভ করার মতো থাকে, তবেই ব্যাচ সাবমিট হবে
-    if (savedCount > 0) {
-      await batch.commit();
-    }
+              // খ) সাধারণ হাজিরা (PRESENT/ABSENT) - ডুপ্লিকেট চেক হবে
+              const customDocId = `${entry.empId}_${entry.date}_${projectClean}`;
+              const docRef = firestoreDb
+                .collection("DailyAttendance")
+                .doc(monthYear)
+                .collection("DATES")
+                .doc(dateDocId)
+                .collection("Present_Absent")
+                .doc(customDocId);
 
-    Swal.close();
+              const docSnap = await docRef.get();
 
-    // ৬. গ্লোবাল মেমোরি থেকে সেভ হওয়া ডাটা মুছে ফেলা এবং শুধু ডুপ্লিকেটগুলো রেখে দেওয়া
-    attendanceData = remainingAttendanceData; 
+              if (docSnap.exists) {
+                // ডুপ্লিকেট ডাটা পাওয়া গেলে এই এন্ট্রির অবজেক্টটি ডুপ্লিকেট লিস্টে যাবে
+                duplicateEntries.push({
+                  id: entry.empId,
+                  name: entry.empName,
+                  site: entry.site || "No-Project",
+                });
+                // ডুপ্লিকেট ডাটাটি টেবিলে রেখে দেওয়ার জন্য এই অ্যারেতে পুশ করছি
+                remainingAttendanceData.push(entry);
+              } else {
+                // ডুপ্লিকেট না হলে ব্যাচে সেভ হবে
+                batch.set(docRef, {
+                  ID: entry.empId,
+                  EMPLOYEE_NAME: entry.empName,
+                  PASSPORT: entry.passport || "",
+                  DATE: entry.date,
+                  STATUS: entry.status || "PRESENT",
+                  SIDE_NAME: entry.site || "",
+                  DESIGNATION: entry.designation || "",
+                  JOINING_DATE: entry.joiningDate || "",
+                  WORKING_AS: entry.workingAs || "",
+                  SALARY: Number(entry.salary) || 0,
+                  OT_HOURS: Number(entry.ot) || 0, // ➔ যুক্ত করা হলো
+                  HOLIDAY_WORK: Number(entry.holidayWork) || 0, // ➔ যুক্ত করা হলো
+                  SUNDAY_WORK: Number(entry.sundayWork) || 0, // ➔ যুক্ত করা হলো
+                  REMARK: entry.remark || "",
+                  CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
+                });
+                savedCount++;
+              }
+            });
 
-    // টেবিল রিফ্রেশ করা (এখন টেবিলে শুধু ডুপ্লিকেটগুলোই পড়ে থাকবে)
-    if (typeof renderTable === "function") renderTable();
+            // সব চেকিং শেষ হওয়া পর্যন্ত অপেক্ষা
+            await Promise.all(checkPromises);
 
-    // ৭. ইউজারকে ফাইনাল রিপোর্ট দেখানো
-    if (duplicateEntries.length > 0) {
-      const tableRows = duplicateEntries
-        .map(entry => `
+            // ৫. যদি নতুন কোনো ডাটা সেভ করার মতো থাকে, তবেই ব্যাচ সাবমিট হবে
+            if (savedCount > 0) {
+              await batch.commit();
+            }
+
+            Swal.close();
+
+            // ৬. গ্লোবাল মেমোরি থেকে সেভ হওয়া ডাটা মুছে ফেলা এবং শুধু ডুপ্লিকেটগুলো রেখে দেওয়া
+            attendanceData = remainingAttendanceData;
+
+            // টেবিল রিফ্রেশ করা (এখন টেবিলে শুধু ডুপ্লিকেটগুলোই পড়ে থাকবে)
+            if (typeof renderTable === "function") renderTable();
+
+            // ৭. ইউজারকে ফাইনাল রিপোর্ট দেখানো
+            if (duplicateEntries.length > 0) {
+              const tableRows = duplicateEntries
+                .map(
+                  (entry) => `
           <tr>
             <td style="padding: 5px 10px; font-weight: bold; color: #ffd700; width: 100px; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: monospace; font-size: 14px;">${entry.id}</td>
             <td style="padding: 5px 10px; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px;">${entry.name}</td>
             <td style="padding: 5px 10px; color: #cccccc; font-style: italic; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 13px;">(${entry.site})</td>
           </tr>
-        `).join("");
+        `,
+                )
+                .join("");
 
-      await Swal.fire({
-        title: `${savedCount} Saved, ${duplicateEntries.length} Skipped!`,
-        html: `
+              await Swal.fire({
+                title: `${savedCount} Saved, ${duplicateEntries.length} Skipped!`,
+                html: `
           <div style="text-align: left; margin-bottom: 10px; color: #ffffff; font-size: 14px;">
             ${savedCount} new entries saved successfully. The following ${duplicateEntries.length} entries already exist:
           </div>
@@ -3421,32 +3928,31 @@ async function saveAllToFirestore() {
             These duplicates are kept on your screen table. Please remove or modify them.
           </div>
         `,
-        icon: "warning",
-        confirmButtonColor: "#002147",
-        background: "#002147",
-      });
-    } else {
-      // যদি কোনো ডুপ্লিকেট না থাকে, সব সেভ হয়ে যায়
-      await Swal.fire({
-        title: "Successfully Saved!",
-        text: "All entries have been saved to the database.",
-        icon: "success",
-        confirmButtonColor: "#002147"
-      });
-    }
+                icon: "warning",
+                confirmButtonColor: "#002147",
+                background: "#002147",
+              });
+            } else {
+              // যদি কোনো ডুপ্লিকেট না থাকে, সব সেভ হয়ে যায়
+              await Swal.fire({
+                title: "Successfully Saved!",
+                text: "All entries have been saved to the database.",
+                icon: "success",
+                confirmButtonColor: "#002147",
+              });
+            }
+          } catch (error) {
+            Swal.close();
+            console.error("Firestore Error:", error);
+            Swal.fire({
+              title: "Upload Failed!",
+              text: "Error: " + error.message,
+              icon: "error",
+            });
+          }
+        }
 
-  } catch (error) {
-    Swal.close();
-    console.error("Firestore Error:", error);
-    Swal.fire({
-      title: "Upload Failed!",
-      text: "Error: " + error.message,
-      icon: "error"
-    });
-  }
-}    
-
-if (typeof bulkEntry === "function") window.bulkEntry = bulkEntry;
+        if (typeof bulkEntry === "function") window.bulkEntry = bulkEntry;
         if (typeof refreshAllData === "function")
           window.refreshAllData = refreshAllData;
         if (typeof toggleHolidayList === "function")
