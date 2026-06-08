@@ -752,28 +752,29 @@ firebase.firestore().collection("HOLIDAY_LIST").get()
         }
       }
 
-      async function fetchRangeData(dFromVal, dToVal) {
-        const key = `${dFromVal}|${dToVal}`;
-        if (_attRangeCache[key]) return _attRangeCache[key];
-        setStatus("loading", "⏳ Fetching attendance & OT...");
-        const db = firebase.firestore();
-        const rtdb = firebase.database();
-        const snap = await db.collectionGroup("Present_Absent")
-          .where("DATE", ">=", dFromVal).where("DATE", "<=", dToVal).get();
-        const attendance = {};
-        snap.forEach(doc => {
-          const d = doc.data();
-          if (!d.ID || !d.DATE) return;
-          const id = String(d.ID).trim();
-          if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
-          const rec = attendance[id];
-          if (d.STATUS === "ABSENT") rec.abs++;
-          if (d.REMARK === "NORMAL WORK") rec.norm++;
-          rec.hol    += parseFloat(d.HOLIDAY_WORK) || 0;
-rec.sun    += parseFloat(d.SUNDAY_WORK)  || 0;
-rec.fine   += parseFloat(d.FINE)         || 0;
-rec.others += parseFloat(d.OTHERS)       || 0;
-        });
+     async function fetchRangeData(dFromVal, dToVal) {
+  const key = `${dFromVal}|${dToVal}`;
+  if (_attRangeCache[key]) return _attRangeCache[key];
+  setStatus("loading", "⏳ Fetching attendance & OT...");
+  const db = firebase.firestore();
+  const rtdb = firebase.database();
+  const snap = await db.collectionGroup("Present_Absent")
+    .where("DATE", ">=", dFromVal).where("DATE", "<=", dToVal).get();
+  const attendance = {};
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (!d.ID || !d.DATE) return;
+    const id = String(d.ID).trim();
+    if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
+    const rec = attendance[id];
+    if (d.STATUS === "ABSENT") rec.abs++;
+    if (d.STATUS === "PRESENT") rec.pres++;         // ← এই লাইন যোগ করুন
+    if (d.REMARK === "NORMAL WORK") rec.norm++;
+    rec.hol    += parseFloat(d.HOLIDAY_WORK) || 0;
+    rec.sun    += parseFloat(d.SUNDAY_WORK)  || 0;
+    rec.fine   += parseFloat(d.FINE)         || 0;
+    rec.others += parseFloat(d.OTHERS)       || 0;
+  });
         const otMap = {};
         const otSnap = await rtdb.ref("OVER_TIME").once("value");
         const otData = otSnap.val() || {};
@@ -808,24 +809,21 @@ rec.others += parseFloat(d.OTHERS)       || 0;
         return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
       }
 
-    async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays) {
+   async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays) {
   const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
   const salary    = emp.salary;
   const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
-  const monthDays = getDaysInMonth(dFromVal);
-  const dailyRate = isCook 
-    ? parseFloat((salary / monthDays).toFixed(2)) 
-    : parseFloat((salary / workingDays).toFixed(2));
-  const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, fine: 0, others: 0 };
+  const dailyRate = parseFloat((salary / workingDays).toFixed(2));
+  const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
   const totalOT      = rangeData.otMap[empId]   || 0;
   const totalAdvance = _cache.advMap[empId]      || 0;
   const totalFine    = _cache.fineMap[empId]     || 0;
-  const normalAmt = dailyRate * att.norm;
+  const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
   const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
   const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
   const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
   const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
-  const netPay    = gross - totalDed;
+ const netPay = Math.round(gross - totalDed);
   const now = new Date();
   let serviceLength = "";
   if (emp.joining) {
@@ -844,7 +842,7 @@ rec.others += parseFloat(d.OTHERS)       || 0;
       serviceLength = { total: months, formatted };
     }
   }
- return {
+  return {
     empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
     joining: emp.joining, wpNo: emp.wpNo || "", rpUidNo: emp.rpUidNo || "",
     entryDate: now.toLocaleDateString("en-GB"),
@@ -855,7 +853,7 @@ rec.others += parseFloat(d.OTHERS)       || 0;
     csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
     advanceRefund: totalAdvance.toFixed(2), fine: totalFine.toFixed(2),
     absentDays: att.abs, totalDed: totalDed.toFixed(2),
-    netPay: netPay.toFixed(2), netPayWords: numToWords(netPay),
+    netPay: netPay, netPayWords: numToWords(netPay),
   };
 }
 
@@ -1348,12 +1346,12 @@ let _attEmpLoaded = false;
         function b100(n){if(n<20)return ones[n];return tens[Math.floor(n/10)]+(n%10?" "+ones[n%10]:"")}
         function b1000(n){if(n<100)return b100(n);return ones[Math.floor(n/100)]+" Hundred"+(n%100?" "+b100(n%100):"")}
         const num=Math.floor(Number(amount)||0);
-        if(num===0)return"Zero Mur Only";
+        if(num===0)return"Zero MUR Only";
         let r="";
         if(num>=1000000)r+=b1000(Math.floor(num/1000000))+" Million ";
         if(num>=1000)r+=b1000(Math.floor((num%1000000)/1000))+" Thousand ";
         if(num%1000)r+=b1000(num%1000);
-        return r.trim()+" Mur Only";
+        return r.trim()+" MUR Only";
       }
       function fmt2(n) { return Number(n||0).toFixed(2); }
       function fmtDate(d) {
@@ -1477,7 +1475,7 @@ let _attEmpLoaded = false;
         }
       } catch(e2) {}
       const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
-      allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
+     allPages += `<div class="page">${buildOneSlip(d, period, "OFFICE COPY")}${buildOneSlip(d, period, "EMPLOYEE COPY")}</div>`;
       updateLoader(i+1, selected.length, empId);
     }
     const fullHtml = `<!doctype html><html><head>
@@ -1694,10 +1692,10 @@ let _attEmpLoaded = false;
             ${payslipWindowCSS()}
           </head><body>
             <div class="no-print"><button onclick="window.print()">🖨️ Print </button></div>
-            <div class="page">
-              ${buildOneSlip(d, period, "EMPLOYEE COPY")}
-              ${buildOneSlip(d, period, "OFFICE COPY")}
-            </div>
+           <div class="page">
+  ${buildOneSlip(d, period, "OFFICE COPY")}
+  ${buildOneSlip(d, period, "EMPLOYEE COPY")}
+</div>
           </body></html>`;
           win.document.open(); win.document.write(html); win.document.close();
         } catch(e) {
@@ -1778,23 +1776,12 @@ async function generateReport() {
   }
   output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
 
-  function getDaysInMonthLocal(dateStr) {
-    if (!dateStr) return 26;
-    const d = new Date(dateStr);
-    return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
-  }
-  const monthDays = getDaysInMonthLocal(dFromVal);
-
-  // ── Working Days: Manual হলে সেটা, না হলে Auto ──
   const workingDays = (window._manualWD && window._manualWD > 0)
     ? window._manualWD
     : await getWorkingDays(dFromVal);
 
-  function getDailyRate(salary, designation) {
-    const des = (designation||"").trim().toUpperCase();
-    return des==="COOK"
-      ? parseFloat((salary / monthDays).toFixed(2))
-      : parseFloat((salary / workingDays).toFixed(2));
+  function getDailyRate(salary) {
+    return parseFloat((salary / workingDays).toFixed(2));
   }
 
   function numberToWords(amount) {
@@ -1807,13 +1794,13 @@ async function generateReport() {
       else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
     }
     const num = Math.round(amount);
-    if (num===0) return "Zero Mur Only";
+    if (num===0) return "Zero MUR Only";
     let result = "";
     if (num>=10000000) { result+=convert(Math.floor(num/10000000))+"Crore "; }
     if (num%10000000>=100000) { result+=convert(Math.floor((num%10000000)/100000))+"Lakh "; }
     if (num%100000>=1000) { result+=convert(Math.floor((num%100000)/1000))+"Thousand "; }
     result+=convert(num%1000);
-    return result.trim()+" Mur Only";
+    return result.trim()+" MUR Only";
   }
 
   try {
@@ -1836,16 +1823,16 @@ async function generateReport() {
         const sal = parseInt(d.SALARY)||0;
         workers[d.ID] = {
           id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
-          sal:sal, daily:getDailyRate(sal, d.DESIGNATION),
-          norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
-          others:parseInt(d.OTHERS)||0
+          sal:sal, daily:getDailyRate(sal),
+          norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0, others:0
         };
       }
       if (d.STATUS==="PRESENT") workers[d.ID].pres++;
       else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
       if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-     workers[d.ID].sun  += parseFloat(d.SUNDAY_WORK)  || 0;
-workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
+      workers[d.ID].sun    += parseFloat(d.SUNDAY_WORK)  || 0;
+      workers[d.ID].hol    += parseFloat(d.HOLIDAY_WORK) || 0;
+      workers[d.ID].others += parseFloat(d.OTHERS)       || 0;
     });
     for (const my in otData) {
       const md=otData[my]; if (typeof md!=="object") continue;
@@ -1873,12 +1860,12 @@ workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
     Object.keys(workers).sort().forEach(id => {
       const w = workers[id];
       const isCook = (w.des||"").trim().toUpperCase()==="COOK";
-      const rowTotalBasic = w.daily * w.norm;
+      const rowTotalBasic = isCook ? w.daily * w.pres : w.daily * w.norm;
       const gross  = rowTotalBasic + w.hol + w.sun + w.otA + w.others;
       const nps    = Math.round(gross*0.01);
       const csg    = Math.round(gross*0.015);
       const totDed = w.adv + w.fine + nps + csg;
-      const net    = gross - totDed;
+     const net = Math.round(gross - totDed);
 
       totals.totBasic+=rowTotalBasic; totals.totDaily+=w.daily;
       totals.norm+=w.norm; totals.hol+=w.hol; totals.sun+=w.sun;
@@ -1887,9 +1874,7 @@ workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
       totals.adv+=w.adv; totals.fine+=w.fine; totals.nps+=nps;
       totals.csg+=csg; totals.totDed+=totDed; totals.net+=net;
 
-      const dailyDisplay = isCook
-        ? `${w.daily.toFixed(2)} <span class="no-print" style="color:#dc2626;font-size:8px">÷${monthDays}d</span>`
-        : `${w.daily.toFixed(2)} <span class="no-print" style="color:#0369a1;font-size:8px">÷${workingDays}d</span>`;
+      const dailyDisplay = `${w.daily.toFixed(2)} <span class="no-print" style="color:${isCook?'#dc2626':'#0369a1'};font-size:8px">÷${workingDays}d${isCook?' ×P':' ×N'}</span>`;
 
       rows += `<tr>
         <td style="text-align:center">${count++}</td>
@@ -1905,8 +1890,8 @@ workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
         <td class="text-right">${w.sun.toFixed(2)}</td>
         <td class="text-right">${w.pres}</td>
         <td class="text-right">${w.abs}</td>
-        <td class="text-right">${w.otA}<div class="ot-hours-preview" style="font-size:9px;color:#666;font-style:italic">${w.otH}</div></td>
-        <td class="text-right">${w.others}</td>
+        <td class="text-right">${w.otA.toFixed(2)}<div class="ot-hours-preview" style="font-size:9px;color:#666;font-style:italic">${w.otH.toFixed(1)}</div></td>
+        <td class="text-right">${w.others.toFixed(2)}</td>
         <td class="text-right"><strong>${gross.toFixed(2)}</strong></td>
         <td class="text-right">${w.adv}</td>
         <td class="text-right">${w.fine}</td>
@@ -1924,19 +1909,19 @@ workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
     });
 
     output.innerHTML = `
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:nowrap; width:100%; margin-bottom:6px;">
-      <div style="display:flex; align-items:center; gap:8px; white-space:nowrap; flex-shrink:0;">
-        <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:32px; width:auto; object-fit:contain" />
-        <span class="co-name print-header" style="white-space:nowrap; font-size:13px; font-weight:700;">ALOMHOW CO LTD &nbsp;|&nbsp; Monthly Salary Sheet</span>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;width:100%;margin-bottom:6px;">
+      <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+        <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:32px;width:auto;object-fit:contain" />
+        <span class="co-name print-header" style="white-space:nowrap;font-size:13px;font-weight:700;">ALAMHOW CO LTD &nbsp;|&nbsp; Monthly Salary Sheet</span>
       </div>
-      <div style="font-size:12px; font-weight:700; color:#000; white-space:nowrap;">Period: ${dFromVal||"…"} to ${dToVal||"…"}</div>
-      <div style="display:flex; align-items:center; gap:8px; white-space:nowrap; flex-shrink:0;">
-        <span style="font-size:11px; font-weight:600; color:#000;">Printed: ${formatDateTime()}</span>
-        <div class="no-print" style="display:flex; align-items:center; gap:6px; background:rgba(255,215,0,0.08); border:1.5px solid var(--brand-gold); border-radius:8px; padding:5px 10px; white-space:nowrap;">
-          <span style="color:var(--brand-gold); font-size:11px; font-weight:700;">⚙️ Working Days:</span>
-          <input type="number" id="manualWDInput" placeholder="day input" value="${window._manualWD||''}" style="width:70px; padding:4px 8px; font-size:14px; border:1.5px solid var(--brand-gold); border-radius:5px; background:#001530; color:#ffd700; font-weight:700; text-align:center;" min="1" max="31" />
-          <button onclick="(function(){const v=parseInt(document.getElementById('manualWDInput').value);window._manualWD=(v>0&&v<=31)?v:null;generateReport();})()" style="background:#0d9488; color:white; border:none; padding:5px 10px; border-radius:5px; font-size:11px; font-weight:700; cursor:pointer;">✔ OK</button>
-          <span style="color:${window._manualWD?'#4ade80':'#ffd700'}; font-size:11px; font-weight:700;">${window._manualWD ? '✅ '+window._manualWD+' Days' : '⚡ '+workingDays+' days'}</span>
+      <div style="font-size:12px;font-weight:700;color:#000;white-space:nowrap;">Period: ${dFromVal||"…"} to ${dToVal||"…"}</div>
+      <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+        <span style="font-size:11px;font-weight:600;color:#000;">Printed: ${formatDateTime()}</span>
+        <div class="no-print" style="display:flex;align-items:center;gap:6px;background:rgba(255,215,0,0.08);border:1.5px solid var(--brand-gold);border-radius:8px;padding:5px 10px;white-space:nowrap;">
+          <span style="color:var(--brand-gold);font-size:11px;font-weight:700;">⚙️ Working Days:</span>
+          <input type="number" id="manualWDInput" placeholder="day input" value="${window._manualWD||''}" style="width:70px;padding:4px 8px;font-size:14px;border:1.5px solid var(--brand-gold);border-radius:5px;background:#001530;color:#ffd700;font-weight:700;text-align:center;" min="1" max="31" />
+          <button onclick="(function(){const v=parseInt(document.getElementById('manualWDInput').value);window._manualWD=(v>0&&v<=31)?v:null;generateReport();})()" style="background:#0d9488;color:white;border:none;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">✔ OK</button>
+          <span style="color:${window._manualWD?'#4ade80':'#ffd700'};font-size:11px;font-weight:700;">${window._manualWD ? '✅ '+window._manualWD+' Days' : '⚡ '+workingDays+' days'}</span>
         </div>
       </div>
     </div>
@@ -1964,19 +1949,23 @@ workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
             <div>${totals.totBasic.toFixed(2)}</div>
             <div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div>
           </td>
-          <td class="text-right">${totals.norm}</td><td class="text-right">${totals.hol}</td>
-          <td class="text-right">${totals.sun}</td><td class="text-right">${totals.pres}</td>
+          <td class="text-right">${totals.norm}</td>
+          <td class="text-right">${totals.hol.toFixed(2)}</td>
+          <td class="text-right">${totals.sun.toFixed(2)}</td>
+          <td class="text-right">${totals.pres}</td>
           <td class="text-right">${totals.abs}</td>
           <td style="text-align:center;vertical-align:bottom">
             <div>${totals.otA.toFixed(2)}</div>
             <div class="ot-hours-preview" style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">${totals.otH.toFixed(1)}</div>
           </td>
-          <td class="text-right">${totals.others}</td>
+          <td class="text-right">${totals.others.toFixed(2)}</td>
           <td class="text-right">${totals.gross.toFixed(2)}</td>
-          <td class="text-right">${totals.adv}</td><td class="text-right">${totals.fine}</td>
-          <td class="text-right">${totals.nps}</td><td class="text-right">${totals.csg}</td>
+          <td class="text-right">${totals.adv}</td>
+          <td class="text-right">${totals.fine}</td>
+          <td class="text-right">${totals.nps}</td>
+          <td class="text-right">${totals.csg}</td>
           <td class="text-right">${totals.totDed}</td>
-          <td class="text-right">${totals.net.toFixed(2)}</td>
+         <td class="text-right">${Math.round(totals.net)}</td>
           <td></td>
         </tr>
         <tr class="no-print-hide">
@@ -2017,13 +2006,13 @@ workers[d.ID].hol  += parseFloat(d.HOLIDAY_WORK) || 0;
           else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
         }
         const num = Math.round(amount);
-        if (num===0) return "Zero Mur Only";
+        if (num===0) return "Zero MUR Only";
         let result = "";
         if (num>=10000000) { result+=convert(Math.floor(num/10000000))+"Crore "; }
         if (num%10000000>=100000) { result+=convert(Math.floor((num%10000000)/100000))+"Lakh "; }
         if (num%100000>=1000) { result+=convert(Math.floor((num%100000)/1000))+"Thousand "; }
         result+=convert(num%1000);
-        return result.trim()+" Mur Only";
+        return result.trim()+" MUR Only";
       }
 
       // ══════════════════════════════════════════
@@ -2337,7 +2326,7 @@ let _otCache     = null;
                 <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:left">Site / Project</th>
                 <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">OT Hours</th>
                 <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">OT Rate</th>
-                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">Amount (Mur)</th>
+                <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:right">Amount (MUR)</th>
                 <th style="color:white;padding:9px 8px;border:1px solid #335185;text-align:left">Remark</th>
               </tr>
             </thead>
