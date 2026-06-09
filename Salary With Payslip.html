@@ -1806,13 +1806,24 @@ async function generateReport() {
   try {
     const db   = firebase.firestore();
     const rtdb = firebase.database();
-    const [snap, otSnap, advSnap, fineSnap] = await Promise.all([
+
+    // ★ monthYearKey ও postedData যোগ করা হয়েছে
+    const d0 = new Date(dFromVal);
+    const _mNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    const monthYearKey = `${_mNames[d0.getMonth()]}_${d0.getFullYear()}`;
+
+    const [snap, otSnap, advSnap, fineSnap, postedSnap] = await Promise.all([
       db.collectionGroup("Present_Absent").get(),
       rtdb.ref("OVER_TIME").once("value"),
       rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
       rtdb.ref("FINE_SUMMARY/USERS").once("value"),
+      rtdb.ref(`SALARY_POSTED/${monthYearKey}`).once("value"),
     ]);
-    const otData = otSnap.val()||{}, advData = advSnap.val()||{}, fineData = fineSnap.val()||{};
+    const otData     = otSnap.val()||{};
+    const advData    = advSnap.val()||{};
+    const fineData   = fineSnap.val()||{};
+    const postedData = postedSnap.val()||{};
+
     let workers = {};
     snap.forEach(doc => {
       const d = doc.data();
@@ -1834,6 +1845,7 @@ async function generateReport() {
       workers[d.ID].hol    += parseFloat(d.HOLIDAY_WORK) || 0;
       workers[d.ID].others += parseFloat(d.OTHERS)       || 0;
     });
+
     for (const my in otData) {
       const md=otData[my]; if (typeof md!=="object") continue;
       for (const df in md) {
@@ -1849,9 +1861,18 @@ async function generateReport() {
         }
       }
     }
+
     for (const id in workers) {
       if (advData[id])  workers[id].adv  = parseInt(advData[id].pending)  || 0;
       if (fineData[id]) workers[id].fine = parseInt(fineData[id].pending) || 0;
+    }
+    // ★ PAID row-এ posted সময়ের actual adv/fine দেখানো
+    for (const id in workers) {
+      const pi = postedData[id];
+      if (pi && pi.status === "PAID") {
+        workers[id].adv  = pi.adv  || 0;
+        workers[id].fine = pi.fine || 0;
+      }
     }
 
     let totals={norm:0,hol:0,sun:0,pres:0,abs:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0};
@@ -1865,7 +1886,7 @@ async function generateReport() {
       const nps    = Math.round(gross*0.01);
       const csg    = Math.round(gross*0.015);
       const totDed = w.adv + w.fine + nps + csg;
-     const net = Math.round(gross - totDed);
+      const net    = Math.round(gross - totDed);
 
       totals.totBasic+=rowTotalBasic; totals.totDaily+=w.daily;
       totals.norm+=w.norm; totals.hol+=w.hol; totals.sun+=w.sun;
@@ -1965,7 +1986,7 @@ async function generateReport() {
           <td class="text-right">${totals.nps}</td>
           <td class="text-right">${totals.csg}</td>
           <td class="text-right">${totals.totDed}</td>
-         <td class="text-right">${Math.round(totals.net)}</td>
+          <td class="text-right">${Math.round(totals.net)}</td>
           <td></td>
         </tr>
         <tr class="no-print-hide">
