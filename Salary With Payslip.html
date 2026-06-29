@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- salary_with_payslip.attendance_sheet -কুকের সেলারী ত্রিশ দিনকে বেসিক দিয়ে ভাগ করা হয়েছে ,,presen sheet এ শিটে sun holi বাদ দিয়ে সবগুলো normal p করা হয়েছে এখানে-->
     <title>Salary &amp; Payslip</title>
     <link rel="icon"type="image/png"href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"/>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -71,10 +70,7 @@
 .flatpickr-prev-month:hover, .flatpickr-next-month:hover { background: rgba(255, 215, 0, 0.15) !important; }
 .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; border: none !important; }
 .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
-
-/* ── Sunday লাল ── */
 .flatpickr-day:nth-child(7n+1) { color: #ff4d4d !important; font-weight: 700 !important; }
-/* ── Holiday লাল (JS থেকে class add হবে) ── */
 .flatpickr-day.is-holiday { color: #ff4d4d !important; font-weight: 700 !important; }
 
       .btn { padding: 8px 18px; font-size: 12px; font-family: "Source Sans 3", sans-serif; font-weight: 700; border: 2px solid transparent; border-radius: 6px; cursor: pointer; letter-spacing: 0.4px; transition: transform 0.15s, box-shadow 0.2s, background 0.2s, color 0.2s, border-color 0.2s; }
@@ -95,6 +91,25 @@
       .btn-view { background: var(--brand-blue); color: #ffd700; padding: 5px 11px; font-size: 10px; border: 2px solid #ffd700; border-radius: 5px; cursor: pointer; font-weight: 800; font-family: "Source Sans 3", sans-serif; transition: all 0.2s; white-space: nowrap; }
       .btn-view:hover { background: #003a7a; transform: translateY(-1px); }
 
+      /* ── Bonus Input Cell Styling ── */
+      .bonus-input {
+       width: 100%; min-width: 40px; max-width: 52px; padding: 2px 2px;
+        font-size: 11px; font-family: "Source Sans 3", sans-serif;
+        font-weight: 700; text-align: right;
+        border: none; border-bottom: 1.5px dashed #b0bdd4;
+        background: transparent; color: #15803d; outline: none;
+        transition: border-color 0.2s, background 0.15s;
+        th.th-pbonus, th.th-abonus { width: 52px !important; min-width: 52px !important; max-width: 52px !important; }
+td:has(.bonus-input) { width: 52px !important; min-width: 52px !important; max-width: 52px !important; padding: 0 !important; overflow: hidden; }
+      }
+      .bonus-input:focus {
+        border-bottom: 2px solid #f59e0b;
+        background: #fffbeb;
+        border-radius: 3px;
+      }
+      .bonus-input:hover { border-bottom-color: #f59e0b; }
+      @media print { .bonus-input { border: none !important; background: transparent !important; } }
+
       .content { padding: 24px 32px; }
       table { width: 100%; border-collapse: collapse; margin-top: 8px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 33, 71, 0.12); }
       thead tr { background: var(--brand-blue); }
@@ -111,6 +126,13 @@
       .sig-label { font-size: 11px; font-weight: 600; color: var(--brand-blue); letter-spacing: 0.5px; }
       .print-footer-signature { display: none; }
       .print-header { display: none; }
+
+      /* ── Grouped header highlight ── */
+      th.th-att-group  { background: #0d4a7a !important; color: #a0d8ff !important; border-bottom: 2px solid #a0d8ff !important; font-size: 9px; letter-spacing: 1px; }
+      th.th-earn-group { background: #064e3b !important; color: #6ee7b7 !important; border-bottom: 2px solid #6ee7b7 !important; font-size: 9px; letter-spacing: 1px; }
+      th.th-ded-group  { background: #7f1d1d !important; color: #fca5a5 !important; border-bottom: 2px solid #fca5a5 !important; font-size: 9px; letter-spacing: 1px; }
+      th.th-pbonus     { background: #065f46 !important; color: #a7f3d0 !important; }
+      th.th-abonus     { background: #92400e !important; color: #fde68a !important; }
 
       .att-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; letter-spacing: 0.5px; }
       .att-badge.present { background: #d1fae5; color: #065f46; }
@@ -235,7 +257,6 @@
       .adv-detail-footer { padding: 12px 20px; border-top: 2px solid var(--brand-gold); background: var(--brand-blue); border-radius: 0 0 12px 12px; display: flex; justify-content: flex-end; }
       .adv-detail-footer button { background: var(--brand-gold); color: var(--brand-blue); border: none; padding: 8px 24px; border-radius: 7px; font-weight: 700; font-family: "Source Sans 3",sans-serif; cursor: pointer; font-size: 12px; }
 
-      /* ══ OT Detail Modal (wider) ══ */
       .ot-detail-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 9100; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
       .ot-detail-overlay.active { display: flex; }
       .ot-detail-box { background: white; border-radius: 12px; width: 820px; max-width: 96vw; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); animation: msgPop .22s cubic-bezier(.34,1.56,.64,1); }
@@ -286,6 +307,7 @@
       .matrix-total-row td { background: #1d3a6d !important; color: #ffd700 !important; font-weight: 800 !important; border: 1px solid #335185 !important; font-size: 9px; }
 
      @media print {
+      
   body { background: #fff; padding: 0; font-size: 8px; }
   .controls, .page-header, .btn, .emp-panel-overlay, .tab-bar, .att-controls, .matrix-controls { display: none !important; }
   .content { padding: 10px; }
@@ -293,6 +315,8 @@
   .print-header .co-name { font-family: "Playfair Display", serif; font-size: 13px; }
   table { font-size: 8px; border: none !important; box-shadow: none; border-collapse: collapse !important; }
   th { background: #f2f2f2 !important; color: #000 !important; font-weight: bold !important; border: 0.5pt solid #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px 4px; }
+ th.th-att-group, th.th-earn-group, th.th-ded-group { background: #e0e0e0 !important; color: #000 !important; border-bottom: 0.5pt solid #000 !important; }
+th.th-pbonus, th.th-abonus { background: #f0f0f0 !important; color: #000 !important; }
   td { padding: 5px 4px; border: 0.5pt solid #000 !important; }
   .total-row td { background: #eee !important; color: #000 !important; font-weight: bold !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 0.5pt solid #000 !important; }
   tfoot { display: table-row-group; }
@@ -309,6 +333,7 @@
   .ot-badge, .adv-badge { border: 0.5pt solid #000 !important; }
   .no-print { display: none !important; }
   .print-header img { display:block !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; height:40px; width:auto; }
+  .bonus-input { border: none !important; }
   @page { @bottom-right { content: "Page " counter(page) " of " counter(pages); font-size: 8pt; color: #000; } }
 }
     </style>
@@ -337,7 +362,6 @@
         <input type="text" id="dateTo" placeholder="End Date" style="width:130px" />
         <input type="text" id="filterId" placeholder="Filter by ID" style="width:120px" />
         <button class="btn btn-report" onclick="generateReport()">&#9654; Report View</button>
-        
         <div style="display:flex;gap:6px;align-items:center">
           <input type="text" id="searchTable" style="width:200px" placeholder="Search in table..." onkeyup="searchTableFn()" />
           <button class="btn btn-emplist" onclick="openEmpPanel()">👥 All Payslips</button>
@@ -350,12 +374,16 @@
       </div>
     </div>
 
+    <!-- ══ MONTHLY DUPLICATE WARNING TABLE (auto, on load) ══ -->
+    <div id="monthlyDupWarning"></div>
+
+    
     <!-- ══ DAILY ATTENDANCE CONTROLS ══ -->
     <div class="att-controls" id="attendance-controls">
       <div class="att-filter-row">
         <label>Search Type:</label>
         <select class="filter-type-select" id="attFilterType" onchange="onFilterTypeChange()">
-          <option value="all">All Records</option>
+          <option value="all">Total Attendance</option>
           <option value="employee">Employee</option>
           <option value="project">Project</option>
           <option value="date"> Date Range</option>
@@ -418,7 +446,7 @@
       <div class="ot-filter-row">
         <label>Search Type:</label>
         <select class="filter-type-select" id="otFilterType" onchange="onOtFilterChange()" style="min-width:140px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:2px solid var(--brand-gold);border-radius:6px;background:#001530;color:var(--brand-gold);font-weight:700;outline:none;">
-          <option value="all">All Records</option>
+          <option value="all">Total Overtime</option>
           <option value="employee">Employee</option>
           <option value="project">Project/Site</option>
           <option value="id">ID</option>
@@ -613,80 +641,94 @@
         messagingSenderId: "371130316468",
         appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
       };
-     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-// ── Holiday Set ──
-let _holidaySet = new Set();
+      // ── Holiday Set ──
+      let _holidaySet = new Set();
 
-const redDayConfig = {
-  dateFormat: "Y-m-d",
-  onDayCreate: function(dObj, dStr, fp, dayElem) {
-    const d = dayElem.dateObj;
-    if (!d) return;
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,"0");
-    const day = String(d.getDate()).padStart(2,"0");
-    const dateStr = `${y}-${m}-${day}`;
-    if (d.getDay() === 0) {
-      dayElem.style.color = "#ff4d4d";
-      dayElem.style.fontWeight = "700";
-    }
-    if (_holidaySet.has(dateStr)) {
-      dayElem.classList.add("is-holiday");
-      dayElem.style.color = "#ff4d4d";
-      dayElem.style.fontWeight = "700";
-    }
-  }
-};
+      const redDayConfig = {
+        dateFormat: "Y-m-d",
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+          const d = dayElem.dateObj;
+          if (!d) return;
+          const y = d.getFullYear();
+          const m = String(d.getMonth()+1).padStart(2,"0");
+          const day = String(d.getDate()).padStart(2,"0");
+          const dateStr = `${y}-${m}-${day}`;
+          if (d.getDay() === 0) {
+            dayElem.style.color = "#ff4d4d";
+            dayElem.style.fontWeight = "700";
+          }
+          if (_holidaySet.has(dateStr)) {
+            dayElem.classList.add("is-holiday");
+            dayElem.style.color = "#ff4d4d";
+            dayElem.style.fontWeight = "700";
+          }
+        }
+      };
+      // ── Default date range: 1st of current month → today ──
+function getDefaultDateRange() {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const pad = (n) => String(n).padStart(2, "0");
+  const toStr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  return { from: toStr(firstDay), to: toStr(now) };
+}
+const _defaultRange = getDefaultDateRange();
 
-flatpickr("#dateFrom",       { ...redDayConfig, onChange: syncPanelDates });
-flatpickr("#dateTo",         { ...redDayConfig, onChange: syncPanelDates });
-flatpickr("#matrixDateFrom", { ...redDayConfig });
-flatpickr("#matrixDateTo",   { ...redDayConfig });
-flatpickr("#panelDateFrom",  { ...redDayConfig });
-flatpickr("#panelDateTo",    { ...redDayConfig });
-flatpickr("#attDateFrom",    { ...redDayConfig });
-flatpickr("#attDateTo",      { ...redDayConfig });
-flatpickr("#otDateFrom",     { ...redDayConfig });
-flatpickr("#otDateTo",       { ...redDayConfig });
+flatpickr("#dateFrom",       { ...redDayConfig, defaultDate: _defaultRange.from, onChange: syncPanelDates });
+flatpickr("#dateTo",         { ...redDayConfig, defaultDate: _defaultRange.to,   onChange: syncPanelDates });
+flatpickr("#matrixDateFrom", { ...redDayConfig, defaultDate: _defaultRange.from });
+flatpickr("#matrixDateTo",   { ...redDayConfig, defaultDate: _defaultRange.to });
+flatpickr("#panelDateFrom",  { ...redDayConfig, defaultDate: _defaultRange.from });
+flatpickr("#panelDateTo",    { ...redDayConfig, defaultDate: _defaultRange.to });
+flatpickr("#attDateFrom",    { ...redDayConfig, defaultDate: _defaultRange.from });
+flatpickr("#attDateTo",      { ...redDayConfig, defaultDate: _defaultRange.to });
+flatpickr("#otDateFrom",     { ...redDayConfig, defaultDate: _defaultRange.from });
+flatpickr("#otDateTo",       { ...redDayConfig, defaultDate: _defaultRange.to });
 
-// Holiday load — firebase ready হওয়ার পরে
-firebase.firestore().collection("HOLIDAY_LIST").get()
-  .then(snap => {
-    snap.forEach(doc => _holidaySet.add(doc.id));
-    document.querySelectorAll(".flatpickr-input").forEach(input => {
-      if (input._flatpickr) input._flatpickr.redraw();
-    });
-  })
-  .catch(e => console.error("Holiday load error:", e));
+//নিচের কোডটি খুলে দিলে ডেট ইনপুটে আর ডিফল্ট তারিখ দেখাবে না /////
+     /* flatpickr("#dateFrom",       { ...redDayConfig, onChange: syncPanelDates });
+      flatpickr("#dateTo",         { ...redDayConfig, onChange: syncPanelDates });
+      flatpickr("#matrixDateFrom", { ...redDayConfig });
+      flatpickr("#matrixDateTo",   { ...redDayConfig });
+      flatpickr("#panelDateFrom",  { ...redDayConfig });
+      flatpickr("#panelDateTo",    { ...redDayConfig });
+      flatpickr("#attDateFrom",    { ...redDayConfig });
+      flatpickr("#attDateTo",      { ...redDayConfig });
+      flatpickr("#otDateFrom",     { ...redDayConfig });
+      flatpickr("#otDateTo",       { ...redDayConfig });
+      */
 
-  
+      firebase.firestore().collection("HOLIDAY_LIST").get()
+        .then(snap => {
+          snap.forEach(doc => _holidaySet.add(doc.id));
+          document.querySelectorAll(".flatpickr-input").forEach(input => {
+            if (input._flatpickr) input._flatpickr.redraw();
+          });
+        })
+        .catch(e => console.error("Holiday load error:", e));
+
       async function getWorkingDays(dateStr) {
-  const d = new Date(dateStr);
-  const year = d.getFullYear();
-  const month = d.getMonth();
-  const totalDays = new Date(year, month + 1, 0).getDate();
-
-  // রবিবার গণনা
-  let sundays = 0;
-  for (let i = 1; i <= totalDays; i++) {
-    if (new Date(year, month, i).getDay() === 0) sundays++;
-  }
-
-  // পাবলিক হলিডে গণনা (ঐ মাসের)
-  const db = firebase.firestore();
-  const holidaySnap = await db.collection("HOLIDAY_LIST").get();
-  let holidays = 0;
-  holidaySnap.forEach(doc => {
-    const hDate = new Date(doc.id);
-    if (hDate.getFullYear() === year && hDate.getMonth() === month) {
-      // রবিবার যদি হলিডেতে পড়ে, দুইবার বাদ না দিতে
-      if (new Date(doc.id).getDay() !== 0) holidays++;
-    }
-  });
-
-  return totalDays - sundays - holidays;
-}  
+        const d = new Date(dateStr);
+        const year = d.getFullYear();
+        const month = d.getMonth();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+        let sundays = 0;
+        for (let i = 1; i <= totalDays; i++) {
+          if (new Date(year, month, i).getDay() === 0) sundays++;
+        }
+        const db = firebase.firestore();
+        const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+        let holidays = 0;
+        holidaySnap.forEach(doc => {
+          const hDate = new Date(doc.id);
+          if (hDate.getFullYear() === year && hDate.getMonth() === month) {
+            if (new Date(doc.id).getDay() !== 0) holidays++;
+          }
+        });
+        return totalDays - sundays - holidays;
+      }
 
       function syncPanelDates() {
         const f = document.getElementById("dateFrom").value;
@@ -722,7 +764,7 @@ firebase.firestore().collection("HOLIDAY_LIST").get()
           _cache.empMap = {};
           empSnap.forEach(d => {
             const e = d.data();
-          const emp = {
+            const emp = {
               id: e.id || d.id, name: e.name || "", passport: e.passport || "",
               desig: e.designation || "", salary: parseInt(e.salary) || 0, joining: e.joining || "",
               wpNo: e.wpNo || "", rpUidNo: e.rpUidNo || "",
@@ -752,29 +794,39 @@ firebase.firestore().collection("HOLIDAY_LIST").get()
         }
       }
 
-     async function fetchRangeData(dFromVal, dToVal) {
-  const key = `${dFromVal}|${dToVal}`;
-  if (_attRangeCache[key]) return _attRangeCache[key];
-  setStatus("loading", "⏳ Fetching attendance & OT...");
-  const db = firebase.firestore();
-  const rtdb = firebase.database();
-  const snap = await db.collectionGroup("Present_Absent")
-    .where("DATE", ">=", dFromVal).where("DATE", "<=", dToVal).get();
-  const attendance = {};
-  snap.forEach(doc => {
-    const d = doc.data();
-    if (!d.ID || !d.DATE) return;
-    const id = String(d.ID).trim();
-    if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
-    const rec = attendance[id];
-    if (d.STATUS === "ABSENT") rec.abs++;
-    if (d.STATUS === "PRESENT") rec.pres++;         // ← এই লাইন যোগ করুন
-    if (d.REMARK === "NORMAL WORK") rec.norm++;
-    rec.hol    += parseFloat(d.HOLIDAY_WORK) || 0;
-    rec.sun    += parseFloat(d.SUNDAY_WORK)  || 0;
-    rec.fine   += parseFloat(d.FINE)         || 0;
-    rec.others += parseFloat(d.OTHERS)       || 0;
-  });
+      async function fetchRangeData(dFromVal, dToVal) {
+        const key = `${dFromVal}|${dToVal}`;
+        if (_attRangeCache[key]) return _attRangeCache[key];
+        setStatus("loading", "⏳ Fetching attendance & OT...");
+        const db = firebase.firestore();
+        const rtdb = firebase.database();
+        const snap = await db.collectionGroup("Present_Absent")
+          .where("DATE", ">=", dFromVal).where("DATE", "<=", dToVal).get();
+        const attendance = {};
+        snap.forEach(doc => {
+          const d = doc.data();
+          if (!d.ID || !d.DATE) return;
+          const id = String(d.ID).trim();
+          if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
+          const rec = attendance[id];
+          if (d.STATUS === "ABSENT") rec.abs++;
+          if (d.STATUS === "PRESENT") rec.pres++;
+          if (d.REMARK === "NORMAL WORK") rec.norm++;
+          rec.hol    += parseFloat(d.HOLIDAY_WORK) || 0;
+          rec.sun    += parseFloat(d.SUNDAY_WORK)  || 0;
+          rec.fine   += parseFloat(d.FINE)         || 0;
+        });
+        // ── "Others" আলাদা sub-collection থেকে AMOUNT যোগ করা হচ্ছে ──
+      // ── "Others" আলাদা sub-collection থেকে AMOUNT যোগ করা হচ্ছে (client-side filter, index লাগবে না) ──
+        const othersSnap = await db.collectionGroup("Others").get();
+        othersSnap.forEach(doc => {
+          const d = doc.data();
+          if (!d.ID || !d.DATE) return;
+          if (d.DATE < dFromVal || d.DATE > dToVal) return;
+          const id = String(d.ID).trim();
+          if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
+          attendance[id].others += parseFloat(d.AMOUNT) || 0;
+        });
         const otMap = {};
         const otSnap = await rtdb.ref("OVER_TIME").once("value");
         const otData = otSnap.val() || {};
@@ -809,93 +861,83 @@ firebase.firestore().collection("HOLIDAY_LIST").get()
         return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
       }
 
-   async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays) {
-  const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
-  const salary    = emp.salary;
-  const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
-  const dailyRate = parseFloat((salary / workingDays).toFixed(2));
-  const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
-  const totalOT      = rangeData.otMap[empId]   || 0;
-  const totalAdvance = _cache.advMap[empId]      || 0;
-  const totalFine    = _cache.fineMap[empId]     || 0;
-  const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
-  const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
-  const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
-  const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
-  const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
- const netPay = Math.round(gross - totalDed);
-  const now = new Date();
-  let serviceLength = "";
-  if (emp.joining) {
-    const parts = emp.joining.split(/[\/\-\.]/);
-    let jDate;
-    if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-    else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
-    if (!isNaN(jDate)) {
-      let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
-      if (now.getDate()<jDate.getDate()) months--;
-      if (months < 0) months = 0;
-      const years = Math.floor(months/12), rem = months%12;
-      const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
-        rem===0 ? `${years} Year${years!==1?'s':''}` :
-        `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
-      serviceLength = { total: months, formatted };
-    }
-  }
-  return {
-    empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
-    joining: emp.joining, wpNo: emp.wpNo || "", rpUidNo: emp.rpUidNo || "",
-    entryDate: now.toLocaleDateString("en-GB"),
-    time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-    serviceLength, normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
-    sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
-    others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
-    csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
-    advanceRefund: totalAdvance.toFixed(2), fine: totalFine.toFixed(2),
-    absentDays: att.abs, totalDed: totalDed.toFixed(2),
-    netPay: netPay, netPayWords: numToWords(netPay),
-  };
-}
+      async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus = 0, aBonus = 0) {
+        const emp = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
+        const salary    = emp.salary;
+        const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
+        const dailyRate = parseFloat((salary / workingDays).toFixed(2));
+        const att = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
+        const totalOT      = rangeData.otMap[empId]   || 0;
+        const totalAdvance = _cache.advMap[empId]      || 0;
+        const totalFine    = _cache.fineMap[empId]     || 0;
+        const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
+        const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0) + pBonus + aBonus;
+        const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
+        const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
+        const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
+        const netPay = Math.round(gross - totalDed);
+        const now = new Date();
+        let serviceLength = "";
+        if (emp.joining) {
+          const parts = emp.joining.split(/[\/\-\.]/);
+          let jDate;
+          if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+          else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+          if (!isNaN(jDate)) {
+            let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
+            if (now.getDate()<jDate.getDate()) months--;
+            if (months < 0) months = 0;
+            const years = Math.floor(months/12), rem = months%12;
+            const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
+              rem===0 ? `${years} Year${years!==1?'s':''}` :
+              `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
+            serviceLength = { total: months, formatted };
+          }
+        }
+        return {
+          empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
+          joining: emp.joining, wpNo: emp.wpNo || "", rpUidNo: emp.rpUidNo || "",
+          entryDate: now.toLocaleDateString("en-GB"),
+          time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+          serviceLength, normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
+          sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
+          others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
+          csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
+          advanceRefund: totalAdvance.toFixed(2), fine: totalFine.toFixed(2),
+          absentDays: att.abs, totalDed: totalDed.toFixed(2),
+          netPay: netPay, netPayWords: numToWords(netPay),
+          pBonus: pBonus.toFixed(2), aBonus: aBonus.toFixed(2),
+        };
+      }
 
-     // ══════════════════════════════════════════
-//  TAB SWITCHING
-// ══════════════════════════════════════════
-function switchTab(tab) {
-  _currentTab = tab;
-  const tabTitles = {
-    monthly: "Monthly Salary Summary",
-    attendance: "Daily Attendance",
-    matrix: "Present Sheet",
-    overtime: "Overtime Report",
-    advance: "Advance Report",
-    fine: "Fine Report"
-  };
-  document.title = "ALOMHOW — " + (tabTitles[tab] || tab);
-  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-  document.getElementById("tab-" + tab).classList.add("active");
-  document.getElementById("monthly-controls").style.display = tab === "monthly" ? "" : "none";
-  document.getElementById("attendance-controls").classList.toggle("active", tab === "attendance");
-  document.getElementById("matrix-controls").classList.toggle("active", tab === "matrix");
-  document.getElementById("overtime-controls").classList.toggle("active", tab === "overtime");
-  document.getElementById("advance-controls").classList.toggle("active", tab === "advance");
-  document.getElementById("fine-controls").classList.toggle("active", tab === "fine");
-  document.getElementById("reportOutput").style.display  = tab === "monthly"    ? "" : "none";
-  document.getElementById("attOutput").style.display     = tab === "attendance"  ? "" : "none";
-  document.getElementById("matrixOutput").style.display  = tab === "matrix"      ? "" : "none";
-  document.getElementById("otOutput").style.display      = tab === "overtime"    ? "" : "none";
-  document.getElementById("advOutput").style.display     = tab === "advance"     ? "" : "none";
-  document.getElementById("fineOutput").style.display    = tab === "fine"        ? "" : "none";
-  if (tab === "attendance") loadAttFilterOptions();
-  if (tab === "matrix")     loadMatrixFilterOptions();
-  if (tab === "overtime")   loadOtFilterOptions();
-}
+      // ══════════════════════════════════════════
+      //  TAB SWITCHING
+      // ══════════════════════════════════════════
+      function switchTab(tab) {
+        _currentTab = tab;
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+        document.getElementById("tab-" + tab).classList.add("active");
+        document.getElementById("monthly-controls").style.display = tab === "monthly" ? "" : "none";
+        document.getElementById("attendance-controls").classList.toggle("active", tab === "attendance");
+        document.getElementById("matrix-controls").classList.toggle("active", tab === "matrix");
+        document.getElementById("overtime-controls").classList.toggle("active", tab === "overtime");
+        document.getElementById("advance-controls").classList.toggle("active", tab === "advance");
+        document.getElementById("fine-controls").classList.toggle("active", tab === "fine");
+        document.getElementById("reportOutput").style.display  = tab === "monthly"    ? "" : "none";
+        document.getElementById("attOutput").style.display     = tab === "attendance"  ? "" : "none";
+        document.getElementById("matrixOutput").style.display  = tab === "matrix"      ? "" : "none";
+        document.getElementById("otOutput").style.display      = tab === "overtime"    ? "" : "none";
+        document.getElementById("advOutput").style.display     = tab === "advance"     ? "" : "none";
+        document.getElementById("fineOutput").style.display    = tab === "fine"        ? "" : "none";
+        if (tab === "attendance") loadAttFilterOptions();
+        if (tab === "matrix")     loadMatrixFilterOptions();
+        if (tab === "overtime")   loadOtFilterOptions();
+      }
 
-// ══════════════════════════════════════════
-//  ATTENDANCE FILTER
-// ══════════════════════════════════════════
-let _attEmpLoaded = false;
-
-
+      // ══════════════════════════════════════════
+      //  ATTENDANCE FILTER
+      // ══════════════════════════════════════════
+      let _attEmpLoaded = false;
 
       function onFilterTypeChange() {
         const type = document.getElementById("attFilterType").value;
@@ -933,130 +975,649 @@ let _attEmpLoaded = false;
         } catch(e) { console.error("Filter options load error:", e); }
       }
 
-      // ══════════════════════════════════════════
-      //  DAILY ATTENDANCE GENERATION
-      // ══════════════════════════════════════════
-      async function generateAttendance() {
-        const attOut = document.getElementById("attOutput");
-        const filterType = document.getElementById("attFilterType").value;
-        const dFromVal = document.getElementById("attDateFrom").value;
-        const dToVal   = document.getElementById("attDateTo").value;
-        const dFrom    = dFromVal ? new Date(dFromVal) : null;
-        const dTo      = dToVal   ? new Date(dToVal)   : null;
-        const selEmp   = document.getElementById("attEmpSelect").value;
-        const selProj  = document.getElementById("attProjectSelect").value;
-        const selId    = document.getElementById("attIdInput").value.trim();
-        const selName  = document.getElementById("attNameInput").value.trim().toLowerCase();
-        attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance data...</p>';
-        try {
-          const db = firebase.firestore();
-          const snap = await db.collectionGroup("Present_Absent").get();
-          let records = [];
-          snap.forEach(doc => {
-            const d = doc.data();
-            const docDate = new Date(d.DATE);
-            if (dFrom && dTo && (docDate < dFrom || docDate > dTo)) return;
-            if (filterType==="employee" && selEmp && String(d.ID).trim()!==selEmp) return;
-            if (filterType==="project"  && selProj && (d.SIDE_NAME||"").trim()!==selProj) return;
-            if (filterType==="id"   && selId  && String(d.ID).trim()!==selId) return;
-            if (filterType==="name" && selName && !(d.EMPLOYEE_NAME||"").toLowerCase().includes(selName)) return;
-            records.push(d);
-          });
-          records.sort((a,b) => {
-            const dd = new Date(b.DATE) - new Date(a.DATE);
-            return dd !== 0 ? dd : String(a.ID).localeCompare(String(b.ID));
-          });
-          if (!records.length) {
-            attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No records found.</p>';
-            return;
-          }
-          let totPresent=0,totAbsent=0,totHoliday=0,totSunday=0,uniqueEmps=new Set(),uniqueDates=new Set();
-          records.forEach(r => {
-            if (r.STATUS==="PRESENT") totPresent++;
-            else if (r.STATUS==="ABSENT") totAbsent++;
-            if (parseInt(r.HOLIDAY_WORK)>0) totHoliday+=parseInt(r.HOLIDAY_WORK);
-            if (parseInt(r.SUNDAY_WORK)>0)  totSunday+=parseInt(r.SUNDAY_WORK);
-            uniqueEmps.add(r.ID); uniqueDates.add(r.DATE);
-          });
-          let periodText = (dFromVal&&dToVal)?`${dFromVal} to ${dToVal}`:dFromVal?`From ${dFromVal}`:"All Dates";
-          let filterDesc = filterType==="employee"&&selEmp?`Employee: ${selEmp}`:filterType==="project"&&selProj?`Project: ${selProj}`:filterType==="id"&&selId?`ID: ${selId}`:filterType==="name"&&selName?`Name: "${selName}"`:"All Records";
-          const rows = records.map((r,i) => {
-            const status = (r.STATUS||"").toUpperCase();
-            const holW = parseInt(r.HOLIDAY_WORK)||0, sunW = parseInt(r.SUNDAY_WORK)||0;
-            let badgeClass = "present";
-            if (status==="ABSENT") badgeClass="absent";
-            else if (holW>0) badgeClass="holiday";
-            else if (sunW>0) badgeClass="sunday";
-            return `<tr>
-              <td style="text-align:center;color:#9ca3af;font-size:10px">${i+1}</td>
-              <td>${r.DATE||"-"}</td>
-              <td style="font-weight:700;color:var(--brand-blue)">${r.ID||"-"}</td>
-              <td>${r.EMPLOYEE_NAME||"-"}</td>
-              <td>${r.PASSPORT||"-"}</td>
-              <td>${r.DESIGNATION||"-"}</td>
-              <td style="text-align:center"><span class="att-badge ${badgeClass}">${status}</span></td>
-              <td>${r.SIDE_NAME||"-"}</td>
-              <td style="text-align:center">${holW||0}</td>
-              <td style="text-align:center">${sunW||0}</td>
-              <td style="text-align:right;font-size:10px;color:#6b7280">${r.SALARY||"-"}</td>
-              <td>${r.REMARK||"-"}</td>
-            </tr>`;
-          }).join("");
-          attOut.innerHTML = `
-            <div class="print-header">
-              <span class="co-name">ALOMHOW CO LTD — Daily Attendance Report</span>
-              <span>Period: ${periodText} | Filter: ${filterDesc}</span>
-              <span>Printed: ${formatDateTime()}</span>
-            </div>
-            <div class="summary-cards">
-              <div class="s-card"><div class="s-card-label">Total Records</div><div class="s-card-value">${records.length}</div></div>
-              <div class="s-card"><div class="s-card-label">Employees</div><div class="s-card-value">${uniqueEmps.size}</div></div>
-              <div class="s-card"><div class="s-card-label">Days Covered</div><div class="s-card-value">${uniqueDates.size}</div></div>
-              <div class="s-card green"><div class="s-card-label">Present</div><div class="s-card-value">${totPresent}</div></div>
-              <div class="s-card red"><div class="s-card-label">Absent</div><div class="s-card-value">${totAbsent}</div></div>
-              <div class="s-card gold"><div class="s-card-label">Holiday Work</div><div class="s-card-value">${totHoliday}</div></div>
-              <div class="s-card purple"><div class="s-card-label">Sunday Work</div><div class="s-card-value">${totSunday}</div></div>
-            </div>
-            <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
-              <div style="color:#ffd700;font-size:11px;font-weight:700">📋 ${records.length} record(s) | Filter: <span style="color:#a0c4ff">${filterDesc}</span></div>
-              <input type="text" placeholder="🔍 Search..." style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px" oninput="searchAttFn(this.value)" />
-            </div>
-            <table id="attTable">
-              <thead><tr>
-                <th>SL</th><th>Date</th><th>EMP ID</th><th>Employee Name</th>
-                <th>Passport</th><th>Designation</th><th>Status</th>
-                <th>Project / Site</th><th>Holiday</th><th>Sunday</th>
-                <th>Salary</th><th>Remark</th>
-              </tr></thead>
-              <tbody>${rows}</tbody>
-            </table>`;
-        } catch(e) {
-          attOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+
+// ══════════════════════════════════════════
+//  AUTO DUPLICATE CHECK — Current Month, shown as table on Home page
+// ══════════════════════════════════════════
+async function checkMonthlyDuplicatesOnLoad() {
+  const warnBox = document.getElementById("monthlyDupWarning");
+  if (!warnBox) return;
+  try {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const lastDay  = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const pad = (n) => String(n).padStart(2, "0");
+    const toStr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const monthFrom = toStr(firstDay);
+    const monthTo   = toStr(lastDay);
+
+    const db = firebase.firestore();
+    const snap = await db.collectionGroup("Present_Absent")
+      .where("DATE", ">=", monthFrom).where("DATE", "<=", monthTo).get();
+
+    const groups = {};
+    snap.forEach(doc => {
+      const d = doc.data();
+      if (!d.ID || !d.DATE) return;
+      const key = `${d.DATE}__${String(d.ID).trim()}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push({ date: d.DATE, id: String(d.ID).trim(), name: d.EMPLOYEE_NAME || "-" });
+    });
+
+    const dupGroups = Object.values(groups).filter(arr => arr.length > 1);
+    if (!dupGroups.length) { warnBox.innerHTML = ""; return; }
+
+    dupGroups.sort((a,b) => a[0].date.localeCompare(b[0].date) || a[0].id.localeCompare(b[0].id));
+    let totalDupRows = 0;
+    dupGroups.forEach(g => totalDupRows += g.length);
+
+    const tableRows = dupGroups.map((g, i) => `
+      <tr>
+        <td style="text-align:center;color:#7f1d1d;font-size:10px">${i+1}</td>
+        <td style="font-weight:700;color:#7f1d1d">${g[0].date}</td>
+        <td style="font-weight:800;color:#991b1b;font-family:monospace">${g[0].id}</td>
+        <td>${g[0].name}</td>
+        <td style="text-align:center">
+          <span style="background:#fee2e2;color:#991b1b;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:10px">${g.length}× Duplicate</span>
+        </td>
+        <td style="text-align:center">
+          <button class="btn-view" style="background:#991b1b;border-color:#991b1b;color:#fff"
+            onclick="goToDuplicate('${g[0].date}','${g[0].id}')">👁️ View</button>
+        </td>
+      </tr>`).join("");
+
+    warnBox.innerHTML = `
+      <div style="background:#fff5f5;border:2px solid #dc2626;border-radius:10px;margin:0 32px 18px;overflow:hidden;box-shadow:0 4px 16px rgba(220,38,38,0.15)">
+        <div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);padding:10px 18px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:18px">⚠️</span>
+          <span style="color:#fff;font-weight:800;font-size:13px;letter-spacing:0.5px">
+            ${totalDupRows} duplicate attendance record(s) found this month (${monthFrom} to ${monthTo}) across ${dupGroups.length} ID/date group(s). This list will stay until they are deleted.
+          </span>
+        </div>
+        <div style="max-height:280px;overflow-y:auto">
+          <table style="width:100%;border-collapse:collapse;margin:0">
+            <thead>
+              <tr style="background:#fecaca">
+                <th style="padding:7px 6px;font-size:10px;color:#7f1d1d;border:1px solid #fca5a5">SL</th>
+                <th style="padding:7px 6px;font-size:10px;color:#7f1d1d;border:1px solid #fca5a5">Date</th>
+                <th style="padding:7px 6px;font-size:10px;color:#7f1d1d;border:1px solid #fca5a5">Emp ID</th>
+                <th style="padding:7px 6px;font-size:10px;color:#7f1d1d;border:1px solid #fca5a5">Name</th>
+                <th style="padding:7px 6px;font-size:10px;color:#7f1d1d;border:1px solid #fca5a5">Count</th>
+                <th style="padding:7px 6px;font-size:10px;color:#7f1d1d;border:1px solid #fca5a5">Action</th>
+              </tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  } catch(e) {
+    console.error("Monthly duplicate check error:", e);
+  }
+}
+
+// ── Clicking the duplicate's View button jumps to Daily Attendance, filtered ──
+function goToDuplicate(dateStr, empId) {
+  switchTab("attendance");
+  document.getElementById("attFilterType").value = "id";
+  onFilterTypeChange();
+  document.getElementById("attIdInput").value = empId;
+  try {
+    document.getElementById("attDateFrom")._flatpickr.setDate(dateStr);
+    document.getElementById("attDateTo")._flatpickr.setDate(dateStr);
+  } catch(e) {}
+  generateAttendance();
+}
+
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+//  DAILY ATTENDANCE GENERATION
+// ══════════════════════════════════════════
+async function generateAttendance() {
+  const attOut = document.getElementById("attOutput");
+  const filterType = document.getElementById("attFilterType").value;
+  const dFromVal = document.getElementById("attDateFrom").value;
+  const dToVal   = document.getElementById("attDateTo").value;
+  const dFrom    = dFromVal ? new Date(dFromVal) : null;
+  const dTo      = dToVal   ? new Date(dToVal)   : null;
+  const selEmp   = document.getElementById("attEmpSelect").value;
+  const selProj  = document.getElementById("attProjectSelect").value;
+  const selId    = document.getElementById("attIdInput").value.trim();
+  const selName  = document.getElementById("attNameInput").value.trim().toLowerCase();
+
+  attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance data...</p>';
+
+  try {
+    const db   = firebase.firestore();
+    const rtdb = firebase.database();
+
+    // ── 1. Present_Absent ─────────────────────────────────────
+    const snap = await db.collectionGroup("Present_Absent").get();
+    let records = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      const docDate = new Date(d.DATE);
+      if (dFrom && dTo && (docDate < dFrom || docDate > dTo)) return;
+      if (filterType==="employee" && selEmp  && String(d.ID).trim()!==selEmp) return;
+      if (filterType==="project"  && selProj && (d.SIDE_NAME||"").trim()!==selProj) return;
+      if (filterType==="id"       && selId   && String(d.ID).trim()!==selId) return;
+      if (filterType==="name"     && selName && !(d.EMPLOYEE_NAME||"").toLowerCase().includes(selName)) return;
+      d._path = doc.ref.path;
+      records.push(d);
+    });
+    records.sort((a,b) => {
+      const dd = new Date(b.DATE) - new Date(a.DATE);
+      return dd !== 0 ? dd : String(a.ID).localeCompare(String(b.ID));
+    });
+
+    if (!records.length) {
+      attOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No records found.</p>';
+      return;
+    }
+
+    // ── 2. Unique month keys বের করি ─────────────────────────
+    // e.g. ["JUNE_2026", "MAY_2026"]
+    const monthKeySet = new Set(records.map(r => getMonthKey(r.DATE)));
+    const monthKeys   = [...monthKeySet];
+
+    // ── 3. BONUS_ENTRY — month-wise একবারে লোড ───────────────
+    // bonusMap[date][empId] = { ATTENDANCE_BONUS, PERFORMANCE_BONUS }
+    const bonusMap = {};
+    await Promise.all(monthKeys.map(async mk => {
+      const snap = await rtdb.ref(`BONUS_ENTRY/${mk}`).once("value");
+      const data = snap.val() || {};
+      // data = { DATE_2026-06-01: { "ACL-0006": { ATTENDANCE_BONUS, PERFORMANCE_BONUS } } }
+      for (const dateKey in data) {
+        const date = dateKey.replace("DATE_", ""); // "2026-06-01"
+        if (!bonusMap[date]) bonusMap[date] = {};
+        const empData = data[dateKey];
+        for (const empId in empData) {
+          bonusMap[date][empId] = empData[empId];
         }
       }
+    }));
 
-      function searchAttFn(val) {
-        const f = val.toUpperCase();
-        const tbl = document.getElementById("attTable");
-        if (!tbl) return;
-        Array.from(tbl.querySelectorAll("tbody tr")).forEach(r => {
-          r.style.display = (r.textContent||"").toUpperCase().includes(f) ? "" : "none";
-        });
+    // ── 4. Others — month-wise Firestore collectionGroup ─────
+   // ── 4. Others — date+empId wise directly fetch ───────────────
+const othersMap = {};
+
+// records থেকে unique date+monthKey combinations
+const dateMonthPairs = [...new Set(records.map(r => `${getMonthKey(r.DATE)}||${r.DATE}`))];
+
+await Promise.all(dateMonthPairs.map(async pair => {
+  const [mk, date] = pair.split("||");
+  const dateKey = `DATE_${date}`; // "DATE_2026-06-01"
+
+  const oSnap = await db
+    .collection("DailyAttendance")
+    .doc(mk)
+    .collection("DATES")
+    .doc(dateKey)
+    .collection("Others")
+    .get();
+
+  oSnap.forEach(oDoc => {
+    const od  = oDoc.data();
+    const eid = String(od.ID || "").trim();
+    if (!eid) return;
+    if (!othersMap[date])      othersMap[date]      = {};
+    if (!othersMap[date][eid]) othersMap[date][eid] = 0;
+    othersMap[date][eid] += Number(od.AMOUNT || 0);
+  });
+}));
+
+    // ── 5. Duplicate detection ────────────────────────────────
+    const dupCountMap = {};
+    records.forEach(r => {
+      const key = `${r.DATE}__${String(r.ID).trim()}`;
+      dupCountMap[key] = (dupCountMap[key] || 0) + 1;
+    });
+    let totalDupGroups = 0, totalDupRows = 0;
+    Object.values(dupCountMap).forEach(c => {
+      if (c > 1) { totalDupGroups++; totalDupRows += c; }
+    });
+
+    // ── 6. Summary counters ───────────────────────────────────
+    let totPresent=0, totAbsent=0, totHoliday=0, totSunday=0;
+    let uniqueEmps=new Set(), uniqueDates=new Set();
+    records.forEach(r => {
+      if (r.STATUS==="PRESENT") totPresent++;
+      else if (r.STATUS==="ABSENT") totAbsent++;
+      if (parseInt(r.HOLIDAY_WORK)>0) totHoliday += parseInt(r.HOLIDAY_WORK);
+      if (parseInt(r.SUNDAY_WORK)>0)  totSunday  += parseInt(r.SUNDAY_WORK);
+      uniqueEmps.add(r.ID);
+      uniqueDates.add(r.DATE);
+    });
+
+    let periodText = (dFromVal&&dToVal) ? `${dFromVal} to ${dToVal}` : dFromVal ? `From ${dFromVal}` : "All Dates";
+    let filterDesc = filterType==="employee"&&selEmp ? `Employee: ${selEmp}`
+                   : filterType==="project"&&selProj  ? `Project: ${selProj}`
+                   : filterType==="id"&&selId          ? `ID: ${selId}`
+                   : filterType==="name"&&selName      ? `Name: "${selName}"`
+                   : "TOTAL ATTENDANCE";
+
+    // ── 7. Table rows ─────────────────────────────────────────
+    const rows = records.map((r, i) => {
+      const status = (r.STATUS||"").toUpperCase();
+      const holW   = parseInt(r.HOLIDAY_WORK) || 0;
+      const sunW   = parseInt(r.SUNDAY_WORK)  || 0;
+      const empId  = String(r.ID || "").trim();
+      const date   = r.DATE;
+
+      // Others & Bonus lookup
+      const othersAmt = (othersMap[date]?.[empId]) || 0;
+      const bonusData = bonusMap[date]?.[empId]    || {};
+      const aBonus    = bonusData.ATTENDANCE_BONUS   || 0;
+      const pBonus    = bonusData.PERFORMANCE_BONUS  || 0;
+
+      let badgeClass = "present";
+      if (status==="ABSENT") badgeClass="absent";
+      else if (holW>0)       badgeClass="holiday";
+      else if (sunW>0)       badgeClass="sunday";
+
+      const dupKey  = `${date}__${empId}`;
+      const isDup   = dupCountMap[dupKey] > 1;
+      const rowStyle = isDup ? ' style="background:rgba(220,38,38,0.22);color:#ff4d4d;font-weight:700"' : '';
+
+      const checkboxCell = isDup
+        ? `<td style="text-align:center;padding:4px">
+             <input type="checkbox" class="dup-checkbox" data-path="${r._path}"
+               data-date="${date}" data-id="${empId}" data-name="${r.EMPLOYEE_NAME||''}"
+               style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626" />
+           </td>`
+        : `<td></td>`;
+
+      const dupFlag = isDup
+        ? ` <span style="font-size:9px;font-weight:700;color:#ff4d4d;margin-left:4px" title="Duplicate Record ">⚠️DUPLICATE</span>
+            <button onclick="deleteDuplicateRecord('${r._path}', this)" title="Delete this duplicate record permanently"
+              style="margin-left:6px;background:#dc2626;color:#fff;border:none;border-radius:4px;
+              padding:2px 7px;font-size:10px;font-weight:700;cursor:pointer;vertical-align:middle">🗑️</button>`
+        : '';
+
+      return `<tr${rowStyle}>
+        ${checkboxCell}
+     <td style="text-align:center;color:${isDup?'#ff4d4d':'#000000'};font-size:14px">${records.length - i}</td>
+        <td>${date||"-"}${dupFlag}</td>
+        <td style="font-weight:700;color:${isDup?'#ff4d4d':'var(--brand-blue)'}">${empId||"-"}</td>
+        <td>${r.EMPLOYEE_NAME||"-"}</td>
+        <td>${r.PASSPORT||"-"}</td>
+        <td>${r.DESIGNATION||"-"}</td>
+        <td style="text-align:center"><span class="att-badge ${badgeClass}">${status}</span></td>
+        <td>${r.SIDE_NAME||"-"}</td>
+        <td style="text-align:center">${holW}</td>
+        <td style="text-align:center">${sunW}</td>
+        <td style="text-align:center">${othersAmt > 0 ? othersAmt : "-"}</td>
+        <td style="text-align:center">${aBonus > 0 ? aBonus : "-"}</td>
+        <td style="text-align:center">${pBonus > 0 ? pBonus : "-"}</td>
+        <td style="text-align:right;font-size:10px;color:${isDup?'#ff4d4d':'#000000'}">${r.SALARY||"-"}</td>
+        <td>${r.REMARK||"-"}</td>
+      </tr>`;
+    }).join("");
+
+    // ── 8. Bulk delete toolbar ────────────────────────────────
+    const bulkToolbar = totalDupRows > 0 ? `
+      <div id="bulkDeleteBar" style="
+        display:flex;align-items:center;gap:10px;margin-bottom:10px;
+        background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.4);
+        border-radius:8px;padding:8px 14px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:7px;cursor:pointer;color:#ff9090;font-size:12px;font-weight:700;user-select:none">
+          <input type="checkbox" id="selectAllDups" onchange="toggleSelectAllDups(this.checked)"
+            style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626" />
+          All Duplicate Rows Select
+          <span style="color:#ff6b6b;font-size:11px">${totalDupRows} </span>
+        </label>
+        <span id="selCountBadge"
+          style="background:rgba(220,38,38,0.3);color:#ffaaaa;font-size:11px;font-weight:700;
+          padding:2px 10px;border-radius:12px;display:none">0 Selected</span>
+        <button id="bulkDeleteBtn" onclick="bulkDeleteSelected()"
+          style="margin-left:auto;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+          border:none;border-radius:6px;padding:7px 16px;font-size:12px;font-weight:800;
+          cursor:pointer;box-shadow:0 3px 10px rgba(220,38,38,0.35);display:none">
+          🗑️ Select Item Delete
+        </button>
+      </div>` : '';
+
+    // ── 9. Final render ───────────────────────────────────────
+    attOut.innerHTML = `
+      <div class="print-header">
+        <span class="co-name">ALOMHOW CO LTD — Daily Attendance Report</span>
+        <span>Period: ${periodText} | Filter: ${filterDesc}</span>
+        <span>Printed: ${formatDateTime()}</span>
+      </div>
+      <div class="summary-cards">
+        <div class="s-card"><div class="s-card-label">TOTAL ATTENDANCE</div><div class="s-card-value">${records.length}</div></div>
+        <div class="s-card"><div class="s-card-label">Employees</div><div class="s-card-value">${uniqueEmps.size}</div></div>
+        <div class="s-card"><div class="s-card-label">Days Covered</div><div class="s-card-value">${uniqueDates.size}</div></div>
+        <div class="s-card green"><div class="s-card-label">Present</div><div class="s-card-value">${totPresent}</div></div>
+        <div class="s-card red"><div class="s-card-label">Absent</div><div class="s-card-value">${totAbsent}</div></div>
+        <div class="s-card gold"><div class="s-card-label">Holiday Work</div><div class="s-card-value">${totHoliday}</div></div>
+        <div class="s-card purple"><div class="s-card-label">Sunday Work</div><div class="s-card-value">${totSunday}</div></div>
+        ${totalDupRows > 0 ? `<div class="s-card red"><div class="s-card-label">⚠️ Duplicate Rows</div><div class="s-card-value">${totalDupRows}</div></div>` : ''}
+      </div>
+      <div style="margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+        <div style="color:#ffd700;font-size:11px;font-weight:700">
+          📋 ${records.length}-Total Attendance: <span style="color:#a0c4ff">${filterDesc}</span>
+          ${totalDupRows > 0 ? ` | <span style="color:#ff6b6b">⚠️ ${totalDupRows} duplicate row (s) in ${totalDupGroups} group(s)</span>` : ''}
+        </div>
+        <input type="text" placeholder="🔍 Search..."
+          style="padding:6px 12px;border:1.5px solid #3a5a8a;border-radius:6px;
+          background:#001530;color:#e0e8f4;font-size:11px;outline:none;width:220px"
+          oninput="searchAttFn(this.value)" />
+      </div>
+      ${bulkToolbar}
+      <table id="attTable">
+        <thead><tr>
+          <th style="width:32px;text-align:center">☑</th>
+          <th>SL</th><th>Date</th><th>EMP ID</th><th>Employee Name</th>
+          <th>Passport</th><th>Designation</th><th>Status</th>
+          <th>Project / Site</th><th>Holiday</th><th>Sunday</th>
+          <th>Others</th><th>A Bonus</th><th>P Bonus</th>
+          <th>Salary</th><th>Remark</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    document.querySelectorAll('.dup-checkbox').forEach(cb => {
+      cb.addEventListener('change', updateSelectionCount);
+    });
+
+  } catch(e) {
+    attOut.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+  }
+}
+// ══════════════════════════════════════════
+//  সিলেকশন কাউন্ট আপডেট
+// ══════════════════════════════════════════
+function updateSelectionCount() {
+  const checked = document.querySelectorAll('.dup-checkbox:checked');
+  const badge = document.getElementById('selCountBadge');
+  const btn = document.getElementById('bulkDeleteBtn');
+  if (!badge || !btn) return;
+  if (checked.length > 0) {
+    badge.textContent = `${checked.length} Selected`;
+    badge.style.display = 'inline-block';
+    btn.style.display = 'inline-block';
+    btn.textContent = `🗑️ ${checked.length} Delete`;
+  } else {
+    badge.style.display = 'none';
+    btn.style.display = 'none';
+  }
+  // selectAll চেকবক্স সিঙ্ক
+  const allCbs = document.querySelectorAll('.dup-checkbox');
+  const selectAllCb = document.getElementById('selectAllDups');
+  if (selectAllCb) {
+    selectAllCb.checked = checked.length === allCbs.length && allCbs.length > 0;
+    selectAllCb.indeterminate = checked.length > 0 && checked.length < allCbs.length;
+  }
+}
+
+// ══════════════════════════════════════════
+//  সব ডুপ্লিকেট সিলেক্ট / আনসিলেক্ট
+// ══════════════════════════════════════════
+function toggleSelectAllDups(checked) {
+  document.querySelectorAll('.dup-checkbox').forEach(cb => { cb.checked = checked; });
+  updateSelectionCount();
+}
+
+// ══════════════════════════════════════════
+//  নির্বাচিত সব রেকর্ড একবারে ডিলিট
+// ══════════════════════════════════════════
+async function bulkDeleteSelected() {
+  const checked = Array.from(document.querySelectorAll('.dup-checkbox:checked'));
+  if (!checked.length) return;
+
+  // কনফার্ম মডাল দেখানো
+  const info = checked.map(cb => ({
+    path: cb.dataset.path,
+    date: cb.dataset.date,
+    id: cb.dataset.id,
+    name: cb.dataset.name
+  }));
+
+  showBulkDeleteConfirmModal(info, async () => {
+    const btn = document.getElementById('bulkDeleteBtn');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Deleting...'; }
+    try {
+      const db = firebase.firestore();
+      const batch = db.batch();
+      info.forEach(item => { if (item.path) batch.delete(db.doc(item.path)); });
+      await batch.commit();
+      showDeleteToast(`${info.length} Selected Records Deleted Successfully`, "success");
+      await generateAttendance();
+      checkMonthlyDuplicatesOnLoad();
+    } catch(e) {
+      if (btn) { btn.disabled = false; btn.textContent = `🗑️ ${info.length} Delete`; }
+      showDeleteToast("Error Deleting Records: " + e.message, "error");
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+//  BULK DELETE কনফার্ম মডাল
+// ══════════════════════════════════════════
+function showBulkDeleteConfirmModal(items, onConfirm) {
+  const existing = document.getElementById("delConfirmOverlay");
+  if (existing) existing.remove();
+
+  const preview = items.slice(0, 5).map(it =>
+    `<div style="display:flex;justify-content:space-between;font-size:11px;color:#cbd5e1;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+       <span style="color:#7d8aa3">${it.date}</span>
+       <span style="font-weight:700;color:#fff">${it.id}</span>
+       <span style="color:#94a3b8;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}</span>
+     </div>`
+  ).join('');
+  const moreText = items.length > 5 ? `<div style="text-align:center;font-size:10px;color:#7d8aa3;margin-top:4px">... এবং আরও ${items.length-5} টি রেকর্ড</div>` : '';
+
+  const overlay = document.createElement("div");
+  overlay.id = "delConfirmOverlay";
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,8,20,0.72);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:99999;
+    animation:delFadeIn .15s ease-out;`;
+  overlay.innerHTML = `
+    <style>
+      @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+      @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+    </style>
+    <div id="delConfirmBox" style="
+      width:370px;max-width:90vw;background:linear-gradient(160deg,#0a1a33,#001530);
+      border:1.5px solid #dc2626;border-radius:14px;padding:22px 22px 18px;
+      animation:delPopIn .18s ease-out;font-family:inherit;box-shadow:0 12px 40px rgba(220,38,38,0.25)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:38px;height:38px;border-radius:50%;background:rgba(220,38,38,0.15);
+          display:flex;align-items:center;justify-content:center;font-size:19px">🗑️</div>
+        <div>
+          <div style="color:#fff;font-size:15px;font-weight:800">${items.length} Selected Records?</div>
+          <div style="color:#94a3b8;font-size:11px;margin-top:1px">This action cannot be undone</div>
+        </div>
+      </div>
+      <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);
+        border-radius:8px;padding:10px 12px;margin-bottom:16px;max-height:160px;overflow-y:auto">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#7d8aa3;padding-bottom:4px;margin-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.1)">
+          <span>Date</span><span>EMP ID</span><span>Name</span>
+        </div>
+        ${preview}${moreText}
+      </div>
+      <div style="display:flex;gap:10px">
+        <button id="delConfirmCancelBtn" style="flex:1;padding:10px 0;border:1.5px solid #3a5a8a;
+          border-radius:8px;background:transparent;color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer">Cancel</button>
+        <button id="delConfirmOkBtn" style="flex:1;padding:10px 0;border:none;
+          border-radius:8px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+          font-size:12.5px;font-weight:800;cursor:pointer">🗑️ Delete All</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.querySelector("#delConfirmCancelBtn").onclick = close;
+  overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+  overlay.querySelector("#delConfirmOkBtn").onclick = () => { close(); onConfirm(); };
+}
+
+// ══════════════════════════════════════════
+//  একক DELETE কনফার্ম মডাল (আগেরটি অপরিবর্তিত)
+// ══════════════════════════════════════════
+function showDeleteConfirmModal({ dateText, idText, nameText, onConfirm }) {
+  const existing = document.getElementById("delConfirmOverlay");
+  if (existing) existing.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "delConfirmOverlay";
+  overlay.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,8,20,0.72);backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;z-index:99999;
+    animation:delFadeIn .15s ease-out;`;
+  overlay.innerHTML = `
+    <style>
+      @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+      @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+      #delConfirmBox button:hover { filter:brightness(1.12); transform:translateY(-1px); }
+    </style>
+    <div id="delConfirmBox" style="
+      width:340px;max-width:90vw;background:linear-gradient(160deg,#0a1a33,#001530);
+      border:1.5px solid #dc2626;border-radius:14px;box-shadow:0 12px 40px rgba(220,38,38,0.25);
+      padding:22px 22px 18px;animation:delPopIn .18s ease-out;font-family:inherit;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="width:38px;height:38px;border-radius:50%;background:rgba(220,38,38,0.15);
+          display:flex;align-items:center;justify-content:center;font-size:19px">🗑️</div>
+        <div>
+          <div style="color:#fff;font-size:15px;font-weight:800">রেকর্ড ডিলিট করুন?</div>
+          <div style="color:#94a3b8;font-size:11px;margin-top:1px">এই কাজটি Undo করা যাবে না</div>
+        </div>
+      </div>
+      <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);
+        border-radius:8px;padding:10px 12px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0">
+          <span style="color:#7d8aa3">Date</span><span style="font-weight:700;color:#fff">${dateText||"-"}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0">
+          <span style="color:#7d8aa3">EMP ID</span><span style="font-weight:700;color:#fff">${idText||"-"}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0">
+          <span style="color:#7d8aa3">Name</span><span style="font-weight:700;color:#fff">${nameText||"-"}</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button id="delConfirmCancelBtn" style="flex:1;padding:10px 0;border:1.5px solid #3a5a8a;
+          border-radius:8px;background:transparent;color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer">Cancel</button>
+        <button id="delConfirmOkBtn" style="flex:1;padding:10px 0;border:none;
+          border-radius:8px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+          font-size:12.5px;font-weight:800;cursor:pointer">🗑️ Delete</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const close = () => overlay.remove();
+  overlay.querySelector("#delConfirmCancelBtn").onclick = close;
+  overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+  overlay.querySelector("#delConfirmOkBtn").onclick = () => { close(); onConfirm(); };
+}
+
+// ══════════════════════════════════════════
+//  TOAST নোটিফিকেশন
+// ══════════════════════════════════════════
+function showDeleteToast(message, type = "success") {
+  const colors = type === "success"
+    ? { bg: "linear-gradient(135deg,#16a34a,#15803d)", icon: "✅" }
+    : { bg: "linear-gradient(135deg,#ef4444,#dc2626)", icon: "⚠️" };
+  const toast = document.createElement("div");
+  toast.style.cssText = `
+    position:fixed;top:24px;right:24px;z-index:100000;
+    background:${colors.bg};color:#fff;padding:13px 18px;border-radius:10px;
+    font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:9px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.35);animation:delToastIn .2s ease-out;max-width:320px;`;
+  toast.innerHTML = `
+    <style>
+      @keyframes delToastIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+      @keyframes delToastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(30px)} }
+    </style>
+    <span style="font-size:15px">${colors.icon}</span><span>${message}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = "delToastOut .2s ease-in forwards";
+    setTimeout(() => toast.remove(), 200);
+  }, 3000);
+}
+
+// ══════════════════════════════════════════
+//  একক DUPLICATE রেকর্ড ডিলিট
+// ══════════════════════════════════════════
+async function deleteDuplicateRecord(path, btn) {
+  if (!path) {
+    showDeleteToast("Record path not found.", "error");
+    return;
+  }
+  const tr = btn ? btn.closest("tr") : null;
+  const cells = tr ? tr.querySelectorAll("td") : [];
+  // চেকবক্স কলাম যোগ হয়েছে, তাই index +1 করা হয়েছে
+  const dateText = cells[2] ? cells[2].childNodes[0].textContent.trim() : "";
+  const idText   = cells[3] ? cells[3].textContent.trim() : "";
+  const nameText = cells[4] ? cells[4].textContent.trim() : "";
+  showDeleteConfirmModal({
+    dateText, idText, nameText,
+    onConfirm: async () => {
+      try {
+        if (btn) { btn.disabled = true; btn.textContent = "⏳"; }
+        const db = firebase.firestore();
+        await db.doc(path).delete();
+        showDeleteToast("Record deleted from server.", "success");
+        await generateAttendance();
+        checkMonthlyDuplicatesOnLoad();
+      } catch (e) {
+        if (btn) { btn.disabled = false; btn.textContent = "🗑️"; }
+        showDeleteToast("Error deleting record: " + e.message, "error");
       }
+    }
+  });
+}
 
-      function clearAttendance() {
-        document.getElementById("attOutput").innerHTML = "";
-        document.getElementById("attFilterType").value = "all";
-        onFilterTypeChange();
-        try { document.getElementById("attDateFrom")._flatpickr.clear(); } catch(e) {}
-        try { document.getElementById("attDateTo")._flatpickr.clear(); } catch(e) {}
-        document.getElementById("attIdInput").value = "";
-        document.getElementById("attNameInput").value = "";
-        document.getElementById("attEmpSelect").value = "";
-        document.getElementById("attProjectSelect").value = "";
+// ══════════════════════════════════════════
+//  TABLE SEARCH
+// ══════════════════════════════════════════
+function searchAttFn(val) {
+  const f = val.trim().toUpperCase();
+  const tbl = document.getElementById("attTable");
+  if (!tbl) return;
+
+  const rows = Array.from(tbl.querySelectorAll("tbody tr"));
+  const totalRows = rows.length;
+
+  if (!f) {
+    rows.forEach((r, i) => {
+      r.style.display = "";
+      const slCell = r.querySelectorAll("td")[1];
+      if (slCell) {
+        slCell.textContent = totalRows - i;
+        const isDup = r.style.background.includes("220,38,38");
+        slCell.style.color = isDup ? "#ff4d4d" : "#000000";
       }
+    });
+    return;
+  }
 
-      // ══════════════════════════════════════════
+  let visibleCount = 0;
+  rows.forEach(r => {
+    const match = (r.textContent || "").toUpperCase().includes(f);
+    r.style.display = match ? "" : "none";
+    if (match) {
+      visibleCount++;
+      const slCell = r.querySelectorAll("td")[1];
+      if (slCell) {
+        slCell.textContent = visibleCount;
+        const isDup = r.style.background.includes("220,38,38");
+        slCell.style.color = isDup ? "#ff4d4d" : "#000000";
+      }
+    }
+  });
+}
+
+function clearAttendance() {
+  document.getElementById("attOutput").innerHTML = "";
+  document.getElementById("attFilterType").value = "all";
+  onFilterTypeChange();
+  try { document.getElementById("attDateFrom")._flatpickr.clear(); } catch(e) {}
+  try { document.getElementById("attDateTo")._flatpickr.clear(); } catch(e) {}
+  document.getElementById("attIdInput").value = "";
+  document.getElementById("attNameInput").value = "";
+  document.getElementById("attEmpSelect").value = "";
+  document.getElementById("attProjectSelect").value = "";
+}     // ══════════════════════════════════════════
       //  ATTENDANCE MATRIX
       // ══════════════════════════════════════════
       let _matrixPrintData = null;
@@ -1092,7 +1653,7 @@ let _attEmpLoaded = false;
         const dToVal     = document.getElementById("matrixDateTo").value;
         const sideFilter = document.getElementById("matrixSideFilter").value.trim();
         const empFilter  = document.getElementById("matrixEmpFilter").value.trim();
-        if (!dFromVal || !dToVal) { showMsg("Date Range Required ", { title: "Date Range Required", type: "warn" }); return; }
+        if (!dFromVal || !dToVal) { showMsg("Date Range Required", { title: "Date Range Required", type: "warn" }); return; }
         matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance matrix...</p>';
         try {
           const inputStart = new Date(dFromVal); inputStart.setHours(0,0,0,0);
@@ -1243,7 +1804,6 @@ let _attEmpLoaded = false;
 <html lang="en"><head>
   <meta charset="UTF-8">
   <title>ALOMHOW — Present Sheet | ${monthName} ${year}</title>
-  
   <style>
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     @page { size: A4 landscape; margin: 5mm 5mm 0mm 5mm; }
@@ -1323,6 +1883,14 @@ let _attEmpLoaded = false;
         document.getElementById("msgboxOverlay").classList.add("active");
       }
       function closeMsgBox() { document.getElementById("msgboxOverlay").classList.remove("active"); }
+      function getMonthYearKey(dateStr) {
+  if (!dateStr) return "UNKNOWN";
+  const d = new Date(dateStr);
+  const monthNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${monthNames[d.getMonth()]}_${d.getFullYear()}`;
+}
+
+
 
       function formatDateTime() {
         const n = new Date();
@@ -1430,7 +1998,170 @@ let _attEmpLoaded = false;
           if (cb) tr.style.background = cb.checked ? "#ede9fe" : "";
         });
       }
+ async function openDetailsTab(empId, dFromVal, dToVal) {
+  const win = window.open("", "_blank");
+  win.document.write(`<!doctype html><html><head><title>Loading...</title><style>
+    body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#002147;font-family:sans-serif;flex-direction:column;gap:16px}
+    .spinner{width:48px;height:48px;border:4px solid #1e3a5f;border-top-color:#ffd700;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .msg{color:#ffd700;font-size:16px;font-weight:700;letter-spacing:1px}
+    .sub{color:#6a88aa;font-size:12px}
+  </style></head><body>
+    <div class="spinner"></div>
+    <div class="msg">⏳ Loading Details</div>
+    <div class="sub">Employee ID: ${empId}</div>
+  </body></html>`);
 
+  try {
+    const db = firebase.firestore();
+    const rtdb = firebase.database();
+    const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+
+    // ── 1. Employee info ──────────────────────────────────────
+    const empDoc = await db.collection("EMPLOYEE_LIST").doc(empId).get();
+    const emp = empDoc.exists ? empDoc.data() : { name: "Unknown" };
+
+    // ── 2. Attendance (Present_Absent collectionGroup) ────────
+    const snap = await db.collectionGroup("Present_Absent").get();
+    let att = [];
+    snap.forEach((doc) => {
+      const d = doc.data();
+      const docDate = new Date(d.DATE);
+      if (String(d.ID).trim() !== String(empId).trim()) return;
+      if (dFromVal && dToVal && (docDate < dFrom || docDate > dTo)) return;
+      att.push(d);
+    });
+    att.sort((a, b) => new Date(a.DATE) - new Date(b.DATE));
+
+    // ── 3. OT (RTDB: OVER_TIME) ───────────────────────────────
+    const otSnap = await rtdb.ref("OVER_TIME").once("value");
+    const otData = otSnap.val() || {};
+    let otMap = {};
+    for (const my in otData) {
+      const md = otData[my];
+      if (typeof md !== "object") continue;
+      for (const df in md) {
+        const dr = md[df];
+        if (typeof dr !== "object") continue;
+        for (const rk in dr) {
+          const row = dr[rk];
+          if (row && String(row.ID) === String(empId))
+            otMap[row.OT_Date || df] = row;
+        }
+      }
+    }
+
+    // ── 4. BONUS_ENTRY (RTDB) — date-wise ────────────────────
+    // Path: BONUS_ENTRY/{MONTH_YEAR}/{DATE_KEY}/{empId}
+    // Month key বের করি dFromVal থেকে (e.g. "JUNE_2026")
+    const monthKey = getMonthKey(dFromVal); // helper নিচে
+    const bonusSnap = await rtdb.ref(`BONUS_ENTRY/${monthKey}`).once("value");
+    const bonusMonthData = bonusSnap.val() || {};
+    // bonusMap[date] = { ATTENDANCE_BONUS, PERFORMANCE_BONUS }
+    let bonusMap = {};
+    for (const dateKey in bonusMonthData) {
+      const dateData = bonusMonthData[dateKey];
+      if (typeof dateData !== "object") continue;
+      if (dateData[empId]) {
+        // dateKey format: DATE_2026-06-01 → date: 2026-06-01
+        const date = dateKey.replace("DATE_", "");
+        bonusMap[date] = dateData[empId];
+      }
+    }
+
+    // ── 5. Others (Firestore: DailyAttendance) — date-wise ───
+    // Path: DailyAttendance/{MONTH_YEAR}/DATES/{DATE_KEY}/Others
+    // সব date-এর Others docs একসাথে collectionGroup দিয়ে নেওয়া যাবে না
+    // তাই attendance-এর প্রতিটি unique date-এর জন্য query করব
+    const uniqueDates = [...new Set(att.map(r => r.DATE))];
+    let othersMap = {}; // othersMap[date] = total AMOUNT
+    const othersPromises = uniqueDates.map(async (date) => {
+      const dateKey = `DATE_${date}`;
+      const othersSnap = await db
+        .collection("DailyAttendance")
+        .doc(monthKey)
+        .collection("DATES")
+        .doc(dateKey)
+        .collection("Others")
+        .where("ID", "==", empId)
+        .get();
+      let total = 0;
+      othersSnap.forEach(doc => {
+        total += Number(doc.data().AMOUNT || 0);
+      });
+      othersMap[date] = total;
+    });
+    await Promise.all(othersPromises);
+
+    // ── 6. Table rows ─────────────────────────────────────────
+    let rows = att.map((r, i) => {
+      const ot       = otMap[r.DATE]    || {};
+      const bonus    = bonusMap[r.DATE] || {};
+      const others   = othersMap[r.DATE] || 0;
+      const aBonus   = bonus.ATTENDANCE_BONUS   || 0;
+      const pBonus   = bonus.PERFORMANCE_BONUS  || 0;
+      return `<tr>
+        <td style="text-align:center">${i + 1}</td>
+        <td>${r.DATE}</td>
+        <td style="text-align:center">${r.STATUS}</td>
+        <td>${r.SIDE_NAME || "-"}</td>
+        <td style="text-align:center">${ot.TOTAL_OT_HOURS || 0}</td>
+        <td style="text-align:center">${r.HOLIDAY_WORK || 0}</td>
+        <td style="text-align:center">${r.SUNDAY_WORK || 0}</td>
+        <td style="text-align:center">${others > 0 ? others : "-"}</td>
+        <td style="text-align:center">${aBonus > 0 ? aBonus : "-"}</td>
+        <td style="text-align:center">${pBonus > 0 ? pBonus : "-"}</td>
+        <td>${r.REMARK || "-"}</td>
+      </tr>`;
+    }).join("");
+
+    // ── 7. Final HTML ─────────────────────────────────────────
+    const html = `<!doctype html><html><head><title>Details - ${empId}</title><style>
+      body{font-family:'Source Sans 3',sans-serif;padding:30px;background:#f4f7f6;color:#1a1a2e}
+      .header{background:#002147;color:#ffd700;padding:20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+      table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+      th{background:#002147;color:white;padding:12px;font-size:11px;text-transform:uppercase;border:1px solid #335185}
+      td{padding:10px;border:1px solid #eee;font-size:12px}
+      tr:hover{background:#fffecb}
+      .btn-print{background:#ffd700;color:#002147;border:2px solid #ffd700;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer}
+      @media print{.no-print{display:none}}
+    </style></head><body>
+      <div class="header">
+        <div>
+          <h2 style="margin:0">Monthly Attendance Details</h2>
+          <p style="margin:5px 0 0;font-size:14px">${empId} — ${emp.name}</p>
+        </div>
+        <button class="btn-print no-print" onclick="window.print()">🖨️ Print Report</button>
+      </div>
+      <p style="margin-bottom:10px;font-size:12px"><b>Period:</b> ${dFromVal} to ${dToVal}</p>
+      <table>
+        <thead><tr>
+          <th>SL</th><th>Date</th><th>Status</th><th>Project Name</th>
+          <th>OT Hours</th><th>Holiday Work</th><th>Sunday Work</th>
+          <th>Others</th><th>A Bonus</th><th>P Bonus</th><th>Remark</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body></html>`;
+
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
+
+  } catch (e) {
+    win.document.write(`<p style="color:red">Error: ${e.message}</p>`);
+  }
+}
+
+// ── Helper: "2026-06-01" → "JUNE_2026" ───────────────────────
+function getMonthKey(dateStr) {
+  const months = [
+    "JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
+    "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"
+  ];
+  const d = new Date(dateStr);
+  return `${months[d.getMonth()]}_${d.getFullYear()}`;
+}
       // ══════════════════════════════════════════
       //  GENERATE PAYSLIPS
       // ══════════════════════════════════════════
@@ -1440,7 +2171,7 @@ let _attEmpLoaded = false;
   const dFromVal = document.getElementById("panelDateFrom").value;
   const dToVal   = document.getElementById("panelDateTo").value;
   if (!dFromVal || !dToVal) {
-    showMsg(" date range required ", {title:"Date Range Required", type:"warn"});
+    showMsg("date range required", {title:"Date Range Required", type:"warn"});
     return;
   }
   const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
@@ -1448,7 +2179,6 @@ let _attEmpLoaded = false;
   genBtn.disabled=true; genBtn.textContent="⏳ Generating...";
   document.getElementById("genLoader").classList.add("active");
   updateLoader(0, selected.length, "");
-  document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
   const win = window.open("", "_blank");
   if (!win) {
     showMsg("Popup blocked! Browser-এ popup allow করুন।", {title:"Popup Blocked", type:"warn"});
@@ -1460,9 +2190,18 @@ let _attEmpLoaded = false;
   try {
     if (!_cache.loaded) await preloadStaticData();
     const rangeData = await fetchRangeData(dFromVal, dToVal);
-   const workingDays = (window._manualWD && window._manualWD > 0)
-  ? window._manualWD
-  : await getWorkingDays(dFromVal);
+    const workingDays = (window._manualWD && window._manualWD > 0)
+      ? window._manualWD
+      : await getWorkingDays(dFromVal);
+
+    // ✅ BONUS: একবার সব bonus data লোড করুন
+    const rtdb = firebase.database();
+    const bonusSnap = await rtdb.ref("BONUS_ENTRY").once("value");
+    const bonusData = bonusSnap.val() || {};
+    const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+    const _mNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+    const monthKey = `${_mNames[dFrom.getMonth()]}_${dFrom.getFullYear()}`;
+
     let allPages = "";
     for (let i=0; i<selected.length; i++) {
       const empId = selected[i];
@@ -1474,8 +2213,34 @@ let _attEmpLoaded = false;
           win.document.getElementById("st").textContent = `Processing: ${empId}`;
         }
       } catch(e2) {}
-      const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
-     allPages += `<div class="page">${buildOneSlip(d, period, "OFFICE COPY")}${buildOneSlip(d, period, "EMPLOYEE COPY")}</div>`;
+
+      // PAID হলে posted সময়ের adv/fine ব্যবহার করুন
+      const _postedSnap = await firebase.database()
+        .ref(`SALARY_POSTED/${getMonthYearKey(dFromVal)}/${empId}`).once("value");
+      const _postedInfo = _postedSnap.val();
+      if (_postedInfo && _postedInfo.status === "PAID") {
+        _cache.advMap[empId]  = _postedInfo.adv  || 0;
+        _cache.fineMap[empId] = _postedInfo.fine || 0;
+      }
+
+      // ✅ BONUS: এই employee-এর bonus হিসাব করুন
+      let pBonus = 0, aBonus = 0;
+      if (bonusData[monthKey] && typeof bonusData[monthKey] === "object") {
+        for (const df in bonusData[monthKey]) {
+          const dr = bonusData[monthKey][df];
+          if (!dr || typeof dr !== "object") continue;
+          if (!dr[empId]) continue;
+          const row = dr[empId];
+          const bonusDate = new Date(row.DATE || df);
+          if (bonusDate >= dFrom && bonusDate <= dTo) {
+            pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
+            aBonus += parseFloat(row.ATTENDANCE_BONUS)  || 0;
+          }
+        }
+      }
+
+      const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus, aBonus);
+      allPages += `<div class="page">${buildOneSlip(d, period, "OFFICE COPY")}${buildOneSlip(d, period, "EMPLOYEE COPY")}</div>`;
       updateLoader(i+1, selected.length, empId);
     }
     const fullHtml = `<!doctype html><html><head>
@@ -1497,7 +2262,6 @@ let _attEmpLoaded = false;
   document.getElementById("genLoader").classList.remove("active");
   genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
 }
-
       function updateLoader(current, total, empId) {
         document.getElementById("genCountCurrent").textContent = current;
         document.getElementById("genCountTotal").textContent   = total;
@@ -1509,9 +2273,9 @@ let _attEmpLoaded = false;
       // ══════════════════════════════════════════
       //  PAYSLIP HTML BUILDERS
       // ══════════════════════════════════════════
-     function buildOneSlip(d, period, title) {
+      function buildOneSlip(d, period, title) {
         return `
-        <div style="position:relative;overflow:hidden;background:white;padding:8mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
+        <div style="position:relative;overflow:hidden;background:white;padding:4mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
           <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.04;width:55%;z-index:0;pointer-events:none" alt="">
           <div style="position:relative;z-index:1;font-family:'Source Sans 3',Arial,sans-serif;font-size:11px;color:#111">
             <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
@@ -1528,13 +2292,13 @@ let _attEmpLoaded = false;
             </div>
             <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:0 8px;margin-bottom:8px">
               <div>
-  <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP ID</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.empId}</span></div>
-  <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP NAME</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.name}</span></div>
-  <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">DESIGNATION</span><span style="width:10px;font-weight:700">:</span><span>${d.desig}</span></div>
-  <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PASSPORT NO</span><span style="width:10px;font-weight:700">:</span><span>${d.passport}</span></div>
-  <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">JOINING DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.joining}</span></div>
-  <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
-</div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP ID</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.empId}</span></div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP NAME</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.name}</span></div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">DESIGNATION</span><span style="width:10px;font-weight:700">:</span><span>${d.desig}</span></div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PASSPORT NO</span><span style="width:10px;font-weight:700">:</span><span>${d.passport}</span></div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">JOINING DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.joining}</span></div>
+                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
+              </div>
               <div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.entryDate}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">GANG</span><span style="width:10px;font-weight:700">:</span><span></span></div>
@@ -1553,9 +2317,9 @@ let _attEmpLoaded = false;
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.sundayWork}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.pBonus}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.aBonus}</td></tr>                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Other</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.others}</td></tr>
                   <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.gross}</td></tr>
                 </table>
               </div>
@@ -1568,10 +2332,10 @@ let _attEmpLoaded = false;
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Advance Refund</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.advanceRefund}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fine</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fine}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Absent <span style="color:#aaa;font-size:9px">(info)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.absentDays} Days</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+                 <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
-                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.totalDed}</td></tr>
-                </table>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
+                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.totalDed}</td></tr></table>
               </div>
             </div>
             <div style="margin-top:8px;border-top:2px solid black;padding-top:6px">
@@ -1616,8 +2380,7 @@ let _attEmpLoaded = false;
                 <td style="border:1px solid #9ca3af;padding:3px"></td>
               </tr>
             </table>
-
-           ${title === "OFFICE COPY" ? `
+            ${title === "OFFICE COPY" ? `
             <div style="margin-top:64px;font-size:10px;text-transform:uppercase">
               EMPLOYEE SIGNATURE:..........................................<br>
               <span style="margin-top:4px;display:inline-block">DATE:...............................</span>
@@ -1626,10 +2389,10 @@ let _attEmpLoaded = false;
               DIRECTOR SIGNATURE:..........................................<br>
               <span style="margin-top:4px;display:inline-block">DATE:...............................</span>
             </div>`}
-
           </div>
         </div>`;
       }
+
       function payslipWindowCSS() {
         return `<style>
           *{box-sizing:border-box;margin:0;padding:0}
@@ -1675,403 +2438,548 @@ let _attEmpLoaded = false;
         </body></html>`;
       }
 
-      async function openSlipTab(empId, dFromVal, dToVal) {
-        const win = window.open("", "_blank");
-        win.document.write(loaderPageHTML(1));
-        try {
-          if (!_cache.loaded) await preloadStaticData();
-         const rangeData = await fetchRangeData(dFromVal, dToVal);
-        const workingDays = (window._manualWD && window._manualWD > 0)
-  ? window._manualWD
-  : await getWorkingDays(dFromVal);
-         const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
-          const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
-          const html = `<!doctype html><html><head>
-            <meta charset="UTF-8"><title>Payslip — ${d.empId}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
-            ${payslipWindowCSS()}
-          </head><body>
-            <div class="no-print"><button onclick="window.print()">🖨️ Print </button></div>
-           <div class="page">
-  ${buildOneSlip(d, period, "OFFICE COPY")}
-  ${buildOneSlip(d, period, "EMPLOYEE COPY")}
-</div>
-          </body></html>`;
-          win.document.open(); win.document.write(html); win.document.close();
-        } catch(e) {
-          win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
+ async function openSlipTab(empId, dFromVal, dToVal) {
+  const win = window.open("", "_blank");
+  win.document.write(loaderPageHTML(1));
+  try {
+    if (!_cache.loaded) await preloadStaticData();
+
+    const rtdb = firebase.database();
+    const [advSnap, fineSnap] = await Promise.all([
+      rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
+      rtdb.ref("FINE_SUMMARY/USERS").once("value"),
+    ]);
+    const advData = advSnap.val() || {};
+    const fineData = fineSnap.val() || {};
+    _cache.advMap = {};
+    _cache.fineMap = {};
+    for (const id in advData) _cache.advMap[id] = parseInt(advData[id].pending) || 0;
+    for (const id in fineData) _cache.fineMap[id] = parseInt(fineData[id].pending) || 0;
+
+    const monthYearKey = getMonthYearKey(dFromVal);
+    const postedSnap = await rtdb.ref(`SALARY_POSTED/${monthYearKey}/${empId}`).once("value");
+    const postedInfo = postedSnap.val();
+    if (postedInfo && postedInfo.status === "PAID") {
+      _cache.advMap[empId]  = postedInfo.adv  || 0;
+      _cache.fineMap[empId] = postedInfo.fine || 0;
+    }
+
+    // ✅ BONUS: BONUS_ENTRY থেকে এই employee-এর bonus আনুন
+    const bonusSnap = await rtdb.ref("BONUS_ENTRY").once("value");
+    const bonusData = bonusSnap.val() || {};
+    let pBonus = 0, aBonus = 0;
+    const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+    const _mNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+    const monthKey = `${_mNames[dFrom.getMonth()]}_${dFrom.getFullYear()}`;
+    if (bonusData[monthKey] && typeof bonusData[monthKey] === "object") {
+      for (const df in bonusData[monthKey]) {
+        const dr = bonusData[monthKey][df];
+        if (!dr || typeof dr !== "object") continue;
+        if (!dr[empId]) continue;
+        const row = dr[empId];
+        const bonusDate = new Date(row.DATE || df);
+        if (bonusDate >= dFrom && bonusDate <= dTo) {
+          pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
+          aBonus += parseFloat(row.ATTENDANCE_BONUS)  || 0;
         }
       }
+    }
 
-      async function openDetailsTab(empId, dFromVal, dToVal) {
-        const win = window.open("", "_blank");
-        win.document.write(loaderPageHTML(1));
-        try {
-          const db   = firebase.firestore();
-          const rtdb = firebase.database();
-          const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
-          const empDoc = await db.collection("EMPLOYEE_LIST").doc(empId).get();
-          const emp  = empDoc.exists ? empDoc.data() : { name: "Unknown" };
-          const snap = await db.collectionGroup("Present_Absent").get();
-          let att = [];
-          snap.forEach(doc => {
-            const d = doc.data();
-            const docDate = new Date(d.DATE);
-            if (String(d.ID).trim()!==String(empId).trim()) return;
-            if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
-            att.push(d);
-          });
-          att.sort((a,b) => new Date(a.DATE)-new Date(b.DATE));
-          const otSnap = await rtdb.ref("OVER_TIME").once("value");
-          const otData = otSnap.val() || {};
-          let otMap = {};
-          for (const my in otData) {
-            const md=otData[my]; if (typeof md!=="object") continue;
-            for (const df in md) {
-              const dr=md[df]; if (typeof dr!=="object") continue;
-              for (const rk in dr) { const row=dr[rk]; if (row&&String(row.ID)===String(empId)) otMap[row.OT_Date||df]=row; }
-            }
-          }
-          let rows = att.map((r,i) => {
-            const ot = otMap[r.DATE]||{};
-            return `<tr><td style="text-align:center">${i+1}</td><td>${r.DATE}</td><td style="text-align:center">${r.STATUS}</td><td>${r.SIDE_NAME||"-"}</td><td style="text-align:center">${ot.TOTAL_OT_HOURS||0}</td><td style="text-align:center">${r.HOLIDAY_WORK||0}</td><td style="text-align:center">${r.SUNDAY_WORK||0}</td><td>${r.REMARK||"-"}</td></tr>`;
-          }).join("");
-          const html = `<!doctype html><html><head><title>Details - ${empId}</title><style>
-            body{font-family:'Source Sans 3',sans-serif;padding:30px;background:#f4f7f6;color:#1a1a2e}
-            .header{background:#002147;color:#ffd700;padding:20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
-            table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
-            th{background:#002147;color:white;padding:12px;font-size:11px;text-transform:uppercase;border:1px solid #335185}
-            td{padding:10px;border:1px solid #eee;font-size:12px}
-            tr:hover{background:#fffecb}
-            .btn-print{background:#ffd700;color:#002147;border:2px solid #ffd700;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer;transition:all .2s}
-            @media print{.no-print{display:none}}
-          </style></head><body>
-            <div class="header">
-              <div><h2 style="margin:0">Monthly Attendance Details</h2><p style="margin:5px 0 0;font-size:14px">${empId} — ${emp.name}</p></div>
-              <button class="btn-print no-print" onclick="window.print()">🖨️ Print Report</button>
-            </div>
-            <p style="margin-bottom:10px;font-size:12px"><b>Period:</b> ${dFromVal} to ${dToVal}</p>
-            <table><thead><tr><th>SL</th><th>Date</th><th>Status</th><th>Project Name</th><th>OT Hours</th><th>Holiday Work</th><th>Sunday Work</th><th>Remark</th></tr></thead><tbody>${rows}</tbody></table>
-          </body></html>`;
-          win.document.open(); win.document.write(html); win.document.close();
-        } catch(e) {
-          win.document.write(`<p style="color:red">Error: ${e.message}</p>`);
-        }
+    const rangeData = await fetchRangeData(dFromVal, dToVal);
+    const workingDays = (window._manualWD && window._manualWD > 0)
+      ? window._manualWD
+      : await getWorkingDays(dFromVal);
+    const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus, aBonus);
+    const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+    const html = `<!doctype html><html><head>
+      <meta charset="UTF-8"><title>Payslip — ${d.empId}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+      ${payslipWindowCSS()}
+    </head><body>
+      <div class="no-print"><button onclick="window.print()">🖨️ Print </button></div>
+      <div class="page">
+        ${buildOneSlip(d, period, "OFFICE COPY")}
+        ${buildOneSlip(d, period, "EMPLOYEE COPY")}
+      </div>
+    </body></html>`;
+    win.document.open(); win.document.write(html); win.document.close();
+  } catch(e) {
+    win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
+  }
+}
+      // ══════════════════════════════════════════
+      //  BONUS RECALCULATION — live row update
+      // ══════════════════════════════════════════
+      function recalcRow(empId) {
+        const pBonusInput = document.getElementById(`pb_${empId}`);
+        const aBonusInput = document.getElementById(`ab_${empId}`);
+        const grossCell   = document.getElementById(`gross_${empId}`);
+        const npsCell     = document.getElementById(`nps_${empId}`);
+        const csgCell     = document.getElementById(`csg_${empId}`);
+        const totDedCell  = document.getElementById(`totded_${empId}`);
+        const netCell     = document.getElementById(`net_${empId}`);
+        const baseGross   = parseFloat(document.getElementById(`basegross_${empId}`).value) || 0;
+        const advVal      = parseFloat(document.getElementById(`adv_${empId}`).dataset.adv) || 0;
+        const fineVal     = parseFloat(document.getElementById(`fine_${empId}`).dataset.fine) || 0;
+        const pBonus = parseFloat(pBonusInput.value) || 0;
+        const aBonus = parseFloat(aBonusInput.value) || 0;
+        const newGross  = baseGross + pBonus + aBonus;
+        const newNps    = Math.round(newGross * 0.01);
+        const newCsg    = Math.round(newGross * 0.015);
+        const newTotDed = advVal + fineVal + newNps + newCsg;
+        const newNet    = Math.round(newGross - newTotDed);
+        grossCell.textContent  = newGross.toFixed(2);
+        npsCell.textContent    = newNps;
+        csgCell.textContent    = newCsg;
+        totDedCell.textContent = newTotDed;
+        netCell.innerHTML      = `<strong>${newNet.toFixed(2)}</strong>`;
+        // Update grand total row
+        updateGrandTotals();
+      }
+
+      function updateGrandTotals() {
+        const tbody = document.querySelector("#reportTable tbody");
+        if (!tbody) return;
+        let totBasic=0, totNorm=0, totHol=0, totSun=0, totPres=0, totAbs=0, totOt=0, totOth=0;
+        let totPB=0, totAB=0, totGross=0, totAdv=0, totFine=0, totNps=0, totCsg=0, totDed=0, totNet=0;
+        tbody.querySelectorAll("tr").forEach(tr => {
+          const get = (sel) => { const el=tr.querySelector(sel); return el?parseFloat(el.textContent)||0:0; };
+          const getVal = (id) => { const el=document.getElementById(id); return el?parseFloat(el.value)||0:0; };
+          const empId = tr.dataset.empid;
+          if (!empId) return;
+          totBasic += parseFloat(tr.dataset.basic||0);
+          totNorm  += parseFloat(tr.dataset.norm||0);
+          totHol   += parseFloat(tr.dataset.hol||0);
+          totSun   += parseFloat(tr.dataset.sun||0);
+          totPres  += parseFloat(tr.dataset.pres||0);
+          totAbs   += parseFloat(tr.dataset.abs||0);
+          totOt    += parseFloat(tr.dataset.ot||0);
+          totOth   += parseFloat(tr.dataset.oth||0);
+          const pb = getVal(`pb_${empId}`);
+          const ab = getVal(`ab_${empId}`);
+          const g  = parseFloat(document.getElementById(`gross_${empId}`).textContent)||0;
+          const nps= parseFloat(document.getElementById(`nps_${empId}`).textContent)||0;
+          const csg= parseFloat(document.getElementById(`csg_${empId}`).textContent)||0;
+          const adv= parseFloat(tr.dataset.adv||0);
+          const fine=parseFloat(tr.dataset.fine||0);
+          const ded= parseFloat(document.getElementById(`totded_${empId}`).textContent)||0;
+          const net= parseFloat(document.getElementById(`net_${empId}`).textContent.replace(/[^0-9.\-]/g,""))||0;
+          totPB   += pb;
+          totAB   += ab;
+          totGross+= g;
+          totAdv  += adv;
+          totFine += fine;
+          totNps  += nps;
+          totCsg  += csg;
+          totDed  += ded;
+          totNet  += net;
+        });
+        const tf = document.getElementById("reportTotalsRow");
+        if (!tf) return;
+        tf.querySelector(".tf-basic").textContent   = totBasic.toFixed(2);
+        tf.querySelector(".tf-norm").textContent    = totNorm;
+        tf.querySelector(".tf-hol").textContent     = totHol.toFixed(2);
+        tf.querySelector(".tf-sun").textContent     = totSun.toFixed(2);
+        tf.querySelector(".tf-pres").textContent    = totPres;
+        tf.querySelector(".tf-abs").textContent     = totAbs;
+        tf.querySelector(".tf-ot").textContent      = totOt.toFixed(2);
+        tf.querySelector(".tf-oth").textContent     = totOth.toFixed(2);
+        tf.querySelector(".tf-pb").textContent      = totPB.toFixed(2);
+        tf.querySelector(".tf-ab").textContent      = totAB.toFixed(2);
+        tf.querySelector(".tf-gross").textContent   = totGross.toFixed(2);
+        tf.querySelector(".tf-adv").textContent     = totAdv;
+        tf.querySelector(".tf-fine").textContent    = totFine;
+        tf.querySelector(".tf-nps").textContent     = Math.round(totNps);
+        tf.querySelector(".tf-csg").textContent     = Math.round(totCsg);
+        tf.querySelector(".tf-totded").textContent  = Math.round(totDed);
+        tf.querySelector(".tf-net").textContent     = Math.round(totNet);
+        // update words
+        const wordsEl = document.getElementById("netWordsRow");
+        if (wordsEl) wordsEl.textContent = numberToWordsGlobal(Math.round(totNet));
+      }
+
+      function numberToWordsGlobal(amount) {
+        const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+        const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+        function b100(n){if(n<20)return ones[n];return tens[Math.floor(n/10)]+(n%10?" "+ones[n%10]:"")}
+        function b1000(n){if(n<100)return b100(n);return ones[Math.floor(n/100)]+" Hundred"+(n%100?" "+b100(n%100):"")}
+        const num=Math.floor(Number(amount)||0);
+        if(num===0)return"Zero MUR Only";
+        let r="";
+        if(num>=1000000)r+=b1000(Math.floor(num/1000000))+" Million ";
+        if(num>=1000)r+=b1000(Math.floor((num%1000000)/1000))+" Thousand ";
+        if(num%1000)r+=b1000(num%1000);
+        return r.trim()+" MUR Only";
       }
 
       // ══════════════════════════════════════════
       //  MAIN MONTHLY REPORT
       // ══════════════════════════════════════════
-async function generateReport() {
-  const output   = document.getElementById("reportOutput");
-  const dFromVal = document.getElementById("dateFrom").value;
-  const dToVal   = document.getElementById("dateTo").value;
-  const dFrom    = new Date(dFromVal), dTo = new Date(dToVal);
-  const filterId = document.getElementById("filterId").value.trim();
-  window._reportFrom = dFromVal; window._reportTo = dToVal;
+      async function generateReport() {
+        const output   = document.getElementById("reportOutput");
+        const dFromVal = document.getElementById("dateFrom").value;
+        const dToVal   = document.getElementById("dateTo").value;
+        const dFrom    = new Date(dFromVal), dTo = new Date(dToVal);
+        const filterId = document.getElementById("filterId").value.trim();
+        window._reportFrom = dFromVal; window._reportTo = dToVal;
 
-  if (!dFromVal || !dToVal) {
-    showMsg("FROM & TO BOTH ARE REQUIRED", {title:"Date Required", type:"warn"});
-    return;
-  }
-  output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
+        if (!dFromVal || !dToVal) {
+          showMsg("FROM & TO BOTH ARE REQUIRED", {title:"Date Required", type:"warn"});
+          return;
+        }
+        output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
 
-  const workingDays = (window._manualWD && window._manualWD > 0)
-    ? window._manualWD
-    : await getWorkingDays(dFromVal);
+        const workingDays = (window._manualWD && window._manualWD > 0)
+          ? window._manualWD
+          : await getWorkingDays(dFromVal);
 
-  function getDailyRate(salary) {
-    return parseFloat((salary / workingDays).toFixed(2));
-  }
+        function getDailyRate(salary) {
+          return parseFloat((salary / workingDays).toFixed(2));
+        }
 
-  function numberToWords(amount) {
-    const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-    const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-    function convert(n) {
-      if (n===0) return "";
-      else if (n<20) return ones[n]+" ";
-      else if (n<100) return tens[Math.floor(n/10)]+" "+(n%10?ones[n%10]+" ":"");
-      else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
-    }
-    const num = Math.round(amount);
-    if (num===0) return "Zero MUR Only";
-    let result = "";
-    if (num>=10000000) { result+=convert(Math.floor(num/10000000))+"Crore "; }
-    if (num%10000000>=100000) { result+=convert(Math.floor((num%10000000)/100000))+"Lakh "; }
-    if (num%100000>=1000) { result+=convert(Math.floor((num%100000)/1000))+"Thousand "; }
-    result+=convert(num%1000);
-    return result.trim()+" MUR Only";
-  }
+        try {
+          const db   = firebase.firestore();
+          const rtdb = firebase.database();
 
-  try {
-    const db   = firebase.firestore();
-    const rtdb = firebase.database();
+          const d0 = new Date(dFromVal);
+          // ✅ UPDATED: Full month names to match Firebase path (JULY_2026)
+          const _mNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+          const monthYearKey = `${_mNames[d0.getMonth()]}_${d0.getFullYear()}`;
 
-    // ★ monthYearKey ও postedData যোগ করা হয়েছে
-    const d0 = new Date(dFromVal);
-    const _mNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-    const monthYearKey = `${_mNames[d0.getMonth()]}_${d0.getFullYear()}`;
+          // ✅ UPDATED: Added bonusSnap to Promise.all
+        const [snap, otSnap, advSnap, fineSnap, postedSnap, bonusSnap, othersSnap] = await Promise.all([
+            db.collectionGroup("Present_Absent").get(),
+            rtdb.ref("OVER_TIME").once("value"),
+            rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
+            rtdb.ref("FINE_SUMMARY/USERS").once("value"),
+            rtdb.ref(`SALARY_POSTED/${monthYearKey}`).once("value"),
+            rtdb.ref("BONUS_ENTRY").once("value"),  // ✅ NEW
+          db.collectionGroup("Others").get(),
+          ]);   // ✅ NEW — আলাদা "Others" sub-collection (client-side filter)
+        
+          const otData     = otSnap.val()||{};
+          const advData    = advSnap.val()||{};
+          const fineData   = fineSnap.val()||{};
+          const postedData = postedSnap.val()||{};
+          const bonusData  = bonusSnap.val()||{};  // ✅ NEW
 
-    const [snap, otSnap, advSnap, fineSnap, postedSnap] = await Promise.all([
-      db.collectionGroup("Present_Absent").get(),
-      rtdb.ref("OVER_TIME").once("value"),
-      rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
-      rtdb.ref("FINE_SUMMARY/USERS").once("value"),
-      rtdb.ref(`SALARY_POSTED/${monthYearKey}`).once("value"),
-    ]);
-    const otData     = otSnap.val()||{};
-    const advData    = advSnap.val()||{};
-    const fineData   = fineSnap.val()||{};
-    const postedData = postedSnap.val()||{};
+          let workers = {};
+          snap.forEach(doc => {
+            const d = doc.data();
+            const docDate = new Date(d.DATE);
+            if (filterId && d.ID!==filterId) return;
+            if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
+            if (!workers[d.ID]) {
+              const sal = parseInt(d.SALARY)||0;
+              workers[d.ID] = {
+                id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
+                sal:sal, daily:getDailyRate(sal),
+                norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0, others:0,
+                pBonus:0, aBonus:0  // ✅ NEW
+              };
+            }
+            if (d.STATUS==="PRESENT") workers[d.ID].pres++;
+            else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
+            if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
+            workers[d.ID].sun += parseFloat(d.SUNDAY_WORK)  || 0;
+            workers[d.ID].hol += parseFloat(d.HOLIDAY_WORK) || 0;
+          });
 
-    let workers = {};
-    snap.forEach(doc => {
-      const d = doc.data();
-      const docDate = new Date(d.DATE);
-      if (filterId && d.ID!==filterId) return;
-      if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
-      if (!workers[d.ID]) {
-        const sal = parseInt(d.SALARY)||0;
-        workers[d.ID] = {
-          id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
-          sal:sal, daily:getDailyRate(sal),
-          norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0, others:0
-        };
-      }
-      if (d.STATUS==="PRESENT") workers[d.ID].pres++;
-      else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
-      if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-      workers[d.ID].sun    += parseFloat(d.SUNDAY_WORK)  || 0;
-      workers[d.ID].hol    += parseFloat(d.HOLIDAY_WORK) || 0;
-      workers[d.ID].others += parseFloat(d.OTHERS)       || 0;
-    });
+          // ✅ NEW: "Others" sub-collection থেকে AMOUNT যোগ করা হচ্ছে
+          othersSnap.forEach(doc => {
+            const d = doc.data();
+            const docDate = new Date(d.DATE);
+            if (!d.ID) return;
+            if (filterId && d.ID!==filterId) return;
+            if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
+            if (!workers[d.ID]) return; // employee আগে থেকে Present_Absent-এ না থাকলে স্কিপ
+            workers[d.ID].others += parseFloat(d.AMOUNT) || 0;
+          });
 
-    for (const my in otData) {
-      const md=otData[my]; if (typeof md!=="object") continue;
-      for (const df in md) {
-        const dr=md[df]; if (typeof dr!=="object") continue;
-        for (const rk in dr) {
-          const row=dr[rk];
-          if (row && row.ID && workers[row.ID]) {
-            const otDate = new Date(row.OT_Date||df);
-            if (dFromVal && dToVal && (otDate<dFrom||otDate>dTo)) continue;
-            workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS)||0;
-            workers[row.ID].otA += (parseFloat(row.TOTAL_OT_HOURS||0)) * (parseFloat(row.OT_Rate||row.ot_rate||row.OT_RATE||0));
+          // OT loop (unchanged)
+          for (const my in otData) {
+            const md=otData[my]; if (typeof md!=="object") continue;
+            for (const df in md) {
+              const dr=md[df]; if (typeof dr!=="object") continue;
+              for (const rk in dr) {
+                const row=dr[rk];
+                if (row && row.ID && workers[row.ID]) {
+                  const otDate = new Date(row.OT_Date||df);
+                  if (dFromVal && dToVal && (otDate<dFrom||otDate>dTo)) continue;
+                  workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS)||0;
+                  workers[row.ID].otA += (parseFloat(row.TOTAL_OT_HOURS||0)) * (parseFloat(row.OT_Rate||row.ot_rate||row.OT_RATE||0));
+                }
+              }
+            }
           }
-        }
-      }
-    }
 
-    for (const id in workers) {
-      if (advData[id])  workers[id].adv  = parseInt(advData[id].pending)  || 0;
-      if (fineData[id]) workers[id].fine = parseInt(fineData[id].pending) || 0;
-    }
-    // ★ PAID row-এ posted সময়ের actual adv/fine দেখানো
-    for (const id in workers) {
-      const pi = postedData[id];
-      if (pi && pi.status === "PAID") {
-        workers[id].adv  = pi.adv  || 0;
-        workers[id].fine = pi.fine || 0;
-      }
-    }
+          // ✅ NEW: Bonus loop — same pattern as OT
+          // BONUS_ENTRY → JULY_2026 → DATE_2026-07-01 → ACL-0006 → { PERFORMANCE_BONUS, ATTENDANCE_BONUS }
+          for (const my in bonusData) {                          // JULY_2026
+            const md = bonusData[my];
+            if (typeof md !== "object") continue;
+            for (const df in md) {                               // DATE_2026-07-01
+              const dr = md[df];
+              if (typeof dr !== "object") continue;
+              for (const empId in dr) {                          // ACL-0006
+                const row = dr[empId];
+                if (!row || !row.ID || !workers[row.ID]) continue;
+                const bonusDate = new Date(row.DATE || df);
+                if (dFromVal && dToVal && (bonusDate < dFrom || bonusDate > dTo)) continue;
+                workers[row.ID].pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
+                workers[row.ID].aBonus += parseFloat(row.ATTENDANCE_BONUS)  || 0;
+              }
+            }
+          }
 
-    let totals={norm:0,hol:0,sun:0,pres:0,abs:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0};
-    let rows="", count=1;
+          // ADV / FINE loop (unchanged)
+          for (const id in workers) {
+            if (advData[id])  workers[id].adv  = parseInt(advData[id].pending)  || 0;
+            if (fineData[id]) workers[id].fine = parseInt(fineData[id].pending) || 0;
+          }
+          for (const id in workers) {
+            const pi = postedData[id];
+            if (pi && pi.status === "PAID") {
+              workers[id].adv  = pi.adv  || 0;
+              workers[id].fine = pi.fine || 0;
+            }
+          }
 
-    Object.keys(workers).sort().forEach(id => {
-      const w = workers[id];
-      const isCook = (w.des||"").trim().toUpperCase()==="COOK";
-      const rowTotalBasic = isCook ? w.daily * w.pres : w.daily * w.norm;
-      const gross  = rowTotalBasic + w.hol + w.sun + w.otA + w.others;
-      const nps    = Math.round(gross*0.01);
-      const csg    = Math.round(gross*0.015);
-      const totDed = w.adv + w.fine + nps + csg;
-      const net    = Math.round(gross - totDed);
+          // ── Init totals ──
+          let totals = {
+            norm:0, hol:0, sun:0, pres:0, abs:0, otA:0, otH:0, others:0,
+            gross:0, adv:0, fine:0, nps:0, csg:0, totDed:0, net:0,
+            totBasic:0, totDaily:0, pBonus:0, aBonus:0
+          };
+          let rows = "", count = 1;
 
-      totals.totBasic+=rowTotalBasic; totals.totDaily+=w.daily;
-      totals.norm+=w.norm; totals.hol+=w.hol; totals.sun+=w.sun;
-      totals.pres+=w.pres; totals.abs+=w.abs; totals.otA+=w.otA;
-      totals.otH+=w.otH; totals.others+=w.others; totals.gross+=gross;
-      totals.adv+=w.adv; totals.fine+=w.fine; totals.nps+=nps;
-      totals.csg+=csg; totals.totDed+=totDed; totals.net+=net;
+          Object.keys(workers).sort().forEach(id => {
+            const w = workers[id];
+            const isCook = (w.des||"").trim().toUpperCase()==="COOK";
+            const rowTotalBasic = isCook ? w.daily * w.pres : w.daily * w.norm;
+            const baseGross     = rowTotalBasic + w.hol + w.sun + w.otA + w.others;
+            // ✅ UPDATED: Use DB bonus values instead of hardcoded 0
+            const initPB = w.pBonus || 0;
+            const initAB = w.aBonus || 0;
+            const gross   = baseGross + initPB + initAB;
+            const nps     = Math.round(gross * 0.01);
+            const csg     = Math.round(gross * 0.015);
+            const totDed  = w.adv + w.fine + nps + csg;
+            const net     = Math.round(gross - totDed);
 
-      const dailyDisplay = `${w.daily.toFixed(2)} <span class="no-print" style="color:${isCook?'#dc2626':'#0369a1'};font-size:8px">÷${workingDays}d${isCook?' ×P':' ×N'}</span>`;
+            totals.totBasic += rowTotalBasic; totals.totDaily += w.daily;
+            totals.norm  += w.norm;  totals.hol  += w.hol;  totals.sun   += w.sun;
+            totals.pres  += w.pres;  totals.abs  += w.abs;  totals.otA   += w.otA;
+            totals.otH   += w.otH;   totals.others += w.others;
+            totals.gross += gross;   totals.adv  += w.adv;  totals.fine  += w.fine;
+            totals.nps   += nps;     totals.csg  += csg;    totals.totDed+= totDed;
+            totals.net   += net;
+            totals.pBonus += initPB; totals.aBonus += initAB;  // ✅ NEW
 
-      rows += `<tr>
-        <td style="text-align:center">${count++}</td>
-        <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
-        <td class="text-left"><div style="font-weight:700;font-size:11px">${w.name}</div><div style="font-size:9px;color:#666;font-style:italic">${w.passport}</div></td>
-        <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
-        <td class="text-right">
-          <div style="font-weight:bold">${rowTotalBasic.toFixed(2)}</div>
-          <div style="font-size:9px;color:#666;font-style:italic">(${dailyDisplay})</div>
-        </td>
-        <td class="text-right">${w.norm}</td>
-        <td class="text-right">${w.hol.toFixed(2)}</td>
-        <td class="text-right">${w.sun.toFixed(2)}</td>
-        <td class="text-right">${w.pres}</td>
-        <td class="text-right">${w.abs}</td>
-        <td class="text-right">${w.otA.toFixed(2)}<div class="ot-hours-preview" style="font-size:9px;color:#666;font-style:italic">${w.otH.toFixed(1)}</div></td>
-        <td class="text-right">${w.others.toFixed(2)}</td>
-        <td class="text-right"><strong>${gross.toFixed(2)}</strong></td>
-        <td class="text-right">${w.adv}</td>
-        <td class="text-right">${w.fine}</td>
-        <td class="text-right">${nps}</td>
-        <td class="text-right">${csg}</td>
-        <td class="text-right">${totDed}</td>
-        <td class="text-right"><strong>${net.toFixed(2)}</strong></td>
-        <td style="text-align:center">
-          <div style="display:flex;gap:4px;justify-content:center">
-            <button class="btn-payslip" onclick="openSlipTab('${w.id}','${dFromVal}','${dToVal}')">📄 Pay Slip</button>
-            <button class="btn-view"    onclick="openDetailsTab('${w.id}','${dFromVal}','${dToVal}')">👁️ View</button>
-          </div>
-        </td>
-      </tr>`;
-    });
+            const dailyDisplay = `${w.daily.toFixed(2)} <span class="no-print" style="color:${isCook?'#dc2626':'#0369a1'};font-size:8px">÷${workingDays}d${isCook?' ×P':' ×N'}</span>`;
 
-    output.innerHTML = `
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;width:100%;margin-bottom:6px;">
-      <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
-        <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:32px;width:auto;object-fit:contain" />
-        <span class="co-name print-header" style="white-space:nowrap;font-size:13px;font-weight:700;">ALAMHOW CO LTD &nbsp;|&nbsp; Monthly Salary Sheet</span>
-      </div>
-      <div style="font-size:12px;font-weight:700;color:#000;white-space:nowrap;">Period: ${dFromVal||"…"} to ${dToVal||"…"}</div>
-      <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
-        <span style="font-size:11px;font-weight:600;color:#000;">Printed: ${formatDateTime()}</span>
-        <div class="no-print" style="display:flex;align-items:center;gap:6px;background:rgba(255,215,0,0.08);border:1.5px solid var(--brand-gold);border-radius:8px;padding:5px 10px;white-space:nowrap;">
-          <span style="color:var(--brand-gold);font-size:11px;font-weight:700;">⚙️ Working Days:</span>
-          <input type="number" id="manualWDInput" placeholder="day input" value="${window._manualWD||''}" style="width:70px;padding:4px 8px;font-size:14px;border:1.5px solid var(--brand-gold);border-radius:5px;background:#001530;color:#ffd700;font-weight:700;text-align:center;" min="1" max="31" />
-          <button onclick="(function(){const v=parseInt(document.getElementById('manualWDInput').value);window._manualWD=(v>0&&v<=31)?v:null;generateReport();})()" style="background:#0d9488;color:white;border:none;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">✔ OK</button>
-          <span style="color:${window._manualWD?'#4ade80':'#ffd700'};font-size:11px;font-weight:700;">${window._manualWD ? '✅ '+window._manualWD+' Days' : '⚡ '+workingDays+' days'}</span>
-        </div>
-      </div>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          <th rowspan="2">SL</th><th rowspan="2">EMP ID</th><th rowspan="2">Employee Name / Passport</th>
-          <th rowspan="2">Designation</th>
-          <th rowspan="2">Total Basic</th><th rowspan="2">P</th>
-          <th rowspan="2">Holi day</th><th rowspan="2">Sun day</th>
-          <th rowspan="2">Total P</th><th rowspan="2">A</th>
-          <th rowspan="2">OT Amt</th><th rowspan="2">Oth</th>
-          <th rowspan="2">Gross Salary</th>
-          <th colspan="5">DEDUCTIONS</th>
-          <th rowspan="2">Net Salary</th>
-          <th rowspan="2">Signature</th>
-        </tr>
-        <tr><th>Adv</th><th>Fine</th><th>NPS 1%</th><th>CSG 1.5%</th><th>Total</th></tr>
-      </thead>
-      <tbody>${rows}</tbody>
-      <tfoot>
-        <tr class="total-row">
-          <td colspan="4" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
-          <td class="text-right">
-            <div>${totals.totBasic.toFixed(2)}</div>
-            <div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div>
-          </td>
-          <td class="text-right">${totals.norm}</td>
-          <td class="text-right">${totals.hol.toFixed(2)}</td>
-          <td class="text-right">${totals.sun.toFixed(2)}</td>
-          <td class="text-right">${totals.pres}</td>
-          <td class="text-right">${totals.abs}</td>
-          <td style="text-align:center;vertical-align:bottom">
-            <div>${totals.otA.toFixed(2)}</div>
-            <div class="ot-hours-preview" style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">${totals.otH.toFixed(1)}</div>
-          </td>
-          <td class="text-right">${totals.others.toFixed(2)}</td>
-          <td class="text-right">${totals.gross.toFixed(2)}</td>
-          <td class="text-right">${totals.adv}</td>
-          <td class="text-right">${totals.fine}</td>
-          <td class="text-right">${totals.nps}</td>
-          <td class="text-right">${totals.csg}</td>
-          <td class="text-right">${totals.totDed}</td>
-          <td class="text-right">${Math.round(totals.net)}</td>
-          <td></td>
-        </tr>
-        <tr class="no-print-hide">
-          <td colspan="20" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
-            <span style="font-weight:bold;font-size:9px">In Words: </span>
-            <span style="font-size:9px;font-style:italic">${numberToWords(totals.net)}</span>
-          </td>
-        </tr>
-        <tr class="print-footer-signature">
-          <td colspan="20" style="border:none!important;padding:80px 0 20px 0!important">
-            <div class="signature-area" style="margin-top:0;display:flex;justify-content:space-around">
-              <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
-              <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
-              <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+            rows += `<tr data-empid="${id}"
+              data-basic="${rowTotalBasic}"
+              data-norm="${w.norm}" data-hol="${w.hol}" data-sun="${w.sun}"
+              data-pres="${w.pres}" data-abs="${w.abs}"
+              data-ot="${w.otA}" data-oth="${w.others}"
+              data-adv="${w.adv}" data-fine="${w.fine}">
+              <td style="text-align:center">${count++}</td>
+              <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
+              <td class="text-left"><div style="font-weight:700;font-size:11px">${w.name}</div><div style="font-size:9px;color:#666;font-style:italic">${w.passport}</div></td>
+              <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
+              <td class="text-right">
+                <div style="font-weight:bold">${rowTotalBasic.toFixed(2)}</div>
+                <div style="font-size:9px;color:#666;font-style:italic">(${dailyDisplay})</div>
+              </td>
+             <td class="text-right">${w.norm}</td>
+<td class="text-right">${w.abs}</td>
+<td class="text-right">${w.pres}</td>
+<td class="text-right">${w.hol.toFixed(2)}</td>
+<td class="text-right">${w.sun.toFixed(2)}</td>
+              <td class="text-right">${w.otA.toFixed(2)}<div class="ot-hours-preview" style="font-size:9px;color:#666;font-style:italic">${w.otH.toFixed(1)}</div></td>
+              <td class="text-right">${w.others.toFixed(2)}</td>
+              <td class="text-right" style="padding:0">
+                <input type="number" id="pb_${id}" class="bonus-input" value="${initPB || ''}"
+                  placeholder="0" min="0" step="1"
+                  oninput="recalcRow('${id}')"
+                  title="Performance Bonus" />
+                <input type="hidden" id="basegross_${id}" value="${baseGross}" />
+              </td>
+              <td class="text-right" style="padding:0">
+                <input type="number" id="ab_${id}" class="bonus-input" value="${initAB || ''}"
+                  placeholder="0" min="0" step="1"
+                  oninput="recalcRow('${id}')"
+                  title="Attendance Bonus" />
+              </td>
+              <td class="text-right" id="gross_${id}"><strong>${gross.toFixed(2)}</strong></td>
+              <td class="text-right" id="adv_${id}" data-adv="${w.adv}">${w.adv}</td>
+              <td class="text-right" id="fine_${id}" data-fine="${w.fine}">${w.fine}</td>
+              <td class="text-right" id="nps_${id}">${nps}</td>
+              <td class="text-right" id="csg_${id}">${csg}</td>
+              <td class="text-right" id="totded_${id}">${totDed}</td>
+              <td class="text-right" id="net_${id}"><strong>${net.toFixed(2)}</strong></td>
+              <td style="text-align:center">
+                <div style="display:flex;gap:4px;justify-content:center">
+                  <button class="btn-payslip" onclick="openSlipTab('${w.id}','${dFromVal}','${dToVal}')">📄 Pay Slip</button>
+                  <button class="btn-view"    onclick="openDetailsTab('${w.id}','${dFromVal}','${dToVal}')">👁️ View</button>
+                </div>
+              </td>
+            </tr>`;
+          });
+
+          output.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;width:100%;margin-bottom:6px;">
+            <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+              <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:32px;width:auto;object-fit:contain" />
+              <span class="co-name print-header" style="white-space:nowrap;font-size:13px;font-weight:700;">ALAMHOW CO LTD &nbsp;|&nbsp; Monthly Salary Sheet</span>
             </div>
-          </td>
-        </tr>
-      </tfoot>
-    </table>
-    <div class="signature-area screen-signature">
-      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
-      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
-      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
-    </div>`;
-  } catch(e) {
-    output.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
-    showMsg(`Error: ${e.message}`, {title:"Report Error", type:"err"});
-  }
-}
+            <div style="font-size:12px;font-weight:700;color:#000;white-space:nowrap;">Period: ${dFromVal||"…"} to ${dToVal||"…"}</div>
+            <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+              <span style="font-size:11px;font-weight:600;color:#000;">Printed: ${formatDateTime()}</span>
+              <div class="no-print" style="display:flex;align-items:center;gap:6px;background:rgba(255,215,0,0.08);border:1.5px solid var(--brand-gold);border-radius:8px;padding:5px 10px;white-space:nowrap;">
+                <span style="color:var(--brand-gold);font-size:11px;font-weight:700;">⚙️ Working Days:</span>
+                <input type="number" id="manualWDInput" placeholder="day input" value="${window._manualWD||''}" style="width:70px;padding:4px 8px;font-size:14px;border:1.5px solid var(--brand-gold);border-radius:5px;background:#001530;color:#ffd700;font-weight:700;text-align:center;" min="1" max="31" />
+                <button onclick="(function(){const v=parseInt(document.getElementById('manualWDInput').value);window._manualWD=(v>0&&v<=31)?v:null;generateReport();})()" style="background:#0d9488;color:white;border:none;padding:5px 10px;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer;">✔ OK</button>
+                <span style="color:${window._manualWD?'#4ade80':'#ffd700'};font-size:11px;font-weight:700;">${window._manualWD ? '✅ '+window._manualWD+' Days' : '⚡ '+workingDays+' days'}</span>
+              </div>
+            </div>
+          </div>
 
-      function numberToWords(amount) {
-        const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
-        const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-        function convert(n) {
-          if (n===0) return "";
-          else if (n<20) return ones[n]+" ";
-          else if (n<100) return tens[Math.floor(n/10)]+" "+(n%10?ones[n%10]+" ":"");
-          else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
+          <table id="reportTable">
+            <thead>
+              <!-- ══ ROW 1: Main Group Headers ══ -->
+              <tr>
+                <th rowspan="2">SL</th>
+                <th rowspan="2">EMP ID</th>
+                <th rowspan="2">Employee Name / Passport</th>
+                <th rowspan="2">Designation</th>
+                <th rowspan="2">Total Basic</th>
+                <!-- ATTENDANCE STATUS group -->
+                <th colspan="3" class="th-att-group">ATTENDANCE STATUS</th>
+                <!-- EARNING DETAILS group -->
+                <th colspan="6" class="th-earn-group">EARNING DETAILS</th>
+                <!-- Gross -->
+                <th rowspan="2">Gross Salary</th>
+                <!-- DEDUCTIONS group -->
+                <th colspan="5" class="th-ded-group">DEDUCTIONS</th>
+                <th rowspan="2">Net Salary</th>
+                <th rowspan="2">Signature</th>
+              </tr>
+              <!-- ══ ROW 2: Sub Headers ══ -->
+              <tr>
+                <!-- Attendance sub -->
+                <th>P</th>
+                <th>A</th>
+                <th>Total P</th>
+                <!-- Earning sub -->
+                <th>Holi day</th>
+                <th>Sun day</th>
+                <th>OT Amt</th>
+                <th>Oth</th>
+                <th class="th-pbonus" title="Performance Bonus">P-Bonus</th>
+                <th class="th-abonus" title="Attendance Bonus">A-Bonus</th>
+                <!-- Deductions sub -->
+                <th>Adv</th>
+                <th>Fine</th>
+                <th>NPS 1%</th>
+                <th>CSG 1.5%</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr class="total-row" id="reportTotalsRow">
+                <td colspan="4" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
+                <td class="text-right">
+                  <div class="tf-basic">${totals.totBasic.toFixed(2)}</div>
+                  <div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div>
+                </td>
+                <td class="text-right tf-norm">${totals.norm}</td>
+                <td class="text-right tf-abs">${totals.abs}</td>
+                <td class="text-right tf-pres">${totals.pres}</td>
+                <td class="text-right tf-hol">${totals.hol.toFixed(2)}</td>
+                <td class="text-right tf-sun">${totals.sun.toFixed(2)}</td>
+                <td style="text-align:center;vertical-align:bottom">
+                  <div class="tf-ot">${totals.otA.toFixed(2)}</div>
+                  <div class="ot-hours-preview" style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">${totals.otH.toFixed(1)}</div>
+                </td>
+                <td class="text-right tf-oth">${totals.others.toFixed(2)}</td>
+                <td class="text-right tf-pb">${totals.pBonus.toFixed(2)}</td>
+                <td class="text-right tf-ab">${totals.aBonus.toFixed(2)}</td>
+                <td class="text-right tf-gross">${totals.gross.toFixed(2)}</td>
+                <td class="text-right tf-adv">${totals.adv}</td>
+                <td class="text-right tf-fine">${totals.fine}</td>
+                <td class="text-right tf-nps">${totals.nps}</td>
+                <td class="text-right tf-csg">${totals.csg}</td>
+                <td class="text-right tf-totded">${totals.totDed}</td>
+                <td class="text-right tf-net">${Math.round(totals.net)}</td>
+                <td></td>
+              </tr>
+              <tr class="no-print-hide">
+                <td colspan="22" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
+                  <span style="font-weight:bold;font-size:9px">In Words: </span>
+                  <span id="netWordsRow" style="font-size:9px;font-style:italic">${numberToWordsGlobal(totals.net)}</span>
+                </td>
+              </tr>
+              <tr class="print-footer-signature">
+                <td colspan="22" style="border:none!important;padding:80px 0 20px 0!important">
+                  <div class="signature-area" style="margin-top:0;display:flex;justify-content:space-around">
+                    <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+                    <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+                    <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="signature-area screen-signature">
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+          </div>`;
+
+        } catch(e) {
+          output.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+          showMsg(`Error: ${e.message}`, {title:"Report Error", type:"err"});
         }
-        const num = Math.round(amount);
-        if (num===0) return "Zero MUR Only";
-        let result = "";
-        if (num>=10000000) { result+=convert(Math.floor(num/10000000))+"Crore "; }
-        if (num%10000000>=100000) { result+=convert(Math.floor((num%10000000)/100000))+"Lakh "; }
-        if (num%100000>=1000) { result+=convert(Math.floor((num%100000)/1000))+"Thousand "; }
-        result+=convert(num%1000);
-        return result.trim()+" MUR Only";
       }
 
       // ══════════════════════════════════════════
       //  CLEAR / RESET
       // ══════════════════════════════════════════
-     function clearAll() {
-  showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?", {
-    title: "Reset Page", type: "warn", confirm: true,
-    onOk: () => {
-      document.getElementById("reportOutput").innerHTML = "";
-      document.getElementById("filterId").value = "";
-      document.getElementById("searchTable").value = "";
-      try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
-      try { document.getElementById("dateTo")._flatpickr.clear(); } catch(e) {}
-      closeEmpPanel(); closeMsgBox();
-      window._reportFrom=""; window._reportTo="";
-      window._manualWD = null; // ── এই লাইনটি যোগ করুন ──
-      _attRangeCache = {};
-      _cache.loaded = false;
-      _cache.loading = false;
-      _otCache = null;
-      _otEmpLoaded = false;
-      _attEmpLoaded = false;
-      setStatus("loading", "⏳ Data not loaded yet");
-      const ctrl = document.querySelector(".controls");
-      ctrl.style.transition="background 0.15s";
-      ctrl.style.background="rgba(255,107,107,0.15)";
-      setTimeout(() => { ctrl.style.background=""; setTimeout(()=>ctrl.style.transition="",400); },300);
-    }
-  });
-}
+      function clearAll() {
+        showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?", {
+          title: "Reset Page", type: "warn", confirm: true,
+          onOk: () => {
+            document.getElementById("reportOutput").innerHTML = "";
+            document.getElementById("filterId").value = "";
+            document.getElementById("searchTable").value = "";
+            try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
+            try { document.getElementById("dateTo")._flatpickr.clear(); } catch(e) {}
+            closeEmpPanel(); closeMsgBox();
+            window._reportFrom=""; window._reportTo="";
+            window._manualWD = null;
+            _attRangeCache = {};
+            _cache.loaded = false;
+            _cache.loading = false;
+            _otCache = null;
+            _otEmpLoaded = false;
+            _attEmpLoaded = false;
+            setStatus("loading", "⏳ Data not loaded yet");
+            const ctrl = document.querySelector(".controls");
+            ctrl.style.transition="background 0.15s";
+            ctrl.style.background="rgba(255,107,107,0.15)";
+            setTimeout(() => { ctrl.style.background=""; setTimeout(()=>ctrl.style.transition="",400); },300);
+          }
+        });
+      }
 
-// ══════════════════════════════════════════
-//  OVERTIME TAB — Employee-wise Grouped View
-// ══════════════════════════════════════════
-
-let _otEmpLoaded = false;
-let _otCache     = null;
+      // ══════════════════════════════════════════
+      //  OVERTIME TAB
+      // ══════════════════════════════════════════
+      let _otEmpLoaded = false;
+      let _otCache     = null;
 
       function onOtFilterChange() {
         const type = document.getElementById("otFilterType").value;
@@ -2132,7 +3040,6 @@ let _otCache     = null;
         });
       }
 
-      // ★ UPDATED: Employee-wise grouped OT view
       async function generateOT() {
         const otOut    = document.getElementById("otOutput");
         const filterType = document.getElementById("otFilterType").value;
@@ -2160,11 +3067,6 @@ let _otCache     = null;
             }
           }
 
-          // Filter records
-          if (_otCache.length > 0) {
-            console.log("🔍 OT record sample keys:", Object.keys(_otCache[0]));
-            console.log("🔍 OT record sample data:", JSON.stringify(_otCache[0]));
-          }
           let records = _otCache.filter(row => {
             const otDate = row.OT_Date ? new Date(row.OT_Date) : null;
             if (dFrom && dTo && otDate && (otDate<dFrom||otDate>dTo)) return false;
@@ -2179,15 +3081,11 @@ let _otCache     = null;
             return;
           }
 
-          // ── Group by Employee ──
           const empGroups = {};
           records.forEach(r => {
             const id = String(r.ID).trim();
             if (!empGroups[id]) {
-              empGroups[id] = {
-                id, name: r.Name||"", desig: r.Designation||"",
-                totalHrs: 0, totalAmt: 0, records: []
-              };
+              empGroups[id] = { id, name: r.Name||"", desig: r.Designation||"", totalHrs: 0, totalAmt: 0, records: [] };
             }
             const hrs  = parseFloat(r.TOTAL_OT_HOURS || r.Total_OT_Hours || r.total_ot_hours || 0);
             const rate = parseFloat(r.OT_Rate || r.ot_rate || r.OT_RATE || r.Ot_Rate || 0);
@@ -2196,7 +3094,6 @@ let _otCache     = null;
             empGroups[id].records.push(r);
           });
 
-          // Sort by employee ID
           const sortedIds = Object.keys(empGroups).sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
           let grandHrs = 0, grandAmt = 0;
           sortedIds.forEach(id => { grandHrs += empGroups[id].totalHrs; grandAmt += empGroups[id].totalAmt; });
@@ -2204,7 +3101,7 @@ let _otCache     = null;
           let periodText = (dFromVal&&dToVal) ? `${dFromVal} to ${dToVal}` : "All Dates";
           let filterDesc = filterType==="employee"&&selEmp ? `Employee: ${selEmp}` :
                            filterType==="project"&&selSite ? `Site: ${selSite}` :
-                           filterType==="id"&&selId ? `ID: ${selId}` : "All Records";
+                           filterType==="id"&&selId ? `ID: ${selId}` : "";
 
           const tableRows = sortedIds.map((id, i) => {
             const g = empGroups[id];
@@ -2250,11 +3147,11 @@ let _otCache     = null;
               <tbody>${tableRows}</tbody>
               <tfoot>
                 <tr class="total-row">
-                 <td colspan="5" class="text-right">GRAND TOTAL</td>
-<td class="text-right">${records.length}</td>
-<td class="text-right">${grandHrs.toFixed(2)}</td>
-<td class="text-right">${grandAmt.toFixed(2)}</td>
-<td></td>
+                  <td colspan="5" class="text-right">GRAND TOTAL</td>
+                  <td class="text-right">${records.length}</td>
+                  <td class="text-right">${grandHrs.toFixed(2)}</td>
+                  <td class="text-right">${grandAmt.toFixed(2)}</td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>`;
@@ -2263,20 +3160,16 @@ let _otCache     = null;
         }
       }
 
-      // ── OT Detail Modal ──
       function openOtDetail(empId) {
         document.getElementById("otDetailTitle").textContent = `⏰ Overtime Details — ${empId}`;
         document.getElementById("otDetailBody").innerHTML = '<p style="padding:20px;text-align:center;color:#6b7280">⏳ Loading...</p>';
         document.getElementById("otDetailOverlay").classList.add("active");
         document.body.style.overflow = "hidden";
-
         if (!_otCache) {
-          document.getElementById("otDetailBody").innerHTML = '<p style="color:red;padding:20px">Data not loaded. Please click View first.</p>';
+          document.getElementById("otDetailBody").innerHTML = '<p style="color:red;padding:20px">Data not loaded.</p>';
           return;
         }
-
         const empRecs = _otCache.filter(r => String(r.ID).trim() === String(empId).trim());
-        // Apply current date filter if set
         const dFromVal = document.getElementById("otDateFrom").value;
         const dToVal   = document.getElementById("otDateTo").value;
         const dFrom    = dFromVal ? new Date(dFromVal) : null;
@@ -2286,12 +3179,10 @@ let _otCache     = null;
           if (dFrom && dTo && otDate && (otDate < dFrom || otDate > dTo)) return false;
           return true;
         });
-
         if (!filtered.length) {
-          document.getElementById("otDetailBody").innerHTML = '<p style="color:#9ca3af;padding:20px;text-align:center">No records found for this employee in the selected period.</p>';
+          document.getElementById("otDetailBody").innerHTML = '<p style="color:#9ca3af;padding:20px;text-align:center">No records found.</p>';
           return;
         }
-
         filtered.sort((a,b) => new Date(a.OT_Date||0) - new Date(b.OT_Date||0));
         const name  = filtered[0].Name || empId;
         const desig = filtered[0].Designation || "-";
@@ -2299,25 +3190,22 @@ let _otCache     = null;
         filtered.forEach(r => {
           const hrs  = parseFloat(r.TOTAL_OT_HOURS || r.Total_OT_Hours || 0);
           const rate = parseFloat(r.OT_Rate || r.ot_rate || r.OT_RATE || 0);
-          totHrs += hrs;
-          totAmt += hrs * rate;
+          totHrs += hrs; totAmt += hrs * rate;
         });
-
         const rows = filtered.map((r, i) => {
           const hrs  = parseFloat(r.TOTAL_OT_HOURS || r.Total_OT_Hours || 0);
           const rate = parseFloat(r.OT_Rate || r.ot_rate || r.OT_RATE || 0);
           const amt  = hrs * rate;
           return `<tr style="${i%2===1?'background:#f8faff;':''}">
-          <td style="text-align:center;color:#9ca3af;font-size:10px;padding:7px 8px">${i+1}</td>
-          <td style="padding:7px 8px;font-weight:600">${r.OT_Date||"-"}</td>
-          <td style="padding:7px 8px;color:#6b7280">${r.Site||"-"}</td>
-          <td style="text-align:right;font-family:monospace;color:#1d4ed8;font-weight:700;padding:7px 8px">${hrs.toFixed(2)}</td>
-          <td style="text-align:right;font-size:11px;color:#6b7280;padding:7px 8px">${rate||"-"}</td>
-          <td style="text-align:right;font-family:monospace;color:#065f46;font-weight:700;padding:7px 8px">${amt.toFixed(2)}</td>
-          <td style="font-size:11px;color:#6b7280;padding:7px 8px">${r.Remark||r.remark||"-"}</td>
-        </tr>`;
+            <td style="text-align:center;color:#000000;font-size:10px;padding:7px 8px">${i+1}</td>
+            <td style="padding:7px 8px;font-weight:600">${r.OT_Date||"-"}</td>
+            <td style="padding:7px 8px;color:#6b7280">${r.Site||"-"}</td>
+            <td style="text-align:right;font-family:monospace;color:#1d4ed8;font-weight:700;padding:7px 8px">${hrs.toFixed(2)}</td>
+            <td style="text-align:right;font-size:11px;color:#6b7280;padding:7px 8px">${rate||"-"}</td>
+            <td style="text-align:right;font-family:monospace;color:#065f46;font-weight:700;padding:7px 8px">${amt.toFixed(2)}</td>
+            <td style="font-size:11px;color:#6b7280;padding:7px 8px">${r.Remark||r.remark||"-"}</td>
+          </tr>`;
         }).join("");
-
         document.getElementById("otDetailBody").innerHTML = `
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
             <div style="background:#dbeafe;border-radius:8px;padding:12px;text-align:center;border-left:4px solid #3b82f6">
@@ -2338,7 +3226,6 @@ let _otCache     = null;
             <span style="font-size:12px"><strong>Name:</strong> ${name}</span>
             <span style="font-size:12px"><strong>Designation:</strong> ${desig}</span>
           </div>
-          <div style="font-weight:700;font-size:12px;color:var(--brand-blue);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px">📋 Day-wise Overtime</div>
           <table style="width:100%;border-collapse:collapse;font-size:12px;border-radius:6px;overflow:hidden;box-shadow:0 2px 8px rgba(0,33,71,0.1)">
             <thead>
               <tr style="background:var(--brand-blue)">
@@ -2354,10 +3241,10 @@ let _otCache     = null;
             <tbody>${rows}</tbody>
             <tfoot>
               <tr style="background:#f3f4f6">
-                <td colspan="3" style="color:#000;font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-size:12px">TOTAL</td>
-                <td style="color:#000;font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-family:monospace;font-size:13px">${totHrs.toFixed(2)}</td>
+                <td colspan="3" style="font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right">TOTAL</td>
+                <td style="font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-family:monospace">${totHrs.toFixed(2)}</td>
                 <td style="border:1px solid #335185;padding:9px 8px"></td>
-                <td style="color:#000;font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-family:monospace;font-size:13px">${totAmt.toFixed(2)}</td>
+                <td style="font-weight:700;padding:9px 8px;border:1px solid #335185;text-align:right;font-family:monospace">${totAmt.toFixed(2)}</td>
                 <td style="border:1px solid #335185;padding:9px 8px"></td>
               </tr>
             </tfoot>
@@ -2368,7 +3255,6 @@ let _otCache     = null;
         document.getElementById("otDetailOverlay").classList.remove("active");
         document.body.style.overflow = "";
       }
-
       document.getElementById("otDetailOverlay").addEventListener("click", function(e) {
         if (e.target === this) closeOtDetail();
       });
@@ -2572,10 +3458,10 @@ let _otCache     = null;
       document.getElementById("advDetailOverlay").addEventListener("click", function(e) {
         if (e.target===this) closeAdvDetail();
       });
-
-      // Auto-preload on page load
-      switchTab("monthly");
-      window.addEventListener("load", preloadStaticData);
+// Auto-preload on page load
+switchTab("monthly");
+window.addEventListener("load", preloadStaticData);
+window.addEventListener("load", checkMonthlyDuplicatesOnLoad);
     </script>
   </body>
 </html>
