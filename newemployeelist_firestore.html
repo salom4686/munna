@@ -19,6 +19,17 @@
         background: linear-gradient(135deg, #002147 0%, #001a38 100%);
         color: #ffffff; min-height: 100vh;
       }
+      thead th {
+  position: sticky; top: 0; background-color: #002147;
+  color: #ffd700; padding: 10px 10px; text-align: left;
+  z-index: 10; border-bottom: 2px solid #ffd700; font-size: 13px;
+  white-space: nowrap;
+}
+td {
+  padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
+  font-size: 12px; vertical-align: middle; color: #002147;
+  white-space: nowrap;
+}
       .search-container {
         max-width: 1600px; margin: 0 auto 20px;
         padding: 0 30px; display: flex;
@@ -64,8 +75,13 @@
         padding: 10px 12px; border-bottom: 1px solid #f0f0f0;
         font-size: 14px; vertical-align: middle; color: #002147;
       }
-      tr:hover { background-color: #f8fbff; }
-
+      tr:hover { background-color: #ffd700; }
+#table-body td:last-child {
+  white-space: nowrap;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
       /* Modal */
       .modal {
         display: none; position: fixed; z-index: 2000;
@@ -218,7 +234,7 @@
         document.getElementById("loader").style.display = "none";
         document.getElementById("table-display").style.display = "block";
 
-        const headers = ["SL","ID","Name","Period","Post","Join Date","Work As","Passport","WP NO","RP UID NO","Salary","OT","Action"];
+         const headers = ["SL","ID","Name","Period","Designation","Joining Date","Working As","Passport No","WP NO","RP UID NO","Salary","OT Rate","Action"];
         head.innerHTML = `<tr>${headers.map(h => `<th>${h.toUpperCase()}</th>`).join("")}</tr>`;
 
         body.innerHTML = dataRows.map(item => `
@@ -396,7 +412,7 @@
       });
 
       function downloadExcel() {
-        const headers = ["SL","ID","Name","Period","Post","Join Date","Work As","Passport","WP NO","RP UID NO","Salary","OT"];
+        const headers = ["SL","ID","Name","Period","Designation","Joining Date","Working As","Passport No","WP NO","RP UID NO","Salary","OT"];
         const data = [headers, ...cachedRows.map(item => [
           item.row[0], item.row[1], item.row[2], calculatePeriod(item.row[5]),
           item.row[4], item.row[5], item.row[6], item.row[7],
