@@ -68,6 +68,11 @@
       .btn-view { background: var(--brand-blue); color: #ffd700; padding: 5px 11px; font-size: 10px; border: 2px solid #ffd700; border-radius: 5px; cursor: pointer; font-weight: 800; font-family: "Source Sans 3", sans-serif; transition: all 0.2s; white-space: nowrap; }
       .btn-view:hover { background: #003a7a; transform: translateY(-1px); }
 
+      /* ── Bonus / Others column styling ── */
+      th.th-pbonus { background: #065f46 !important; color: #a7f3d0 !important; }
+      th.th-abonus { background: #92400e !important; color: #fde68a !important; }
+      th.th-others { background: #1e3a5f !important; color: #93c5fd !important; }
+
       .content { padding: 24px 32px; }
       table { width: 100%; border-collapse: collapse; margin-top: 8px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 20px rgba(0, 33, 71, 0.12); }
       thead tr { background: var(--brand-blue); }
@@ -161,6 +166,7 @@
         .print-header .co-name { font-family: "Playfair Display", serif; font-size: 13px; }
         table { font-size: 8px; border: none !important; box-shadow: none; border-collapse: collapse !important; }
         th { background: #f2f2f2 !important; color: #000 !important; font-weight: bold !important; border: 0.5pt solid #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; padding: 6px 4px; }
+        th.th-pbonus, th.th-abonus, th.th-others { background: #e0e0e0 !important; color: #000 !important; }
         td { padding: 5px 4px; border: 0.5pt solid #000 !important; }
         .total-row td { background: #eee !important; color: #000 !important; font-weight: bold !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 0.5pt solid #000 !important; }
         tfoot { display: table-row-group; }
@@ -291,7 +297,6 @@
       };
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-      // ── Holiday Set ──
       let _holidaySet = new Set();
 
       const redDayConfig = {
@@ -303,22 +308,24 @@
           const m   = String(d.getMonth()+1).padStart(2,"0");
           const day = String(d.getDate()).padStart(2,"0");
           const dateStr = `${y}-${m}-${day}`;
-          if (d.getDay() === 0) {
-            dayElem.style.color      = "#ff4d4d";
-            dayElem.style.fontWeight = "700";
-          }
-          if (_holidaySet.has(dateStr)) {
-            dayElem.classList.add("is-holiday");
-            dayElem.style.color      = "#ff4d4d";
-            dayElem.style.fontWeight = "700";
-          }
+          if (d.getDay() === 0) { dayElem.style.color="#ff4d4d"; dayElem.style.fontWeight="700"; }
+          if (_holidaySet.has(dateStr)) { dayElem.classList.add("is-holiday"); dayElem.style.color="#ff4d4d"; dayElem.style.fontWeight="700"; }
         }
       };
 
-      flatpickr("#dateFrom",      { ...redDayConfig, onChange: syncPanelDates });
-      flatpickr("#dateTo",        { ...redDayConfig, onChange: syncPanelDates });
-      flatpickr("#panelDateFrom", { ...redDayConfig });
-      flatpickr("#panelDateTo",   { ...redDayConfig });
+      function getDefaultDateRange() {
+        const now = new Date();
+        const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+        const pad = (n) => String(n).padStart(2, "0");
+        const toStr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+        return { from: toStr(firstDay), to: toStr(now) };
+      }
+      const _defaultRange = getDefaultDateRange();
+
+      flatpickr("#dateFrom",      { ...redDayConfig, defaultDate: _defaultRange.from, onChange: syncPanelDates });
+      flatpickr("#dateTo",        { ...redDayConfig, defaultDate: _defaultRange.to,   onChange: syncPanelDates });
+      flatpickr("#panelDateFrom", { ...redDayConfig, defaultDate: _defaultRange.from });
+      flatpickr("#panelDateTo",   { ...redDayConfig, defaultDate: _defaultRange.to });
 
       firebase.firestore().collection("HOLIDAY_LIST").get()
         .then(snap => {
@@ -326,8 +333,7 @@
           document.querySelectorAll(".flatpickr-input").forEach(input => {
             if (input._flatpickr) input._flatpickr.redraw();
           });
-        })
-        .catch(e => console.error("Holiday load error:", e));
+        }).catch(e => console.error("Holiday load error:", e));
 
       function syncPanelDates() {
         const f = document.getElementById("dateFrom").value;
@@ -336,41 +342,30 @@
         if (t) { try { document.getElementById("panelDateTo")._flatpickr.setDate(t); }   catch(e){} }
       }
 
-      // ══════════════════════════════════════════
-      //  WORKING DAYS CALCULATION
-      // ══════════════════════════════════════════
       async function getWorkingDays(dateStr) {
-        const d     = new Date(dateStr);
-        const year  = d.getFullYear();
-        const month = d.getMonth();
+        const d = new Date(dateStr);
+        const year = d.getFullYear(), month = d.getMonth();
         const totalDays = new Date(year, month + 1, 0).getDate();
         let sundays = 0;
-        for (let i = 1; i <= totalDays; i++) {
-          if (new Date(year, month, i).getDay() === 0) sundays++;
-        }
+        for (let i = 1; i <= totalDays; i++) { if (new Date(year, month, i).getDay() === 0) sundays++; }
         const db = firebase.firestore();
         const holidaySnap = await db.collection("HOLIDAY_LIST").get();
         let holidays = 0;
         holidaySnap.forEach(doc => {
           const hDate = new Date(doc.id);
-          if (hDate.getFullYear() === year && hDate.getMonth() === month) {
-            if (new Date(doc.id).getDay() !== 0) holidays++;
-          }
+          if (hDate.getFullYear()===year && hDate.getMonth()===month && new Date(doc.id).getDay()!==0) holidays++;
         });
         return totalDays - sundays - holidays;
       }
 
-      // ══════════════════════════════════════════
-      //  GLOBAL CACHE
-      // ══════════════════════════════════════════
+      // ── GLOBAL CACHE ──
       let _cache = { loaded: false, loading: false, empList: [], empMap: {}, advMap: {}, fineMap: {} };
       let _attRangeCache = {};
 
       function setStatus(type, msg) {
         const el = document.getElementById("cacheStatus");
         if (!el) return;
-        const dotClass = type === "ok" ? "status-ok" : "status-loading";
-        el.innerHTML = `<span class="status-dot ${dotClass}"></span>${msg}`;
+        el.innerHTML = `<span class="status-dot ${type==="ok"?"status-ok":"status-loading"}"></span>${msg}`;
       }
 
       async function preloadStaticData() {
@@ -378,89 +373,77 @@
         _cache.loading = true;
         setStatus("loading", "⏳ Loading data...");
         try {
-          const db   = firebase.firestore();
-          const rtdb = firebase.database();
+          const db = firebase.firestore(), rtdb = firebase.database();
           const empSnap = await db.collection("EMPLOYEE_LIST").get();
-          _cache.empList = [];
-          _cache.empMap  = {};
+          _cache.empList = []; _cache.empMap = {};
           empSnap.forEach(d => {
             const e = d.data();
-            const emp = {
-              id: e.id || d.id, name: e.name || "", passport: e.passport || "",
-              desig: e.designation || "", salary: parseInt(e.salary) || 0, joining: e.joining || "",
-            };
-            _cache.empList.push(emp);
-            _cache.empMap[emp.id] = emp;
+            const emp = { id: e.id||d.id, name: e.name||"", passport: e.passport||"", desig: e.designation||"", salary: parseInt(e.salary)||0, joining: e.joining||"", wpNo: e.wpNo||"", rpUidNo: e.rpUidNo||"" };
+            _cache.empList.push(emp); _cache.empMap[emp.id] = emp;
           });
           _cache.empList.sort((a,b) => a.id.localeCompare(b.id));
           const advSnap = await rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
-          const advData = advSnap.val() || {};
+          const advData = advSnap.val()||{};
           _cache.advMap = {};
-          for (const id in advData) {
-            _cache.advMap[id] = parseInt(advData[id].pending) || 0;
-          }
-         const fineSnap = await rtdb.ref("FINE_SUMMARY/USERS").once("value");
-          const fineData = fineSnap.val() || {};
+          for (const id in advData) _cache.advMap[id] = parseInt(advData[id].pending)||0;
+          const fineSnap = await rtdb.ref("FINE_SUMMARY/USERS").once("value");
+          const fineData = fineSnap.val()||{};
           _cache.fineMap = {};
-          for (const id in fineData) {
-            _cache.fineMap[id] = parseInt(fineData[id].pending) || 0;
-          }
-          _cache.loaded  = true;
-          _cache.loading = false;
+          for (const id in fineData) _cache.fineMap[id] = parseInt(fineData[id].pending)||0;
+          _cache.loaded = true; _cache.loading = false;
           setStatus("ok", `✅ ${_cache.empList.length} employees loaded`);
-        } catch(e) {
-          _cache.loading = false;
-          setStatus("err", "⚠️ Load error: " + e.message);
-        }
+        } catch(e) { _cache.loading = false; setStatus("err", "⚠️ Load error: "+e.message); }
       }
 
-      // ══════════════════════════════════════════
-      //  FETCH RANGE DATA
-      // ══════════════════════════════════════════
       async function fetchRangeData(dFromVal, dToVal) {
         const key = `${dFromVal}|${dToVal}`;
         if (_attRangeCache[key]) return _attRangeCache[key];
         setStatus("loading", "⏳ Fetching attendance & OT...");
-        const db   = firebase.firestore();
-        const rtdb = firebase.database();
-        const snap = await db.collectionGroup("Present_Absent")
-          .where("DATE", ">=", dFromVal)
-          .where("DATE", "<=", dToVal)
-          .get();
+        const db = firebase.firestore(), rtdb = firebase.database();
+        const snap = await db.collectionGroup("Present_Absent").where("DATE",">=",dFromVal).where("DATE","<=",dToVal).get();
         const attendance = {};
         snap.forEach(doc => {
           const d = doc.data();
           if (!d.ID || !d.DATE) return;
           const id = String(d.ID).trim();
-          if (!attendance[id]) attendance[id] = { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, fine: 0, others: 0 };
+          if (!attendance[id]) attendance[id] = { norm:0, hol:0, sun:0, abs:0, pres:0, fine:0, others:0 };
           const rec = attendance[id];
-          if (d.STATUS === "PRESENT")     rec.pres++;
-          if (d.STATUS === "ABSENT")      rec.abs++;
-          if (d.REMARK === "NORMAL WORK") rec.norm++;
-          rec.hol    += parseFloat(d.HOLIDAY_WORK) || 0;
-          rec.sun    += parseFloat(d.SUNDAY_WORK)  || 0;
-          rec.fine   += parseFloat(d.FINE)         || 0;
-          rec.others += parseFloat(d.OTHERS)       || 0;
+          if (d.STATUS==="PRESENT") rec.pres++;
+          if (d.STATUS==="ABSENT")  rec.abs++;
+          if (d.REMARK==="NORMAL WORK") rec.norm++;
+          rec.hol    += parseFloat(d.HOLIDAY_WORK)||0;
+          rec.sun    += parseFloat(d.SUNDAY_WORK) ||0;
+          rec.fine   += parseFloat(d.FINE)        ||0;
+          rec.others += parseFloat(d.OTHERS)      ||0;
         });
-        const otMap  = {};
+        // Others sub-collection
+        const othersSnap = await db.collectionGroup("Others").get();
+        othersSnap.forEach(doc => {
+          const d = doc.data();
+          if (!d.ID || !d.DATE) return;
+          if (d.DATE < dFromVal || d.DATE > dToVal) return;
+          const id = String(d.ID).trim();
+          if (!attendance[id]) attendance[id] = { norm:0, hol:0, sun:0, abs:0, pres:0, fine:0, others:0 };
+          attendance[id].others += parseFloat(d.AMOUNT)||0;
+        });
+        const otMap = {};
         const otSnap = await rtdb.ref("OVER_TIME").once("value");
-        const otData = otSnap.val() || {};
+        const otData = otSnap.val()||{};
         for (const monthKey in otData) {
           const monthObj = otData[monthKey];
-          if (typeof monthObj !== "object" || !monthObj) continue;
+          if (typeof monthObj!=="object"||!monthObj) continue;
           for (const dateKey in monthObj) {
             const dateObj = monthObj[dateKey];
-            if (typeof dateObj !== "object" || !dateObj) continue;
+            if (typeof dateObj!=="object"||!dateObj) continue;
             for (const recKey in dateObj) {
               const row = dateObj[recKey];
-              if (!row || !row.ID) continue;
-              const otDateStr = String(row.OT_Date || dateKey || "").trim();
-              if (!otDateStr) continue;
-              if (otDateStr < dFromVal || otDateStr > dToVal) continue;
-              const id     = String(row.ID).trim();
-              const otHrs  = parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0);
-              const otRate = parseFloat(row.OT_Rate || row.ot_rate || row.OT_RATE || 0);
-              otMap[id] = (otMap[id] || 0) + (otHrs * otRate);
+              if (!row||!row.ID) continue;
+              const otDateStr = String(row.OT_Date||dateKey||"").trim();
+              if (!otDateStr||otDateStr<dFromVal||otDateStr>dToVal) continue;
+              const id = String(row.ID).trim();
+              const otHrs  = parseFloat(row.TOTAL_OT_HOURS||row.Total_OT_Hours||0);
+              const otRate = parseFloat(row.OT_Rate||row.ot_rate||row.OT_RATE||0);
+              otMap[id] = (otMap[id]||0) + (otHrs*otRate);
             }
           }
         }
@@ -470,34 +453,28 @@
         return result;
       }
 
-      function invalidateRangeCache() {
-        _attRangeCache = {};
-        _cache.loaded  = false;
-        _cache.loading = false;
-      }
+      function invalidateRangeCache() { _attRangeCache = {}; _cache.loaded=false; _cache.loading=false; }
 
       function getDaysInMonth(dateStr) {
         if (!dateStr) return 26;
         const d = new Date(dateStr);
-        return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        return new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
       }
 
-      // ══════════════════════════════════════════
-      //  BUILD PAYSLIP DATA
-      // ══════════════════════════════════════════
-      function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays) {
-        const emp       = _cache.empMap[empId] || { id: empId, name: "", desig: "", passport: "", joining: "", salary: 0 };
+      // ── BUILD PAYSLIP DATA ──
+      function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus=0, aBonus=0) {
+        const emp       = _cache.empMap[empId]||{ id:empId, name:"", desig:"", passport:"", joining:"", salary:0 };
         const salary    = emp.salary;
-        const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
-        const dailyRate = parseFloat((salary / workingDays).toFixed(2));
-        const att          = rangeData.attendance[empId] || { norm: 0, hol: 0, sun: 0, abs: 0, pres: 0, others: 0 };
-        const totalOT      = rangeData.otMap[empId] || 0;
-        const totalAdvance = _cache.advMap[empId]   || 0;
-        const totalFine    = _cache.fineMap[empId]  || 0;
-        const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
-        const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0);
-        const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
-        const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
+        const isCook    = (emp.desig||"").trim().toUpperCase()==="COOK";
+        const dailyRate = parseFloat((salary/workingDays).toFixed(2));
+        const att          = rangeData.attendance[empId]||{ norm:0, hol:0, sun:0, abs:0, pres:0, others:0 };
+        const totalOT      = rangeData.otMap[empId]  ||0;
+        const totalAdvance = _cache.advMap[empId]    ||0;
+        const totalFine    = _cache.fineMap[empId]   ||0;
+        const normalAmt = isCook ? dailyRate*att.pres : dailyRate*att.norm;
+        const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others||0) + pBonus + aBonus;
+        const csgEmp    = Math.round(gross*0.015*100)/100;
+        const npsEmp    = Math.round(gross*0.01 *100)/100;
         const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
         const netPay    = Math.round(gross - totalDed);
         const now = new Date();
@@ -505,84 +482,64 @@
         if (emp.joining) {
           const parts = emp.joining.split(/[\/\-\.]/);
           let jDate;
-          if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
-          else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+          if (parts[0].length===4) jDate=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
+          else jDate=new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));
           if (!isNaN(jDate)) {
-            let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
+            let months=(now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
             if (now.getDate()<jDate.getDate()) months--;
-            if (months < 0) months = 0;
-            const years = Math.floor(months/12), rem = months%12;
-            const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
-              rem===0 ? `${years} Year${years!==1?'s':''}` :
-              `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
-            serviceLength = { total: months, formatted };
+            if (months<0) months=0;
+            const years=Math.floor(months/12), rem=months%12;
+            const formatted=years===0?`${rem} Month${rem!==1?'s':''}`:rem===0?`${years} Year${years!==1?'s':''}` :`${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
+            serviceLength={ total:months, formatted };
           }
         }
         return {
-          empId: emp.id, name: emp.name, desig: emp.desig,
-          passport: emp.passport, joining: emp.joining,
-          entryDate: now.toLocaleDateString("en-GB"),
-          time: now.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
-          serviceLength,
-          normalWork:    normalAmt.toFixed(2),
-          holidayWork:   att.hol.toFixed(2),
-          sundayWork:    att.sun.toFixed(2),
-          overtime:      totalOT.toFixed(2),
-          others:        (att.others||0).toFixed(2),
-          gross:         gross.toFixed(2),
-          csgEmp:        csgEmp.toFixed(2),
-          npsEmp:        npsEmp.toFixed(2),
-          advanceRefund: totalAdvance.toFixed(2),
-          fine:          totalFine.toFixed(2),
-          absentDays:    att.abs,
-          totalDed:      totalDed.toFixed(2),
-          netPay:        netPay,
-          netPayWords:   numToWords(netPay),
+          empId:emp.id, name:emp.name, desig:emp.desig, passport:emp.passport,
+          joining:emp.joining, wpNo:emp.wpNo||"", rpUidNo:emp.rpUidNo||"",
+          entryDate:now.toLocaleDateString("en-GB"),
+          time:now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),
+          serviceLength, normalWork:normalAmt.toFixed(2), holidayWork:att.hol.toFixed(2),
+          sundayWork:att.sun.toFixed(2), overtime:totalOT.toFixed(2),
+          others:(att.others||0).toFixed(2), gross:gross.toFixed(2),
+          csgEmp:csgEmp.toFixed(2), npsEmp:npsEmp.toFixed(2),
+          advanceRefund:totalAdvance.toFixed(2), fine:totalFine.toFixed(2),
+          absentDays:att.abs, totalDed:totalDed.toFixed(2),
+          netPay:netPay, netPayWords:numToWords(netPay),
+          pBonus:pBonus.toFixed(2), aBonus:aBonus.toFixed(2),
         };
       }
 
-      // ══════════════════════════════════════════
-      //  UTILITIES
-      // ══════════════════════════════════════════
-      function showMsg(msg, {title="Notice", type="warn", confirm=false, onOk=null}={}) {
-        const icons = { warn:"⚠️", err:"❌", ok:"✅", info:"ℹ️", success:"✅" };
+      // ── UTILITIES ──
+      function showMsg(msg, {title="Notice",type="warn",confirm=false,onOk=null}={}) {
+        const icons={warn:"⚠️",err:"❌",ok:"✅",info:"ℹ️",success:"✅"};
         document.getElementById("msgboxIcon").textContent  = icons[type]||"ℹ️";
-        document.getElementById("msgboxIcon").className    = "msgbox-icon " + type;
+        document.getElementById("msgboxIcon").className    = "msgbox-icon "+type;
         document.getElementById("msgboxTitle").textContent = title;
         document.getElementById("msgboxBody").innerHTML    = msg;
         const footer = document.getElementById("msgboxFooter");
         footer.innerHTML = "";
         if (confirm) {
-          const btnOk = document.createElement("button"); btnOk.className="msgbox-btn primary"; btnOk.textContent="Yes";
-          btnOk.onclick = () => { closeMsgBox(); if(onOk) onOk(); };
-          const btnNo = document.createElement("button"); btnNo.className="msgbox-btn secondary"; btnNo.textContent="No";
-          btnNo.onclick = closeMsgBox;
+          const btnOk=document.createElement("button"); btnOk.className="msgbox-btn primary"; btnOk.textContent="Yes";
+          btnOk.onclick=()=>{ closeMsgBox(); if(onOk) onOk(); };
+          const btnNo=document.createElement("button"); btnNo.className="msgbox-btn secondary"; btnNo.textContent="No";
+          btnNo.onclick=closeMsgBox;
           footer.appendChild(btnNo); footer.appendChild(btnOk);
         } else {
-          const btn = document.createElement("button"); btn.className="msgbox-btn primary"; btn.textContent="OK";
-          btn.onclick = () => { closeMsgBox(); if(onOk) onOk(); };
+          const btn=document.createElement("button"); btn.className="msgbox-btn primary"; btn.textContent="OK";
+          btn.onclick=()=>{ closeMsgBox(); if(onOk) onOk(); };
           footer.appendChild(btn);
         }
         document.getElementById("msgboxOverlay").classList.add("active");
       }
       function closeMsgBox() { document.getElementById("msgboxOverlay").classList.remove("active"); }
-
-      function formatDateTime() {
-        const n = new Date();
-        return n.toLocaleDateString("en-GB").replace(/\//g,".") + ", " + n.toLocaleTimeString("en-US", { hour12: true });
-      }
-
+      function formatDateTime() { const n=new Date(); return n.toLocaleDateString("en-GB").replace(/\//g,".")+", "+n.toLocaleTimeString("en-US",{hour12:true}); }
       function searchTableFn() {
-        const f   = document.getElementById("searchTable").value.toUpperCase();
-        const tbl = document.querySelector("#reportOutput table");
+        const f=document.getElementById("searchTable").value.toUpperCase();
+        const tbl=document.querySelector("#reportOutput table");
         if (!tbl) return;
-        const rows = tbl.getElementsByTagName("tr");
-        for (let i=1; i<rows.length-1; i++) {
-          const txt = rows[i].textContent || rows[i].innerText;
-          rows[i].style.display = txt.toUpperCase().indexOf(f) > -1 ? "" : "none";
-        }
+        const rows=tbl.getElementsByTagName("tr");
+        for (let i=1;i<rows.length-1;i++) { const txt=rows[i].textContent||rows[i].innerText; rows[i].style.display=txt.toUpperCase().indexOf(f)>-1?"":"none"; }
       }
-
       function numToWords(amount) {
         const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
         const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
@@ -596,26 +553,10 @@
         if(num%1000)r+=b1000(num%1000);
         return r.trim()+" MUR Only";
       }
-      function fmtDate(d) {
-        const day=String(d.getDate()).padStart(2,"0");
-        const m=d.toLocaleString("en-US",{month:"short"}).toUpperCase();
-        return `${day}-${m}-${d.getFullYear()}`;
-      }
-      function getMonthYearKey(dateStr) {
-        if (!dateStr) return "UNKNOWN";
-        const d = new Date(dateStr);
-        const monthNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-        return `${monthNames[d.getMonth()]}_${d.getFullYear()}`;
-      }
       function numberToWordsLocal(amount) {
         const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
         const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
-        function convert(n){
-          if(n===0)return"";
-          else if(n<20)return ones[n]+" ";
-          else if(n<100)return tens[Math.floor(n/10)]+" "+(n%10?ones[n%10]+" ":"");
-          else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");
-        }
+        function convert(n){if(n===0)return"";else if(n<20)return ones[n]+" ";else if(n<100)return tens[Math.floor(n/10)]+" "+(n%10?ones[n%10]+" ":"");else return ones[Math.floor(n/100)]+" Hundred "+(n%100?convert(n%100):"");}
         const num=Math.round(amount);
         if(num===0)return"Zero MUR Only";
         let result="";
@@ -625,189 +566,162 @@
         result+=convert(num%1000);
         return result.trim()+" MUR Only";
       }
+      function fmtDate(d) { const day=String(d.getDate()).padStart(2,"0"); const m=d.toLocaleString("en-US",{month:"short"}).toUpperCase(); return `${day}-${m}-${d.getFullYear()}`; }
+      function getMonthYearKey(dateStr) {
+        if (!dateStr) return "UNKNOWN";
+        const d=new Date(dateStr);
+        const monthNames=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+        return `${monthNames[d.getMonth()]}_${d.getFullYear()}`;
+      }
+      function getMonthKey(dateStr) {
+        const months=["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
+        const d=new Date(dateStr);
+        return `${months[d.getMonth()]}_${d.getFullYear()}`;
+      }
 
-      // ══════════════════════════════════════════
-      //  EMPLOYEE PANEL
-      // ══════════════════════════════════════════
+      // ── EMPLOYEE PANEL ──
       async function openEmpPanel() {
         document.getElementById("empPanel").classList.add("active");
-        document.body.style.overflow = "hidden";
+        document.body.style.overflow="hidden";
         syncPanelDates();
         if (!_cache.loaded) await preloadStaticData();
         renderPanelRows(_cache.empList);
       }
-      function closeEmpPanel() {
-        document.getElementById("empPanel").classList.remove("active");
-        document.body.style.overflow = "";
-      }
-      document.getElementById("empPanel").addEventListener("click", function(e) {
-        if (e.target === this) closeEmpPanel();
-      });
+      function closeEmpPanel() { document.getElementById("empPanel").classList.remove("active"); document.body.style.overflow=""; }
+      document.getElementById("empPanel").addEventListener("click", function(e){ if(e.target===this) closeEmpPanel(); });
 
       function renderPanelRows(list) {
-        const tbody = document.getElementById("empPanelBody");
-        tbody.innerHTML = "";
+        const tbody=document.getElementById("empPanelBody");
+        tbody.innerHTML="";
         list.forEach(e => {
-          const tr = document.createElement("tr");
-          tr.dataset.id   = e.id;
-          tr.dataset.name = (e.name||"").toLowerCase();
-          tr.innerHTML = `
-            <td style="text-align:center"><input type="checkbox" class="panel-cb" value="${e.id}" onchange="updatePanelCount()" style="width:15px;height:15px;accent-color:#6366f1;cursor:pointer"/></td>
-            <td style="font-family:monospace;font-weight:700;color:var(--brand-blue)">${e.id}</td>
-            <td style="font-weight:600">${e.name}</td>
-            <td style="color:#6b7280;font-size:11px">${e.passport||""}</td>
-            <td style="color:#6b7280;font-size:11px">${e.desig||""}</td>`;
-          tr.addEventListener("click", ev => {
-            if (ev.target.tagName==="INPUT") return;
-            const cb = tr.querySelector(".panel-cb"); cb.checked=!cb.checked; updatePanelCount();
-          });
-          tr.style.cursor = "pointer";
+          const tr=document.createElement("tr");
+          tr.dataset.id=e.id; tr.dataset.name=(e.name||"").toLowerCase();
+          tr.innerHTML=`<td style="text-align:center"><input type="checkbox" class="panel-cb" value="${e.id}" onchange="updatePanelCount()" style="width:15px;height:15px;accent-color:#6366f1;cursor:pointer"/></td><td style="font-family:monospace;font-weight:700;color:var(--brand-blue)">${e.id}</td><td style="font-weight:600">${e.name}</td><td style="color:#6b7280;font-size:11px">${e.passport||""}</td><td style="color:#6b7280;font-size:11px">${e.desig||""}</td>`;
+          tr.addEventListener("click",ev=>{ if(ev.target.tagName==="INPUT") return; const cb=tr.querySelector(".panel-cb"); cb.checked=!cb.checked; updatePanelCount(); });
+          tr.style.cursor="pointer";
           tbody.appendChild(tr);
         });
         updatePanelCount();
       }
-
-      function filterPanelList() {
-        const q = document.getElementById("panelSearch").value.toLowerCase();
-        document.querySelectorAll("#empPanelBody tr").forEach(tr => {
-          tr.style.display = (tr.textContent||"").toLowerCase().includes(q) ? "" : "none";
-        });
-      }
-
-      function togglePanelAll() {
-        const master = document.getElementById("panelSelectAll").checked;
-        document.querySelectorAll("#empPanelBody tr").forEach(tr => {
-          if (tr.style.display==="none") return;
-          const cb = tr.querySelector(".panel-cb"); if (cb) cb.checked=master;
-        });
-        updatePanelCount();
-      }
-
+      function filterPanelList() { const q=document.getElementById("panelSearch").value.toLowerCase(); document.querySelectorAll("#empPanelBody tr").forEach(tr=>{ tr.style.display=(tr.textContent||"").toLowerCase().includes(q)?"":"none"; }); }
+      function togglePanelAll() { const master=document.getElementById("panelSelectAll").checked; document.querySelectorAll("#empPanelBody tr").forEach(tr=>{ if(tr.style.display==="none") return; const cb=tr.querySelector(".panel-cb"); if(cb) cb.checked=master; }); updatePanelCount(); }
       function updatePanelCount() {
-        const checked = document.querySelectorAll(".panel-cb:checked").length;
-        const total   = document.querySelectorAll(".panel-cb").length;
-        document.getElementById("panelSelCount").textContent = checked + " selected";
-        document.getElementById("panelGenBtn").disabled      = checked===0;
-        const allCb = document.getElementById("panelSelectAll");
-        allCb.indeterminate = checked>0 && checked<total;
-        allCb.checked       = checked===total && total>0;
-        document.querySelectorAll("#empPanelBody tr").forEach(tr => {
-          const cb = tr.querySelector(".panel-cb");
-          if (cb) tr.style.background = cb.checked ? "#ede9fe" : "";
-        });
+        const checked=document.querySelectorAll(".panel-cb:checked").length;
+        const total=document.querySelectorAll(".panel-cb").length;
+        document.getElementById("panelSelCount").textContent=checked+" selected";
+        document.getElementById("panelGenBtn").disabled=checked===0;
+        const allCb=document.getElementById("panelSelectAll");
+        allCb.indeterminate=checked>0&&checked<total; allCb.checked=checked===total&&total>0;
+        document.querySelectorAll("#empPanelBody tr").forEach(tr=>{ const cb=tr.querySelector(".panel-cb"); if(cb) tr.style.background=cb.checked?"#ede9fe":""; });
       }
 
-      // ══════════════════════════════════════════
-      //  GENERATE PAYSLIPS (bulk)
-      // ══════════════════════════════════════════
+      // ── GENERATE PAYSLIPS (bulk) ──
       async function generateFromPanel() {
-        const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
+        const selected=[...document.querySelectorAll(".panel-cb:checked")].map(cb=>cb.value);
         if (!selected.length) return;
-        const dFromVal = document.getElementById("panelDateFrom").value;
-        const dToVal   = document.getElementById("panelDateTo").value;
-        if (!dFromVal || !dToVal) {
-          showMsg("Date range required", {title:"Date Range Required", type:"warn"});
-          return;
-        }
-        const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
-        const genBtn = document.getElementById("panelGenBtn");
+        const dFromVal=document.getElementById("panelDateFrom").value;
+        const dToVal  =document.getElementById("panelDateTo").value;
+        if (!dFromVal||!dToVal) { showMsg("Date range required",{title:"Date Range Required",type:"warn"}); return; }
+        const period=`${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+        const genBtn=document.getElementById("panelGenBtn");
         genBtn.disabled=true; genBtn.textContent="⏳ Generating...";
         document.getElementById("genLoader").classList.add("active");
-        updateLoader(0, selected.length, "");
-        document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
-
-        const win = window.open("", "_blank");
-        if (!win) {
-          showMsg("Popup blocked! Browser-এ popup allow করুন।", {title:"Popup Blocked", type:"warn"});
-          document.getElementById("genLoader").classList.remove("active");
-          genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
-          return;
-        }
+        updateLoader(0,selected.length,"");
+        const win=window.open("","_blank");
+        if (!win) { showMsg("Popup blocked!",{title:"Popup Blocked",type:"warn"}); document.getElementById("genLoader").classList.remove("active"); genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip"; return; }
         win.document.write(loaderPageHTML(selected.length));
-
         try {
           if (!_cache.loaded) await preloadStaticData();
-          const rangeData   = await fetchRangeData(dFromVal, dToVal);
-          const workingDays = (window._manualWD && window._manualWD > 0)
-            ? window._manualWD
-            : await getWorkingDays(dFromVal);
-          let allPages = "";
-          for (let i=0; i<selected.length; i++) {
-            const empId = selected[i];
-            updateLoader(i, selected.length, empId);
-            try {
-              if (win && !win.closed) {
-                win.document.getElementById("cc").textContent = i;
-                win.document.getElementById("pb").style.width = (i/selected.length*100) + "%";
-                win.document.getElementById("st").textContent = `Processing: ${empId}`;
+          const rtdb2=firebase.database();
+          const [advSnap2,fineSnap2]=await Promise.all([rtdb2.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),rtdb2.ref("FINE_SUMMARY/USERS").once("value")]);
+          const advData2=advSnap2.val()||{}, fineData2=fineSnap2.val()||{};
+          _cache.advMap={}; _cache.fineMap={};
+          for (const id in advData2) _cache.advMap[id]=parseInt(advData2[id].pending)||0;
+          for (const id in fineData2) _cache.fineMap[id]=parseInt(fineData2[id].pending)||0;
+
+          // Bonus data
+          const bonusSnap=await rtdb2.ref("BONUS_ENTRY").once("value");
+          const bonusData=bonusSnap.val()||{};
+          const dFrom=new Date(dFromVal), dTo=new Date(dToVal);
+          const monthKey=getMonthKey(dFromVal);
+
+          const rangeData=await fetchRangeData(dFromVal,dToVal);
+          const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
+          let allPages="";
+          for (let i=0;i<selected.length;i++) {
+            const empId=selected[i];
+            updateLoader(i,selected.length,empId);
+            try { if(win&&!win.closed){ win.document.getElementById("cc").textContent=i; win.document.getElementById("pb").style.width=(i/selected.length*100)+"%"; win.document.getElementById("st").textContent=`Processing: ${empId}`; } } catch(e2){}
+
+            const postedSnapEmp=await firebase.database().ref(`SALARY_POSTED/${getMonthYearKey(dFromVal)}/${empId}`).once("value");
+            const postedInfoEmp=postedSnapEmp.val();
+            if (postedInfoEmp&&postedInfoEmp.status==="PAID") {
+              _cache.advMap[empId] =postedInfoEmp.adv  ||0;
+              _cache.fineMap[empId]=postedInfoEmp.fine ||0;
+            }
+
+            // Bonus calculation per employee
+            let pBonus=0, aBonus=0;
+            if (bonusData[monthKey]&&typeof bonusData[monthKey]==="object") {
+              for (const df in bonusData[monthKey]) {
+                const dr=bonusData[monthKey][df];
+                if (!dr||typeof dr!=="object") continue;
+                if (!dr[empId]) continue;
+                const row=dr[empId];
+                const bonusDate=new Date(row.DATE||df);
+                if (bonusDate>=dFrom&&bonusDate<=dTo) { pBonus+=parseFloat(row.PERFORMANCE_BONUS)||0; aBonus+=parseFloat(row.ATTENDANCE_BONUS)||0; }
               }
-            } catch(e2) {}
-            const d = buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
-            allPages += `<div class="page">${buildOneSlip(d, period, "EMPLOYEE COPY")}${buildOneSlip(d, period, "OFFICE COPY")}</div>`;
-            updateLoader(i+1, selected.length, empId);
+            }
+
+            const d=buildPayslipData(empId,dFromVal,dToVal,rangeData,workingDays,pBonus,aBonus);
+            allPages+=`<div class="page">${buildOneSlip(d,period,"OFFICE COPY")}${buildOneSlip(d,period,"EMPLOYEE COPY")}</div>`;
+            updateLoader(i+1,selected.length,empId);
           }
-          const fullHtml = `<!doctype html><html><head>
-            <meta charset="UTF-8"><title>Payslips — ${period}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
-            ${payslipWindowCSS()}
-          </head><body>
-            <div class="no-print">
-              <button onclick="window.print()">🖨️ Print</button>
-              &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip — ${period}</span>
-            </div>
-            ${allPages}
-          </body></html>`;
+          const fullHtml=`<!doctype html><html><head><meta charset="UTF-8"><title>Payslips — ${period}</title><link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">${payslipWindowCSS()}</head><body><div class="no-print"><button onclick="window.print()">🖨️ Print</button>&nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${selected.length} payslip — ${period}</span></div>${allPages}</body></html>`;
           win.document.open(); win.document.write(fullHtml); win.document.close();
-        } catch(e) {
-          win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
-          showMsg(`Error: ${e.message}`, {title:"Generation Error", type:"err"});
-        }
+        } catch(e) { win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`); showMsg(`Error: ${e.message}`,{title:"Generation Error",type:"err"}); }
         document.getElementById("genLoader").classList.remove("active");
         genBtn.disabled=false; genBtn.textContent="⚡ Generate Payslip";
       }
 
-      function updateLoader(current, total, empId) {
-        document.getElementById("genCountCurrent").textContent = current;
-        document.getElementById("genCountTotal").textContent   = total;
-        document.getElementById("genProgressBar").style.width  = (total>0?(current/total*100):0)+"%";
-        document.getElementById("genEmpBadge").innerHTML = empId ? `🔄 Processing: <span>${empId}</span>` : `🔄 Initializing...`;
-        document.getElementById("genLoaderSub").textContent = total>0 ? `${current} of ${total} payslip${total>1?'s':''} completed` : "Please wait...";
+      function updateLoader(current,total,empId) {
+        document.getElementById("genCountCurrent").textContent=current;
+        document.getElementById("genCountTotal").textContent=total;
+        document.getElementById("genProgressBar").style.width=(total>0?(current/total*100):0)+"%";
+        document.getElementById("genEmpBadge").innerHTML=empId?`🔄 Processing: <span>${empId}</span>`:`🔄 Initializing...`;
+        document.getElementById("genLoaderSub").textContent=total>0?`${current} of ${total} payslip${total>1?'s':''} completed`:"Please wait...";
       }
 
-      // ══════════════════════════════════════════
-      //  PAYSLIP HTML BUILDERS
-      // ══════════════════════════════════════════
+     // ── PAYSLIP BUILDERS ──
       function buildOneSlip(d, period, title) {
-        return `
-        <div style="position:relative;overflow:hidden;background:white;padding:8mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
+        return `<div style="position:relative;overflow:hidden;background:white;padding:8mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
           <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.04;width:55%;z-index:0;pointer-events:none" alt="">
           <div style="position:relative;z-index:1;font-family:'Source Sans 3',Arial,sans-serif;font-size:11px;color:#111">
             <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
               <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="width:36px;height:36px;object-fit:contain" alt="">
-              <div style="text-align:center">
-                <div style="font-size:17px;font-weight:800;text-transform:uppercase">ALAMHOW CO LTD</div>
-                <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;border-top:1px solid #ccc;padding-top:2px">PAYSLIP</div>
-              </div>
+              <div style="text-align:center"><div style="font-size:17px;font-weight:800;text-transform:uppercase">ALAMHOW CO LTD</div><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;border-top:1px solid #ccc;padding-top:2px">PAYSLIP</div></div>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:6px">
               <span style="font-size:10px;font-weight:700;text-decoration:underline">${title}</span>
               <span style="font-size:10px">PERIOD: ${period}</span>
               <span style="font-size:9px;color:#666">TIME: ${d.time}</span>
             </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 8px;margin-bottom:8px">
+            <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:0 8px;margin-bottom:8px">
               <div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP ID</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.empId}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP NAME</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.name}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">DESIGNATION</span><span style="width:10px;font-weight:700">:</span><span>${d.desig}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PASSPORT NO</span><span style="width:10px;font-weight:700">:</span><span>${d.passport}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">JOINING DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.joining}</span></div>
+                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">SERVICE</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength?d.serviceLength.total+' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>':''}</span></div>
               </div>
               <div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.entryDate}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">GANG</span><span style="width:10px;font-weight:700">:</span><span></span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">SRN</span><span style="width:10px;font-weight:700">:</span><span></span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">NPS NO</span><span style="width:10px;font-weight:700">:</span><span></span></div>
-                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">WP NO</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.wpNo}</span></div>
+                <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">RP UID NO</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.rpUidNo}</span></div>
               </div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
@@ -819,9 +733,10 @@
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.sundayWork}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.pBonus}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.aBonus}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Others</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.others}</td></tr>
                   <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.gross}</td></tr>
                 </table>
               </div>
@@ -836,307 +751,353 @@
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Absent <span style="color:#aaa;font-size:9px">(info)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.absentDays} Days</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
                   <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.totalDed}</td></tr>
                 </table>
               </div>
             </div>
             <div style="margin-top:8px;border-top:2px solid black;padding-top:6px">
-              <div style="font-weight:700;font-size:13px;display:flex;justify-content:space-between;text-transform:uppercase">
-                <span>Net Payable</span><span style="color:#15803d;font-family:monospace">${d.netPay}</span>
-              </div>
-              <div style="margin-top:3px;font-size:10px;color:#444;border:1px dashed #aaa;border-radius:4px;padding:3px 6px">
-                <span style="font-weight:700">IN WORDS:</span> ${d.netPayWords}
-              </div>
+              <div style="font-weight:700;font-size:13px;display:flex;justify-content:space-between;text-transform:uppercase"><span>Net Payable</span><span style="color:#15803d;font-family:monospace">${d.netPay}</span></div>
+              <div style="margin-top:3px;font-size:10px;color:#444;border:1px dashed #aaa;border-radius:4px;padding:3px 6px"><span style="font-weight:700">IN WORDS:</span> ${d.netPayWords}</div>
             </div>
             <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
-              <thead><tr style="background:#f3f4f6">
-                <th style="border:1px solid #9ca3af;padding:3px">A.L</th><th style="border:1px solid #9ca3af;padding:3px">S.L</th>
-                <th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
-                <th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
-              </tr></thead>
-              <tbody><tr>
-                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
-                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
-                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
-              </tr></tbody>
+              <thead><tr style="background:#f3f4f6"><th style="border:1px solid #9ca3af;padding:3px">A.L</th><th style="border:1px solid #9ca3af;padding:3px">S.L</th><th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th></tr></thead>
+              <tbody><tr><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td></tr></tbody>
             </table>
             <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:16px">
-              <tr style="background:#f3f4f6;font-weight:700">
-                <th style="border:1px solid #9ca3af;padding:3px">GROSS PAY</th>
-                <th style="border:1px solid #9ca3af;padding:3px">DEDUCTIONS</th>
-                <th style="border:1px solid #9ca3af;padding:3px">B/F CENTS</th>
-              </tr>
-              <tr>
-                <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace">${d.gross}</td>
-                <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace">${d.totalDed}</td>
-                <td style="border:1px solid #9ca3af;padding:3px">-</td>
-              </tr>
-              <tr style="background:#f9fafb;font-weight:700">
-                <td style="border:1px solid #9ca3af;padding:2px">PAID BY CASH/CHQ/D.D</td>
-                <td style="border:1px solid #9ca3af;padding:2px">TO BE PAID</td>
-                <td style="border:1px solid #9ca3af;padding:2px">C/F CENTS</td>
-              </tr>
-              <tr>
-                <td style="border:1px solid #9ca3af;padding:3px">CASH</td>
-                <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace;font-weight:700">${d.netPay}</td>
-                <td style="border:1px solid #9ca3af;padding:3px"></td>
-              </tr>
+              <tr style="background:#f3f4f6;font-weight:700"><th style="border:1px solid #9ca3af;padding:3px">GROSS PAY</th><th style="border:1px solid #9ca3af;padding:3px">DEDUCTIONS</th><th style="border:1px solid #9ca3af;padding:3px">B/F CENTS</th></tr>
+              <tr><td style="border:1px solid #9ca3af;padding:3px;font-family:monospace">${d.gross}</td><td style="border:1px solid #9ca3af;padding:3px;font-family:monospace">${d.totalDed}</td><td style="border:1px solid #9ca3af;padding:3px">-</td></tr>
+              <tr style="background:#f9fafb;font-weight:700"><td style="border:1px solid #9ca3af;padding:2px">PAID BY CASH/CHQ/D.D</td><td style="border:1px solid #9ca3af;padding:2px">TO BE PAID</td><td style="border:1px solid #9ca3af;padding:2px">C/F CENTS</td></tr>
+              <tr><td style="border:1px solid #9ca3af;padding:3px">CASH</td><td style="border:1px solid #9ca3af;padding:3px;font-family:monospace;font-weight:700">${d.netPay}</td><td style="border:1px solid #9ca3af;padding:3px"></td></tr>
             </table>
-            <div style="margin-top:64px;font-size:10px;text-transform:uppercase">
-              DIRECTOR SIGNATURE:..........................................<br>
-              <span style="margin-top:4px;display:inline-block">DATE:...............................</span>
-            </div>
+            ${title==="OFFICE COPY"?`<div style="margin-top:64px;font-size:10px;text-transform:uppercase">EMPLOYEE SIGNATURE:..........................................<br><span style="margin-top:4px;display:inline-block">DATE:...............................</span></div>`:`<div style="margin-top:64px;font-size:10px;text-transform:uppercase">DIRECTOR SIGNATURE:..........................................<br><span style="margin-top:4px;display:inline-block">DATE:...............................</span></div>`}
           </div>
         </div>`;
       }
 
       function payslipWindowCSS() {
-        return `<style>
-          *{box-sizing:border-box;margin:0;padding:0}
-          body{background:#f3f4f6;font-family:'Source Sans 3',Arial,sans-serif;padding:10mm}
-          .page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}
-          .page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}
-          .page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}
-          .no-print{text-align:center;margin-bottom:8mm}
-          .no-print button{background:#002147;color:#ffd700;border:2px solid #ffd700;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
-          .no-print button:hover{background:#ffd700;color:#002147}
-          @media print{
-            @page{size:A4 landscape;margin:6mm}
-            body{background:white;padding:0}
-            .no-print{display:none!important}
-            .page{box-shadow:none;border-radius:0;padding:2mm 0;max-width:100%;gap:22mm;margin:0;page-break-after:always;break-after:page}
-            .page:last-child{page-break-after:avoid;break-after:avoid}
-          }
-        </style>`;
+        return `<style>*{box-sizing:border-box;margin:0;padding:0}body{background:#f3f4f6;font-family:'Source Sans 3',Arial,sans-serif;padding:10mm}.page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}.page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}.page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}.no-print{text-align:center;margin-bottom:8mm}.no-print button{background:#002147;color:#ffd700;border:2px solid #ffd700;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}.no-print button:hover{background:#ffd700;color:#002147}@media print{@page{size:A4 landscape;margin:6mm}body{background:white;padding:0}.no-print{display:none!important}.page{box-shadow:none;border-radius:0;padding:2mm 0;max-width:100%;gap:22mm;margin:0;page-break-after:always;break-after:page}.page:last-child{page-break-after:avoid;break-after:avoid}}</style>`;
       }
 
       function loaderPageHTML(total) {
-        return `<!doctype html><html><head><title>Generating...</title><style>
-          *{box-sizing:border-box;margin:0;padding:0}
-          body{display:flex;align-items:center;justify-content:center;height:100vh;background:#002147;font-family:sans-serif;flex-direction:column;gap:20px}
-          .spinner{width:56px;height:56px;border:5px solid #1e3a5f;border-top-color:#ffd700;border-right-color:rgba(255,215,0,0.4);border-radius:50%;animation:spin .7s linear infinite}
-          @keyframes spin{to{transform:rotate(360deg)}}
-          .title{color:#ffd700;font-size:22px;font-weight:700;letter-spacing:1.5px}
-          .count-box{background:rgba(255,215,0,0.08);border:2px solid #ffd700;border-radius:14px;padding:14px 40px;text-align:center}
-          .count-big{color:#ffd700;font-size:44px;font-weight:700;line-height:1}
-          .count-of{color:#6a88aa;font-size:13px;font-weight:600;margin-top:4px}
-          .bar-wrap{width:280px;height:8px;background:#001030;border-radius:20px;overflow:hidden}
-          .bar{height:100%;background:linear-gradient(90deg,#ffd700,#ffe87a);width:0%;border-radius:20px;transition:width .4s}
-          .sub{color:#6a88aa;font-size:12px;font-weight:600}
-        </style></head><body>
-          <div class="spinner"></div>
-          <div class="title">⚡ PLEASE WAIT</div>
-          <div class="count-box">
-            <div class="count-big" id="cc">0</div>
-            <div class="count-of">of ${total} payslip${total>1?'s':''}</div>
-          </div>
-          <div class="bar-wrap"><div class="bar" id="pb"></div></div>
-          <div class="sub" id="st">Fetching data...</div>
-        </body></html>`;
+        return `<!doctype html><html><head><title>Generating...</title><style>*{box-sizing:border-box;margin:0;padding:0}body{display:flex;align-items:center;justify-content:center;height:100vh;background:#002147;font-family:sans-serif;flex-direction:column;gap:20px}.spinner{width:56px;height:56px;border:5px solid #1e3a5f;border-top-color:#ffd700;border-right-color:rgba(255,215,0,0.4);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.title{color:#ffd700;font-size:22px;font-weight:700;letter-spacing:1.5px}.count-box{background:rgba(255,215,0,0.08);border:2px solid #ffd700;border-radius:14px;padding:14px 40px;text-align:center}.count-big{color:#ffd700;font-size:44px;font-weight:700;line-height:1}.count-of{color:#6a88aa;font-size:13px;font-weight:600;margin-top:4px}.bar-wrap{width:280px;height:8px;background:#001030;border-radius:20px;overflow:hidden}.bar{height:100%;background:linear-gradient(90deg,#ffd700,#ffe87a);width:0%;border-radius:20px;transition:width .4s}.sub{color:#6a88aa;font-size:12px;font-weight:600}</style></head><body><div class="spinner"></div><div class="title">⚡ PLEASE WAIT</div><div class="count-box"><div class="count-big" id="cc">0</div><div class="count-of">of ${total} payslip${total>1?'s':''}</div></div><div class="bar-wrap"><div class="bar" id="pb"></div></div><div class="sub" id="st">Fetching data...</div></body></html>`;
       }
 
-      // ══════════════════════════════════════════
-      //  SINGLE PAYSLIP TAB
-      // ══════════════════════════════════════════
+      // ── SINGLE PAYSLIP ──
       async function openSlipTab(empId, dFromVal, dToVal) {
-        const win = window.open("", "_blank");
-        if (!win) { showMsg("Popup blocked!", {title:"Popup Blocked", type:"warn"}); return; }
+        const win=window.open("","_blank");
         win.document.write(loaderPageHTML(1));
         try {
           if (!_cache.loaded) await preloadStaticData();
-          const rangeData   = await fetchRangeData(dFromVal, dToVal);
-          const workingDays = (window._manualWD && window._manualWD > 0)
-            ? window._manualWD
-            : await getWorkingDays(dFromVal);
-          const d        = buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays);
-          const period   = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
-          const html = `<!doctype html><html><head>
-            <meta charset="UTF-8"><title>Payslip — ${d.empId}</title>
-            <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
-            ${payslipWindowCSS()}
-          </head><body>
-            <div class="no-print"><button onclick="window.print()">🖨️ Print</button></div>
-            <div class="page">
-              ${buildOneSlip(d, period, "EMPLOYEE COPY")}
-              ${buildOneSlip(d, period, "OFFICE COPY")}
-            </div>
-          </body></html>`;
-          win.document.open(); win.document.write(html); win.document.close();
-        } catch(e) {
-          win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
-        }
-      }
+          const rtdb=firebase.database();
+          const [advSnap,fineSnap]=await Promise.all([rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),rtdb.ref("FINE_SUMMARY/USERS").once("value")]);
+          const advData=advSnap.val()||{}, fineData=fineSnap.val()||{};
+          _cache.advMap={}; _cache.fineMap={};
+          for (const id in advData) _cache.advMap[id]=parseInt(advData[id].pending)||0;
+          for (const id in fineData) _cache.fineMap[id]=parseInt(fineData[id].pending)||0;
 
-      // ══════════════════════════════════════════
-      //  DETAILS TAB
-      // ══════════════════════════════════════════
-      async function openDetailsTab(empId, dFromVal, dToVal) {
-        const win = window.open("", "_blank");
-        if (!win) { showMsg("Popup blocked!", {title:"Popup Blocked", type:"warn"}); return; }
-        win.document.write(loaderPageHTML(1));
-        try {
-          const db   = firebase.firestore();
-          const rtdb = firebase.database();
-          const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
-          const empDoc = await db.collection("EMPLOYEE_LIST").doc(empId).get();
-          const emp    = empDoc.exists ? empDoc.data() : { name: "Unknown" };
-          const snap   = await db.collectionGroup("Present_Absent").get();
-          let att = [];
-          snap.forEach(doc => {
-            const d = doc.data();
-            const docDate = new Date(d.DATE);
-            if (String(d.ID).trim()!==String(empId).trim()) return;
-            if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
-            att.push(d);
-          });
-          att.sort((a,b) => new Date(a.DATE)-new Date(b.DATE));
-          const otSnap = await rtdb.ref("OVER_TIME").once("value");
-          const otData = otSnap.val() || {};
-          let otMap = {};
-          for (const my in otData) {
-            const md=otData[my]; if (typeof md!=="object") continue;
-            for (const df in md) {
-              const dr=md[df]; if (typeof dr!=="object") continue;
-              for (const rk in dr) {
-                const row=dr[rk];
-                if (row && String(row.ID)===String(empId)) {
-                  const key = row.OT_Date || df;
-                  otMap[key] = row;
-                }
-              }
+          const monthYearKey=getMonthYearKey(dFromVal);
+          const postedSnap=await rtdb.ref(`SALARY_POSTED/${monthYearKey}/${empId}`).once("value");
+          const postedInfo=postedSnap.val();
+          if (postedInfo&&postedInfo.status==="PAID") {
+            _cache.advMap[empId] =postedInfo.adv  ||0;
+            _cache.fineMap[empId]=postedInfo.fine ||0;
+          }
+
+          // Bonus
+          const bonusSnap=await rtdb.ref("BONUS_ENTRY").once("value");
+          const bonusData=bonusSnap.val()||{};
+          let pBonus=0, aBonus=0;
+          const dFrom=new Date(dFromVal), dTo=new Date(dToVal);
+          const monthKey=getMonthKey(dFromVal);
+          if (bonusData[monthKey]&&typeof bonusData[monthKey]==="object") {
+            for (const df in bonusData[monthKey]) {
+              const dr=bonusData[monthKey][df];
+              if (!dr||typeof dr!=="object"||!dr[empId]) continue;
+              const row=dr[empId];
+              const bonusDate=new Date(row.DATE||df);
+              if (bonusDate>=dFrom&&bonusDate<=dTo) { pBonus+=parseFloat(row.PERFORMANCE_BONUS)||0; aBonus+=parseFloat(row.ATTENDANCE_BONUS)||0; }
             }
           }
-          const rows = att.map((r,i) => {
-            const ot = otMap[r.DATE]||{};
-            return `<tr><td style="text-align:center">${i+1}</td><td>${r.DATE}</td><td style="text-align:center">${r.STATUS}</td><td>${r.SIDE_NAME||"-"}</td><td style="text-align:center">${ot.TOTAL_OT_HOURS||0}</td><td style="text-align:center">${r.HOLIDAY_WORK||0}</td><td style="text-align:center">${r.SUNDAY_WORK||0}</td><td>${r.REMARK||"-"}</td></tr>`;
-          }).join("");
-          const html = `<!doctype html><html><head><title>Details — ${empId}</title><style>
-            body{font-family:'Source Sans 3',sans-serif;padding:30px;background:#f4f7f6;color:#1a1a2e}
-            .header{background:#002147;color:#ffd700;padding:20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
-            table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
-            th{background:#002147;color:white;padding:12px;font-size:11px;text-transform:uppercase;border:1px solid #335185}
-            td{padding:10px;border:1px solid #eee;font-size:12px}
-            tr:hover{background:#fffecb}
-            .btn-print{background:#ffd700;color:#002147;border:2px solid #ffd700;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer;transition:all .2s}
-            @media print{.no-print{display:none}}
-          </style></head><body>
-            <div class="header">
-              <div><h2 style="margin:0">Monthly Attendance Details</h2><p style="margin:5px 0 0;font-size:14px">${empId} — ${emp.name}</p></div>
-              <button class="btn-print no-print" onclick="window.print()">🖨️ Print Report</button>
-            </div>
-            <p style="margin-bottom:10px;font-size:12px"><b>Period:</b> ${dFromVal} to ${dToVal}</p>
-            <table><thead><tr><th>SL</th><th>Date</th><th>Status</th><th>Project</th><th>OT Hours</th><th>Holiday</th><th>Sunday</th><th>Remark</th></tr></thead><tbody>${rows}</tbody></table>
-          </body></html>`;
+
+          const rangeData=await fetchRangeData(dFromVal,dToVal);
+          const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
+          const d=buildPayslipData(empId,dFromVal,dToVal,rangeData,workingDays,pBonus,aBonus);
+          const period=`${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+          const html=`<!doctype html><html><head><meta charset="UTF-8"><title>Payslip — ${d.empId}</title><link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">${payslipWindowCSS()}</head><body><div class="no-print"><button onclick="window.print()">🖨️ Print </button></div><div class="page">${buildOneSlip(d,period,"OFFICE COPY")}${buildOneSlip(d,period,"EMPLOYEE COPY")}</div></body></html>`;
           win.document.open(); win.document.write(html); win.document.close();
-        } catch(e) {
-          win.document.write(`<p style="color:red">Error: ${e.message}</p>`);
-        }
+        } catch(e) { win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`); }
       }
 
-    async function generateReport() {
+      // ── DETAILS TAB ──
+      // ── DETAILS TAB (Others + Bonus সহ আপডেটেড) ──
+async function openDetailsTab(empId, dFromVal, dToVal) {
+  const win = window.open("", "_blank");
+  if (!win) { showMsg("Popup blocked!", {title:"Popup Blocked", type:"warn"}); return; }
+  win.document.write(loaderPageHTML(1));
+  try {
+    const db = firebase.firestore(), rtdb = firebase.database();
+    const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+
+    // ── 1. Employee info ──
+    const empDoc = await db.collection("EMPLOYEE_LIST").doc(empId).get();
+    const emp = empDoc.exists ? empDoc.data() : { name: "Unknown" };
+
+    // ── 2. Attendance ──
+    const snap = await db.collectionGroup("Present_Absent").get();
+    let att = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      const docDate = new Date(d.DATE);
+      if (String(d.ID).trim() !== String(empId).trim()) return;
+      if (dFromVal && dToVal && (docDate < dFrom || docDate > dTo)) return;
+      att.push(d);
+    });
+    att.sort((a,b) => new Date(a.DATE) - new Date(b.DATE));
+
+    // ── 3. OT (RTDB) ──
+    const otSnap = await rtdb.ref("OVER_TIME").once("value");
+    const otData = otSnap.val() || {};
+    let otMap = {};
+    for (const my in otData) {
+      const md = otData[my]; if (typeof md !== "object") continue;
+      for (const df in md) {
+        const dr = md[df]; if (typeof dr !== "object") continue;
+        for (const rk in dr) {
+          const row = dr[rk];
+          if (row && String(row.ID) === String(empId)) {
+            const key = row.OT_Date || df;
+            otMap[key] = row;
+          }
+        }
+      }
+    }
+
+    // ── 4. BONUS_ENTRY (RTDB) — date-wise ──
+    // Path: BONUS_ENTRY/{MONTH_YEAR}/{DATE_KEY}/{empId}
+    const monthKey = getMonthKey(dFromVal);
+    const bonusSnap = await rtdb.ref(`BONUS_ENTRY/${monthKey}`).once("value");
+    const bonusMonthData = bonusSnap.val() || {};
+    let bonusMap = {}; // bonusMap[date] = { ATTENDANCE_BONUS, PERFORMANCE_BONUS }
+    for (const dateKey in bonusMonthData) {
+      const dateData = bonusMonthData[dateKey];
+      if (typeof dateData !== "object") continue;
+      if (dateData[empId]) {
+        const date = dateKey.replace("DATE_", "");
+        bonusMap[date] = dateData[empId];
+      }
+    }
+
+    // ── 5. Others (Firestore: DailyAttendance) — date-wise ──
+    // Path: DailyAttendance/{MONTH_YEAR}/DATES/{DATE_KEY}/Others
+    const uniqueDates = [...new Set(att.map(r => r.DATE))];
+    let othersMap = {}; // othersMap[date] = total AMOUNT
+    const othersPromises = uniqueDates.map(async (date) => {
+      const dateKey = `DATE_${date}`;
+      const othersSnap = await db
+        .collection("DailyAttendance")
+        .doc(monthKey)
+        .collection("DATES")
+        .doc(dateKey)
+        .collection("Others")
+        .where("ID", "==", empId)
+        .get();
+      let total = 0;
+      othersSnap.forEach(doc => { total += Number(doc.data().AMOUNT || 0); });
+      othersMap[date] = total;
+    });
+    await Promise.all(othersPromises);
+
+    // ── 6. Table rows ──
+    const rows = att.map((r, i) => {
+      const ot     = otMap[r.DATE]    || {};
+      const bonus  = bonusMap[r.DATE] || {};
+      const others = othersMap[r.DATE] || 0;
+      const aBonus = bonus.ATTENDANCE_BONUS  || 0;
+      const pBonus = bonus.PERFORMANCE_BONUS || 0;
+      return `<tr>
+        <td style="text-align:center">${i+1}</td>
+        <td>${r.DATE}</td>
+        <td style="text-align:center">${r.STATUS}</td>
+        <td>${r.SIDE_NAME||"-"}</td>
+        <td style="text-align:center">${ot.TOTAL_OT_HOURS||0}</td>
+        <td style="text-align:center">${r.HOLIDAY_WORK||0}</td>
+        <td style="text-align:center">${r.SUNDAY_WORK||0}</td>
+        <td style="text-align:center">${others > 0 ? others : "-"}</td>
+        <td style="text-align:center">${aBonus > 0 ? aBonus : "-"}</td>
+        <td style="text-align:center">${pBonus > 0 ? pBonus : "-"}</td>
+        <td>${r.REMARK||"-"}</td>
+      </tr>`;
+    }).join("");
+
+    // ── 7. Final HTML ──
+    const html = `<!doctype html><html><head><title>Details — ${empId}</title><style>
+      body{font-family:'Source Sans 3',sans-serif;padding:30px;background:#f4f7f6;color:#1a1a2e}
+      .header{background:#002147;color:#ffd700;padding:20px;border-radius:10px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+      table{width:100%;border-collapse:collapse;background:white;border-radius:8px;overflow:hidden;box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+      th{background:#002147;color:white;padding:12px;font-size:11px;text-transform:uppercase;border:1px solid #335185}
+      td{padding:10px;border:1px solid #eee;font-size:12px}
+      tr:hover{background:#fffecb}
+      .btn-print{background:#ffd700;color:#002147;border:2px solid #ffd700;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer}
+      @media print{.no-print{display:none}}
+    </style></head><body>
+      <div class="header">
+        <div>
+          <h2 style="margin:0">Monthly Attendance Details</h2>
+          <p style="margin:5px 0 0;font-size:14px">${empId} — ${emp.name}</p>
+        </div>
+        <button class="btn-print no-print" onclick="window.print()">🖨️ Print Report</button>
+      </div>
+      <p style="margin-bottom:10px;font-size:12px"><b>Period:</b> ${dFromVal} to ${dToVal}</p>
+      <table>
+        <thead><tr>
+          <th>SL</th><th>Date</th><th>Status</th><th>Project</th>
+          <th>OT Hours</th><th>Holiday</th><th>Sunday</th>
+          <th>Others</th><th>A Bonus</th><th>P Bonus</th><th>Remark</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </body></html>`;
+    win.document.open(); win.document.write(html); win.document.close();
+  } catch(e) {
+    win.document.write(`<p style="color:red">Error: ${e.message}</p>`);
+  }
+}
+
+// ── Helper (যদি Document 4-এ আগে থেকে না থাকে, এটাও যোগ করুন) ──
+// getMonthKey ফাংশনটা আপনার Document 4-তে ইতিমধ্যেই আছে, তাই আলাদা যোগ করার দরকার নেই।
+
+      // ══════════════════════════════════════════
+      //  GENERATE REPORT — Others, P Bonus, A Bonus সহ
+      // ══════════════════════════════════════════
+      async function generateReport() {
         const output   = document.getElementById("reportOutput");
         const dFromVal = document.getElementById("dateFrom").value;
         const dToVal   = document.getElementById("dateTo").value;
         const dFrom    = new Date(dFromVal), dTo = new Date(dToVal);
         const filterId = document.getElementById("filterId").value.trim();
-        window._reportFrom = dFromVal; window._reportTo = dToVal;
-        output.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
-
-        if (!dFromVal || !dToVal) {
-          showMsg("FROM & TO BOTH ARE REQUIRED", {title:"Date Required", type:"warn"});
-          return;
-        }
-
-        const workingDays = (window._manualWD && window._manualWD > 0)
-          ? window._manualWD
-          : await getWorkingDays(dFromVal);
-
-        function getDailyRate(salary) {
-          return parseFloat((salary / workingDays).toFixed(2));
-        }
-
+        window._reportFrom=dFromVal; window._reportTo=dToVal;
+        output.innerHTML='<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Processing data…</p>';
+        if (!dFromVal||!dToVal) { showMsg("FROM & TO BOTH ARE REQUIRED",{title:"Date Required",type:"warn"}); return; }
+        const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
+        function getDailyRate(salary) { return parseFloat((salary/workingDays).toFixed(2)); }
         try {
-          const db   = firebase.firestore();
-          const rtdb = firebase.database();
-          const monthYearKey = getMonthYearKey(dFromVal);
+          const db=firebase.firestore(), rtdb=firebase.database();
+          const monthYearKey=getMonthYearKey(dFromVal);
+          const monthKey=getMonthKey(dFromVal);
 
-          const [snap, otSnap, advSnap, postedSnap, fineSnap] = await Promise.all([
+          const [snap, otSnap, advSnap, postedSnap, fineSnap, bonusSnap, othersSnap] = await Promise.all([
             db.collectionGroup("Present_Absent").get(),
             rtdb.ref("OVER_TIME").once("value"),
             rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
             rtdb.ref(`SALARY_POSTED/${monthYearKey}`).once("value"),
             rtdb.ref("FINE_SUMMARY/USERS").once("value"),
+            rtdb.ref("BONUS_ENTRY").once("value"),       // ✅ Bonus
+            db.collectionGroup("Others").get(),          // ✅ Others
           ]);
+
           const otData     = otSnap.val()||{};
           const advData    = advSnap.val()||{};
-          const postedData = postedSnap.val()||{};
           const fineData   = fineSnap.val()||{};
+          const postedData = postedSnap.val()||{};
+          const bonusData  = bonusSnap.val()||{};
 
-          let workers = {};
+          let workers={};
           snap.forEach(doc => {
-            const d = doc.data();
-            const docDate = new Date(d.DATE);
-            if (filterId && d.ID!==filterId) return;
-            if (dFromVal && dToVal && (docDate<dFrom||docDate>dTo)) return;
+            const d=doc.data();
+            const docDate=new Date(d.DATE);
+            if (filterId&&d.ID!==filterId) return;
+            if (dFromVal&&dToVal&&(docDate<dFrom||docDate>dTo)) return;
             if (!workers[d.ID]) {
-              const sal = parseInt(d.SALARY)||0;
-              workers[d.ID] = {
-                id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
-                sal:sal, daily:getDailyRate(sal),
-                norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0, others:0
+              const sal=parseInt(d.SALARY)||0;
+              workers[d.ID]={ id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
+                sal, daily:getDailyRate(sal),
+                norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
+                others:0, pBonus:0, aBonus:0  // ✅ NEW
               };
             }
-            if (d.STATUS==="PRESENT")     workers[d.ID].pres++;
+            if (d.STATUS==="PRESENT") workers[d.ID].pres++;
             else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
             if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-            workers[d.ID].sun    += parseFloat(d.SUNDAY_WORK)  || 0;
-            workers[d.ID].hol    += parseFloat(d.HOLIDAY_WORK) || 0;
-            workers[d.ID].others += parseFloat(d.OTHERS)       || 0;
+            workers[d.ID].sun += parseFloat(d.SUNDAY_WORK) ||0;
+            workers[d.ID].hol += parseFloat(d.HOLIDAY_WORK)||0;
           });
 
+          // ✅ Others sub-collection
+          othersSnap.forEach(doc => {
+            const d=doc.data();
+            const docDate=new Date(d.DATE);
+            if (!d.ID) return;
+            if (filterId&&d.ID!==filterId) return;
+            if (dFromVal&&dToVal&&(docDate<dFrom||docDate>dTo)) return;
+            if (!workers[d.ID]) return;
+            workers[d.ID].others += parseFloat(d.AMOUNT)||0;
+          });
+
+          // OT loop
           for (const my in otData) {
-            const md=otData[my]; if (typeof md!=="object") continue;
+            const md=otData[my]; if(typeof md!=="object") continue;
             for (const df in md) {
-              const dr=md[df]; if (typeof dr!=="object") continue;
+              const dr=md[df]; if(typeof dr!=="object") continue;
               for (const rk in dr) {
                 const row=dr[rk];
-                if (row && row.ID && workers[row.ID]) {
-                  const otDate = new Date(row.OT_Date || df);
-                  if (dFromVal && dToVal && (otDate<dFrom||otDate>dTo)) continue;
-                  workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0);
-                  const hrs  = parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0);
-                  const rate = parseFloat(row.OT_Rate || row.ot_rate || row.OT_RATE || 0);
-                  workers[row.ID].otA += hrs * rate;
+                if (row&&row.ID&&workers[row.ID]) {
+                  const otDate=new Date(row.OT_Date||df);
+                  if (dFromVal&&dToVal&&(otDate<dFrom||otDate>dTo)) continue;
+                  workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS||row.Total_OT_Hours||0);
+                  workers[row.ID].otA += (parseFloat(row.TOTAL_OT_HOURS||row.Total_OT_Hours||0))*(parseFloat(row.OT_Rate||row.ot_rate||row.OT_RATE||0));
                 }
               }
             }
           }
 
-          for (const id in workers) {
-            if (advData[id])  workers[id].adv  = parseInt(advData[id].pending)  || 0;
-            if (fineData[id]) workers[id].fine = parseInt(fineData[id].pending) || 0;
-          }
-          // ★ PAID row-এ posted সময়ের actual adv/fine দেখানো
-          for (const id in workers) {
-            const pi = postedData[id];
-            if (pi && pi.status === "PAID") {
-              workers[id].adv  = pi.adv  || 0;
-              workers[id].fine = pi.fine || 0;
+          // ✅ Bonus loop
+          for (const my in bonusData) {
+            const md=bonusData[my]; if(typeof md!=="object") continue;
+            for (const df in md) {
+              const dr=md[df]; if(typeof dr!=="object") continue;
+              for (const empId in dr) {
+                const row=dr[empId];
+                if (!row||!workers[empId]) continue;
+                const bonusDate=new Date(row.DATE||df);
+                if (dFromVal&&dToVal&&(bonusDate<dFrom||bonusDate>dTo)) continue;
+                workers[empId].pBonus += parseFloat(row.PERFORMANCE_BONUS)||0;
+                workers[empId].aBonus += parseFloat(row.ATTENDANCE_BONUS) ||0;
+              }
             }
           }
 
-          let totals={norm:0,hol:0,sun:0,pres:0,abs:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0};
+          // Adv / Fine
+          for (const id in workers) {
+            if (advData[id])  workers[id].adv  = parseInt(advData[id].pending) ||0;
+            if (fineData[id]) workers[id].fine = parseInt(fineData[id].pending)||0;
+          }
+          // ✅ PAID row: posted সময়ের actual values (others/bonus সহ)
+          for (const id in workers) {
+            const pi=postedData[id];
+            if (pi&&pi.status==="PAID") {
+              workers[id].adv    = pi.adv    ||0;
+              workers[id].fine   = pi.fine   ||0;
+              workers[id].others = pi.others !== undefined ? pi.others : workers[id].others;
+              workers[id].pBonus = pi.pBonus !== undefined ? pi.pBonus : workers[id].pBonus;
+              workers[id].aBonus = pi.aBonus !== undefined ? pi.aBonus : workers[id].aBonus;
+            }
+          }
+
+          let totals={norm:0,hol:0,sun:0,pres:0,abs:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0,pBonus:0,aBonus:0};
           let rows="", count=1, hasUnpaid=false;
 
           Object.keys(workers).sort().forEach(id => {
-            const w      = workers[id];
-            const isCook = (w.des||"").trim().toUpperCase()==="COOK";
-            const rowTotalBasic = isCook ? w.daily * w.pres : w.daily * w.norm;
-            const gross         = rowTotalBasic + w.hol + w.sun + w.otA + w.others;
-            const nps           = Math.round(gross * 0.01);
-            const csg           = Math.round(gross * 0.015);
-            const totDed        = w.adv + w.fine + nps + csg;
-            const net           = Math.round(gross - totDed);
+            const w=workers[id];
+            const isCook=(w.des||"").trim().toUpperCase()==="COOK";
+            const rowTotalBasic=isCook?w.daily*w.pres:w.daily*w.norm;
+            const baseGross    =rowTotalBasic+w.hol+w.sun+w.otA+w.others;
+            const initPB=w.pBonus||0, initAB=w.aBonus||0;
+            const gross  =baseGross+initPB+initAB;
+            const nps    =Math.round(gross*0.01);
+            const csg    =Math.round(gross*0.015);
+            const totDed =w.adv+w.fine+nps+csg;
+            const net    =Math.round(gross-totDed);
 
             totals.totBasic+=rowTotalBasic; totals.totDaily+=w.daily;
             totals.norm+=w.norm; totals.hol+=w.hol; totals.sun+=w.sun;
@@ -1144,18 +1105,18 @@
             totals.otH+=w.otH; totals.others+=w.others; totals.gross+=gross;
             totals.adv+=w.adv; totals.fine+=w.fine; totals.nps+=nps;
             totals.csg+=csg; totals.totDed+=totDed; totals.net+=net;
+            totals.pBonus+=initPB; totals.aBonus+=initAB;
 
-            const dailyDisplay = `${w.daily.toFixed(2)} <span class="no-print" style="color:${isCook?'#dc2626':'#0369a1'};font-size:8px">÷${workingDays}d${isCook?' ×P':' ×N'}</span>`;
+            const dailyDisplay=`${w.daily.toFixed(2)} <span class="no-print" style="color:${isCook?'#dc2626':'#0369a1'};font-size:8px">÷${workingDays}d${isCook?' ×P':' ×N'}</span>`;
+            const postedInfo=postedData[id];
+            const isPaid=postedInfo&&postedInfo.status==="PAID";
+            if (!isPaid) hasUnpaid=true;
 
-            const postedInfo = postedData[id];
-            const isPaid     = postedInfo && postedInfo.status === "PAID";
-            if (!isPaid) hasUnpaid = true;
+            const statusCell=isPaid
+              ?`<span style="background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">✅ PAID</span>`
+              :`<input type="checkbox" class="salary-checkbox" data-id="${w.id}" style="width:14px;height:14px;cursor:pointer;accent-color:#002147" onchange="updateSalarySelCount()">`;
 
-            const statusCell = isPaid
-              ? `<span style="background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;">✅ PAID</span>`
-              : `<input type="checkbox" class="salary-checkbox" data-id="${w.id}" style="width:14px;height:14px;cursor:pointer;accent-color:#002147" onchange="updateSalarySelCount()">`;
-
-            rows += `<tr data-status="${isPaid ? 'paid' : 'unpaid'}">
+            rows+=`<tr data-status="${isPaid?'paid':'unpaid'}">
               <td class="no-print" style="text-align:center">${statusCell}</td>
               <td style="text-align:center">${count++}</td>
               <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
@@ -1169,6 +1130,8 @@
               <td class="text-right">${w.abs}</td>
               <td class="text-right">${w.otA.toFixed(2)}<div class="ot-hours-preview" style="font-size:9px;color:#666;font-style:italic">${w.otH.toFixed(1)}</div></td>
               <td class="text-right">${w.others.toFixed(2)}</td>
+              <td class="text-right" style="color:#065f46;font-weight:700">${initPB.toFixed(2)}</td>
+              <td class="text-right" style="color:#92400e;font-weight:700">${initAB.toFixed(2)}</td>
               <td class="text-right"><strong>${gross.toFixed(2)}</strong></td>
               <td class="text-right">${w.adv}</td>
               <td class="text-right">${w.fine}</td>
@@ -1184,397 +1147,355 @@
               </td>
               <td style="text-align:center;white-space:nowrap">
                 ${isPaid
-                  ? `<span style="background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px">✅ POSTED</span>`
-                  : `<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px">⏳ PENDING</span>`
+                  ?`<span style="background:#d1fae5;color:#065f46;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px">✅ POSTED</span>`
+                  :`<span style="background:#fef3c7;color:#92400e;font-size:10px;font-weight:700;padding:3px 10px;border-radius:10px">⏳ PENDING</span>`
                 }
               </td>
             </tr>`;
           });
 
-          const postBtnHtml = hasUnpaid
-            ? `<span id="salarySelBadge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,0.12);border:1.5px solid #ffd700;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;color:#ffd700;letter-spacing:0.5px;">
-                 ☑️ Selected: <span id="salarySelCount" style="font-size:15px;color:#ffe87a;">0</span>
-               </span>
+          const postBtnHtml=hasUnpaid
+            ?`<span id="salarySelBadge" style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,215,0,0.12);border:1.5px solid #ffd700;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;color:#ffd700;letter-spacing:0.5px;">☑️ Selected: <span id="salarySelCount" style="font-size:15px;color:#ffe87a;">0</span></span>
                <button id="postSalaryBtn" onclick="postSelectedSalary('${dFromVal}','${dToVal}')" style="background:#d4af37;color:#0f1e33;font-weight:900;padding:8px 22px;border:none;border-radius:8px;font-size:13px;cursor:pointer;letter-spacing:1px;box-shadow:0 3px 10px rgba(212,175,55,0.4);transition:all .2s;">🚀 POST SALARY</button>`
-            : `<span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1.5px solid #10b981;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;color:#10b981;">✅ ALL POSTED</span>`;
+            :`<span style="display:inline-flex;align-items:center;background:rgba(16,185,129,0.12);border:1.5px solid #10b981;border-radius:8px;padding:5px 14px;font-size:12px;font-weight:700;color:#10b981;">✅ ALL POSTED</span>`;
 
-          output.innerHTML = `
-          <div class="print-header" style="display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; white-space:nowrap; padding:5px 0;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:35px; width:auto; object-fit:contain" />
-              <span class="co-name" style="font-weight:bold; font-size:13px;">ALAMHOW CO LTD | Monthly Salary Sheet</span>
-            </div>
-            <div style="font-size:11px; color:#555;">
-              <span>Period: ${dFromVal||"…"} to ${dToVal||"…"}</span> | 
-              <span>Printed: ${formatDateTime()}</span>
-            </div>
-            <div class="no-print" style="display:flex; align-items:center; gap:10px;">
+          output.innerHTML=`
+          <div class="print-header" style="display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;white-space:nowrap;padding:5px 0;">
+            <div style="display:flex;align-items:center;gap:8px;"><img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:35px;width:auto;object-fit:contain"/><span class="co-name" style="font-weight:bold;font-size:13px;">ALAMHOW CO LTD | Monthly Salary Sheet</span></div>
+            <div style="font-size:11px;color:#555;"><span>Period: ${dFromVal||"…"} to ${dToVal||"…"}</span> | <span>Printed: ${formatDateTime()}</span></div>
+            <div class="no-print" style="display:flex;align-items:center;gap:10px;">
               ${postBtnHtml}
-              <select id="statusFilter" onchange="filterSalaryStatus(this.value)" style="padding:5px; border-radius:5px; border:1.5px solid var(--brand-gold); cursor:pointer; font-size:12px;">
-                <option value="all">All</option>
-                <option value="unpaid">Unpaid</option>
-                <option value="paid">Paid</option>
+              <select id="statusFilter" onchange="filterSalaryStatus(this.value)" style="padding:5px;border-radius:5px;border:1.5px solid var(--brand-gold);cursor:pointer;font-size:12px;">
+                <option value="all">All</option><option value="unpaid">Unpaid</option><option value="paid">Paid</option>
               </select>
-              <div style="display:flex; align-items:center; gap:5px; background:rgba(255,215,0,0.08); border:1.5px solid var(--brand-gold); border-radius:8px; padding:4px 8px;">
-                <span style="color:var(--brand-gold); font-size:10px; font-weight:700;">⚙️ WD:</span>
-                <input type="number" id="manualWDInput" value="${window._manualWD||''}" style="width:40px; padding:2px; font-size:12px; border:1px solid #ccc; border-radius:3px; text-align:center;" min="1" max="31" />
-                <button onclick="(function(){const v=parseInt(document.getElementById('manualWDInput').value);window._manualWD=(v>0&&v<=31)?v:null;generateReport();})()" style="background:#0d9488; color:white; border:none; padding:2px 8px; border-radius:3px; font-size:10px; cursor:pointer;">OK</button>
-                <span style="color:${window._manualWD?'#4ade80':'#ffd700'}; font-size:10px; font-weight:700;">${window._manualWD ? '✅'+window._manualWD : '⚡'+workingDays}</span>
+              <div style="display:flex;align-items:center;gap:5px;background:rgba(255,215,0,0.08);border:1.5px solid var(--brand-gold);border-radius:8px;padding:4px 8px;">
+                <span style="color:var(--brand-gold);font-size:10px;font-weight:700;">⚙️ WD:</span>
+                <input type="number" id="manualWDInput" value="${window._manualWD||''}" style="width:40px;padding:2px;font-size:12px;border:1px solid #ccc;border-radius:3px;text-align:center;" min="1" max="31"/>
+                <button onclick="(function(){const v=parseInt(document.getElementById('manualWDInput').value);window._manualWD=(v>0&&v<=31)?v:null;generateReport();})()" style="background:#0d9488;color:white;border:none;padding:2px 8px;border-radius:3px;font-size:10px;cursor:pointer;">OK</button>
+                <span style="color:${window._manualWD?'#4ade80':'#ffd700'};font-size:10px;font-weight:700;">${window._manualWD?'✅'+window._manualWD:'⚡'+workingDays}</span>
               </div>
             </div>
           </div>
-            <table>
-              <thead>
-                <tr>
-                  <th rowspan="2" class="no-print" style="width:40px">
-                    <input type="checkbox" id="selectAllSalary" onclick="toggleAllSalary(this)" style="width:14px;height:14px;cursor:pointer" title="Select All Unpaid">
-                  </th>
-                  <th rowspan="2">SL</th>
-                  <th rowspan="2">EMP ID</th>
-                  <th rowspan="2">Employee Name / Passport</th>
-                  <th rowspan="2">Designation</th>
-                  <th rowspan="2">Total Basic</th>
-                  <th rowspan="2">P</th>
-                  <th rowspan="2">Holiday</th>
-                  <th rowspan="2">Sunday</th>
-                  <th rowspan="2">Total P</th>
-                  <th rowspan="2">A</th>
-                  <th rowspan="2">OT Amt</th>
-                  <th rowspan="2">Oth</th>
-                  <th rowspan="2">Gross Salary</th>
-                  <th colspan="5">DEDUCTIONS</th>
-                  <th rowspan="2">Net Salary</th>
-                  <th rowspan="2" class="no-print">Actions</th>
-                  <th rowspan="2">Status</th>
-                </tr>
-                <tr><th>Adv</th><th>Fine</th><th>NPS 1%</th><th>CSG 1.5%</th><th>Total</th></tr>
-              </thead>
-              <tbody>${rows}</tbody>
-              <tfoot>
-                <tr class="total-row">
-                  <td class="no-print"></td>
-                  <td colspan="4" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
-                  <td class="text-right"><div>${totals.totBasic.toFixed(2)}</div><div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div></td>
-                  <td class="text-right">${totals.norm}</td>
-                  <td class="text-right">${totals.hol.toFixed(2)}</td>
-                  <td class="text-right">${totals.sun.toFixed(2)}</td>
-                  <td class="text-right">${totals.pres}</td>
-                  <td class="text-right">${totals.abs}</td>
-                  <td style="text-align:center;vertical-align:bottom">
-                    <div>${totals.otA.toFixed(2)}</div>
-                    <div class="ot-hours-preview" style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">${totals.otH.toFixed(1)}</div>
-                  </td>
-                  <td class="text-right">${totals.others.toFixed(2)}</td>
-                  <td class="text-right">${totals.gross.toFixed(2)}</td>
-                  <td class="text-right">${totals.adv}</td>
-                  <td class="text-right">${totals.fine}</td>
-                  <td class="text-right">${totals.nps}</td>
-                  <td class="text-right">${totals.csg}</td>
-                  <td class="text-right">${totals.totDed}</td>
-                  <td class="text-right">${Math.round(totals.net)}</td>
-                  <td class="no-print"></td>
-                  <td></td>
-                </tr>
-                <tr>
-                  <td colspan="23" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
-                    <span style="font-weight:bold;font-size:9px">In Words: </span>
-                    <span style="font-size:9px;font-style:italic">${numberToWordsLocal(totals.net)}</span>
-                  </td>
-                </tr>
-                <tr class="print-footer-signature">
-                  <td colspan="23" style="border:none!important;padding:80px 0 20px 0!important">
-                    <div class="signature-area" style="margin-top:0;display:flex;justify-content:space-around">
-                      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
-                      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
-                      <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
-                    </div>
-                  </td>
-                </tr>
-              </tfoot>
-            </table>
-            <div class="signature-area screen-signature">
-              <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
-              <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
-              <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
-            </div>`;
+          <table>
+            <thead>
+              <tr>
+                <th rowspan="2" class="no-print" style="width:40px"><input type="checkbox" id="selectAllSalary" onclick="toggleAllSalary(this)" style="width:14px;height:14px;cursor:pointer" title="Select All Unpaid"></th>
+                <th rowspan="2">SL</th><th rowspan="2">EMP ID</th>
+                <th rowspan="2">Employee Name / Passport</th><th rowspan="2">Designation</th>
+                <th rowspan="2">Total Basic</th><th rowspan="2">P</th><th rowspan="2">Holiday</th>
+                <th rowspan="2">Sunday</th><th rowspan="2">Total P</th><th rowspan="2">A</th>
+                <th rowspan="2">OT Amt</th>
+                <th rowspan="2" class="th-others">Others</th>
+                <th rowspan="2" class="th-pbonus">P Bonus</th>
+                <th rowspan="2" class="th-abonus">A Bonus</th>
+                <th rowspan="2">Gross Salary</th>
+                <th colspan="5">DEDUCTIONS</th>
+                <th rowspan="2">Net Salary</th><th rowspan="2" class="no-print">Actions</th><th rowspan="2">Status</th>
+              </tr>
+              <tr><th>Adv</th><th>Fine</th><th>NPS 1%</th><th>CSG 1.5%</th><th>Total</th></tr>
+            </thead>
+            <tbody>${rows}</tbody>
+            <tfoot>
+              <tr class="total-row">
+                <td class="no-print"></td>
+                <td colspan="4" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
+                <td class="text-right"><div>${totals.totBasic.toFixed(2)}</div><div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div></td>
+                <td class="text-right">${totals.norm}</td>
+                <td class="text-right">${totals.hol.toFixed(2)}</td>
+                <td class="text-right">${totals.sun.toFixed(2)}</td>
+                <td class="text-right">${totals.pres}</td>
+                <td class="text-right">${totals.abs}</td>
+                <td style="text-align:center;vertical-align:bottom"><div>${totals.otA.toFixed(2)}</div><div class="ot-hours-preview" style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">${totals.otH.toFixed(1)}</div></td>
+                <td class="text-right">${totals.others.toFixed(2)}</td>
+                <td class="text-right">${totals.pBonus.toFixed(2)}</td>
+                <td class="text-right">${totals.aBonus.toFixed(2)}</td>
+                <td class="text-right">${totals.gross.toFixed(2)}</td>
+                <td class="text-right">${totals.adv}</td>
+                <td class="text-right">${totals.fine}</td>
+                <td class="text-right">${totals.nps}</td>
+                <td class="text-right">${totals.csg}</td>
+                <td class="text-right">${totals.totDed}</td>
+                <td class="text-right">${Math.round(totals.net)}</td>
+                <td class="no-print"></td><td></td>
+              </tr>
+              <tr>
+                <td colspan="26" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
+                  <span style="font-weight:bold;font-size:9px">In Words: </span>
+                  <span style="font-size:9px;font-style:italic">${numberToWordsLocal(totals.net)}</span>
+                </td>
+              </tr>
+              <tr class="print-footer-signature">
+                <td colspan="26" style="border:none!important;padding:80px 0 20px 0!important">
+                  <div class="signature-area" style="margin-top:0;display:flex;justify-content:space-around">
+                    <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+                    <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+                    <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+                  </div>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="signature-area screen-signature">
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+          </div>`;
         } catch(e) {
-          output.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
-          showMsg(`Error: ${e.message}`, {title:"Report Error", type:"err"});
+          output.innerHTML=`<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+          showMsg(`Error: ${e.message}`,{title:"Report Error",type:"err"});
         }
       }
 
       function filterSalaryStatus(status) {
-        const tbl = document.querySelector("#reportOutput table");
+        const tbl=document.querySelector("#reportOutput table");
         if (!tbl) return;
-        Array.from(tbl.querySelectorAll("tbody tr")).forEach(tr => {
-          if (status === "all") { tr.style.display = ""; return; }
-          tr.style.display = tr.dataset.status === status ? "" : "none";
-        });
+        Array.from(tbl.querySelectorAll("tbody tr")).forEach(tr=>{ if(status==="all"){tr.style.display="";return;} tr.style.display=tr.dataset.status===status?"":"none"; });
       }
-
-      function toggleAllSalary(masterChk) {
-        document.querySelectorAll(".salary-checkbox").forEach(chk => {
-          chk.checked = masterChk.checked;
-        });
-        updateSalarySelCount();
-      }
-
+      function toggleAllSalary(masterChk) { document.querySelectorAll(".salary-checkbox").forEach(chk=>{ chk.checked=masterChk.checked; }); updateSalarySelCount(); }
       function updateSalarySelCount() {
-        const count   = document.querySelectorAll(".salary-checkbox:checked").length;
-        const counter = document.getElementById("salarySelCount");
-        if (counter) counter.textContent = count;
-        const allCbs   = document.querySelectorAll(".salary-checkbox").length;
-        const masterCb = document.getElementById("selectAllSalary");
-        if (masterCb) {
-          masterCb.indeterminate = count > 0 && count < allCbs;
-          masterCb.checked       = count === allCbs && allCbs > 0;
-        }
+        const count=document.querySelectorAll(".salary-checkbox:checked").length;
+        const counter=document.getElementById("salarySelCount"); if(counter) counter.textContent=count;
+        const allCbs=document.querySelectorAll(".salary-checkbox").length;
+        const masterCb=document.getElementById("selectAllSalary");
+        if(masterCb){ masterCb.indeterminate=count>0&&count<allCbs; masterCb.checked=count===allCbs&&allCbs>0; }
       }
 
       async function postSelectedSalary(dFromVal, dToVal) {
-        const selected = [...document.querySelectorAll(".salary-checkbox:checked")].map(cb => cb.getAttribute("data-id"));
-        if (selected.length === 0) {
-          showMsg("কোনো employee select করা হয়নি। চেকবক্স টিক দিয়ে post করুন।", {title:"No Selection", type:"warn"});
-          return;
-        }
-        showMsg(`${selected.length} জন employee এর salary post করবেন?`, {
-          title: "Confirm Post", type: "warn", confirm: true,
-          onOk: () => _doPostSalary(selected, dFromVal, dToVal)
-        });
+        const selected=[...document.querySelectorAll(".salary-checkbox:checked")].map(cb=>cb.getAttribute("data-id"));
+        if (!selected.length) { showMsg("কোনো employee select করা হয়নি।",{title:"No Selection",type:"warn"}); return; }
+        showMsg(`${selected.length} জন employee এর salary post করবেন?`,{title:"Confirm Post",type:"warn",confirm:true,onOk:()=>_doPostSalary(selected,dFromVal,dToVal)});
       }
 
       // ══════════════════════════════════════════
-      //  _doPostSalary — Fine Auto-Clear সহ ★ FIX
+      //  _doPostSalary — Others + Bonus সহ ✅
       // ══════════════════════════════════════════
-     async function _doPostSalary(selected, dFromVal, dToVal) {
-  const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
-  const today = new Date();
-  const postedAt     = today.toLocaleDateString("en-GB", {day:"2-digit",month:"short",year:"numeric"}).toUpperCase();
-  const tsDate       = today.toLocaleDateString("en-GB");
-  const tsTime       = today.toLocaleTimeString("en-GB");
-  const monthYearKey = getMonthYearKey(dFromVal);
-  const d0           = new Date(dFromVal);
-  const yearMonthNum = `${d0.getFullYear()}${String(d0.getMonth()+1).padStart(2,"0")}`;
+      async function _doPostSalary(selected, dFromVal, dToVal) {
+        const dFrom=new Date(dFromVal), dTo=new Date(dToVal);
+        const today=new Date();
+        const postedAt    =today.toLocaleDateString("en-GB",{day:"2-digit",month:"short",year:"numeric"}).toUpperCase();
+        const tsDate      =today.toLocaleDateString("en-GB");
+        const tsTime      =today.toLocaleTimeString("en-GB");
+        const monthYearKey=getMonthYearKey(dFromVal);
+        const monthKey    =getMonthKey(dFromVal);
+        const d0          =new Date(dFromVal);
+        const yearMonthNum=`${d0.getFullYear()}${String(d0.getMonth()+1).padStart(2,"0")}`;
 
-  showMsg("⏳ Processing salary post...", {title:"Please Wait", type:"info"});
+        showMsg("⏳ Processing salary post...",{title:"Please Wait",type:"info"});
 
-  try {
-    const db   = firebase.firestore();
-    const rtdb = firebase.database();
+        try {
+          const db=firebase.firestore(), rtdb=firebase.database();
 
-    const [snap, otSnap, advSnap, postedSnap, globalSnap, fineSnap, fineGlobalSnap] = await Promise.all([
-      db.collectionGroup("Present_Absent").get(),
-      rtdb.ref("OVER_TIME").once("value"),
-      rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
-      rtdb.ref(`SALARY_POSTED/${monthYearKey}`).once("value"),
-      rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL").once("value"),
-      rtdb.ref("FINE_SUMMARY/USERS").once("value"),
-      rtdb.ref("FINE_SUMMARY/GLOBAL").once("value"),
-    ]);
+          // ✅ bonusSnap + othersSnap যোগ করা হয়েছে
+          const [snap, otSnap, advSnap, postedSnap, globalSnap, fineSnap, fineGlobalSnap, bonusSnap, othersSnap] = await Promise.all([
+            db.collectionGroup("Present_Absent").get(),
+            rtdb.ref("OVER_TIME").once("value"),
+            rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
+            rtdb.ref(`SALARY_POSTED/${monthYearKey}`).once("value"),
+            rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL").once("value"),
+            rtdb.ref("FINE_SUMMARY/USERS").once("value"),
+            rtdb.ref("FINE_SUMMARY/GLOBAL").once("value"),
+            rtdb.ref("BONUS_ENTRY").once("value"),       // ✅ NEW
+            db.collectionGroup("Others").get(),          // ✅ NEW
+          ]);
 
-    const otData        = otSnap.val() || {};
-    const advData       = advSnap.val() || {};
-    const postedData    = postedSnap.val() || {};
-    const globalSummary = Object.assign({totalAdvance:0, totalAdjusted:0, pending:0}, globalSnap.val() || {});
-    const fineData      = fineSnap.val() || {};
-    const fineGlobalSummary = Object.assign({totalFine:0, pending:0}, fineGlobalSnap.val() || {});
+          const otData        =otSnap.val()||{};
+          const advData       =advSnap.val()||{};
+          const postedData    =postedSnap.val()||{};
+          const globalSummary =Object.assign({totalAdvance:0,totalAdjusted:0,pending:0},globalSnap.val()||{});
+          const fineData      =fineSnap.val()||{};
+          const fineGlobalSummary=Object.assign({totalFine:0,pending:0},fineGlobalSnap.val()||{});
+          const bonusData     =bonusSnap.val()||{};  // ✅ NEW
 
-    // ── Build workers ──
-    let workers = {};
-    snap.forEach(doc => {
-      const d = doc.data();
-      if (!selected.includes(d.ID)) return;
-      const docDate = new Date(d.DATE);
-      if (dFromVal && dToVal && (docDate < dFrom || docDate > dTo)) return;
-      if (!workers[d.ID]) {
-        const sal = parseInt(d.SALARY) || 0;
-        workers[d.ID] = {
-          id: d.ID, name: d.EMPLOYEE_NAME, passport: d.PASSPORT, des: d.DESIGNATION,
-          sal, daily: 0,
-          norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, others:0
-        };
-      }
-      if (d.STATUS === "PRESENT")     workers[d.ID].pres++;
-      else if (d.STATUS === "ABSENT") workers[d.ID].abs++;
-      if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
-      workers[d.ID].sun    += parseFloat(d.SUNDAY_WORK)  || 0;
-      workers[d.ID].hol    += parseFloat(d.HOLIDAY_WORK) || 0;
-      workers[d.ID].others += parseFloat(d.OTHERS)       || 0;
-    });
+          // Build workers
+          let workers={};
+          snap.forEach(doc => {
+            const d=doc.data();
+            if (!selected.includes(d.ID)) return;
+            const docDate=new Date(d.DATE);
+            if (dFromVal&&dToVal&&(docDate<dFrom||docDate>dTo)) return;
+            if (!workers[d.ID]) {
+              const sal=parseInt(d.SALARY)||0;
+              workers[d.ID]={ id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
+                sal, daily:0, norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0,
+                others:0, pBonus:0, aBonus:0  // ✅ NEW
+              };
+            }
+            if (d.STATUS==="PRESENT") workers[d.ID].pres++;
+            else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
+            if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
+            workers[d.ID].sun += parseFloat(d.SUNDAY_WORK) ||0;
+            workers[d.ID].hol += parseFloat(d.HOLIDAY_WORK)||0;
+          });
 
-    // OT
-    for (const my in otData) {
-      const md = otData[my]; if (typeof md !== "object") continue;
-      for (const df in md) {
-        const dr = md[df]; if (typeof dr !== "object") continue;
-        for (const rk in dr) {
-          const row = dr[rk];
-          if (row && row.ID && workers[row.ID]) {
-            const otDate = new Date(row.OT_Date || df);
-            if (dFromVal && dToVal && (otDate < dFrom || otDate > dTo)) continue;
-            workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0);
-            const hrs  = parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0);
-            const rate = parseFloat(row.OT_Rate || row.ot_rate || row.OT_RATE || 0);
-            workers[row.ID].otA += hrs * rate;
+          // ✅ Others sub-collection
+          othersSnap.forEach(doc => {
+            const d=doc.data();
+            const docDate=new Date(d.DATE);
+            if (!d.ID||!selected.includes(d.ID)) return;
+            if (dFromVal&&dToVal&&(docDate<dFrom||docDate>dTo)) return;
+            if (!workers[d.ID]) return;
+            workers[d.ID].others += parseFloat(d.AMOUNT)||0;
+          });
+
+          // OT
+          for (const my in otData) {
+            const md=otData[my]; if(typeof md!=="object") continue;
+            for (const df in md) {
+              const dr=md[df]; if(typeof dr!=="object") continue;
+              for (const rk in dr) {
+                const row=dr[rk];
+                if (row&&row.ID&&workers[row.ID]) {
+                  const otDate=new Date(row.OT_Date||df);
+                  if (dFromVal&&dToVal&&(otDate<dFrom||otDate>dTo)) continue;
+                  workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS||row.Total_OT_Hours||0);
+                  workers[row.ID].otA += (parseFloat(row.TOTAL_OT_HOURS||row.Total_OT_Hours||0))*(parseFloat(row.OT_Rate||row.ot_rate||row.OT_RATE||0));
+                }
+              }
+            }
           }
+
+          // ✅ Bonus loop
+          for (const my in bonusData) {
+            const md=bonusData[my]; if(typeof md!=="object") continue;
+            for (const df in md) {
+              const dr=md[df]; if(typeof dr!=="object") continue;
+              for (const empId in dr) {
+                const row=dr[empId];
+                if (!row||!workers[empId]) continue;
+                const bonusDate=new Date(row.DATE||df);
+                if (dFromVal&&dToVal&&(bonusDate<dFrom||bonusDate>dTo)) continue;
+                workers[empId].pBonus += parseFloat(row.PERFORMANCE_BONUS)||0;
+                workers[empId].aBonus += parseFloat(row.ATTENDANCE_BONUS) ||0;
+              }
+            }
+          }
+
+          // Working days
+          const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
+          for (const id in workers) workers[id].daily=parseFloat((workers[id].sal/workingDays).toFixed(2));
+
+          // Atomic counter
+          const adjCounterRef=rtdb.ref(`COUNTERS/ADJUSTMENT/${yearMonthNum}`);
+          const empNeedingAdj=Object.keys(workers).filter(id=>{
+            if (postedData[id]&&postedData[id].status==="PAID") return false;
+            return (parseInt((advData[id]||{}).pending)||0)>0;
+          });
+          let adjStartSeq=0;
+          if (empNeedingAdj.length>0) {
+            const res=await adjCounterRef.transaction(cur=>(cur||0)+empNeedingAdj.length);
+            adjStartSeq=res.snapshot.val()-empNeedingAdj.length;
+          }
+
+          const updates={};
+          let adjSeqOffset=0, totalAdvDeducted=0, totalFineDeducted=0;
+
+          Object.keys(workers).sort().forEach(id => {
+            const w=workers[id];
+            if (postedData[id]&&postedData[id].status==="PAID") return;
+            const advPending =parseInt((advData[id] ||{}).pending)||0;
+            const finePending=parseInt((fineData[id]||{}).pending)||0;
+            const isCook=(w.des||"").trim().toUpperCase()==="COOK";
+            const rowTotalBasic=isCook?w.daily*w.pres:w.daily*w.norm;
+            // ✅ others + pBonus + aBonus gross এ যোগ হচ্ছে
+            const gross=rowTotalBasic+w.hol+w.sun+w.otA+w.others+w.pBonus+w.aBonus;
+            const nps  =Math.round(gross*0.01);
+            const csg  =Math.round(gross*0.015);
+            const totDed=advPending+finePending+nps+csg;
+            const net  =Math.round(gross-totDed);
+
+            // ✅ SALARY_POSTED এ others/pBonus/aBonus সেভ হচ্ছে
+            updates[`SALARY_POSTED/${monthYearKey}/${id}`]={
+              status:"PAID", net, gross, totDed,
+              adv:advPending, fine:finePending,
+              others:w.others||0,   // ✅ NEW
+              pBonus:w.pBonus||0,   // ✅ NEW
+              aBonus:w.aBonus||0,   // ✅ NEW
+              postedAt, month:monthYearKey,
+            };
+
+            // Advance auto-adjust
+            if (advPending>0) {
+              adjSeqOffset++;
+              const adjNo      =`ACL-ADJ-${yearMonthNum}-${String(adjStartSeq+adjSeqOffset).padStart(4,"0")}`;
+              const empAdvData =advData[id]||{totalAdvance:0,totalAdjusted:0,pending:0};
+              const prevPending=parseInt(empAdvData.pending)||0;
+              const newPending =Math.max(0,prevPending-advPending);
+              const adjEntry={
+                advanceNo:adjNo, tsDate, tsTime, recordDate:postedAt,
+                id, name:w.name, desig:w.des, passport:w.passport,
+                amount:advPending, amountWords:numberToWordsLocal(advPending),
+                reference:`SALARY POST - ${monthYearKey} (ADVANCE DEDUCTION)`,
+                remark:`Auto adjustment on salary post for ${monthYearKey}`,
+                entryType:"adjustment", prevPending, newPending,
+                newPendingWords:numberToWordsLocal(newPending),
+              };
+              updates[`ADJUSTMENT/${monthYearKey}/${postedAt}/${id}_${adjNo}`]=adjEntry;
+              updates[`ADVANCE_ADJUSTMENT_TRANSACTIONS/${monthYearKey}/${postedAt}/${id}_${adjNo}`]=adjEntry;
+              updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/totalAdjusted`]=Number(empAdvData.totalAdjusted||0)+advPending;
+              updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/pending`]=newPending;
+              updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/lastDate`]=postedAt;
+              totalAdvDeducted+=advPending;
+            }
+
+            // Fine auto-clear
+            if (finePending>0) {
+              const empFineData    =fineData[id]||{totalFine:0,pending:0};
+              const prevFinePending=parseInt(empFineData.pending)||0;
+              const newFinePending =Math.max(0,prevFinePending-finePending);
+              updates[`FINE_SUMMARY/USERS/${id}/pending`]   =newFinePending;
+              updates[`FINE_SUMMARY/USERS/${id}/lastDate`]  =postedAt;
+              updates[`FINE_SUMMARY/USERS/${id}/lastRemark`]=`Deducted via salary post - ${monthYearKey}`;
+              totalFineDeducted+=finePending;
+            }
+          });
+
+          // Global summaries
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/totalAdjusted`]=Number(globalSummary.totalAdjusted||0)+totalAdvDeducted;
+          updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/pending`]=Math.max(0,Number(globalSummary.pending||0)-totalAdvDeducted);
+          updates[`FINE_SUMMARY/GLOBAL/pending`]=Math.max(0,Number(fineGlobalSummary.pending||0)-totalFineDeducted);
+
+          await rtdb.ref().update(updates);
+          invalidateRangeCache();
+
+          closeMsgBox();
+          showMsg(
+            `✅ ${selected.length} জন employee এর salary posted!<br><br>`+
+            `💰 Advance deducted: ${totalAdvDeducted.toLocaleString()} /-<br>`+
+            `🚫 Fine cleared: ${totalFineDeducted.toLocaleString()} /-`,
+            {title:"Post Complete",type:"success"}
+          );
+          await generateReport();
+
+        } catch(e) {
+          if (empNeedingAdj&&empNeedingAdj.length>0&&adjSeqOffset<empNeedingAdj.length) {
+            try { const rollback=empNeedingAdj.length-adjSeqOffset; await rtdb.ref(`COUNTERS/ADJUSTMENT/${yearMonthNum}`).transaction(cur=>Math.max(0,(cur||0)-rollback)); } catch(re){ console.warn("Counter rollback failed:",re); }
+          }
+          showMsg(`Error: ${e.message}`,{title:"Post Error",type:"err"});
         }
       }
-    }
 
-    // Working days
-    const workingDays = (window._manualWD && window._manualWD > 0)
-      ? window._manualWD
-      : await getWorkingDays(dFromVal);
-
-    for (const id in workers) {
-      workers[id].daily = parseFloat((workers[id].sal / workingDays).toFixed(2));
-    }
-
-    // ── Atomic counter: claim N adjustment vouchers at once ──
-    const adjCounterRef = rtdb.ref(`COUNTERS/ADJUSTMENT/${yearMonthNum}`);
-    const empNeedingAdj = Object.keys(workers).filter(id => {
-      if (postedData[id] && postedData[id].status === "PAID") return false;
-      const adv = parseInt((advData[id] || {}).pending) || 0;
-      return adv > 0;
-    });
-
-    let adjStartSeq = 0;
-    if (empNeedingAdj.length > 0) {
-      const res = await adjCounterRef.transaction(cur => (cur || 0) + empNeedingAdj.length);
-      adjStartSeq = res.snapshot.val() - empNeedingAdj.length; // first seq = adjStartSeq + 1
-    }
-
-    const updates = {};
-    let adjSeqOffset = 0;
-
-    // Running totals for global summary
-    let totalAdvDeducted  = 0;
-    let totalFineDeducted = 0;
-
-    Object.keys(workers).sort().forEach(id => {
-      const w = workers[id];
-      if (postedData[id] && postedData[id].status === "PAID") return;
-
-      // Advance & Fine from SUMMARY (not attendance)
-      const advPending  = parseInt((advData[id]  || {}).pending) || 0;
-      const finePending = parseInt((fineData[id] || {}).pending) || 0;
-
-      const isCook        = (w.des || "").trim().toUpperCase() === "COOK";
-      const rowTotalBasic = isCook ? w.daily * w.pres : w.daily * w.norm;
-      const gross         = rowTotalBasic + w.hol + w.sun + w.otA + w.others;
-      const nps           = Math.round(gross * 0.01);
-      const csg           = Math.round(gross * 0.015);
-      const totDed        = advPending + finePending + nps + csg;
-      const net           = Math.round(gross - totDed);
-
-      // Salary Posted
-      updates[`SALARY_POSTED/${monthYearKey}/${id}`] = {
-        status: "PAID", net, gross, totDed,
-        adv: advPending, fine: finePending, postedAt, month: monthYearKey,
-      };
-
-      // ── Advance Auto-Adjust ──
-      if (advPending > 0) {
-        adjSeqOffset++;
-        const adjNo       = `ACL-ADJ-${yearMonthNum}-${String(adjStartSeq + adjSeqOffset).padStart(4,"0")}`;
-        const empAdvData  = advData[id] || {totalAdvance:0, totalAdjusted:0, pending:0};
-        const prevPending = parseInt(empAdvData.pending) || 0;
-        const newPending  = Math.max(0, prevPending - advPending);
-
-        const adjEntry = {
-          advanceNo: adjNo, tsDate, tsTime, recordDate: postedAt,
-          id, name: w.name, desig: w.des, passport: w.passport,
-          amount: advPending, amountWords: numberToWordsLocal(advPending),
-          reference: `SALARY POST - ${monthYearKey} (ADVANCE DEDUCTION)`,
-          remark:    `Auto adjustment on salary post for ${monthYearKey}`,
-          entryType: "adjustment", prevPending, newPending,
-          newPendingWords: numberToWordsLocal(newPending),
-        };
-
-        updates[`ADJUSTMENT/${monthYearKey}/${postedAt}/${id}_${adjNo}`]                      = adjEntry;
-        updates[`ADVANCE_ADJUSTMENT_TRANSACTIONS/${monthYearKey}/${postedAt}/${id}_${adjNo}`] = adjEntry;
-        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/totalAdjusted`] = Number(empAdvData.totalAdjusted || 0) + advPending;
-        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/pending`]       = newPending;
-        updates[`ADVANCE_ADJUSTMENT_SUMMARY/USERS/${id}/lastDate`]      = postedAt;
-
-        totalAdvDeducted += advPending;
-      }
-
-      // ── Fine Auto-Clear ──
-      if (finePending > 0) {
-        const empFineData     = fineData[id] || {totalFine:0, pending:0};
-        const prevFinePending = parseInt(empFineData.pending) || 0;
-        const newFinePending  = Math.max(0, prevFinePending - finePending);
-
-        updates[`FINE_SUMMARY/USERS/${id}/pending`]    = newFinePending;
-        updates[`FINE_SUMMARY/USERS/${id}/lastDate`]   = postedAt;
-        updates[`FINE_SUMMARY/USERS/${id}/lastRemark`] = `Deducted via salary post - ${monthYearKey}`;
-
-        totalFineDeducted += finePending;
-      }
-    });
- 
-    // ── Global summaries — computed ONCE after loop ──
-    updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/totalAdjusted`] =
-      Number(globalSummary.totalAdjusted || 0) + totalAdvDeducted;
-    updates[`ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/pending`] =
-      Math.max(0, Number(globalSummary.pending || 0) - totalAdvDeducted);
-
-    updates[`FINE_SUMMARY/GLOBAL/pending`] =
-      Math.max(0, Number(fineGlobalSummary.pending || 0) - totalFineDeducted);
-
-    await rtdb.ref().update(updates);
-    invalidateRangeCache();
-
-    closeMsgBox();
-    showMsg(
-      `✅ ${selected.length} জন employee এর salary posted!<br><br>` +
-      `💰 Advance deducted: ${totalAdvDeducted.toLocaleString()} /-<br>` +
-      `🚫 Fine cleared: ${totalFineDeducted.toLocaleString()} /-`,
-      {title:"Post Complete", type:"success"}
-    );
-    await generateReport();
-
-  } catch(e) {
-    // Rollback counter if something failed mid-way
-    if (empNeedingAdj && empNeedingAdj.length > 0 && adjSeqOffset < empNeedingAdj.length) {
-      try {
-        const rollback = empNeedingAdj.length - adjSeqOffset;
-        await rtdb.ref(`COUNTERS/ADJUSTMENT/${yearMonthNum}`).transaction(cur => Math.max(0, (cur||0) - rollback));
-      } catch(re) { console.warn("Counter rollback failed:", re); }
-    }
-    showMsg(`Error: ${e.message}`, {title:"Post Error", type:"err"});
-  }
-}
-      // ══════════════════════════════════════════
-      //  CLEAR / RESET
-      // ══════════════════════════════════════════
+      // ── CLEAR / RESET ──
       function clearAll() {
-        showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?", {
-          title: "Reset Page", type: "warn", confirm: true,
-          onOk: () => {
-            document.getElementById("reportOutput").innerHTML = "";
-            document.getElementById("filterId").value         = "";
-            document.getElementById("searchTable").value      = "";
-            try { document.getElementById("dateFrom")._flatpickr.clear(); } catch(e) {}
-            try { document.getElementById("dateTo")._flatpickr.clear(); }   catch(e) {}
-            closeEmpPanel(); closeMsgBox();
-            window._reportFrom = ""; window._reportTo = "";
-            window._manualWD   = null;
-            _attRangeCache = {};
-            _cache.loaded  = false;
-            _cache.loading = false;
-            setStatus("loading", "⏳ Data not loaded yet");
-            const ctrl = document.querySelector(".controls");
-            ctrl.style.transition = "background 0.15s";
-            ctrl.style.background = "rgba(255,107,107,0.15)";
-            setTimeout(() => { ctrl.style.background=""; setTimeout(()=>ctrl.style.transition="",400); }, 300);
-          }
-        });
+        showMsg("ALL DATA WILL BE CLEARED.<br><br>ARE YOU SURE?",{title:"Reset Page",type:"warn",confirm:true,onOk:()=>{
+          document.getElementById("reportOutput").innerHTML="";
+          document.getElementById("filterId").value="";
+          document.getElementById("searchTable").value="";
+          try{document.getElementById("dateFrom")._flatpickr.clear();}catch(e){}
+          try{document.getElementById("dateTo")._flatpickr.clear();}catch(e){}
+          closeEmpPanel(); closeMsgBox();
+          window._reportFrom=""; window._reportTo=""; window._manualWD=null;
+          _attRangeCache={}; _cache.loaded=false; _cache.loading=false;
+          setStatus("loading","⏳ Data not loaded yet");
+          const ctrl=document.querySelector(".controls");
+          ctrl.style.transition="background 0.15s"; ctrl.style.background="rgba(255,107,107,0.15)";
+          setTimeout(()=>{ctrl.style.background="";setTimeout(()=>ctrl.style.transition="",400);},300);
+        }});
       }
 
-      // ── Init ──
       window.addEventListener("load", preloadStaticData);
     </script>
   </body>
 </html>
+
+
+
