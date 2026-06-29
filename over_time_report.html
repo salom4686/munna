@@ -30,7 +30,7 @@
             color: #1e293b;
         }
 
-        /* ── Loading Overlay ── */
+        /* ── লোডিং ওভারলে স্টাইল ── */
         #initial-overlay {
             position: fixed; top:0; left:0; width:100%; height:100%;
             background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
@@ -46,10 +46,10 @@
         @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
         #initial-overlay p { color: var(--gold-light); font-size:11px; letter-spacing:3px; text-transform:uppercase; font-weight:700; }
 
-        /* ── App Container ── */
+        /* ── মেইন অ্যাপ কন্টেইনার ── */
         #app-container { display:none; }
 
-        /* ── Header ── */
+        /* ── হেডার স্টাইল ── */
         .app-header {
             background: linear-gradient(90deg, var(--navy-dark) 0%, var(--navy-mid) 60%, var(--navy-dark) 100%);
             border-bottom: 3px solid var(--gold);
@@ -68,7 +68,7 @@
         }
         .brand-logo { height:56px; width:auto; object-fit:contain; filter: brightness(1.1); }
 
-        /* ── Period Badge ── */
+        /* ── পিরিয়ড ব্যাজ ── */
         .period-badge {
             background: rgba(212,160,23,0.15);
             border: 1px solid var(--gold);
@@ -77,7 +77,7 @@
             font-size:11px; font-weight:700; letter-spacing:0.5px;
         }
 
-        /* ── Print Button ── */
+        /* ── প্রিন্ট প্রিভিউ বাটন ── */
         .print-btn {
             background: linear-gradient(135deg, var(--gold), var(--gold-bright));
             color: var(--navy-dark); border:none;
@@ -88,15 +88,14 @@
         }
         .print-btn:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(212,160,23,0.5); }
 
-        /* ── Filter Section ── */
-        /* ── Filter Section ── */
-.filter-section {
-    background: var(--navy-pale);
-    border-bottom: 2px solid rgba(212,160,23,0.3);
-    padding: 18px 24px;
-    overflow: visible;   /* ← এটা যোগ করুন */
-    position: relative;  /* ← এটা যোগ করুন */
-}
+        /* ── ফিল্টার সেকশন ── */
+        .filter-section {
+            background: var(--navy-pale);
+            border-bottom: 2px solid rgba(212,160,23,0.3);
+            padding: 18px 24px;
+            overflow: visible;   
+            position: relative;  
+        }
 
         .filter-label {
             display:block; text-transform:uppercase;
@@ -116,7 +115,7 @@
         }
         .filter-input:hover { border-color: var(--navy-light); }
 
-        /* ── Buttons ── */
+        /* ── বাটনসমূহ ── */
         .btn-view {
             width:100%; height:44px;
             background: linear-gradient(135deg, var(--navy-dark), var(--navy-light));
@@ -134,10 +133,11 @@
             font-size:11px; font-weight:800; text-transform:uppercase;
             cursor:pointer; transition:all 0.2s; white-space:nowrap;
             box-shadow: 0 2px 8px rgba(212,160,23,0.3);
+            text-align: center; display: inline-flex; align-items: center; gap: 6px;
         }
         .btn-breakdown:hover { transform:translateY(-1px); box-shadow:0 4px 12px rgba(212,160,23,0.4); }
 
-        /* ── Suggestion Box ── */
+        /* ── সাজেশন বক্স ── */
         .suggestion-box {
             position:absolute; top:100%; left:0;
             background:white; border:1.5px solid var(--gold);
@@ -151,28 +151,25 @@
         }
         .suggestion-item:hover { background:var(--gold-pale); }
         .suggestion-item b { color: var(--navy-dark); }
-
         
-/* ── Custom Calendar ── */
+        /* ── কাস্টম ক্যালেন্ডার ── */
+        .custom-calendar { position:fixed; background:#001d3d; border:2px solid var(--gold-bright) !important; border-radius:12px; padding:14px; z-index:9999; display:none; width:300px; box-shadow:0 20px 40px rgba(0,0,0,0.4); }
+        .cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:2px solid var(--gold); }
+        .cal-nav { background:var(--navy-dark); border:2px solid var(--gold-bright); border-radius:6px; width:30px; height:30px; cursor:pointer; font-weight:700; color:var(--gold-bright); transition:all 0.15s; font-size:13px; }
+        .cal-nav:hover { background:var(--gold-bright); color:var(--navy-dark); }
+        .cal-month { font-size:14px; font-weight:900; color:var(--gold-bright); }
+        .cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
+        .cal-days-header div { text-align:center; font-size:10px; font-weight:700; color:var(--gold-bright); padding:4px 0; }
+        .cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
+        .calendar-day-cell { padding:8px 0; font-size:13px; cursor:pointer; text-align:center; border-radius:6px; transition:all 0.15s; color:var(--gold-light); }
+        .calendar-day-cell:hover { background:var(--gold-bright) !important; color:var(--navy-dark) !important; }
+        .cal-selected { background:var(--navy-dark) !important; color:var(--gold-bright) !important; font-weight:800; border:1px solid var(--gold-bright); }
+        .cal-today { background:var(--gold-bright) !important; color:var(--navy-dark) !important; font-weight:900; box-shadow:0 0 8px rgba(245,183,0,0.6); border-radius:6px; }
 
-       .custom-calendar { position:fixed; background:#001d3d; border:2px solid var(--gold-bright) !important; border-radius:12px; padding:14px; z-index:9999; display:none; width:300px; box-shadow:0 20px 40px rgba(0,0,0,0.4); }
-.cal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding-bottom:10px; border-bottom:2px solid var(--gold); }
-.cal-nav { background:var(--navy-dark); border:2px solid var(--gold-bright); border-radius:6px; width:30px; height:30px; cursor:pointer; font-weight:700; color:var(--gold-bright); transition:all 0.15s; font-size:13px; }
-.cal-nav:hover { background:var(--gold-bright); color:var(--navy-dark); }
-.cal-month { font-size:14px; font-weight:900; color:var(--gold-bright); }
-.cal-days-header { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; margin-bottom:6px; }
-.cal-days-header div { text-align:center; font-size:10px; font-weight:700; color:var(--gold-bright); padding:4px 0; }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:2px; }
-.calendar-day-cell { padding:8px 0; font-size:13px; cursor:pointer; text-align:center; border-radius:6px; transition:all 0.15s; color:var(--gold-light); }
-.calendar-day-cell:hover { background:var(--gold-bright) !important; color:var(--navy-dark) !important; }
-.cal-selected { background:var(--navy-dark) !important; color:var(--gold-bright) !important; font-weight:800; border:1px solid var(--gold-bright); }
-.cal-today { background:var(--gold-bright) !important; color:var(--navy-dark) !important; font-weight:900; box-shadow:0 0 8px rgba(245,183,0,0.6); border-radius:6px; }
-
-
-        /* ── Main Content ── */
+        /* ── মূল কন্টেন্ট সেকশন ── */
         .main-content { padding:20px 24px; background:#f8faff; }
 
-        /* ── Table ── */
+        /* ── টেবিল কন্টেইনার এবং স্টাইল ── */
         .table-container {
             overflow-x:auto; border-radius:10px;
             border:2px solid rgba(15,36,96,0.15);
@@ -182,19 +179,14 @@
         table { border-collapse:separate; border-spacing:0; width:100%; white-space:nowrap; }
         th, td { border:1px solid #dde4f0; padding:9px 8px; text-align:center; font-size:12.5px; }
 
-        /* Sticky cols */
-        .sticky-sl   { position:sticky; left:0;    background:white; z-index:21; min-width:42px; }
-        .sticky-id   { position:sticky; left:42px;  background:white; z-index:21; min-width:82px; }
-        .sticky-name {
-            position:sticky; left:124px; background:white; z-index:21;
+        .col-sl   { min-width:42px; }
+        .col-id   { min-width:82px; }
+        .col-name {
             min-width:185px; text-align:left;
-            border-right:2px solid var(--gold) !important;
-        }
-        thead th.sticky-sl, thead th.sticky-id, thead th.sticky-name {
-            background: var(--navy-dark); color:white; z-index:30;
+            border-right:1px solid #dde4f0 !important;
         }
 
-        /* Header row */
+        /* টেবিল হেডার রো */
         thead tr { background: var(--navy-dark); }
         thead th {
             color:white; font-weight:700; font-size:11px;
@@ -202,72 +194,51 @@
             border-color: rgba(255,255,255,0.15) !important;
         }
 
-        /* Total column */
+        /* (গুরুত্বপূর্ণ পরিবর্তন) টোটাল কলাম যাতে ভেঙে না যায় সেজন্য white-space এবং min-width নির্ধারণ করা হয়েছে */
         .total-col {
-            position:sticky; right:0; background:#fffbeb;
-            z-index:20; font-weight:800; color: var(--navy-dark);
-            border-left:2px solid var(--gold) !important;
+            background:#fffbeb;
+            font-weight:800; color: var(--navy-dark);
+            border-left:1px solid #dde4f0 !important;
+            white-space: nowrap !important;
+            min-width: 75px;
         }
-        thead th.total-col { background: var(--gold); color: var(--navy-dark); }
+        thead th.total-col { background: var(--navy-mid); color: white; border-left:1px solid rgba(255,255,255,0.15) !important; }
 
-        /* Sunday column */
+        /* রবিবার বা সাপ্তাহিক ছুটির দিনের কলাম */
         .sun-col { background:#fff5f5; color:#dc2626; }
 
-        /* Body rows */
+        /* টেবিল ডাটা রো ইফেক্ট */
         tbody tr:nth-child(even) td { background:#f5f7ff; }
-        tbody tr:nth-child(even) td.sticky-sl,
-        tbody tr:nth-child(even) td.sticky-id,
-        tbody tr:nth-child(even) td.sticky-name { background:#f5f7ff; }
         tbody tr:hover td { background: var(--gold-pale) !important; }
-        tbody tr:hover td.sticky-sl,
-        tbody tr:hover td.sticky-id,
-        tbody tr:hover td.sticky-name { background: var(--gold-pale) !important; }
 
         .id-cell { color: var(--navy-dark); font-weight:800; }
 
-        /* Footer */
+        /* টেবিল ফুটার */
         tfoot td {
             background: var(--navy-pale); font-weight:800;
             color: var(--navy-dark); font-size:12px;
-            border-top:2px solid var(--gold) !important;
+            border-top:2px solid var(--navy-dark) !important;
         }
         tfoot td.total-col { background: var(--navy-dark); color:white; }
 
-        /* ── Breakdown Table ── */
+        /* ── ব্রেকডাউন বা ডিটেইলস টেবিল স্টাইল ── */
         .breakdown-head th {
             background: var(--navy-dark); color:white;
             font-size:11px; text-transform:uppercase; letter-spacing:0.3px;
             padding:11px 8px;
         }
-        .breakdown-head th:last-child { background: var(--gold); color: var(--navy-dark); font-weight:800; }
+        .breakdown-head th:last-child { background: var(--navy-mid); color: white; font-weight:800; }
         .breakdown-body tr:nth-child(even) td { background:#f5f7ff; }
         .breakdown-body tr:hover td { background: var(--gold-pale) !important; }
         .breakdown-foot td {
             background: var(--navy-dark); color:white; font-weight:800; font-size:13px;
         }
-        .breakdown-foot td:last-child { background: var(--gold); color: var(--navy-dark); }
-
-        /* ── Print ── */
-        .print-only { display:none; }
-
-        @media print {
-            @page { size:A4 landscape; margin:0.5cm 1cm; }
-            body { background:white !important; color:black !important; padding:0 !important; margin:0 !important; }
-            #initial-overlay, .no-print { display:none !important; }
-            #app-container { border:none !important; box-shadow:none !important; max-width:100% !important; margin:0 !important; }
-            .print-only { display:block !important; }
-            .table-container { overflow:visible !important; border:1px solid #ccc !important; }
-            table { border:1px solid black !important; width:100% !important; }
-            th, td { border:1px solid #aaa !important; color:black !important; background:white !important; padding:4px 2px !important; font-size:10px !important; }
-            thead th { background:#e8edf8 !important; color:black !important; }
-            .sticky-sl, .sticky-id, .sticky-name, .total-col { position:static !important; background:white !important; }
-            .app-header, .filter-section { display:none !important; }
-        }
+        .breakdown-foot td:last-child { background: var(--navy-mid); color: white; }
     </style>
 </head>
 <body class="p-3 md:p-5">
 
-    <!-- Loading -->
+    <!-- লোডিং ওভারলে স্ক্রিন -->
     <div id="initial-overlay">
         <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Logo"
              style="height:80px; width:auto; object-fit:contain; margin-bottom:8px; filter:brightness(1.2);">
@@ -280,36 +251,29 @@
 
     <div id="app-container" style="max-width:99%; margin:0 auto; background:white; border-radius:16px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.4); border:2px solid rgba(212,160,23,0.4);">
 
-        <!-- Header -->
-        <div class="app-header no-print">
+        <!-- হেডার এরিয়া -->
+        <div class="app-header">
             <div style="display:flex; align-items:center; gap:16px;">
                 <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" alt="Logo" class="brand-logo">
                 <div>
-                    <h1 class="app-header">ALAMHOW CO LTD.</h1>
+                    <h1 class="app-header" style="border:none; padding:0; background:none;">ALAMHOW CO LTD.</h1>
                     <div class="subtitle">Overtime Management Report</div>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
                 <div id="monthYearDisplay" class="period-badge"></div>
-                <button onclick="handlePrint()" id="printBtn" class="print-btn" style="display:none;">
+                <button onclick="openPrintPreview()" id="printBtn" class="print-btn" style="display:none;">
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                     </svg>
-                    Print
+                    Print Preview
                 </button>
             </div>
         </div>
 
-        <!-- Print Header -->
-        <div class="print-only" style="padding:12px 16px 8px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid black; padding-bottom:6px;">
-                <strong style="font-size:16px; text-transform:uppercase;">OVERTIME REPORT — ALAMHOW CO LTD.</strong>
-                <span style="font-size:10px;"><strong>Period:</strong> <span id="printPeriodDisplay"></span> &nbsp;|&nbsp; <strong>Printed:</strong> <span id="pd"></span> <span id="pt"></span></span>
-            </div>
-        </div>
-
-        <!-- Filters -->
-        <div class="filter-section no-print">
+        <!-- ফিল্টারসমূহ (সার্চ, প্রজেক্ট ও তারিখ সিলেকশন) -->
+        <div class="filter-section">
             <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:14px; align-items:end;">
 
                 <div style="position:relative;">
@@ -344,9 +308,10 @@
             </div>
         </div>
 
-        <!-- Main Content -->
+        <!-- মূল রিপোর্ট কন্টেন্ট এরিয়া -->
         <div id="mainContent" style="display:none; padding:20px 20px; background:#f0f4ff;">
 
+            <!-- ১-৩১ তারিখ ভিত্তিক রিপোর্ট টেবিল -->
             <div id="attendanceSection">
                 <div class="table-container" style="margin-bottom:20px;">
                     <table id="attendanceTable">
@@ -357,6 +322,7 @@
                 </div>
             </div>
 
+            <!-- ডিটেইলস/ব্রেকডাউন সেকশন রিপোর্ট টেবিল -->
             <div id="detailedReportSection" style="display:none;">
                 <div class="table-container">
                     <table>
@@ -382,13 +348,20 @@
     </div>
 
 <script>
+    // ফায়ারবেস রিয়েলটাইম ডাটাবেস ইউআরএল কনফিগ
     const FIREBASE_URL = "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app";
     const OT_NODE = "OVER_TIME";
     let rawData = [];
     let uniqueEmployeeMap = [];
+    let currentFilteredData = []; // প্রিন্ট করার সুবিধার্থে গ্লোবাল ফিল্টারড ডাটা
+    let currentStartDate = null;
+    let currentEndDate = null;
+    let isDetailedView = false; // কোন ট্যাব ওপেন আছে তা ট্র‍্যাক করার জন্য
+
     const daysEn   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
     const monthsEn = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+    // সিস্টেম ইনিশিয়ালাইজেশন
     async function initSystem() {
         try {
             const res  = await fetch(`${FIREBASE_URL}/${OT_NODE}.json`);
@@ -410,6 +383,7 @@
         }
     }
 
+    // ফায়ারবেস ডাটাকে ফ্ল্যাট অবজেক্টে রূপান্তর
     function flattenFirebaseData(otRoot) {
         const records = [];
         Object.values(otRoot).forEach(monthObj => {
@@ -435,6 +409,7 @@
         return records;
     }
 
+    // ফিল্টার ইনপুটগুলোর প্রারম্ভিক কনফিগারেশন
     function initFilters() {
         const seenIds = new Set();
         rawData.forEach(item => {
@@ -450,72 +425,71 @@
         updateSiteDropdown();
     }
 
+   // প্রজেক্ট ড্রপডাউন আপডেট করা
    function updateSiteDropdown() {
-    const from = document.getElementById('fromDate').value;
-    const to   = document.getElementById('toDate').value;
-    const sel  = document.getElementById('filterSite');
-    const prev = sel.value;
-    
-    while (sel.options.length > 1) sel.remove(1);
+        const from = document.getElementById('fromDate').value;
+        const to   = document.getElementById('toDate').value;
+        const sel  = document.getElementById('filterSite');
+        const prev = sel.value;
+        
+        while (sel.options.length > 1) sel.remove(1);
 
-    // ← দুটো date না থাকলে dropdown খালি রাখো
-    if (!from || !to) {
-        sel.value = '';
-        return;
+        if (!from || !to) {
+            sel.value = '';
+            return;
+        }
+
+        const startD = new Date(from);
+        const endD   = new Date(to);
+        const filtered = rawData.filter(i => {
+            const d = new Date(i.otDate);
+            return d >= startD && d <= endD;
+        });
+
+        const siteMap = new Map();
+        filtered.forEach(i => {
+            const s = (i.site || "").trim();
+            if (s) siteMap.set(s.toLowerCase(), s);
+        });
+
+        [...siteMap.values()].sort((a, b) => a.localeCompare(b)).forEach(site => {
+            const opt = document.createElement('option');
+            opt.value = site;
+            opt.textContent = site;
+            sel.appendChild(opt);
+        });
+
+        if (prev && [...siteMap.values()].some(s => s === prev)) {
+            sel.value = prev;
+        } else {
+            sel.value = '';
+        }
     }
 
-    const startD = new Date(from);
-    const endD   = new Date(to);
-    // ← শুধু selected range এর data filter করো
-    const filtered = rawData.filter(i => {
-        const d = new Date(i.otDate);
-        return d >= startD && d <= endD;
-    });
-
-    const siteMap = new Map();
-    filtered.forEach(i => {
-        const s = (i.site || "").trim();
-        if (s) siteMap.set(s.toLowerCase(), s);
-    });
-
-    [...siteMap.values()].sort((a, b) => a.localeCompare(b)).forEach(site => {
-        const opt = document.createElement('option');
-        opt.value = site;
-        opt.textContent = site;
-        sel.appendChild(opt);
-    });
-
-    // ← আগের selection যদি নতুন range এ থাকে তাহলে রাখো
-    if (prev && [...siteMap.values()].some(s => s === prev)) {
-        sel.value = prev;
-    } else {
-        sel.value = '';
-    }
-}
-
+   // কাস্টম ডেট পিকার উইজেট সেটাপ
    function setupCustomDatePicker(inputId, calendarId) {
-    const input    = document.getElementById(inputId);
-    const calendar = document.getElementById(calendarId);
-    
-    input.addEventListener('click', e => {
-        e.stopPropagation();
-        document.querySelectorAll('.custom-calendar,.suggestion-box')
-                .forEach(el => el.style.display='none');
+        const input    = document.getElementById(inputId);
+        const calendar = document.getElementById(calendarId);
         
-        // ← input এর position অনুযায়ী calendar বসান
-        const rect = input.getBoundingClientRect();
-        calendar.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
-        calendar.style.left = rect.left + 'px';
+        input.addEventListener('click', e => {
+            e.stopPropagation();
+            document.querySelectorAll('.custom-calendar,.suggestion-box')
+                    .forEach(el => el.style.display='none');
+            
+            const rect = input.getBoundingClientRect();
+            calendar.style.top  = (rect.bottom + window.scrollY + 4) + 'px';
+            calendar.style.left = rect.left + 'px';
+            
+            calendar.style.display = 'block';
+            renderCalendar(calendar, input);
+        });
         
-        calendar.style.display = 'block';
-        renderCalendar(calendar, input);
-    });
-    
-    document.addEventListener('click', e => {
-        if (!calendar.contains(e.target)) calendar.style.display = 'none';
-    });
-}
+        document.addEventListener('click', e => {
+            if (!calendar.contains(e.target)) calendar.style.display = 'none';
+        });
+    }
 
+    // কাস্টম ক্যালেন্ডার রেন্ডার করা
     function renderCalendar(calendarEl, inputEl) {
         let d0 = new Date();
         if (inputEl.value) { const p=new Date(inputEl.value); if(!isNaN(p)) d0=p; }
@@ -554,6 +528,7 @@
         build();
     }
 
+    // আইডি সাজেশন বক্স সেটাপ
     function setupIdSuggestions() {
         const input = document.getElementById('filterId');
         const box   = document.getElementById('idSuggestions');
@@ -576,6 +551,7 @@
         };
     }
 
+    // ফিল্টার প্রয়োগ করা
     function applyFilters() {
         const from = document.getElementById('fromDate').value;
         const to   = document.getElementById('toDate').value;
@@ -583,27 +559,29 @@
 
         const id   = document.getElementById('filterId').value.trim().toLowerCase();
         const site = document.getElementById('filterSite').value;
-        const startD = new Date(from), endD = new Date(to);
+        currentStartDate = new Date(from);
+        currentEndDate = new Date(to);
 
-        const filtered = rawData.filter(item => {
+        currentFilteredData = rawData.filter(item => {
             const d = new Date(item.otDate);
             const matchId   = id   ? (item.id.toLowerCase().includes(id) || item.name.toLowerCase().includes(id)) : true;
             const matchSite = site ? item.site === site : true;
-            return matchId && matchSite && d>=startD && d<=endD;
+            return matchId && matchSite && d>=currentStartDate && d<=currentEndDate;
         });
 
+        isDetailedView = false;
         document.getElementById('attendanceSection').style.display     = 'block';
         document.getElementById('detailedReportSection').style.display = 'none';
         document.getElementById('breakdownBtn').style.display          = 'inline-flex';
         document.getElementById('printBtn').style.display              = 'flex';
         document.getElementById('mainContent').style.display           = 'block';
-        renderAll(filtered, startD, endD);
+        renderAll(currentFilteredData, currentStartDate, currentEndDate);
     }
 
+    // রিপোর্ট ডাটা রেন্ডার করা
     function renderAll(data, start, end) {
         const dateRangeStr = `${start.toLocaleDateString('en-GB')} → ${end.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
         document.getElementById('monthYearDisplay').innerText   = dateRangeStr;
-        document.getElementById('printPeriodDisplay').innerText = dateRangeStr;
 
         const dateList = [];
         let curr = new Date(start);
@@ -613,11 +591,11 @@
         const body = document.getElementById('attendanceBody');
         const foot = document.getElementById('attendanceFoot');
 
-        // Header
+        // মেইন এটেনডেন্স হেডার
         let hHtml = `<tr>
-            <th class="sticky-sl">SL</th>
-            <th class="sticky-id">ID</th>
-            <th class="sticky-name">EMPLOYEE NAME</th>`;
+            <th class="col-sl">SL</th>
+            <th class="col-id">ID</th>
+            <th class="col-name">EMPLOYEE NAME</th>`;
         dateList.forEach(d => {
             const isSun = d.getDay()===0;
             hHtml += `<th style="${isSun?'background:#dc2626;':'background:var(--navy-dark);'} min-width:34px; font-size:9px; color:white; padding:7px 2px;">
@@ -626,7 +604,7 @@
         });
         head.innerHTML = hHtml + `<th class="total-col">TOTAL</th></tr>`;
 
-        // Employees
+        // কর্মীদের ডাটা রো তৈরি করা
         const employees = {};
         data.forEach(item => { if(!employees[item.id]) employees[item.id]={name:item.name}; });
         const empIds = Object.keys(employees).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
@@ -637,9 +615,9 @@
         body.innerHTML = empIds.map((uid,idx) => {
             let rowTot=0;
             let row=`<tr>
-                <td class="sticky-sl" style="color:#64748b; font-size:11px;">${idx+1}</td>
-                <td class="sticky-id id-cell">${uid}</td>
-                <td class="sticky-name" style="font-weight:600;">${employees[uid].name}</td>`;
+                <td class="col-sl" style="color:#64748b; font-size:11px;">${idx+1}</td>
+                <td class="col-id id-cell">${uid}</td>
+                <td class="col-name" style="font-weight:600;">${employees[uid].name}</td>`;
 
             dateList.forEach(d => {
                 const ds    = d.toLocaleDateString('en-CA');
@@ -655,7 +633,7 @@
             return row + `<td class="total-col">${Number(rowTot.toFixed(2))}</td></tr>`;
         }).join('');
 
-        // Footer
+        // গ্র্যান্ড টোটাল ফুটার রো
         let fHtml = `<tr><td colspan="3" style="text-align:right; padding-right:10px;">GRAND TOTAL</td>`;
         dateList.forEach(d => {
             const cVal = colTot[d.toLocaleDateString('en-CA')]||0;
@@ -663,7 +641,7 @@
         });
         foot.innerHTML = fHtml + `<td class="total-col" style="background:var(--navy-dark);color:white;">${Number(gt.toFixed(2))}</td></tr>`;
 
-        // Breakdown
+        // ব্রেকডাউন টেবিল রেন্ডারিং
         const dBody      = document.getElementById('detailsBody');
         const sortedData = [...data].sort((a,b)=>new Date(a.otDate)-new Date(b.otDate));
         let tAmt=0;
@@ -690,18 +668,153 @@
             </tr>`;
     }
 
+    // ব্রেকডাউন ভিউ এক্টিভেট করা
     function showBreakdownOnly() {
+        isDetailedView = true;
         document.getElementById('attendanceSection').style.display     = 'none';
         document.getElementById('detailedReportSection').style.display = 'block';
     }
 
-    function handlePrint() {
+    // ── নতুন ট্যাবে প্রিভিউ খুলে প্রিন্ট করার মেথড (সম্পূর্ণ সাদা-কালো এবং কুচকুচে কালো টেক্সট) ──
+    function openPrintPreview() {
+        if (!currentStartDate || !currentEndDate) return;
+
+        const dateRangeStr = `${currentStartDate.toLocaleDateString('en-GB')} → ${currentEndDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}`;
         const now = new Date();
-        document.getElementById('pd').innerText = now.toLocaleDateString('en-GB');
-        document.getElementById('pt').innerText = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
-        window.print();
+        const printDate = now.toLocaleDateString('en-GB');
+        const printTime = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+
+        let targetTableHTML = "";
+
+        if (!isDetailedView) {
+            targetTableHTML = document.getElementById('attendanceTable').outerHTML;
+        } else {
+            targetTableHTML = document.getElementById('detailedReportSection').getElementsByTagName('table')[0].outerHTML;
+        }
+
+        // নতুন ব্রাউজার ট্যাব বা উইন্ডো ওপেন করা
+        const printWindow = window.open('', '_blank');
+        
+        // প্রিন্ট প্রিভিউ উইন্ডোতে সাদাকালো এবং গ্রে হেডার সিএসএস প্রয়োগ করা
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Print Preview - Overtime Management Report</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+                    
+                    @page { 
+                        size: A4 landscape; 
+                        margin: 0.3cm 0.4cm; 
+                    }
+                    
+                    body { 
+                        font-family: 'Inter', sans-serif;
+                        background: #ffffff !important; 
+                        color: #000000 !important; 
+                        padding: 10px !important; 
+                        margin: 0 !important; 
+                    }
+
+                    .print-header {
+                        padding: 5px 0 10px 0;
+                        margin-bottom: 12px;
+                        display: flex; 
+                        justify-content: space-between; 
+                        align-items: flex-end; 
+                        border-bottom: 2px solid #000000;
+                    }
+                    .print-header strong { font-size: 8px; text-transform: uppercase; color: #000000; font-weight: 800; }
+                    .print-header span { font-size: 8px; color: #000000; }
+
+                    table { 
+                        border: 1px solid #000000 !important; 
+                        width: 100% !important; 
+                        table-layout: fixed !important; 
+                        border-collapse: collapse !important;
+                        color: #000000 !important;
+                    }
+                    
+                    th, td { 
+                        border: 1px solid #000000 !important; 
+                        color: #000000 !important; 
+                        background: #ffffff !important; 
+                        padding: 5px 1px !important; 
+                        font-size: 8.5px !important; 
+                        text-align: center !important;
+                        word-wrap: break-word !important;
+                        white-space: normal !important;
+                    }
+
+                    thead th, .breakdown-head th { 
+                        background: #e6e6e6 !important; 
+                        color: #000000 !important; 
+                        font-weight: 800 !important;
+                        font-size: 8.5px !important; 
+                        text-transform: uppercase !important;
+                        padding: 6px 1px !important;
+                    }
+                    
+                    /* প্রিন্ট লেআউটের জন্য কলামের রেস্পনসিভ উইডথ ফিক্স */
+                    th.col-sl, td.col-sl { width: 3.5% !important; }
+                    th.col-id, td.col-id { width: 6.5% !important; font-weight: 700 !important; }
+                    th.col-name, td.col-name { 
+                        width: 15% !important; 
+                        text-align: left !important; 
+                        padding-left: 4px !important;
+                        font-weight: 700 !important;
+                        border-right: 1px solid #000000 !important;
+                    }
+
+                    /* (গুরুত্বপূর্ণ পরিবর্তন) প্রিন্ট প্রিভিউ উইন্ডোতেও টোটাল কলাম যেন কোনোভাবেই না ভেঙে যায় */
+                    th.total-col, td.total-col, tfoot td.total-col { 
+                        font-weight: 800 !important;
+                        background: #dfdfdf !important; 
+                        color: #000000 !important;
+                        width: 7% !important;
+                        white-space: nowrap !important;
+                    }
+
+                    tfoot td {
+                        font-weight: 800 !important;
+                        background: #dfdfdf !important; 
+                        color: #000000 !important;
+                    }
+
+                    .sun-col {
+                        background: #fafafa !important; 
+                        border-left: 1px dashed #000000 !important; 
+                        border-right: 1px dashed #000000 !important; 
+                    }
+
+                    .breakdown-body td { text-align: left !important; padding: 6px 6px !important; font-size: 10px !important; }
+                    .breakdown-body td:nth-child(2), .breakdown-body td:nth-child(6), .breakdown-body td:nth-child(7), .breakdown-body td:nth-child(8) { text-align: center !important; }
+                    .breakdown-foot td { font-size: 11px !important; padding: 6px !important; }
+
+                    span, b, strong { color: #000000 !important; }
+                </style>
+            </head>
+            <body>
+                <div class="print-header">
+                    <div>
+                        <strong>ALAMHOW CO LTD — OVERTIME REPORT</strong>
+                    </div>
+                    <div>
+                        <span><strong>Period:</strong> ${dateRangeStr} &nbsp;|&nbsp; <strong>Printed On:</strong> ${printDate} ${printTime}</span>
+                    </div>
+                </div>
+                <div>
+                    ${targetTableHTML}
+                </div>
+            </body>
+            </html>
+        `);
+
+        printWindow.document.close();
     }
 
+    // উইন্ডো লোড হওয়ার সাথে সাথে সিস্টেম ইনিশিয়ালাইজেশন
     window.onload = initSystem;
 </script>
 </body>
