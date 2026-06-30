@@ -71,9 +71,7 @@
     .btn-clear { background: transparent; color: #ff6b6b; border: 2px solid #ff6b6b; }
     .btn-clear:hover { background: #ff6b6b; color: white; }
 
-    /* Flatpickr dark theme */
-   
-     .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
+ .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
 .flatpickr-day { color: #cce !important; }
 .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
 .flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; border-color: var(--brand-gold) !important; }
@@ -84,6 +82,7 @@
 .flatpickr-prev-month:hover, .flatpickr-next-month:hover { background: rgba(255, 215, 0, 0.15) !important; }
 .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; border: none !important; }
 .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+
 
     /* Content area */
     .content { padding: 24px 32px; }
@@ -116,7 +115,7 @@
 
   <div class="page-header">
     <h2>ALOMHOW CO LTD</h2>
-    <span class="header-badge">📅 Attendance Sheet </span>
+    <span class="header-badge">📅 Present Sheet</span>
   </div>
 
   <!-- Controls -->
@@ -126,15 +125,22 @@
       <input type="text" id="matrixDateFrom" placeholder="Start Date" style="width:130px" />
       <label>To:</label>
       <input type="text" id="matrixDateTo" placeholder="End Date" style="width:130px" />
-      <label>Project / Site:</label>
-      <select id="matrixSideFilter" style="min-width:180px;">
-        <option value="">All Projects</option>
+      <label>Filter By:</label>
+      <select id="matrixFilterType" style="min-width:150px;" onchange="onFilterTypeChange()">
+        <option value="">Select Fast Date</option>
+        <option value="project">Project Name</option>
+        <option value="employee">Employee</option>
       </select>
-      <label>Employee:</label>
-      <select id="matrixEmpFilter" style="min-width:180px;">
-        <option value="">All Employees</option>
+
+      <!-- Hidden by default; shown based on Filter By selection -->
+      <select id="matrixSideFilter" style="min-width:180px; display:none;">
+        <option value="">Select dates first</option>
       </select>
-      <button class="btn btn-att" onclick="generateMatrix()">📅 ATTENDANCE SHEET</button>
+      <select id="matrixEmpFilter" style="min-width:180px; display:none;">
+        <option value="">Select dates first</option>
+      </select>
+
+      <button class="btn btn-att" onclick="generateMatrix()">📅 View</button>
       <button class="btn btn-clear" onclick="clearMatrix()">🗑️ Clear</button>
     </div>
 
@@ -178,45 +184,59 @@
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-    // Flatpickr
-    flatpickr("#matrixDateFrom", { dateFormat: "Y-m-d" });
-    flatpickr("#matrixDateTo",   { dateFormat: "Y-m-d" });
+    // Flatpickr — refresh dropdowns whenever a date changes
+    flatpickr("#matrixDateFrom", { dateFormat: "Y-m-d", onChange: onMatrixDateChange });
+    flatpickr("#matrixDateTo",   { dateFormat: "Y-m-d", onChange: onMatrixDateChange });
 
-    let _matrixLoaded = false;
+    function onMatrixDateChange() {
+      const dFromVal = document.getElementById("matrixDateFrom").value;
+      const dToVal   = document.getElementById("matrixDateTo").value;
+      if (dFromVal && dToVal) {
+        loadMatrixFilterOptions(dFromVal, dToVal);
+      }
+    }
 
-    // ── Load filter dropdowns on page load ──
-    window.addEventListener("load", loadMatrixFilterOptions);
+    function toLocalDateStr(d) {
+      const y   = d.getFullYear();
+      const m   = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
+    }
 
-    async function loadMatrixFilterOptions() {
-      if (_matrixLoaded) return;
+    // ── Load filter dropdowns based on the selected date range's month ──
+    async function loadMatrixFilterOptions(dFromVal, dToVal) {
+      const sideSel = document.getElementById("matrixSideFilter");
+      const empSel  = document.getElementById("matrixEmpFilter");
+      sideSel.innerHTML = '<option value="">Loading...</option>';
+      empSel.innerHTML  = '<option value="">Loading...</option>';
+
       try {
+        const inputStart = new Date(dFromVal); inputStart.setHours(0, 0, 0, 0);
+        const firstDay   = new Date(inputStart.getFullYear(), inputStart.getMonth(), 1);
+        const lastDay    = new Date(inputStart.getFullYear(), inputStart.getMonth() + 1, 0);
+        const firstDayStr = toLocalDateStr(firstDay);
+        const lastDayStr  = toLocalDateStr(lastDay);
+
         const db = firebase.firestore();
 
-        // Employees
-        const empSnap = await db.collection("EMPLOYEE_LIST").get();
-        const empSel = document.getElementById("matrixEmpFilter");
-        empSel.innerHTML = '<option value="">All Employees</option>';
-        const empList = [];
-        empSnap.forEach(d => {
-          const e = d.data();
-          empList.push({ id: e.id || d.id, name: e.name || "" });
-        });
-        empList.sort((a, b) => a.id.localeCompare(b.id));
-        empList.forEach(e => {
-          const opt = document.createElement("option");
-          opt.value = e.id;
-          opt.textContent = `${e.id} — ${e.name}`;
-          empSel.appendChild(opt);
-        });
+        // Only fetch attendance docs within the selected month's date range
+        const attSnap = await db.collectionGroup("Present_Absent")
+          .where("DATE", ">=", firstDayStr)
+          .where("DATE", "<=", lastDayStr)
+          .get();
 
-        // Project/Side names
-        const attSnap = await db.collectionGroup("Present_Absent").get();
         const sides = new Set();
+        const empMap = {};
         attSnap.forEach(doc => {
           const d = doc.data();
           if (d.SIDE_NAME && d.SIDE_NAME.trim()) sides.add(d.SIDE_NAME.trim());
+          if (d.ID) {
+            const empId = String(d.ID).trim();
+            if (!empMap[empId]) empMap[empId] = d.EMPLOYEE_NAME || empId;
+          }
         });
-        const sideSel = document.getElementById("matrixSideFilter");
+
+        // Projects
         sideSel.innerHTML = '<option value="">All Projects</option>';
         [...sides].sort().forEach(s => {
           const opt = document.createElement("option");
@@ -224,8 +244,38 @@
           sideSel.appendChild(opt);
         });
 
-        _matrixLoaded = true;
-      } catch(e) { console.error("Matrix filter load error:", e); }
+        // Employees
+        empSel.innerHTML = '<option value="">All Employees</option>';
+        Object.keys(empMap).sort((a, b) => a.localeCompare(b, undefined, { numeric: true })).forEach(id => {
+          const opt = document.createElement("option");
+          opt.value = id;
+          opt.textContent = `${id} — ${empMap[id]}`;
+          empSel.appendChild(opt);
+        });
+
+      } catch(e) {
+        console.error("Matrix filter load error:", e);
+        sideSel.innerHTML = '<option value="">All Projects</option>';
+        empSel.innerHTML  = '<option value="">All Employees</option>';
+      }
+    }
+
+    // ── Toggle visible filter select based on Filter By dropdown ──
+    function onFilterTypeChange() {
+      const type = document.getElementById("matrixFilterType").value;
+      const sideSel = document.getElementById("matrixSideFilter");
+      const empSel  = document.getElementById("matrixEmpFilter");
+
+      sideSel.style.display = "none";
+      empSel.style.display  = "none";
+      sideSel.value = "";
+      empSel.value  = "";
+
+      if (type === "project") {
+        sideSel.style.display = "inline-block";
+      } else if (type === "employee") {
+        empSel.style.display = "inline-block";
+      }
     }
 
     // ── Generate Matrix (opens in new tab) ──
@@ -241,7 +291,7 @@
         return;
       }
 
-      matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance sheet...</p>';
+      matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading present sheet...</p>';
 
       try {
         const inputStart = new Date(dFromVal); inputStart.setHours(0, 0, 0, 0);
@@ -254,13 +304,6 @@
           dateRange.push(new Date(d));
         }
 
-        const toLocalDateStr = (d) => {
-          const y   = d.getFullYear();
-          const m   = String(d.getMonth() + 1).padStart(2, "0");
-          const day = String(d.getDate()).padStart(2, "0");
-          return `${y}-${m}-${day}`;
-        };
-
         const db = firebase.firestore();
 
         // Public holidays
@@ -268,13 +311,21 @@
         const holidaySnap = await db.collection("HOLIDAY_LIST").get();
         holidaySnap.forEach(doc => publicHolidayDates.add(doc.id));
 
-        // Attendance records
-        const snap = await db.collectionGroup("Present_Absent").get();
+        const firstDayStr = toLocalDateStr(firstDay);
+        const lastDayStr  = toLocalDateStr(lastDay);
+
+        // Attendance records — filtered at the Firestore query level to this month's range
+        const snap = await db.collectionGroup("Present_Absent")
+          .where("DATE", ">=", firstDayStr)
+          .where("DATE", "<=", lastDayStr)
+          .get();
         const attendanceMap = {}, employees = {};
 
         snap.forEach(doc => {
           const d = doc.data();
+
           if (!d.ID || !d.DATE) return;
+          if (d.DATE < firstDayStr || d.DATE > lastDayStr) return;
           if (sideFilter && (d.SIDE_NAME || "").trim() !== sideFilter) return;
           if (empFilter  && String(d.ID).trim() !== empFilter) return;
 
@@ -386,14 +437,14 @@
 
             if (isSunday || isPubHol) {
               const bg = "background-color:#fff0f0; border:1px solid #000;";
-              if (stat === "A") return `<td style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
+              if (stat === "A") return `<td class="cell-absent" style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
               if (stat === "P") return `<td style="${bg} color:green; font-weight:bold;">P</td>`;
               if (stat === "L" || stat === "H") return `<td style="${bg} color:green;">${stat}</td>`;
               return `<td style="${bg}"></td>`;
             }
 
             if (stat === "P") return `<td style="color:green; font-weight:bold;">P</td>`;
-            if (stat === "A") return `<td style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
+            if (stat === "A") return `<td class="cell-absent" style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
             if (stat === "L" || stat === "H") return `<td style="color:green;">${stat}</td>`;
             return `<td></td>`;
           }).join("");
@@ -408,7 +459,7 @@
   <td class="text-start">${id} — ${employees[id].name}</td>
   ${daysHtml}
   <td style="font-weight:bold; background:#e6fffa; color:#065f46;">${countP}</td>
-  <td style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
+  <td class="cell-absent" style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
   <td style="font-weight:bold; background:#fff9e6; color:#92400e;">${countSun}</td>
   <td style="font-weight:bold; background:#f3f0ff; color:#5b21b6;">${countHol}</td>
 </tr>`;
@@ -429,7 +480,7 @@
 </tr>`;
 
         // Open in new tab
-        matOut.innerHTML = '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;">✅ Generating Attendance Sheet in new tab...</p>';
+        matOut.innerHTML = '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;">✅ Generating Present Sheet in new tab...</p>';
 
         const preview = window.open("", "_blank");
         if (!preview) {
@@ -445,28 +496,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Attendance Summary — ${monthName} ${year}</title>
   <style>
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
     @page { size: A4 landscape; margin: 5mm 5mm 0mm 5mm; }
     body { font-family: sans-serif; padding: 10px; margin: 0; zoom: 1.4; }
     .company-name {
       text-align: center; margin: 0; font-size: 26px; font-weight: bold;
-      background: linear-gradient(135deg, #bf953f 0%, #fcf6ba 25%, #b38728 50%, #fbf5b7 75%, #aa771c 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      filter: drop-shadow(1px 1px 1.5px rgba(0,0,0,0.15));
+      color: #000;
     }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; border: 1.2px solid #000; margin-top: 10px; }
     th, td { border: 1px solid #000; text-align: center; font-size: 10px; padding: 1px 0; }
+    tbody tr:hover td { background-color: #ffd6d6 !important; }
+    tbody tr:hover td.cell-absent { color: #ff0000 !important; }
+    body.bw-mode tbody tr:hover td { background-color: #ffd6d6 !important; }
+    body.bw-mode tbody tr:hover td.cell-absent { color: #ff0000 !important; -webkit-text-fill-color: #ff0000 !important; }
     th { background: #1d3a6d; color: #fff; }
     .holiday-box { margin: 0 auto; display: flex; align-items: center; justify-content: center; }
     .holiday-svg { width: 100%; height: 100%; }
     .text-start { text-align: left !important; padding-left: 5px !important; white-space: nowrap; overflow: hidden; }
-    .no-print { position: fixed; top: 10px; right: 10px; padding: 10px 20px; background: #1d3a6d; color: #ffd700; border: none; border-radius: 5px; cursor: pointer; font-size: 13px; font-weight: bold; z-index: 1000; }
-    .no-print:hover { background: #2a4f9a; }
-    @media print { body { zoom: 1.0; } th, td { font-size: 8.5px; } .no-print { display: none; } }
+    .action-bar { position: fixed; top: 10px; right: 10px; z-index: 1000; display: flex; align-items: center; gap: 8px; }
+    .no-print { padding: 4px 10px; background: transparent; color: #1d3a6d; border: 1.5px solid #1d3a6d; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; transition: background 0.15s, color 0.15s; }
+    .no-print:hover { background: #1d3a6d; color: #ffd700; }
+    .bw-toggle-wrap {
+      display: inline-block;
+      background: transparent; border: 1.5px solid #1d3a6d; border-radius: 4px;
+      padding: 4px 10px; font-size: 10px; font-weight: bold; color: #1d3a6d;
+      cursor: pointer; user-select: none; transition: background 0.15s, color 0.15s;
+    }
+    .bw-toggle-wrap:hover { background: #1d3a6d; color: #fff; }
+    .bw-toggle-wrap.active { background: #1d3a6d; color: #fff; }
+
+    /* Keep button hover working even when bw-mode forces colors elsewhere */
+    body.bw-mode .no-print:hover,
+    body.bw-mode .bw-toggle-wrap:hover {
+      background: #1d3a6d !important;
+      color: #fff !important;
+    }
+
+    /* Black & White mode — forces all text/background colors to black/white */
+    body.bw-mode * {
+      background: #fff !important;
+      background-color: #fff !important;
+      background-image: none !important;
+      color: #000 !important;
+      -webkit-text-fill-color: #000 !important;
+      filter: none !important;
+      box-shadow: none !important;
+    }
+    body.bw-mode table, body.bw-mode th, body.bw-mode td {
+      border-color: #000 !important;
+    }
+    body.bw-mode th {
+      background: #d9d9d9 !important;
+      background-color: #d9d9d9 !important;
+      color: #000 !important;
+    }
+    body.bw-mode th * {
+      background: transparent !important;
+      background-color: transparent !important;
+    }
+    body.bw-mode .cell-absent {
+      background: #b0b0b0 !important;
+      background-color: #b0b0b0 !important;
+      color: #000 !important;
+      font-weight: bold !important;
+    }
+    body.bw-mode .holiday-svg circle {
+      stroke: #000 !important;
+      fill: none !important;
+    }
+    body.bw-mode .holiday-svg path {
+      stroke: #000 !important;
+      fill: transparent !important;
+    }
+    body.bw-mode .holiday-svg text,
+    body.bw-mode .holiday-svg textPath {
+      stroke: none !important;
+      fill: #000 !important;
+    }
+
+    @media print { body { zoom: 1.0; } th, td { font-size: 8.5px; } .action-bar { display: none; } }
   </style>
 </head>
 <body>
-  <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+  <div class="action-bar">
+    <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+    <span class="bw-toggle-wrap" id="bwToggleBtn" onclick="
+    document.body.classList.toggle('bw-mode');
+    this.classList.toggle('active');
+  ">Black &amp; White</span>
+  </div>
   <h1 class="company-name">ALAMHOW CO LTD</h1>
   <table>
     ${tableHeader}
@@ -506,8 +623,11 @@
       document.getElementById("matrixOutput").innerHTML = "";
       try { document.getElementById("matrixDateFrom")._flatpickr.clear(); } catch(e) {}
       try { document.getElementById("matrixDateTo")._flatpickr.clear(); } catch(e) {}
+      document.getElementById("matrixFilterType").value = "";
       document.getElementById("matrixSideFilter").value = "";
+      document.getElementById("matrixSideFilter").style.display = "none";
       document.getElementById("matrixEmpFilter").value = "";
+      document.getElementById("matrixEmpFilter").style.display = "none";
     }
 
     // Message box helpers
