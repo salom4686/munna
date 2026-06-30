@@ -427,16 +427,19 @@ th.th-pbonus, th.th-abonus { background: #f0f0f0 !important; color: #000 !import
         <input type="text" id="matrixDateFrom" placeholder="Start Date" style="width:130px" />
         <label>To:</label>
         <input type="text" id="matrixDateTo" placeholder="End Date" style="width:130px" />
-        <label>Project / Site:</label>
-        <select id="matrixSideFilter" style="min-width:180px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;">
-          <option value="">All Projects</option>
+        <label>Filter By:</label>
+        <select id="matrixFilterType" style="min-width:150px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;" onchange="onMatrixFilterTypeChange()">
+          <option value="">Select Filter</option>
+          <option value="project">Project Name</option>
+          <option value="employee">Employee</option>
         </select>
-        <label>Employee:</label>
-        <select id="matrixEmpFilter" style="min-width:180px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;">
-          <option value="">All Employees</option>
+        <select id="matrixSideFilter" style="min-width:180px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;display:none;">
+          <option value="">Select dates first</option>
         </select>
-        <button class="btn btn-att" onclick="generateMatrix()" style="background:#0d9488;border-color:#0d9488;">📅PREVIEW</button>
-        <button class="btn" onclick="printMatrix()" style="background:transparent;color:var(--brand-gold);border:2px solid var(--brand-gold);">🖨️ Print</button>
+        <select id="matrixEmpFilter" style="min-width:180px;padding:8px 12px;font-size:12px;font-family:'Source Sans 3',sans-serif;border:1.5px solid #3a5a8a;border-radius:6px;background:#001530;color:#e0e8f4;outline:none;display:none;">
+          <option value="">Select dates first</option>
+        </select>
+        <button class="btn btn-att" onclick="generateMatrix()" style="background:#0d9488;border-color:#0d9488;">📅 View</button>
         <button class="btn btn-clear" onclick="clearMatrix()">🗑️ Clear</button>
       </div>
     </div>
@@ -678,8 +681,8 @@ const _defaultRange = getDefaultDateRange();
 
 flatpickr("#dateFrom",       { ...redDayConfig, defaultDate: _defaultRange.from, onChange: syncPanelDates });
 flatpickr("#dateTo",         { ...redDayConfig, defaultDate: _defaultRange.to,   onChange: syncPanelDates });
-flatpickr("#matrixDateFrom", { ...redDayConfig, defaultDate: _defaultRange.from });
-flatpickr("#matrixDateTo",   { ...redDayConfig, defaultDate: _defaultRange.to });
+flatpickr("#matrixDateFrom", { ...redDayConfig, defaultDate: _defaultRange.from, onChange: onMatrixDateChange });
+flatpickr("#matrixDateTo",   { ...redDayConfig, defaultDate: _defaultRange.to,   onChange: onMatrixDateChange });
 flatpickr("#panelDateFrom",  { ...redDayConfig, defaultDate: _defaultRange.from });
 flatpickr("#panelDateTo",    { ...redDayConfig, defaultDate: _defaultRange.to });
 flatpickr("#attDateFrom",    { ...redDayConfig, defaultDate: _defaultRange.from });
@@ -738,7 +741,6 @@ flatpickr("#otDateTo",       { ...redDayConfig, defaultDate: _defaultRange.to })
       }
 
       let _currentTab = "monthly";
-      let _matrixLoaded = false;
 
       let _cache = {
         loaded: false, loading: false, empList: [], empMap: {}, advMap: {},
@@ -930,8 +932,12 @@ flatpickr("#otDateTo",       { ...redDayConfig, defaultDate: _defaultRange.to })
         document.getElementById("advOutput").style.display     = tab === "advance"     ? "" : "none";
         document.getElementById("fineOutput").style.display    = tab === "fine"        ? "" : "none";
         if (tab === "attendance") loadAttFilterOptions();
-        if (tab === "matrix")     loadMatrixFilterOptions();
         if (tab === "overtime")   loadOtFilterOptions();
+        if (tab === "matrix") {
+          const f = document.getElementById("matrixDateFrom").value;
+          const t = document.getElementById("matrixDateTo").value;
+          if (f && t) loadMatrixFilterOptions(f, t);
+        }
       }
 
       // ══════════════════════════════════════════
@@ -1622,59 +1628,102 @@ function clearAttendance() {
       // ══════════════════════════════════════════
       let _matrixPrintData = null;
 
-      async function loadMatrixFilterOptions() {
-        if (_matrixLoaded) return;
+      function toLocalDateStr(d) {
+        const y   = d.getFullYear();
+        const m   = String(d.getMonth()+1).padStart(2,"0");
+        const day = String(d.getDate()).padStart(2,"0");
+        return `${y}-${m}-${day}`;
+      }
+
+      // ── Date change callback — reload filter dropdowns ──
+      function onMatrixDateChange() {
+        const dFromVal = document.getElementById("matrixDateFrom").value;
+        const dToVal   = document.getElementById("matrixDateTo").value;
+        if (dFromVal && dToVal) loadMatrixFilterOptions(dFromVal, dToVal);
+      }
+
+      // ── Toggle visible filter select based on Filter By dropdown ──
+      function onMatrixFilterTypeChange() {
+        const type    = document.getElementById("matrixFilterType").value;
+        const sideSel = document.getElementById("matrixSideFilter");
+        const empSel  = document.getElementById("matrixEmpFilter");
+        sideSel.style.display = "none";
+        empSel.style.display  = "none";
+        sideSel.value = "";
+        empSel.value  = "";
+        if (type === "project")       sideSel.style.display = "inline-block";
+        else if (type === "employee") empSel.style.display  = "inline-block";
+      }
+
+      async function loadMatrixFilterOptions(dFromVal, dToVal) {
+        const sideSel = document.getElementById("matrixSideFilter");
+        const empSel  = document.getElementById("matrixEmpFilter");
+        sideSel.innerHTML = '<option value="">Loading...</option>';
+        empSel.innerHTML  = '<option value="">Loading...</option>';
         try {
+          const inputStart  = new Date(dFromVal); inputStart.setHours(0,0,0,0);
+          const firstDay    = new Date(inputStart.getFullYear(), inputStart.getMonth(), 1);
+          const lastDay     = new Date(inputStart.getFullYear(), inputStart.getMonth()+1, 0);
+          const firstDayStr = toLocalDateStr(firstDay);
+          const lastDayStr  = toLocalDateStr(lastDay);
           const db = firebase.firestore();
-          const empSnap = await db.collection("EMPLOYEE_LIST").get();
-          const empSel = document.getElementById("matrixEmpFilter");
-          empSel.innerHTML = '<option value="">All Employees</option>';
-          const empList = [];
-          empSnap.forEach(d => { const e = d.data(); empList.push({ id: e.id||d.id, name: e.name||"" }); });
-          empList.sort((a,b) => a.id.localeCompare(b.id));
-          empList.forEach(e => {
-            const opt = document.createElement("option"); opt.value=e.id; opt.textContent=`${e.id} — ${e.name}`; empSel.appendChild(opt);
-          });
-          const attSnap = await db.collectionGroup("Present_Absent").get();
+          const attSnap = await db.collectionGroup("Present_Absent")
+            .where("DATE", ">=", firstDayStr)
+            .where("DATE", "<=", lastDayStr)
+            .get();
           const sides = new Set();
-          attSnap.forEach(doc => { const d=doc.data(); if (d.SIDE_NAME&&d.SIDE_NAME.trim()) sides.add(d.SIDE_NAME.trim()); });
-          const sideSel = document.getElementById("matrixSideFilter");
+          const empMap = {};
+          attSnap.forEach(doc => {
+            const d = doc.data();
+            if (d.SIDE_NAME && d.SIDE_NAME.trim()) sides.add(d.SIDE_NAME.trim());
+            if (d.ID) { const eid = String(d.ID).trim(); if (!empMap[eid]) empMap[eid] = d.EMPLOYEE_NAME || eid; }
+          });
           sideSel.innerHTML = '<option value="">All Projects</option>';
           [...sides].sort().forEach(s => {
             const opt = document.createElement("option"); opt.value=s; opt.textContent=s; sideSel.appendChild(opt);
           });
-          _matrixLoaded = true;
-        } catch(e) { console.error("Matrix filter load error:", e); }
+          empSel.innerHTML = '<option value="">All Employees</option>';
+          Object.keys(empMap).sort((a,b) => a.localeCompare(b, undefined, { numeric: true })).forEach(id => {
+            const opt = document.createElement("option"); opt.value=id; opt.textContent=`${id} — ${empMap[id]}`; empSel.appendChild(opt);
+          });
+        } catch(e) {
+          console.error("Matrix filter load error:", e);
+          sideSel.innerHTML = '<option value="">All Projects</option>';
+          empSel.innerHTML  = '<option value="">All Employees</option>';
+        }
       }
 
       async function generateMatrix() {
-        const matOut = document.getElementById("matrixOutput");
+        const matOut     = document.getElementById("matrixOutput");
         const dFromVal   = document.getElementById("matrixDateFrom").value;
         const dToVal     = document.getElementById("matrixDateTo").value;
         const sideFilter = document.getElementById("matrixSideFilter").value.trim();
         const empFilter  = document.getElementById("matrixEmpFilter").value.trim();
-        if (!dFromVal || !dToVal) { showMsg("Date Range Required", { title: "Date Range Required", type: "warn" }); return; }
-        matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading attendance matrix...</p>';
+        if (!dFromVal || !dToVal) { showMsg("Please select a date range.", { title: "Date Range Required", type: "warn" }); return; }
+        matOut.innerHTML = '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Loading present sheet...</p>';
         try {
-          const inputStart = new Date(dFromVal); inputStart.setHours(0,0,0,0);
-          const inputEnd   = new Date(dToVal);   inputEnd.setHours(23,59,59,999);
-          const firstDay   = new Date(inputStart.getFullYear(), inputStart.getMonth(), 1);
-          const lastDay    = new Date(inputStart.getFullYear(), inputStart.getMonth()+1, 0);
-          const dateRange  = [];
+          const inputStart  = new Date(dFromVal); inputStart.setHours(0,0,0,0);
+          const inputEnd    = new Date(dToVal);   inputEnd.setHours(23,59,59,999);
+          const firstDay    = new Date(inputStart.getFullYear(), inputStart.getMonth(), 1);
+          const lastDay     = new Date(inputStart.getFullYear(), inputStart.getMonth()+1, 0);
+          const dateRange   = [];
           for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate()+1)) dateRange.push(new Date(d));
-          const toLocalDateStr = (d) => {
-            const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
-            return `${y}-${m}-${day}`;
-          };
+          const firstDayStr = toLocalDateStr(firstDay);
+          const lastDayStr  = toLocalDateStr(lastDay);
           const db = firebase.firestore();
           const publicHolidayDates = new Set();
           const holidaySnap = await db.collection("HOLIDAY_LIST").get();
           holidaySnap.forEach(doc => publicHolidayDates.add(doc.id));
-          const snap = await db.collectionGroup("Present_Absent").get();
+          // Optimized query — only this month's records
+          const snap = await db.collectionGroup("Present_Absent")
+            .where("DATE", ">=", firstDayStr)
+            .where("DATE", "<=", lastDayStr)
+            .get();
           const attendanceMap = {}, employees = {};
           snap.forEach(doc => {
             const d = doc.data();
             if (!d.ID || !d.DATE) return;
+            if (d.DATE < firstDayStr || d.DATE > lastDayStr) return;
             if (sideFilter && (d.SIDE_NAME||"").trim()!==sideFilter) return;
             if (empFilter  && String(d.ID).trim()!==empFilter) return;
             const empId = String(d.ID).trim();
@@ -1682,7 +1731,7 @@ function clearAttendance() {
             if (!attendanceMap[empId]) attendanceMap[empId] = {};
             const st = (d.STATUS||"").trim().toUpperCase();
             let shortStat = "-";
-            if (st.startsWith("P")) shortStat="P";
+            if      (st.startsWith("P")) shortStat="P";
             else if (st.startsWith("A")) shortStat="A";
             else if (st.startsWith("L")) shortStat="L";
             else if (st.startsWith("H")) shortStat="H";
@@ -1690,66 +1739,66 @@ function clearAttendance() {
           });
           const sortedIds = Object.keys(employees).sort((a,b) => a.localeCompare(b, undefined, { numeric: true }));
           const monthName = firstDay.toLocaleString("default", { month: "long" });
-          const year = firstDay.getFullYear();
-          const now = new Date();
+          const year      = firstDay.getFullYear();
+          const now       = new Date();
           const printDateTime = now.toLocaleString("en-GB", { day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",hour12:true });
           let dayTotalsP=Array(dateRange.length).fill(0), dayTotalsSun=Array(dateRange.length).fill(0);
           let dayTotalsHol=Array(dateRange.length).fill(0), dayTotalsA=Array(dateRange.length).fill(0);
           let grandTotalP=0, grandTotalA=0, grandTotalSun=0, grandTotalHol=0;
           const tableHeader = `<thead>
-  <tr style="height:22px;">
-    <th rowspan="2" style="width:20px; padding:1px;">SL</th>
-    <th rowspan="2" style="width:160px; padding:1px;">EMPLOYEE ID &amp; Name</th>
-    <th colspan="${dateRange.length}" style="padding:0 10px; font-size:11px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-        <div style="flex:2; text-align:center; font-weight:bold;">
-          Attendance Summary: ${monthName} ${year}${sideFilter ? ` — ${sideFilter.toUpperCase()}` : " — ALL PROJECT"}
-        </div>
-        <div style="flex:1; text-align:right; font-size:9px; font-weight:normal;">Printed on: ${printDateTime}</div>
+<tr style="height:22px;">
+  <th rowspan="2" style="width:20px; padding:1px;">SL</th>
+  <th rowspan="2" style="width:160px; padding:1px;">EMPLOYEE ID &amp; Name</th>
+  <th colspan="${dateRange.length}" style="padding:0 10px; font-size:11px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+      <div style="flex:2; text-align:center; font-weight:bold;">
+        Attendance Summary: ${monthName} ${year}${sideFilter ? ` — ${sideFilter.toUpperCase()}` : " — ALL PROJECT"}
       </div>
-    </th>
-    <th colspan="4" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
-  </tr>
-  <tr style="height:35px;">
-    ${dateRange.map((d) => {
-      const dayName = d.toLocaleDateString("en-US",{weekday:"short"}).substring(0,2);
-      const isSun   = d.getDay()===0;
-      const ds      = toLocalDateStr(d);
-      const isPubHol= publicHolidayDates.has(ds);
-      const isOut   = d < inputStart || d > inputEnd;
-      const redStyle= isSun||isPubHol ? "color:#ff4d4d !important;" : "";
-      if (isPubHol && !isOut) {
-        return `<th style="width:25px; padding:1px 0; vertical-align:middle; ${redStyle}">
-          <div class="holiday-box" style="width:25px; height:25px; margin:0 auto;">
-            <svg viewBox="0 0 100 100" style="width:100%;height:100%;">
-              <circle cx="50" cy="50" r="47" style="fill:none;stroke:#ff4d4d;stroke-width:6;"/>
-              <path id="hcurve${d.getDate()}" d="M 15,55 A 35,35 0 0,1 85,55" fill="transparent"/>
-              <text style="fill:#ff4d4d;font-weight:900;font-size:16px;">
-                <textPath xlink:href="#hcurve${d.getDate()}" startOffset="50%" text-anchor="middle">Holiday</textPath>
-              </text>
-              <text x="50" y="62" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:40px;">${d.getDate()}</text>
-              <text x="50" y="88" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:24px;">${dayName}</text>
-            </svg>
-          </div>
-        </th>`;
-      }
+      <div style="flex:1; text-align:right; font-size:9px; font-weight:normal;">Printed on: ${printDateTime}</div>
+    </div>
+  </th>
+  <th colspan="4" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
+</tr>
+<tr style="height:35px;">
+  ${dateRange.map((d) => {
+    const dayName  = d.toLocaleDateString("en-US",{weekday:"short"}).substring(0,2);
+    const isSun    = d.getDay()===0;
+    const ds       = toLocalDateStr(d);
+    const isPubHol = publicHolidayDates.has(ds);
+    const isOut    = d < inputStart || d > inputEnd;
+    const redStyle = isSun||isPubHol ? "color:#ff4d4d !important;" : "";
+    if (isPubHol && !isOut) {
       return `<th style="width:25px; padding:1px 0; vertical-align:middle; ${redStyle}">
-        <div style="line-height:1;">${d.getDate()}<br><span style="font-size:7px">${dayName}</span></div>
+        <div class="holiday-box" style="width:25px; height:25px; margin:0 auto;">
+          <svg viewBox="0 0 100 100" class="holiday-svg" style="width:100%;height:100%;">
+            <circle cx="50" cy="50" r="47" style="fill:none;stroke:#ff4d4d;stroke-width:6;"/>
+            <path id="hcurve${d.getDate()}" d="M 15,55 A 35,35 0 0,1 85,55" fill="transparent"/>
+            <text style="fill:#ff4d4d;font-weight:900;font-size:16px;">
+              <textPath xlink:href="#hcurve${d.getDate()}" startOffset="50%" text-anchor="middle">Holiday</textPath>
+            </text>
+            <text x="50" y="62" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:40px;">${d.getDate()}</text>
+            <text x="50" y="88" style="fill:#ff4d4d;font-weight:bold;text-anchor:middle;font-size:24px;">${dayName}</text>
+          </svg>
+        </div>
       </th>`;
-    }).join("")}
-    <th style="width:25px; background:#198754; padding:1px;">P</th>
-    <th style="width:25px; background:#dc3545; padding:1px;">A</th>
-    <th style="width:25px; background:#ffc107; color:#000; padding:1px;">SUN</th>
-    <th style="width:25px; background:#6c757d; padding:1px;">HOL</th>
-  </tr>
+    }
+    return `<th style="width:25px; padding:1px 0; vertical-align:middle; ${redStyle}">
+      <div style="line-height:1;">${d.getDate()}<br><span style="font-size:7px">${dayName}</span></div>
+    </th>`;
+  }).join("")}
+  <th style="width:25px; background:#198754; padding:1px;">P</th>
+  <th style="width:25px; background:#dc3545; padding:1px;">A</th>
+  <th style="width:25px; background:#ffc107; color:#000; padding:1px;">SUN</th>
+  <th style="width:25px; background:#6c757d; padding:1px;">HOL</th>
+</tr>
 </thead>`;
           const tableBody = sortedIds.map((id, idx) => {
             const isCook = employees[id]?.isCook || false;
             let countP=0, countA=0, countSun=0, countHol=0;
             const daysHtml = dateRange.map((d, dIdx) => {
-              const ds      = toLocalDateStr(d);
-              const isSunday= d.getDay()===0;
-              const isPubHol= publicHolidayDates.has(ds);
+              const ds       = toLocalDateStr(d);
+              const isSunday = d.getDay()===0;
+              const isPubHol = publicHolidayDates.has(ds);
               if (d < inputStart || d > inputEnd) return `<td></td>`;
               let stat = attendanceMap[id] ? (attendanceMap[id][ds]||"-") : "-";
               if (stat==="P") {
@@ -1760,13 +1809,13 @@ function clearAttendance() {
               if (stat==="A") { dayTotalsA[dIdx]++; countA++; }
               if (isSunday || isPubHol) {
                 const bg = "background-color:#fff0f0; border:1px solid #000;";
-                if (stat==="A") return `<td style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
+                if (stat==="A") return `<td class="cell-absent" style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
                 if (stat==="P") return `<td style="${bg} color:green; font-weight:bold;">P</td>`;
                 if (stat==="L"||stat==="H") return `<td style="${bg} color:green;">${stat}</td>`;
                 return `<td style="${bg}"></td>`;
               }
               if (stat==="P") return `<td style="color:green; font-weight:bold;">P</td>`;
-              if (stat==="A") return `<td style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
+              if (stat==="A") return `<td class="cell-absent" style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
               if (stat==="L"||stat==="H") return `<td style="color:green;">${stat}</td>`;
               return `<td></td>`;
             }).join("");
@@ -1776,7 +1825,7 @@ function clearAttendance() {
   <td class="text-start">${id} — ${employees[id].name}</td>
   ${daysHtml}
   <td style="font-weight:bold; background:#e6fffa; color:#065f46;">${countP}</td>
-  <td style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
+  <td class="cell-absent" style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
   <td style="font-weight:bold; background:#fff9e6; color:#92400e;">${countSun}</td>
   <td style="font-weight:bold; background:#f3f0ff; color:#5b21b6;">${countHol}</td>
 </tr>`;
@@ -1793,34 +1842,66 @@ function clearAttendance() {
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSun}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalHol}</td>
 </tr>`;
-          matOut.innerHTML = '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;">Generating Attendance Sheet...</p>';
+          matOut.innerHTML = '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;">✅ Generating Present Sheet ...</p>';
           const preview = window.open("", "_blank");
           if (!preview) {
             showMsg("Popup blocked! Browser-এ popup allow করুন।", { title: "Popup Blocked", type: "warn" });
-            matOut.innerHTML = '<p style="color:orange; padding:20px;">⚠️ Popup blocked।</p>';
+            matOut.innerHTML = '<p style="color:orange; padding:20px;">⚠️ Popup blocked। Browser-এ popup allow করে আবার চেষ্টা করুন।</p>';
             return;
           }
           preview.document.write(`<!DOCTYPE html>
-<html lang="en"><head>
+<html lang="en">
+<head>
   <meta charset="UTF-8">
-  <title>ALOMHOW — Present Sheet | ${monthName} ${year}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Summary — ${monthName} ${year}</title>
   <style>
-    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     @page { size: A4 landscape; margin: 5mm 5mm 0mm 5mm; }
     body { font-family: sans-serif; padding: 10px; margin: 0; zoom: 1.4; }
     .company-name { text-align:center; margin:0; font-size:26px; font-weight:bold; color:#000; }
     table { width:100%; border-collapse:collapse; table-layout:fixed; border:1.2px solid #000; margin-top:10px; }
     th, td { border:1px solid #000; text-align:center; font-size:10px; padding:1px 0; }
+    tbody tr:hover td { background-color:#ffd6d6 !important; }
+    tbody tr:hover td.cell-absent { color:#ff0000 !important; }
+    body.bw-mode tbody tr:hover td { background-color:#ffd6d6 !important; }
+    body.bw-mode tbody tr:hover td.cell-absent { color:#ff0000 !important; -webkit-text-fill-color:#ff0000 !important; }
     th { background:#1d3a6d; color:#fff; }
+    .holiday-box { margin:0 auto; display:flex; align-items:center; justify-content:center; }
+    .holiday-svg { width:100%; height:100%; }
     .text-start { text-align:left !important; padding-left:5px !important; white-space:nowrap; overflow:hidden; }
-    .no-print { position:fixed; top:10px; right:10px; padding:10px 20px; background:#1d3a6d; color:#ffd700; border:none; border-radius:5px; cursor:pointer; font-size:13px; font-weight:bold; z-index:1000; }
-    @media print { body { zoom:1.0; } th,td { font-size:8.5px; } .no-print { display:none; } }
+    .action-bar { position:fixed; top:10px; right:10px; z-index:1000; display:flex; align-items:center; gap:8px; }
+    .no-print { padding:4px 10px; background:transparent; color:#1d3a6d; border:1.5px solid #1d3a6d; border-radius:4px; cursor:pointer; font-size:10px; font-weight:bold; transition:background 0.15s,color 0.15s; }
+    .no-print:hover { background:#1d3a6d; color:#ffd700; }
+    .bw-toggle-wrap { display:inline-block; background:transparent; border:1.5px solid #1d3a6d; border-radius:4px; padding:4px 10px; font-size:10px; font-weight:bold; color:#1d3a6d; cursor:pointer; user-select:none; transition:background 0.15s,color 0.15s; }
+    .bw-toggle-wrap:hover { background:#1d3a6d; color:#fff; }
+    .bw-toggle-wrap.active { background:#1d3a6d; color:#fff; }
+    body.bw-mode .no-print:hover, body.bw-mode .bw-toggle-wrap:hover { background:#1d3a6d !important; color:#fff !important; }
+    body.bw-mode * { background:#fff !important; background-color:#fff !important; background-image:none !important; color:#000 !important; -webkit-text-fill-color:#000 !important; filter:none !important; box-shadow:none !important; }
+    body.bw-mode table, body.bw-mode th, body.bw-mode td { border-color:#000 !important; }
+    body.bw-mode th { background:#d9d9d9 !important; background-color:#d9d9d9 !important; color:#000 !important; }
+    body.bw-mode th * { background:transparent !important; background-color:transparent !important; }
+    body.bw-mode .cell-absent { background:#b0b0b0 !important; background-color:#b0b0b0 !important; color:#000 !important; font-weight:bold !important; }
+    body.bw-mode .holiday-svg circle { stroke:#000 !important; fill:none !important; }
+    body.bw-mode .holiday-svg path { stroke:#000 !important; fill:transparent !important; }
+    body.bw-mode .holiday-svg text, body.bw-mode .holiday-svg textPath { stroke:none !important; fill:#000 !important; }
+    @media print { body { zoom:1.0; } th,td { font-size:8.5px; } .action-bar { display:none; } }
   </style>
-</head><body>
-  <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+</head>
+<body>
+  <div class="action-bar">
+    <button class="no-print" onclick="window.print()">🖨️ Print Report</button>
+    <span class="bw-toggle-wrap" id="bwToggleBtn" onclick="
+    document.body.classList.toggle('bw-mode');
+    this.classList.toggle('active');
+  ">Black &amp; White</span>
+  </div>
   <h1 class="company-name">ALAMHOW CO LTD</h1>
-  <table>${tableHeader}<tbody>${tableBody}</tbody><tfoot>${tableFooter}</tfoot></table>
-  <div style="margin-top:15px; display:flex; gap:20px; flex-wrap:wrap;">
+  <table>
+    ${tableHeader}
+    <tbody>${tableBody}</tbody>
+    <tfoot>${tableFooter}</tfoot>
+  </table>
+  <div style="margin-top:15px; display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;">
     <table style="width:auto; min-width:240px; border-collapse:collapse; border:1px solid #000;">
       <thead><tr><th colspan="2" style="background:#1d3a6d; color:#ffd700; padding:4px 10px; font-size:11px;">PRESENT SUMMARY</th></tr></thead>
       <tbody>
@@ -1843,18 +1924,15 @@ function clearAttendance() {
         }
       }
 
-      function printMatrix() {
-        const area = document.getElementById("matrixPrintArea");
-        if (!area) { showMsg("প্রথমে Matrix Generate করুন।", { title: "No Data", type: "warn" }); return; }
-        window.print();
-      }
-
       function clearMatrix() {
         document.getElementById("matrixOutput").innerHTML = "";
         try { document.getElementById("matrixDateFrom")._flatpickr.clear(); } catch(e) {}
         try { document.getElementById("matrixDateTo")._flatpickr.clear(); } catch(e) {}
+        document.getElementById("matrixFilterType").value = "";
         document.getElementById("matrixSideFilter").value = "";
+        document.getElementById("matrixSideFilter").style.display = "none";
         document.getElementById("matrixEmpFilter").value  = "";
+        document.getElementById("matrixEmpFilter").style.display  = "none";
         _matrixPrintData = null;
       }
 
