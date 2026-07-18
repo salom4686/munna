@@ -1,0 +1,2774 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Delete / Edit Manager — ALOMHOW CO LTD</title>
+  <link
+    rel="icon"
+    type="image/png"
+    href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"
+  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+  />
+  <style>
+      :root {
+        --brand-blue: #002147;
+        --brand-gold: #ffd700;
+        --brand-blue-pale: #e8edf4;
+        --brand-gold-soft: #fff4b2;
+        --border: #b0bdd4;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: "Source Sans 3", sans-serif;
+        background: var(--brand-blue);
+        color: #1a1a2e;
+        font-size: 12px;
+      }
+
+      .page-header {
+        background: var(--brand-blue);
+        padding: 18px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 4px solid var(--brand-gold);
+      }
+      .page-header h2 {
+        font-family: "Playfair Display", serif;
+        color: var(--brand-gold);
+        font-size: 22px;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+      }
+      .header-badge {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        font-weight: 700;
+        font-size: 10px;
+        letter-spacing: 1px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        text-transform: uppercase;
+      }
+
+      .tab-bar {
+        background: #001530;
+        border-bottom: 3px solid var(--brand-gold);
+        display: flex;
+        padding: 0 32px;
+        gap: 0;
+      }
+      .tab-btn {
+        padding: 12px 24px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: "Source Sans 3", sans-serif;
+        color: #6a88aa;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        margin-bottom: -3px;
+        transition: all 0.2s;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .tab-btn:hover {
+        color: var(--brand-gold);
+      }
+      .tab-btn.active {
+        color: var(--brand-gold);
+        border-bottom: 3px solid var(--brand-gold);
+      }
+
+      .controls {
+        background: var(--brand-blue);
+        padding: 14px 32px;
+        border-bottom: 3px solid var(--brand-gold);
+      }
+      .row-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .controls label {
+        color: var(--brand-gold);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .controls input[type="text"],
+      .controls select {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 6px;
+        background: #001530;
+        color: #e0e8f4;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .controls input[type="text"]::placeholder {
+        color: #6a88aa;
+      }
+      .controls input[type="text"]:focus,
+      .controls select:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 6px;
+      }
+      .status-ok {
+        background: #10b981;
+      }
+      .status-loading {
+        background: #ffd700;
+        animation: pulse 1s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .att-controls {
+        background: var(--brand-blue);
+        padding: 14px 32px;
+        border-bottom: 3px solid var(--brand-gold);
+        display: none;
+      }
+      .att-controls.active {
+        display: block;
+      }
+      .att-filter-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .att-controls label {
+        color: var(--brand-gold);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .att-controls select,
+      .att-controls input[type="text"] {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 6px;
+        background: #001530;
+        color: #e0e8f4;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .att-controls select:focus,
+      .att-controls input[type="text"]:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      }
+      .att-controls input::placeholder {
+        color: #6a88aa;
+      }
+
+      .filter-type-select {
+        background: #001530;
+        color: var(--brand-gold);
+        border: 2px solid var(--brand-gold);
+        font-weight: 700;
+        min-width: 140px;
+      }
+      .secondary-filter {
+        display: none;
+      }
+      .secondary-filter.active {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .flatpickr-calendar {
+        background: #001d3d !important;
+        border: 1px solid var(--brand-gold) !important;
+      }
+      .flatpickr-day {
+        color: #cce !important;
+      }
+      .flatpickr-day.selected,
+      .flatpickr-day.today {
+        background: var(--brand-gold) !important;
+        color: var(--brand-blue) !important;
+        border-color: var(--brand-gold) !important;
+      }
+      .flatpickr-day:hover {
+        background: var(--brand-gold) !important;
+        color: black !important;
+        border-color: var(--brand-gold) !important;
+      }
+      .flatpickr-months .flatpickr-month,
+      .flatpickr-weekdays,
+      span.flatpickr-weekday {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+      }
+      .flatpickr-day.prevMonthDay,
+      .flatpickr-day.nextMonthDay {
+        visibility: hidden;
+      }
+      .flatpickr-prev-month,
+      .flatpickr-next-month {
+        color: var(--brand-gold) !important;
+        fill: var(--brand-gold) !important;
+      }
+      .flatpickr-prev-month svg,
+      .flatpickr-next-month svg {
+        fill: var(--brand-gold) !important;
+        stroke: var(--brand-gold) !important;
+      }
+      .flatpickr-prev-month:hover,
+      .flatpickr-next-month:hover {
+        background: rgba(255, 215, 0, 0.15) !important;
+      }
+      .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+        border: none !important;
+      }
+      .flatpickr-months
+        .flatpickr-month
+        select.flatpickr-monthDropdown-months
+        option {
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+      }
+      .flatpickr-day:nth-child(7n + 1) {
+        color: #ff4d4d !important;
+        font-weight: 700 !important;
+      }
+      .flatpickr-day.is-holiday {
+        color: #ff4d4d !important;
+        font-weight: 700 !important;
+      }
+
+      .btn {
+        padding: 8px 18px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        font-weight: 700;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        cursor: pointer;
+        letter-spacing: 0.4px;
+        transition:
+          transform 0.15s,
+          box-shadow 0.2s,
+          background 0.2s,
+          color 0.2s,
+          border-color 0.2s;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn-report {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border-color: var(--brand-gold);
+      }
+      .btn-report:hover {
+        background: transparent;
+        color: var(--brand-gold);
+        border-color: var(--brand-gold);
+      }
+      .btn-att {
+        background: #00a86b;
+        color: white;
+        border-color: #00a86b;
+      }
+      .btn-att:hover {
+        background: transparent;
+        color: #00a86b;
+        border-color: #00a86b;
+      }
+      .btn-print {
+        background: transparent;
+        color: var(--brand-gold);
+        border: 2px solid var(--brand-gold);
+      }
+      .btn-print:hover {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+      }
+      .btn-emplist {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+      }
+      .btn-emplist:hover {
+        background: transparent;
+        color: var(--brand-gold);
+      }
+      .btn-clear {
+        background: transparent;
+        color: #ff6b6b;
+        border: 2px solid #ff6b6b;
+      }
+      .btn-clear:hover {
+        background: #ff6b6b;
+        color: white;
+        border-color: #ff6b6b;
+        box-shadow: 0 4px 14px rgba(255, 107, 107, 0.4);
+      }
+      .btn-payslip {
+        background: var(--brand-gold);
+        color: #000000;
+        padding: 5px 11px;
+        font-size: 10px;
+        border: 2px solid #c9a800;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 800;
+        font-family: "Source Sans 3", sans-serif;
+        transition: all 0.2s;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      .btn-payslip:hover {
+        background: #ffe840;
+        transform: translateY(-1px);
+      }
+      .btn-view {
+        background: var(--brand-blue);
+        color: #ffd700;
+        padding: 5px 11px;
+        font-size: 10px;
+        border: 2px solid #ffd700;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 800;
+        font-family: "Source Sans 3", sans-serif;
+        transition: all 0.2s;
+        white-space: nowrap;
+      }
+      .btn-view:hover {
+        background: #003a7a;
+        transform: translateY(-1px);
+      }
+
+      /* ── Bonus Input Cell Styling ── */
+      .bonus-input {
+        width: 100%;
+        min-width: 40px;
+        max-width: 52px;
+        padding: 2px 2px;
+        font-size: 11px;
+        font-family: "Source Sans 3", sans-serif;
+        font-weight: 700;
+        text-align: right;
+        border: none;
+        border-bottom: 1.5px dashed #b0bdd4;
+        background: transparent;
+        color: #15803d;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          background 0.15s;
+        th.th-pbonus,
+        th.th-abonus {
+          width: 52px !important;
+          min-width: 52px !important;
+          max-width: 52px !important;
+        }
+        td:has(.bonus-input) {
+          width: 52px !important;
+          min-width: 52px !important;
+          max-width: 52px !important;
+          padding: 0 !important;
+          overflow: hidden;
+        }
+      }
+      .bonus-input:focus {
+        border-bottom: 2px solid #f59e0b;
+        background: #fffbeb;
+        border-radius: 3px;
+      }
+      .bonus-input:hover {
+        border-bottom-color: #f59e0b;
+      }
+      @media print {
+        .bonus-input {
+          border: none !important;
+          background: transparent !important;
+        }
+      }
+
+      .content {
+        padding: 24px 32px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 8px;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 33, 71, 0.12);
+      }
+      thead tr {
+        background: var(--brand-blue);
+      }
+      th {
+        padding: 12px 8px;
+        color: white;
+        text-align: center;
+        border: 1px solid #335185;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        white-space: normal;
+      }
+      td {
+        padding: 10px 8px;
+        border: 1px solid var(--border);
+        white-space: nowrap;
+        background: #fff;
+        transition: background 0.15s;
+      }
+      tbody tr:nth-child(even) td {
+        background: var(--brand-blue-pale);
+      }
+      tbody tr:hover td {
+        background: var(--brand-gold-soft);
+      }
+      .text-left {
+        text-align: left;
+      }
+      .text-right {
+        text-align: right;
+      }
+      .total-row td {
+        font-weight: 700;
+        background: var(--brand-blue) !important;
+        color: var(--brand-gold) !important;
+        border: 1px solid #335185 !important;
+      }
+      .signature-area {
+        margin-top: 60px;
+        display: flex;
+        justify-content: space-around;
+        text-align: center;
+      }
+      .sig-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+      }
+      .sig-line {
+        width: 160px;
+        border-bottom: 2px solid var(--brand-blue);
+      }
+      .sig-label {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--brand-blue);
+        letter-spacing: 0.5px;
+      }
+      .print-footer-signature {
+        display: none;
+      }
+      .print-header {
+        display: none;
+      }
+
+      /* ── Grouped header highlight ── */
+      th.th-att-group {
+        background: #0d4a7a !important;
+        color: #a0d8ff !important;
+        border-bottom: 2px solid #a0d8ff !important;
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+      th.th-earn-group {
+        background: #064e3b !important;
+        color: #6ee7b7 !important;
+        border-bottom: 2px solid #6ee7b7 !important;
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+      th.th-ded-group {
+        background: #7f1d1d !important;
+        color: #fca5a5 !important;
+        border-bottom: 2px solid #fca5a5 !important;
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+      th.th-pbonus {
+        background: #065f46 !important;
+        color: #a7f3d0 !important;
+      }
+      th.th-abonus {
+        background: #0a6b4d !important;
+        color: #d1fae5 !important;
+      }
+
+      /* ── Sub-header tint: matches parent group color, one shade lighter ── */
+      th.th-att-sub {
+        background: #14588f !important;
+        color: #dbeeff !important;
+      }
+      th.th-earn-sub {
+        background: #0a6b4d !important;
+        color: #d1fae5 !important;
+      }
+      th.th-ded-sub {
+        background: #9b2e2e !important;
+        color: #fde2e2 !important;
+      }
+
+      .att-badge {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .att-badge.present {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .att-badge.absent {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .att-badge.holiday {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .att-badge.sunday {
+        background: #ede9fe;
+        color: #5b21b6;
+      }
+
+      .summary-cards {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .s-card {
+        background: white;
+        border-radius: 8px;
+        padding: 12px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 120px;
+        box-shadow: 0 2px 8px rgba(0, 33, 71, 0.1);
+        border-left: 4px solid var(--brand-blue);
+      }
+      .s-card-label {
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #6b7280;
+      }
+      .s-card-value {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--brand-blue);
+        font-family: "Playfair Display", serif;
+      }
+      .s-card.green {
+        border-left-color: #10b981;
+      }
+      .s-card.green .s-card-value {
+        color: #065f46;
+      }
+      .s-card.red {
+        border-left-color: #ef4444;
+      }
+      .s-card.red .s-card-value {
+        color: #991b1b;
+      }
+      .s-card.gold {
+        border-left-color: var(--brand-gold);
+      }
+      .s-card.gold .s-card-value {
+        color: #92400e;
+      }
+      .s-card.purple {
+        border-left-color: #8b5cf6;
+      }
+      .s-card.purple .s-card-value {
+        color: #5b21b6;
+      }
+      .s-card.teal {
+        border-left-color: #0d9488;
+      }
+      .s-card.teal .s-card-value {
+        color: #0f766e;
+      }
+      .s-card.blue {
+        border-left-color: #3b82f6;
+      }
+      .s-card.blue .s-card-value {
+        color: #1d4ed8;
+      }
+
+      .emp-panel-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 8000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+      }
+      .emp-panel-overlay.active {
+        display: flex;
+      }
+      .emp-panel-box {
+        background: white;
+        border-radius: 12px;
+        width: 680px;
+        max-width: 95vw;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      }
+      .emp-panel-header {
+        background: linear-gradient(
+          135deg,
+          #002147 0%,
+          #003580 60%,
+          #001a38 100%
+        );
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 12px 12px 0 0;
+        flex-shrink: 0;
+        border-bottom: 3px solid var(--brand-gold);
+      }
+      .emp-panel-header h3 {
+        color: var(--brand-gold);
+        font-family: "Playfair Display", serif;
+        font-size: 16px;
+        text-shadow: 0 1px 8px rgba(255, 215, 0, 0.25);
+        letter-spacing: 0.5px;
+      }
+      .emp-panel-controls {
+        background: var(--brand-blue);
+        padding: 12px 16px;
+        border-bottom: 2px solid var(--brand-gold);
+        flex-shrink: 0;
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .emp-panel-controls input {
+        flex: 1;
+        min-width: 160px;
+        padding: 7px 12px;
+        border: 1.5px solid var(--brand-gold);
+        border-radius: 6px;
+        font-size: 12px;
+        outline: none;
+        background: #001530;
+        color: #e0e8f4;
+      }
+      .emp-panel-controls input:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      }
+      .emp-panel-body {
+        overflow-y: auto;
+        flex: 1;
+      }
+      .emp-panel-footer {
+        padding: 12px 16px;
+        border-top: 2px solid var(--brand-gold);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--brand-blue);
+        border-radius: 0 0 12px 12px;
+      }
+      .panel-close {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s;
+      }
+      .panel-close:hover {
+        transform: rotate(90deg);
+      }
+      .emp-panel-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .emp-panel-table thead tr {
+        background: #f3f4f6;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+      .emp-panel-table th {
+        padding: 9px 12px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #374151;
+        border-bottom: 2px solid #e5e7eb;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .emp-panel-table td {
+        padding: 9px 12px;
+        font-size: 12px;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .emp-panel-table tbody tr:hover td {
+        background: #ede9fe;
+      }
+      .sel-count {
+        font-size: 12px;
+        color: var(--brand-gold);
+        font-weight: 700;
+      }
+      .btn-gen-selected {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border: 2px solid var(--brand-gold);
+        padding: 8px 20px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: "Source Sans 3", sans-serif;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-gen-selected:hover {
+        background: transparent;
+        color: var(--brand-gold);
+      }
+      .btn-gen-selected:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      .month-sel {
+        padding: 6px 10px;
+        border: 1.5px solid var(--brand-gold);
+        border-radius: 6px;
+        font-size: 12px;
+        outline: none;
+        cursor: pointer;
+        background: #001530;
+        color: #e0e8f4;
+      }
+
+      .msgbox-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 21, 48, 0.82);
+        z-index: 99999;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(4px);
+      }
+      .msgbox-overlay.active {
+        display: flex;
+      }
+      .msgbox-card {
+        background: #fff;
+        border-radius: 14px;
+        min-width: 320px;
+        max-width: 420px;
+        box-shadow: 0 30px 70px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        animation: msgPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes msgPop {
+        from {
+          transform: scale(0.85);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      .msgbox-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 20px 12px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+      .msgbox-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+      .msgbox-icon.warn {
+        background: #fff8e1;
+      }
+      .msgbox-icon.err {
+        background: #ffeaea;
+      }
+      .msgbox-icon.ok {
+        background: #e8f5e9;
+      }
+      .msgbox-icon.info {
+        background: #e3f2fd;
+      }
+      .msgbox-title {
+        font-family: "Playfair Display", serif;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--brand-blue);
+      }
+      .msgbox-body {
+        padding: 14px 20px 18px;
+        font-size: 13px;
+        color: #374151;
+        line-height: 1.6;
+      }
+      .msgbox-footer {
+        padding: 10px 20px 16px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+      .msgbox-btn {
+        padding: 8px 22px;
+        border: 2px solid transparent;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-family: "Source Sans 3", sans-serif;
+      }
+      .msgbox-btn.primary {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border-color: var(--brand-gold);
+      }
+      .msgbox-btn.primary:hover {
+        background: transparent;
+        color: var(--brand-blue);
+        border-color: var(--brand-blue);
+      }
+      .msgbox-btn.secondary {
+        background: #f3f4f6;
+        color: #374151;
+        border-color: #e5e7eb;
+      }
+      .msgbox-btn.secondary:hover {
+        background: #e5e7eb;
+      }
+
+      .gen-loader {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: var(--brand-blue);
+        z-index: 99990;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+      }
+      .gen-loader.active {
+        display: flex;
+      }
+      .gen-loader-title {
+        font-family: "Playfair Display", serif;
+        color: var(--brand-gold);
+        font-size: 24px;
+        letter-spacing: 1.5px;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+      }
+      .gen-loader-sub {
+        color: #a0b8d8;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        min-height: 20px;
+      }
+      .gen-count-display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        background: rgba(255, 215, 0, 0.08);
+        border: 2px solid var(--brand-gold);
+        border-radius: 16px;
+        padding: 16px 48px;
+        min-width: 220px;
+        text-align: center;
+      }
+      .gen-count-label {
+        color: #a0b8d8;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .gen-count-numbers {
+        color: var(--brand-gold);
+        font-family: "Playfair Display", serif;
+        font-size: 48px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 2px;
+        text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+      }
+      .gen-count-of {
+        color: #6a88aa;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 1px;
+      }
+      .gen-progress-wrap {
+        width: 320px;
+        height: 8px;
+        background: #001030;
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid #1e3a5f;
+      }
+      .gen-progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #ffd700, #ffe87a, #ffd700);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s linear infinite;
+        border-radius: 20px;
+        width: 0%;
+        transition: width 0.4s ease;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 200% 50%;
+        }
+      }
+      .gen-spinner {
+        width: 52px;
+        height: 52px;
+        border: 4px solid #1e3a5f;
+        border-top-color: var(--brand-gold);
+        border-right-color: rgba(255, 215, 0, 0.4);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .gen-emp-badge {
+        background: #001530;
+        border: 1.5px solid #335185;
+        border-radius: 8px;
+        padding: 6px 16px;
+        color: #a0b8d8;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 32px;
+      }
+      .gen-emp-badge span {
+        color: var(--brand-gold);
+        font-weight: 700;
+      }
+
+      .ot-controls,
+      .adv-controls {
+        background: var(--brand-blue);
+        padding: 14px 32px;
+        border-bottom: 3px solid var(--brand-gold);
+        display: none;
+      }
+      .ot-controls.active,
+      .adv-controls.active {
+        display: block;
+      }
+      .ot-filter-row,
+      .adv-filter-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .ot-controls label,
+      .adv-controls label {
+        color: var(--brand-gold);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .ot-controls select,
+      .ot-controls input[type="text"],
+      .adv-controls select,
+      .adv-controls input[type="text"] {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 6px;
+        background: #001530;
+        color: #e0e8f4;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .ot-controls select:focus,
+      .ot-controls input:focus,
+      .adv-controls select:focus,
+      .adv-controls input:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      }
+      .ot-controls input::placeholder,
+      .adv-controls input::placeholder {
+        color: #6a88aa;
+      }
+
+      .ot-amt-cell {
+        font-family: monospace;
+        font-weight: 700;
+        color: #15803d;
+      }
+      .ot-hrs-cell {
+        font-family: monospace;
+        color: #1d4ed8;
+      }
+
+      .adv-badge {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 10px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .adv-badge.pending {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .adv-badge.cleared {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .adv-badge.partial {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      .adv-detail-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 9000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+      }
+      .adv-detail-overlay.active {
+        display: flex;
+      }
+      .adv-detail-box {
+        background: white;
+        border-radius: 12px;
+        width: 720px;
+        max-width: 96vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+      }
+      .adv-detail-header {
+        background: linear-gradient(135deg, #002147, #003580, #001a38);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 3px solid var(--brand-gold);
+        flex-shrink: 0;
+      }
+      .adv-detail-header h3 {
+        color: var(--brand-gold);
+        font-family: "Playfair Display", serif;
+        font-size: 16px;
+      }
+      .adv-detail-body {
+        overflow-y: auto;
+        flex: 1;
+        padding: 16px;
+      }
+      .adv-detail-footer {
+        padding: 12px 20px;
+        border-top: 2px solid var(--brand-gold);
+        background: var(--brand-blue);
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .adv-detail-footer button {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border: none;
+        padding: 8px 24px;
+        border-radius: 7px;
+        font-weight: 700;
+        font-family: "Source Sans 3", sans-serif;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .ot-detail-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 9100;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+      }
+      .ot-detail-overlay.active {
+        display: flex;
+      }
+      .ot-detail-box {
+        background: white;
+        border-radius: 12px;
+        width: 820px;
+        max-width: 96vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        animation: msgPop 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      .ot-detail-header {
+        background: linear-gradient(135deg, #002147, #003580, #001a38);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 3px solid var(--brand-gold);
+        flex-shrink: 0;
+      }
+      .ot-detail-header h3 {
+        color: var(--brand-gold);
+        font-family: "Playfair Display", serif;
+        font-size: 16px;
+      }
+      .ot-detail-body {
+        overflow-y: auto;
+        flex: 1;
+        padding: 16px;
+      }
+      .ot-detail-footer {
+        padding: 12px 20px;
+        border-top: 2px solid var(--brand-gold);
+        background: var(--brand-blue);
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        justify-content: flex-end;
+      }
+      .ot-detail-footer button {
+        background: var(--brand-gold);
+        color: var(--brand-blue);
+        border: none;
+        padding: 8px 24px;
+        border-radius: 7px;
+        font-weight: 700;
+        font-family: "Source Sans 3", sans-serif;
+        cursor: pointer;
+        font-size: 12px;
+      }
+
+      .matrix-controls {
+        background: var(--brand-blue);
+        padding: 14px 32px;
+        border-bottom: 3px solid var(--brand-gold);
+        display: none;
+      }
+      .matrix-controls.active {
+        display: block;
+      }
+      .matrix-filter-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .matrix-controls label {
+        color: var(--brand-gold);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .matrix-controls select,
+      .matrix-controls input[type="text"],
+      .matrix-controls input[type="month"] {
+        padding: 8px 12px;
+        font-size: 12px;
+        font-family: "Source Sans 3", sans-serif;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 6px;
+        background: #001530;
+        color: #e0e8f4;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      .matrix-controls select:focus,
+      .matrix-controls input:focus {
+        border-color: var(--brand-gold);
+        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+      }
+      .matrix-controls input::placeholder {
+        color: #6a88aa;
+      }
+      .matrix-wrapper {
+        overflow-x: auto;
+        margin-top: 8px;
+      }
+      .matrix-table {
+        border-collapse: collapse;
+        font-size: 10px;
+        min-width: 100%;
+      }
+      .matrix-table th {
+        background: var(--brand-blue);
+        color: white;
+        border: 1px solid #335185;
+        padding: 4px 2px;
+        text-align: center;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+      }
+      .matrix-table td {
+        border: 1px solid #b0bdd4;
+        padding: 3px 2px;
+        text-align: center;
+        font-size: 9px;
+        white-space: nowrap;
+        background: white;
+      }
+      .matrix-table tbody tr:nth-child(even) td {
+        background: #f0f4f8;
+      }
+      .matrix-table tbody tr:hover td {
+        background: #fff4b2;
+      }
+      .mc-P {
+        color: #065f46;
+        font-weight: 800;
+      }
+      .mc-A {
+        color: #991b1b;
+        font-weight: 800;
+      }
+      .mc-H {
+        color: #b45309;
+        font-weight: 700;
+      }
+      .mc-L {
+        color: #1d4ed8;
+        font-weight: 700;
+      }
+      .mc-sun-bg {
+        background: #fff0f0 !important;
+      }
+      .mc-hol-bg {
+        background: #fff9e6 !important;
+      }
+      .matrix-sum-P {
+        background: #d1fae5 !important;
+        color: #065f46;
+        font-weight: 800;
+      }
+      .matrix-sum-A {
+        background: #fee2e2 !important;
+        color: #991b1b;
+        font-weight: 800;
+      }
+      .matrix-sum-SUN {
+        background: #fef3c7 !important;
+        color: #92400e;
+        font-weight: 800;
+      }
+      .matrix-sum-HOL {
+        background: #ede9fe !important;
+        color: #5b21b6;
+        font-weight: 800;
+      }
+      .matrix-emp-cell {
+        text-align: left !important;
+        padding-left: 6px !important;
+        font-weight: 600;
+        min-width: 140px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .matrix-total-row td {
+        background: #1d3a6d !important;
+        color: #ffd700 !important;
+        font-weight: 800 !important;
+        border: 1px solid #335185 !important;
+        font-size: 9px;
+      }
+
+      @media print {
+        body {
+          background: #fff;
+          padding: 0;
+          font-size: 8px;
+        }
+        .controls,
+        .page-header,
+        .btn,
+        .emp-panel-overlay,
+        .tab-bar,
+        .att-controls,
+        .matrix-controls {
+          display: none !important;
+        }
+        .content {
+          padding: 6px 2px;
+        }
+        .print-header {
+          display: flex !important;
+          justify-content: space-between;
+          font-weight: bold;
+          font-size: 9px;
+          margin-bottom: 12px;
+          width: 100%;
+          color: #000;
+          border-bottom: 0.5pt solid #000 !important;
+          padding-bottom: 8px;
+        }
+        .print-header .co-name {
+          font-family: "Playfair Display", serif;
+          font-size: 13px;
+        }
+        table {
+          font-size: 8px;
+          border: none !important;
+          box-shadow: none;
+          border-collapse: collapse !important;
+        }
+        th {
+          background: #f2f2f2 !important;
+          color: #000 !important;
+          font-weight: bold !important;
+          border: 0.5pt solid #000 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          padding: 6px 4px;
+        }
+        th.th-att-group,
+        th.th-earn-group,
+        th.th-ded-group,
+        th.th-att-sub,
+        th.th-earn-sub,
+        th.th-ded-sub {
+          background: #e0e0e0 !important;
+          color: #000 !important;
+          border-bottom: 0.5pt solid #000 !important;
+        }
+        th.th-pbonus,
+        th.th-abonus {
+          background: #f0f0f0 !important;
+          color: #000 !important;
+        }
+        td {
+          padding: 5px 4px;
+          border: 0.5pt solid #000 !important;
+        }
+        .total-row td {
+          background: #eee !important;
+          color: #000 !important;
+          font-weight: bold !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          border: 0.5pt solid #000 !important;
+        }
+        tfoot {
+          display: table-row-group;
+        }
+        tbody tr:nth-child(even) td {
+          background: #f2f2f2 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        .signature-area {
+          margin-top: 50px;
+        }
+        .sig-line {
+          border-bottom: 0.5pt solid #000 !important;
+        }
+        .sig-label {
+          color: #000 !important;
+        }
+        .print-footer-signature {
+          display: table-row !important;
+        }
+        .screen-signature {
+          display: none !important;
+        }
+        .ot-hours-preview {
+          display: none !important;
+        }
+        .btn-payslip,
+        .btn-view {
+          display: none !important;
+        }
+        .att-badge {
+          border: 0.5pt solid #000;
+        }
+        .summary-cards {
+          display: none !important;
+        }
+        .ot-badge,
+        .adv-badge {
+          border: 0.5pt solid #000 !important;
+        }
+        .no-print {
+          display: none !important;
+        }
+        col.col-holiday,
+        col.col-sunday,
+        col.col-otamt {
+          visibility: collapse;
+        }
+        col.col-signature {
+          width: 140px !important;
+        }
+        #reportTable th:last-child,
+        #reportTable td:last-child {
+          min-width: 140px !important;
+        }
+        /* ── প্রতিটা কলামের width fix করা হলো, যাতে OT/Total কলাম টেক্সট এর সমান ছোট থাকে
+             আর Signature কলাম বড় থাকে (সাইন করার জন্য) ── */
+        #reportTable {
+          table-layout: fixed !important;
+        }
+        #reportTable colgroup col:nth-child(1)  { width: 2.5% !important; } /* SL */
+        #reportTable colgroup col:nth-child(2)  { width: 5.5% !important; } /* EMP ID */
+        #reportTable colgroup col:nth-child(3)  { width: 13%  !important; } /* Name/Passport */
+        #reportTable colgroup col:nth-child(4)  { width: 9%   !important; } /* Designation */
+        #reportTable colgroup col:nth-child(5)  { width: 6%   !important; } /* Total Basic */
+        #reportTable colgroup col:nth-child(6)  { width: 3.2% !important; } /* P */
+        #reportTable colgroup col:nth-child(7)  { width: 3.2% !important; } /* H Day */
+        #reportTable colgroup col:nth-child(8)  { width: 3.2% !important; } /* S Day */
+        #reportTable colgroup col:nth-child(9)  { width: 3.2% !important; } /* A */
+        #reportTable colgroup col:nth-child(10) { width: 3.7% !important; } /* Total P */
+        #reportTable colgroup col:nth-child(14) { width: 3.2% !important; } /* OT Hours */
+        #reportTable colgroup col:nth-child(15) { width: 3.2% !important; } /* Oth */
+        #reportTable colgroup col:nth-child(16) { width: 3.7% !important; } /* P-Bonus */
+        #reportTable colgroup col:nth-child(17) { width: 3.7% !important; } /* A-Bonus */
+        #reportTable colgroup col:nth-child(18) { width: 3.2% !important; } /* F Trv */
+        #reportTable colgroup col:nth-child(19) { width: 5%   !important; } /* Gross Salary */
+        #reportTable colgroup col:nth-child(20) { width: 3.2% !important; } /* Adv */
+        #reportTable colgroup col:nth-child(21) { width: 3.2% !important; } /* Fine */
+        #reportTable colgroup col:nth-child(22) { width: 3.7% !important; } /* NPS 1% */
+        #reportTable colgroup col:nth-child(23) { width: 4.2% !important; } /* CSG 1.5% */
+        #reportTable colgroup col:nth-child(24) { width: 3.7% !important; } /* Total (deductions) */
+        #reportTable colgroup col:nth-child(25) { width: 5%   !important; } /* Net Salary */
+        #reportTable th:nth-child(1),
+        #reportTable th:nth-child(2),
+        #reportTable th:nth-child(4),
+        #reportTable th:nth-child(5),
+        #reportTable th:nth-child(19),
+        #reportTable th:nth-child(25) {
+          white-space: nowrap !important;
+          overflow: visible !important;
+        }
+        #reportTable th,
+        #reportTable td {
+          overflow: hidden;
+          white-space: normal !important;
+        }
+        #reportTable th:last-child,
+        #reportTable td:last-child {
+          white-space: normal !important;
+        }
+        .print-header img {
+          display: block !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+          height: 40px;
+          width: auto;
+        }
+        .bonus-input {
+          border: none !important;
+        }
+        @page {
+          size: A4 landscape;
+          margin: 10mm 5mm 14mm 5mm;
+          @bottom-right {
+            content: "Page " counter(page) " of " counter(pages);
+            font-size: 8pt;
+            color: #000;
+          }
+        }
+      }
+      .del-manager-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 8500;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+      }
+      .del-manager-overlay.active {
+        display: flex;
+      }
+      .del-manager-box {
+        background: #001530;
+        border-radius: 12px;
+        width: 1150px;
+        max-width: 96vw;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        border: 1.5px solid var(--brand-gold);
+      }
+      .del-manager-header {
+        background: linear-gradient(
+          135deg,
+          #002147 0%,
+          #003580 60%,
+          #001a38 100%
+        );
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-radius: 12px 12px 0 0;
+        flex-shrink: 0;
+        border-bottom: 3px solid var(--brand-gold);
+      }
+      .del-manager-header h3 {
+        color: var(--brand-gold);
+        font-family: "Playfair Display", serif;
+        font-size: 16px;
+        margin: 0;
+        text-shadow: 0 1px 8px rgba(255, 215, 0, 0.25);
+        letter-spacing: 0.5px;
+      }
+      .del-manager-body {
+        padding: 16px 20px 22px;
+        overflow-y: auto;
+      }
+      .btn-del-manager {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: #fff;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: 12.5px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.35);
+      }
+      .btn-del-manager:hover {
+        filter: brightness(1.1);
+      }
+    </style>
+</head>
+<body>
+  <div class="page-header">
+    <h2>ALOMHOW CO LTD</h2>
+    <span class="header-badge">🗑️ DELETE / EDIT MANAGER</span>
+  </div>
+
+  <div class="content" style="padding-top: 18px">
+          <div class="adv-controls active" id="delete-controls">
+            <div class="adv-filter-row">
+              <label>Data Type:</label>
+              <select
+                id="delDataType"
+                style="
+                  min-width: 140px;
+                  padding: 8px 12px;
+                  font-size: 12px;
+                  font-family: &quot;Source Sans 3&quot;, sans-serif;
+                  border: 2px solid var(--brand-gold);
+                  border-radius: 6px;
+                  background: #001530;
+                  color: var(--brand-gold);
+                  font-weight: 700;
+                  outline: none;
+                "
+              >
+                <option value="attendance">📋 Attendance</option>
+                <option value="fine">🚨 Fine</option>
+                <option value="advance">💰 Advance</option>
+                <option value="ot">⏰ Overtime</option>
+              </select>
+              <label>From:</label>
+              <input
+                type="text"
+                id="delDateFrom"
+                placeholder="Start Date"
+                style="
+                  width: 130px;
+                  padding: 8px 10px;
+                  font-size: 12px;
+                  border: 1.5px solid #3a5a8a;
+                  border-radius: 6px;
+                  background: #001530;
+                  color: #e0e8f4;
+                  outline: none;
+                "
+              />
+              <label>To:</label>
+              <input
+                type="text"
+                id="delDateTo"
+                placeholder="End Date"
+                style="
+                  width: 130px;
+                  padding: 8px 10px;
+                  font-size: 12px;
+                  border: 1.5px solid #3a5a8a;
+                  border-radius: 6px;
+                  background: #001530;
+                  color: #e0e8f4;
+                  outline: none;
+                "
+              />
+              <label>Emp ID:</label>
+              <input
+                type="text"
+                id="delIdInput"
+                placeholder="e.g. ACL001"
+                style="
+                  width: 130px;
+                  padding: 8px 12px;
+                  font-size: 12px;
+                  border: 1.5px solid #3a5a8a;
+                  border-radius: 6px;
+                  background: #001530;
+                  color: #e0e8f4;
+                  outline: none;
+                "
+              />
+              <button
+                class="btn btn-att"
+                onclick="generateDeleteSearch()"
+                style="background: #dc2626; border-color: #dc2626"
+              >
+                🔍 Search
+              </button>
+              <button class="btn btn-clear" onclick="clearDeleteSearch()">
+                🗑️ Clear
+              </button>
+              <button
+                class="btn btn-print"
+                onclick="openAuditHistory()"
+                style="background: #334155; border-color: #334155"
+              >
+                📜 History
+              </button>
+            </div>
+            <div
+              style="
+                padding: 6px 4px 0;
+                font-size: 10.5px;
+                color: #9ca3af;
+                font-style: italic;
+              "
+            >
+              ⚠️ Fine ডিলিট করলে শুধু ওই দিনের Fine অ্যামাউন্ট ০ হবে (পুরো
+              Attendance রেকর্ড থাকবে)। Advance এডিট/ডিলিট করলে
+              ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে
+              আপডেট হয় না — প্রয়োজনে আলাদাভাবে মিলিয়ে নিন। 🔒 যে মাসের
+              সেলারি পোস্ট (PAID) হয়ে গেছে, সেই মাসের কোনো রেকর্ড
+              এডিট/ডিলিট করা যাবে না। সব Delete/Edit অ্যাকশন History-তে জমা
+              থাকবে।
+            </div>
+          </div>
+          <div id="deleteOutput" style="margin-top: 12px"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+      authDomain: "munna-acl-fda7c.firebaseapp.com",
+      databaseURL:
+        "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "munna-acl-fda7c",
+      storageBucket: "munna-acl-fda7c.firebasestorage.app",
+      messagingSenderId: "371130316468",
+      appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+    // ── Holiday Set (ক্যালেন্ডারে রবিবার/ছুটির দিন লাল দেখানোর জন্য) ──
+    let _holidaySet = new Set();
+
+    const redDayConfig = {
+      dateFormat: "Y-m-d",
+      onDayCreate: function (dObj, dStr, fp, dayElem) {
+        const d = dayElem.dateObj;
+        if (!d) return;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        const dateStr = `${y}-${m}-${day}`;
+        if (d.getDay() === 0) {
+          dayElem.style.color = "#ff4d4d";
+          dayElem.style.fontWeight = "700";
+        }
+        if (_holidaySet.has(dateStr)) {
+          dayElem.classList.add("is-holiday");
+          dayElem.style.color = "#ff4d4d";
+          dayElem.style.fontWeight = "700";
+        }
+      },
+    };
+
+    flatpickr("#delDateFrom", { ...redDayConfig });
+    flatpickr("#delDateTo", { ...redDayConfig });
+
+    firebase
+      .firestore()
+      .collection("HOLIDAY_LIST")
+      .get()
+      .then((snap) => {
+        snap.forEach((doc) => _holidaySet.add(doc.id));
+        document.querySelectorAll(".flatpickr-input").forEach((input) => {
+          if (input._flatpickr) input._flatpickr.redraw();
+        });
+      })
+      .catch((e) => console.error("Holiday load error:", e));
+
+      function showDeleteToast(message, type = "success") {
+        const colors =
+          type === "success"
+            ? { bg: "linear-gradient(135deg,#16a34a,#15803d)", icon: "✅" }
+            : { bg: "linear-gradient(135deg,#ef4444,#dc2626)", icon: "⚠️" };
+        const toast = document.createElement("div");
+        toast.style.cssText = `
+    position:fixed;top:24px;right:24px;z-index:100000;
+    background:${colors.bg};color:#fff;padding:13px 18px;border-radius:10px;
+    font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:9px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.35);animation:delToastIn .2s ease-out;max-width:320px;`;
+        toast.innerHTML = `
+    <style>
+      @keyframes delToastIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+      @keyframes delToastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(30px)} }
+    </style>
+    <span style="font-size:15px">${colors.icon}</span><span>${message}</span>`;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+          toast.style.animation = "delToastOut .2s ease-in forwards";
+          setTimeout(() => toast.remove(), 200);
+        }, 3000);
+      }
+
+      function getMonthYearKey(dateStr) {
+        if (!dateStr) return "UNKNOWN";
+        const d = new Date(dateStr);
+        const monthNames = [
+          "JAN",
+          "FEB",
+          "MAR",
+          "APR",
+          "MAY",
+          "JUN",
+          "JUL",
+          "AUG",
+          "SEP",
+          "OCT",
+          "NOV",
+          "DEC",
+        ];
+        return `${monthNames[d.getMonth()]}_${d.getFullYear()}`;
+      }
+
+
+      function formatDateTime() {
+        const n = new Date();
+        return (
+          n.toLocaleDateString("en-GB").replace(/\//g, ".") +
+          ", " +
+          n.toLocaleTimeString("en-US", { hour12: true })
+        );
+      }
+
+      function clearDeleteSearch() {
+        document.getElementById("deleteOutput").innerHTML = "";
+        document.getElementById("deleteOutput").style.display = "none";
+        try {
+          document.getElementById("delDateFrom")._flatpickr.clear();
+        } catch (e) {}
+        try {
+          document.getElementById("delDateTo")._flatpickr.clear();
+        } catch (e) {}
+        document.getElementById("delIdInput").value = "";
+        _delRecordsCache = [];
+      }
+
+      async function generateDeleteSearch() {
+        const type = document.getElementById("delDataType").value;
+        const dFromVal = document.getElementById("delDateFrom").value;
+        const dToVal = document.getElementById("delDateTo").value;
+        const idVal = document.getElementById("delIdInput").value.trim();
+        const out = document.getElementById("deleteOutput");
+        out.style.display = "";
+        out.innerHTML =
+          '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ খুঁজছে...</p>';
+        try {
+          let rows = [];
+          if (type === "attendance") {
+            rows = await fetchAttendanceForDelete(
+              dFromVal,
+              dToVal,
+              idVal,
+              false,
+            );
+          } else if (type === "fine") {
+            rows = await fetchAttendanceForDelete(
+              dFromVal,
+              dToVal,
+              idVal,
+              true,
+            );
+          } else if (type === "ot") {
+            rows = await fetchOTForDelete(dFromVal, dToVal, idVal);
+          } else if (type === "advance") {
+            rows = await fetchAdvanceForDelete(dFromVal, dToVal, idVal);
+          }
+          _delRecordsCache = await annotatePostedStatus(rows);
+          renderDeleteTable(type, _delRecordsCache);
+        } catch (e) {
+          out.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+        }
+      }
+
+      // ── যে মাসের সেলারি POST/PAID হয়ে গেছে, সেই মাসের রেকর্ড
+      // Edit/Delete করা যাবে না — SALARY_POSTED/{monthKey}/{empId} চেক করে
+      async function annotatePostedStatus(rows) {
+        const monthKeys = [
+          ...new Set(
+            rows.map((r) => getMonthYearKey(r.date)).filter((mk) => mk),
+          ),
+        ].filter((mk) => mk !== "UNKNOWN");
+        if (!monthKeys.length) return rows;
+        const rtdb = firebase.database();
+        const postedMap = {};
+        await Promise.all(
+          monthKeys.map(async (mk) => {
+            const snap = await rtdb.ref(`SALARY_POSTED/${mk}`).once("value");
+            postedMap[mk] = snap.val() || {};
+          }),
+        );
+        rows.forEach((r) => {
+          const mk = getMonthYearKey(r.date);
+          const info = (postedMap[mk] || {})[r.id];
+          r.monthKey = mk;
+          r.posted = !!(info && info.status === "PAID");
+        });
+        return rows;
+      }
+
+      async function fetchAttendanceForDelete(
+        dFromVal,
+        dToVal,
+        idVal,
+        fineOnly,
+      ) {
+        const db = firebase.firestore();
+        let snap;
+        if (dFromVal && dToVal) {
+          snap = await db
+            .collectionGroup("Present_Absent")
+            .where("DATE", ">=", dFromVal)
+            .where("DATE", "<=", dToVal)
+            .get();
+        } else {
+          snap = await db.collectionGroup("Present_Absent").get();
+        }
+        let rows = [];
+        snap.forEach((doc) => {
+          const d = doc.data();
+          if (!d.ID || !d.DATE) return;
+          if (!dFromVal || !dToVal) {
+            if (dFromVal && d.DATE < dFromVal) return;
+            if (dToVal && d.DATE > dToVal) return;
+          }
+          if (
+            idVal &&
+            String(d.ID).trim().toUpperCase() !== idVal.toUpperCase()
+          )
+            return;
+          const fineAmt = parseFloat(d.FINE) || 0;
+          if (fineOnly && !(fineAmt > 0)) return;
+          rows.push({
+            path: doc.ref.path,
+            id: String(d.ID).trim(),
+            name: d.EMPLOYEE_NAME || "",
+            date: d.DATE,
+            status: d.STATUS || "",
+            remark: d.REMARK || "",
+            holiday: parseFloat(d.HOLIDAY_WORK) || 0,
+            sunday: parseFloat(d.SUNDAY_WORK) || 0,
+            fine: fineAmt,
+            site: d.SIDE_NAME || "",
+            raw: d,
+          });
+        });
+        rows.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        return rows;
+      }
+
+      async function fetchOTForDelete(dFromVal, dToVal, idVal) {
+        const rtdb = firebase.database();
+        const snap = await rtdb.ref("OVER_TIME").once("value");
+        const data = snap.val() || {};
+        const dFrom = dFromVal ? new Date(dFromVal) : null;
+        const dTo = dToVal ? new Date(dToVal) : null;
+        let rows = [];
+        for (const mk in data) {
+          const md = data[mk];
+          if (typeof md !== "object" || !md) continue;
+          for (const dk in md) {
+            const dr = md[dk];
+            if (typeof dr !== "object" || !dr) continue;
+            for (const rk in dr) {
+              const row = dr[rk];
+              if (!row || !row.ID) continue;
+              if (
+                idVal &&
+                String(row.ID).trim().toUpperCase() !== idVal.toUpperCase()
+              )
+                continue;
+              const otDateStr = String(row.OT_Date || "").trim();
+              if (dFrom && dTo && otDateStr) {
+                const od = new Date(otDateStr);
+                if (od < dFrom || od > dTo) continue;
+              }
+              rows.push({
+                path: `OVER_TIME/${mk}/${dk}/${rk}`,
+                id: String(row.ID).trim(),
+                name: row.Name || "",
+                date: otDateStr,
+                hrs: parseFloat(
+                  row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0,
+                ),
+                rate: parseFloat(
+                  row.OT_Rate || row.ot_rate || row.OT_RATE || 0,
+                ),
+                site: row.Site || "",
+                raw: row,
+              });
+            }
+          }
+        }
+        rows.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        return rows;
+      }
+
+      async function fetchAdvanceForDelete(dFromVal, dToVal, idVal) {
+        const rtdb = firebase.database();
+        const dFrom = dFromVal ? new Date(dFromVal) : null;
+        const dTo = dToVal ? new Date(dToVal) : null;
+        let empIds = [];
+        if (idVal) {
+          empIds = [idVal.trim()];
+        } else {
+          const advSnap = await rtdb
+            .ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS")
+            .once("value");
+          empIds = Object.keys(advSnap.val() || {});
+        }
+        let rows = [];
+        await Promise.all(
+          empIds.map(async (empId) => {
+            const txSnap = await rtdb
+              .ref(`ADVANCE_RECORDS/${empId}`)
+              .once("value");
+            const txData = txSnap.val() || {};
+            for (const txId in txData) {
+              const t = txData[txId];
+              if (!t) continue;
+              const dateStr = t.date || t.DATE || "";
+              if (dFrom && dTo && dateStr) {
+                const td = new Date(dateStr);
+                if (td < dFrom || td > dTo) continue;
+              }
+              rows.push({
+                path: `ADVANCE_RECORDS/${empId}/${txId}`,
+                id: empId,
+                empId,
+                name: t.name || "",
+                date: dateStr,
+                type: t.type || t.TYPE || "",
+                amount: parseFloat(t.amount || t.AMOUNT || 0),
+                note: t.note || t.NOTE || t.remark || "",
+                raw: t,
+              });
+            }
+          }),
+        );
+        rows.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+        return rows;
+      }
+
+      // ── সাইট/প্রোজেক্টের তালিকা — ড্রপডাউনে দেখানোর জন্য (একবার লোড হয়ে ক্যাশ থাকবে) ──
+      let _knownSites = null;
+      async function getKnownSites() {
+        if (_knownSites) return _knownSites;
+        const set = new Set();
+        try {
+          const db = firebase.firestore();
+          const snap = await db.collectionGroup("Present_Absent").get();
+          snap.forEach((doc) => {
+            const s = (doc.data().SIDE_NAME || "").trim();
+            if (s) set.add(s);
+          });
+        } catch (e) {
+          console.error("Site list load (attendance) error:", e);
+        }
+        try {
+          const rtdb = firebase.database();
+          const snap = await rtdb.ref("OVER_TIME").once("value");
+          const data = snap.val() || {};
+          for (const mk in data) {
+            const md = data[mk];
+            if (typeof md !== "object" || !md) continue;
+            for (const dk in md) {
+              const dr = md[dk];
+              if (typeof dr !== "object" || !dr) continue;
+              for (const rk in dr) {
+                const s = (dr[rk] && dr[rk].Site ? dr[rk].Site : "").trim();
+                if (s) set.add(s);
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Site list load (OT) error:", e);
+        }
+        _knownSites = [...set].sort((a, b) => a.localeCompare(b));
+        return _knownSites;
+      }
+
+      function buildSiteOptionsHtml(sites, currentSite) {
+        const opts = [...sites];
+        if (currentSite && !opts.includes(currentSite)) opts.unshift(currentSite);
+        let html = `<option value="">-- Select Site --</option>`;
+        html += opts
+          .map(
+            (s) =>
+              `<option value="${s.replace(/"/g, "&quot;")}" ${
+                s === currentSite ? "selected" : ""
+              }>${s}</option>`,
+          )
+          .join("");
+        return html;
+      }
+
+      function delActionCell(type, r, i) {
+        if (r.posted) {
+          return `<span title="সেলারি পোস্ট হয়ে গেছে (${r.monthKey}) — এডিট/ডিলিট বন্ধ" style="display:inline-block;padding:4px 10px;border-radius:12px;background:rgba(107,114,128,0.25);color:#9ca3af;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(107,114,128,0.4)">🔒 Posted</span>`;
+        }
+        return `<button class="btn-view" onclick="openDelEditModal('${type}', ${i})">✏️ Edit</button>
+                <button class="btn-view" style="background:#dc2626" onclick="confirmDelRecord('${type}', ${i})">🗑️ Delete</button>`;
+      }
+
+      function renderDeleteTable(type, rows) {
+        const out = document.getElementById("deleteOutput");
+        if (!rows.length) {
+          out.innerHTML =
+            '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 কোনো রেকর্ড পাওয়া যায়নি।</p>';
+          return;
+        }
+        const lockedCount = rows.filter((r) => r.posted).length;
+        let headCols = "",
+          bodyRows = "";
+        if (type === "attendance" || type === "fine") {
+          headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Status</th><th>Site</th><th>Holiday</th><th>Sunday</th><th>Fine</th><th>Action</th>`;
+          bodyRows = rows
+            .map(
+              (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
+              <td>${r.date}</td>
+              <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
+              <td>${r.name || "-"}</td>
+              <td>${r.status || "-"}</td>
+              <td>${r.site || "-"}</td>
+              <td style="text-align:right;font-family:monospace">${r.holiday}</td>
+              <td style="text-align:right;font-family:monospace">${r.sunday}</td>
+              <td style="text-align:right;font-family:monospace;color:${r.fine > 0 ? "#991b1b" : "inherit"};font-weight:${r.fine > 0 ? "700" : "400"}">${r.fine}</td>
+              <td style="text-align:center;white-space:nowrap">
+                ${delActionCell(type, r, i)}
+              </td>
+            </tr>`,
+            )
+            .join("");
+        } else if (type === "ot") {
+          headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Site</th><th>OT Hours</th><th>OT Rate</th><th>Action</th>`;
+          bodyRows = rows
+            .map(
+              (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
+              <td>${r.date || "-"}</td>
+              <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
+              <td>${r.name || "-"}</td>
+              <td>${r.site || "-"}</td>
+              <td style="text-align:right;font-family:monospace">${r.hrs}</td>
+              <td style="text-align:right;font-family:monospace">${r.rate}</td>
+              <td style="text-align:center;white-space:nowrap">
+                ${delActionCell(type, r, i)}
+              </td>
+            </tr>`,
+            )
+            .join("");
+        } else if (type === "advance") {
+          headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Type</th><th>Amount</th><th>Note</th><th>Action</th>`;
+          bodyRows = rows
+            .map(
+              (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
+              <td>${r.date || "-"}</td>
+              <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
+              <td>${r.type || "-"}</td>
+              <td style="text-align:right;font-family:monospace">${r.amount}</td>
+              <td>${r.note || "-"}</td>
+              <td style="text-align:center;white-space:nowrap">
+                ${delActionCell(type, r, i)}
+              </td>
+            </tr>`,
+            )
+            .join("");
+        }
+        out.innerHTML = `
+          <div class="print-header">
+            <span class="co-name">ALOMHOW CO LTD — Delete / Edit (${type.toUpperCase()})</span>
+            <span>মোট: ${rows.length} রেকর্ড${lockedCount ? ` | 🔒 ${lockedCount} টি পোস্টেড (লকড)` : ""}</span>
+            <span>Printed: ${formatDateTime()}</span>
+          </div>
+          <table id="deleteTable">
+            <thead><tr>${headCols}</tr></thead>
+            <tbody>${bodyRows}</tbody>
+          </table>`;
+      }
+
+      // ── EDIT মডাল ──
+      async function openDelEditModal(type, idx) {
+        const r = _delRecordsCache[idx];
+        if (!r) return;
+        if (r.posted) {
+          showDeleteToast(
+            `⛔ ${r.monthKey} মাসের সেলারি পোস্ট হয়ে গেছে — এই রেকর্ড এডিট করা যাবে না।`,
+            "error",
+          );
+          return;
+        }
+        const existing = document.getElementById("delEditOverlay");
+        if (existing) existing.remove();
+
+        let siteOptionsHtml = "";
+        if (type === "attendance" || type === "fine" || type === "ot") {
+          const sites = await getKnownSites();
+          siteOptionsHtml = buildSiteOptionsHtml(sites, r.site || "");
+        }
+
+        let fieldsHtml = "";
+        if (type === "attendance" || type === "fine") {
+          fieldsHtml = `
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Status</label>
+              <select id="deField_status" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+                <option value="PRESENT" ${r.status === "PRESENT" ? "selected" : ""}>PRESENT</option>
+                <option value="ABSENT" ${r.status === "ABSENT" ? "selected" : ""}>ABSENT</option>
+              </select>
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Holiday Work</label>
+              <input id="deField_holiday" type="number" step="0.5" value="${r.holiday}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Sunday Work</label>
+              <input id="deField_sunday" type="number" step="0.5" value="${r.sunday}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Fine Amount</label>
+              <input id="deField_fine" type="number" step="1" value="${r.fine}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Site / Project</label>
+              <select id="deField_site" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+                ${siteOptionsHtml}
+              </select>
+            </div>`;
+        } else if (type === "ot") {
+          fieldsHtml = `
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">OT Hours</label>
+              <input id="deField_hrs" type="number" step="0.5" value="${r.hrs}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">OT Rate</label>
+              <input id="deField_rate" type="number" step="1" value="${r.rate}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Site / Project</label>
+              <select id="deField_site" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+                ${siteOptionsHtml}
+              </select>
+            </div>`;
+        } else if (type === "advance") {
+          fieldsHtml = `
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Type</label>
+              <input id="deField_type" type="text" value="${(r.type || "").replace(/"/g, "&quot;")}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Amount</label>
+              <input id="deField_amount" type="number" step="1" value="${r.amount}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="margin-bottom:10px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Note</label>
+              <input id="deField_note" type="text" value="${(r.note || "").replace(/"/g, "&quot;")}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="padding:8px 10px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:6px;font-size:10.5px;color:#fbbf24;margin-bottom:10px">
+              ⚠️ এটি সেভ করলে ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে পরিবর্তন হবে না।
+            </div>`;
+        }
+
+        const overlay = document.createElement("div");
+        overlay.id = "delEditOverlay";
+        overlay.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,8,20,0.72);backdrop-filter:blur(3px);
+          display:flex;align-items:center;justify-content:center;z-index:99999;
+          animation:delFadeIn .15s ease-out;`;
+        overlay.innerHTML = `
+          <style>
+            @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+            @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+            #delEditBox button:hover { filter:brightness(1.12); transform:translateY(-1px); }
+          </style>
+          <div id="delEditBox" style="
+            width:360px;max-width:90vw;max-height:85vh;overflow-y:auto;background:linear-gradient(160deg,#0a1a33,#001530);
+            border:1.5px solid #2563eb;border-radius:14px;box-shadow:0 12px 40px rgba(37,99,235,0.25);
+            padding:22px 22px 18px;animation:delPopIn .18s ease-out;font-family:inherit;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <div style="width:38px;height:38px;border-radius:50%;background:rgba(37,99,235,0.15);
+                display:flex;align-items:center;justify-content:center;font-size:19px">✏️</div>
+              <div>
+                <div style="color:#fff;font-size:15px;font-weight:800">রেকর্ড এডিট করুন</div>
+                <div style="color:#94a3b8;font-size:11px;margin-top:1px">${r.date || ""} — ${r.id}${r.name ? " (" + r.name + ")" : ""}</div>
+              </div>
+            </div>
+            ${fieldsHtml}
+            <div style="margin-bottom:14px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">কারণ / আপনার নাম (ঐচ্ছিক)</label>
+              <input id="deField_reason" type="text" placeholder="e.g. Ripon - correction" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="display:flex;gap:10px">
+              <button id="deCancelBtn" style="flex:1;padding:10px 0;border:1.5px solid #3a5a8a;
+                border-radius:8px;background:transparent;color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer">Cancel</button>
+              <button id="deSaveBtn" style="flex:1;padding:10px 0;border:none;
+                border-radius:8px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;
+                font-size:12.5px;font-weight:800;cursor:pointer">💾 Save</button>
+            </div>
+          </div>`;
+        document.body.appendChild(overlay);
+        const close = () => overlay.remove();
+        overlay.querySelector("#deCancelBtn").onclick = close;
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) close();
+        });
+        overlay.querySelector("#deSaveBtn").onclick = async () => {
+          const btn = overlay.querySelector("#deSaveBtn");
+          btn.disabled = true;
+          btn.textContent = "⏳ Saving...";
+          try {
+            await saveDelEditRecord(type, r);
+            close();
+            showDeleteToast("রেকর্ড আপডেট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।", "success");
+            generateDeleteSearch();
+          } catch (e2) {
+            btn.disabled = false;
+            btn.textContent = "💾 Save";
+            showDeleteToast("সেভ এরর: " + e2.message, "error");
+          }
+        };
+      }
+
+      async function saveDelEditRecord(type, r) {
+        const reason = (
+          document.getElementById("deField_reason").value || ""
+        ).trim();
+        const before = r.raw;
+        let after = null;
+        if (type === "attendance" || type === "fine") {
+          const status = document.getElementById("deField_status").value;
+          const holiday =
+            parseFloat(document.getElementById("deField_holiday").value) ||
+            0;
+          const sunday =
+            parseFloat(document.getElementById("deField_sunday").value) || 0;
+          const fine =
+            parseFloat(document.getElementById("deField_fine").value) || 0;
+          const site = (
+            document.getElementById("deField_site").value || ""
+          ).trim();
+          const update = {
+            STATUS: status,
+            HOLIDAY_WORK: holiday,
+            SUNDAY_WORK: sunday,
+            FINE: fine,
+            SIDE_NAME: site,
+          };
+          await firebase.firestore().doc(r.path).update(update);
+          after = { ...before, ...update };
+        } else if (type === "ot") {
+          const hrs =
+            parseFloat(document.getElementById("deField_hrs").value) || 0;
+          const rate =
+            parseFloat(document.getElementById("deField_rate").value) || 0;
+          const site = (
+            document.getElementById("deField_site").value || ""
+          ).trim();
+          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate, Site: site };
+          await firebase.database().ref(r.path).update(update);
+          after = { ...before, ...update };
+        } else if (type === "advance") {
+          const t = (
+            document.getElementById("deField_type").value || ""
+          ).trim();
+          const amount =
+            parseFloat(document.getElementById("deField_amount").value) || 0;
+          const note = (
+            document.getElementById("deField_note").value || ""
+          ).trim();
+          const update = { type: t, amount, note };
+          await firebase.database().ref(r.path).update(update);
+          after = { ...before, ...update };
+        }
+        await writeAuditLog({
+          action: "edit",
+          dataType: type,
+          path: r.path,
+          empId: r.id || r.empId || "",
+          date: r.date || "",
+          before,
+          after,
+          reason,
+        });
+      }
+
+      // ── DELETE কনফার্ম ──
+      function confirmDelRecord(type, idx) {
+        const r = _delRecordsCache[idx];
+        if (!r) return;
+        if (r.posted) {
+          showDeleteToast(
+            `⛔ ${r.monthKey} মাসের সেলারি পোস্ট হয়ে গেছে — এই রেকর্ড ডিলিট করা যাবে না।`,
+            "error",
+          );
+          return;
+        }
+        const existing = document.getElementById("delEditOverlay");
+        if (existing) existing.remove();
+
+        const warnText =
+          type === "fine"
+            ? "শুধু এই দিনের Fine অ্যামাউন্ট ০ (শূন্য) করা হবে। পুরো Attendance রেকর্ড থাকবে।"
+            : type === "advance"
+              ? "এই লেনদেনটি মুছে ফেলা হবে। Advance সামারি (Total/Paid/Pending) আলাদাভাবে মিলিয়ে নিতে হবে।"
+              : "এই কাজটি Undo করা যাবে না।";
+
+        const overlay = document.createElement("div");
+        overlay.id = "delEditOverlay";
+        overlay.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,8,20,0.72);backdrop-filter:blur(3px);
+          display:flex;align-items:center;justify-content:center;z-index:99999;
+          animation:delFadeIn .15s ease-out;`;
+        overlay.innerHTML = `
+          <style>
+            @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+            @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+            #delConfirmBox2 button:hover { filter:brightness(1.12); transform:translateY(-1px); }
+          </style>
+          <div id="delConfirmBox2" style="
+            width:340px;max-width:90vw;background:linear-gradient(160deg,#0a1a33,#001530);
+            border:1.5px solid #dc2626;border-radius:14px;box-shadow:0 12px 40px rgba(220,38,38,0.25);
+            padding:22px 22px 18px;animation:delPopIn .18s ease-out;font-family:inherit;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <div style="width:38px;height:38px;border-radius:50%;background:rgba(220,38,38,0.15);
+                display:flex;align-items:center;justify-content:center;font-size:19px">🗑️</div>
+              <div>
+                <div style="color:#fff;font-size:15px;font-weight:800">রেকর্ড ডিলিট করুন?</div>
+                <div style="color:#94a3b8;font-size:11px;margin-top:1px">${warnText}</div>
+              </div>
+            </div>
+            <div style="background:rgba(220,38,38,0.08);border:1px solid rgba(220,38,38,0.3);
+              border-radius:8px;padding:10px 12px;margin-bottom:12px">
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0">
+                <span style="color:#7d8aa3">Date</span><span style="font-weight:700;color:#fff">${r.date || "-"}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0">
+                <span style="color:#7d8aa3">EMP ID</span><span style="font-weight:700;color:#fff">${r.id || "-"}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;padding:2px 0">
+                <span style="color:#7d8aa3">Name</span><span style="font-weight:700;color:#fff">${r.name || "-"}</span>
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">কারণ / আপনার নাম (ঐচ্ছিক)</label>
+              <input id="delReasonInput" type="text" placeholder="e.g. Ripon - wrong entry" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="display:flex;gap:10px">
+              <button id="delConfirmCancelBtn2" style="flex:1;padding:10px 0;border:1.5px solid #3a5a8a;
+                border-radius:8px;background:transparent;color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer">Cancel</button>
+              <button id="delConfirmOkBtn2" style="flex:1;padding:10px 0;border:none;
+                border-radius:8px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+                font-size:12.5px;font-weight:800;cursor:pointer">🗑️ Delete</button>
+            </div>
+          </div>`;
+        document.body.appendChild(overlay);
+        const close = () => overlay.remove();
+        overlay.querySelector("#delConfirmCancelBtn2").onclick = close;
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) close();
+        });
+        overlay.querySelector("#delConfirmOkBtn2").onclick = async () => {
+          const btn = overlay.querySelector("#delConfirmOkBtn2");
+          const reason = (
+            document.getElementById("delReasonInput").value || ""
+          ).trim();
+          btn.disabled = true;
+          btn.textContent = "⏳";
+          try {
+            const before = r.raw;
+            if (type === "attendance") {
+              await firebase.firestore().doc(r.path).delete();
+            } else if (type === "fine") {
+              await firebase.firestore().doc(r.path).update({ FINE: 0 });
+            } else if (type === "ot" || type === "advance") {
+              await firebase.database().ref(r.path).remove();
+            }
+            await writeAuditLog({
+              action: "delete",
+              dataType: type,
+              path: r.path,
+              empId: r.id || r.empId || "",
+              date: r.date || "",
+              before,
+              after: null,
+              reason,
+            });
+            close();
+            showDeleteToast(
+              "রেকর্ড ডিলিট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
+              "success",
+            );
+            generateDeleteSearch();
+          } catch (e2) {
+            btn.disabled = false;
+            btn.textContent = "🗑️ Delete";
+            showDeleteToast("ডিলিট এরর: " + e2.message, "error");
+          }
+        };
+      }
+
+      // ── অডিট লগ — ডিলিট/এডিট হিস্ট্রি (Firestore) ──
+      async function writeAuditLog({
+        action,
+        dataType,
+        path,
+        empId,
+        date,
+        before,
+        after,
+        reason,
+      }) {
+        try {
+          const db = firebase.firestore();
+          await db.collection(DEL_AUDIT_COLLECTION).add({
+            action,
+            dataType,
+            path: path || "",
+            empId: empId || "",
+            date: date || "",
+            before: before || null,
+            after: after || null,
+            reason: reason || "",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          });
+        } catch (e) {
+          console.error("Audit log write failed:", e);
+        }
+      }
+
+      let _auditCache = null;
+      let _auditDateFrom = "";
+      let _auditDateTo = "";
+      let _auditIdFilter = "";
+      async function openAuditHistory() {
+        const dFromVal = document.getElementById("delDateFrom").value;
+        const dToVal = document.getElementById("delDateTo").value;
+        const idVal = document.getElementById("delIdInput").value.trim();
+        _auditDateFrom = dFromVal || "";
+        _auditDateTo = dToVal || "";
+        _auditIdFilter = idVal || "";
+
+        let filterInfo = "";
+        if (_auditDateFrom && _auditDateTo) {
+          filterInfo += `📅 ${_auditDateFrom} → ${_auditDateTo}`;
+        } else if (_auditDateFrom) {
+          filterInfo += `📅 ${_auditDateFrom} থেকে`;
+        } else if (_auditDateTo) {
+          filterInfo += `📅 ${_auditDateTo} পর্যন্ত`;
+        }
+        if (_auditIdFilter) {
+          filterInfo += (filterInfo ? "  |  " : "") + `🆔 ${_auditIdFilter}`;
+        }
+
+        const out = document.getElementById("deleteOutput");
+        out.style.display = "";
+        out.innerHTML = `
+          <div class="print-header">
+            <span class="co-name">ALOMHOW CO LTD — 📜 Delete / Edit History</span>
+            <span>Printed: ${formatDateTime()}</span>
+          </div>
+          <div style="padding:0 0 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="auditSearchInput" type="text" placeholder="🔍 EMP ID / Date / Reason দিয়ে সার্চ করুন..." style="flex:1;min-width:200px;padding:8px 12px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none">
+            ${
+              filterInfo
+                ? `<button id="auditFilterChip" title="ফিল্টার বাদ দিতে ক্লিক করুন" style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.4);color:var(--brand-gold);padding:7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">${filterInfo} ✕</button>`
+                : ""
+            }
+          </div>
+          <div style="padding-bottom:8px">
+            <span id="auditResultCount" style="font-size:10.5px;color:#7d8aa3"></span>
+          </div>
+          <div id="auditListBody">
+            <p style="padding:30px;text-align:center;color:#ffd700;font-size:13px;font-style:italic">⏳ Loading...</p>
+          </div>`;
+
+        document
+          .getElementById("auditSearchInput")
+          .addEventListener("input", (e) =>
+            renderAuditList(e.target.value.trim().toUpperCase()),
+          );
+        const chip = document.getElementById("auditFilterChip");
+        if (chip) {
+          chip.onclick = () => {
+            _auditDateFrom = "";
+            _auditDateTo = "";
+            _auditIdFilter = "";
+            chip.remove();
+            renderAuditList(
+              document
+                .getElementById("auditSearchInput")
+                .value.trim()
+                .toUpperCase(),
+            );
+          };
+        }
+
+        try {
+          const db = firebase.firestore();
+          const snap = await db
+            .collection(DEL_AUDIT_COLLECTION)
+            .orderBy("timestamp", "desc")
+            .limit(300)
+            .get();
+          _auditCache = [];
+          snap.forEach((doc) => {
+            const d = doc.data();
+            d._id = doc.id;
+            _auditCache.push(d);
+          });
+          renderAuditList("");
+        } catch (e) {
+          const body = document.getElementById("auditListBody");
+          if (body)
+            body.innerHTML = `<p style="padding:20px;color:red">⚠️ Error: ${e.message}</p>`;
+        }
+      }
+
+      function renderAuditList(filter) {
+        const body = document.getElementById("auditListBody");
+        if (!body || !_auditCache) return;
+        let rows = _auditCache;
+        if (_auditDateFrom || _auditDateTo) {
+          rows = rows.filter((r) => {
+            if (!r.date) return false;
+            if (_auditDateFrom && r.date < _auditDateFrom) return false;
+            if (_auditDateTo && r.date > _auditDateTo) return false;
+            return true;
+          });
+        }
+        if (_auditIdFilter) {
+          rows = rows.filter(
+            (r) =>
+              String(r.empId || "").toUpperCase() ===
+              _auditIdFilter.toUpperCase(),
+          );
+        }
+        if (filter) {
+          rows = rows.filter((r) => {
+            const hay = `${r.empId || ""} ${r.date || ""} ${r.reason || ""} ${r.dataType || ""}`.toUpperCase();
+            return hay.includes(filter);
+          });
+        }
+        const countEl = document.getElementById("auditResultCount");
+        if (countEl)
+          countEl.textContent = `মোট ${rows.length} টি এন্ট্রি পাওয়া গেছে${_auditCache.length !== rows.length ? ` (সর্বমোট ${_auditCache.length} টির মধ্যে থেকে ফিল্টার করা)` : ""}`;
+        if (!rows.length) {
+          body.innerHTML =
+            '<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 কোনো হিস্ট্রি পাওয়া যায়নি।</p>';
+          return;
+        }
+        body.innerHTML = `
+          <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px">
+            <thead><tr style="background:var(--brand-blue)">
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">Time</th>
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">Action</th>
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">Type</th>
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">Date</th>
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">EMP ID</th>
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">Reason</th>
+              <th style="color:white;padding:6px 8px;border:1px solid #335185">Details</th>
+            </tr></thead>
+            <tbody>
+              ${rows
+                .map((r) => {
+                  const ts = r.timestamp && r.timestamp.toDate
+                    ? r.timestamp.toDate()
+                    : null;
+                  const timeStr = ts ? ts.toLocaleString() : "-";
+                  const badgeColor =
+                    r.action === "delete" ? "#dc2626" : "#2563eb";
+                  return `<tr>
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1;white-space:nowrap">${timeStr}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center">
+                  <span style="background:${badgeColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase">${r.action}</span>
+                </td>
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1;text-transform:uppercase">${r.dataType || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1">${r.date || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;font-weight:700;color:#ffd700">${r.empId || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1">${r.reason || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center">
+                  <button class="btn-view" onclick="viewAuditDetail('${r._id}')">👁️ View</button>
+                </td>
+              </tr>`;
+                })
+                .join("")}
+            </tbody>
+          </table>`;
+      }
+
+      function viewAuditDetail(id) {
+        if (!_auditCache) return;
+        const r = _auditCache.find((x) => x._id === id);
+        if (!r) return;
+        const text = JSON.stringify(
+          { action: r.action, before: r.before, after: r.after },
+          null,
+          2,
+        );
+        alert(text);
+      }
+
+  </script>
+</body>
+</html>
