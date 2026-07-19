@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delete / Edit </title>
+  <title>Delete / Edit Manager — ALOMHOW CO LTD</title>
   <link
     rel="icon"
     type="image/png"
@@ -1530,8 +1530,8 @@
         #reportTable td:last-child {
           min-width: 140px !important;
         }
-        /* ── প্রতিটা কলামের width fix করা হলো, যাতে OT/Total কলাম টেক্সট এর সমান ছোট থাকে
-             আর Signature কলাম বড় থাকে (সাইন করার জন্য) ── */
+        /* ── Column widths fixed so OT/Total columns stay narrow to match their text,
+             while the Signature column stays wide (for signing) ── */
         #reportTable {
           table-layout: fixed !important;
         }
@@ -1812,13 +1812,13 @@
                 font-style: italic;
               "
             >
-              ⚠️ Fine ডিলিট করলে শুধু ওই দিনের Fine অ্যামাউন্ট ০ হবে (পুরো
-              Attendance রেকর্ড থাকবে)। Advance এডিট/ডিলিট করলে
-              ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে
-              আপডেট হয় না — প্রয়োজনে আলাদাভাবে মিলিয়ে নিন। 🔒 যে মাসের
-              সেলারি পোস্ট (PAID) হয়ে গেছে, সেই মাসের কোনো রেকর্ড
-              এডিট/ডিলিট হবে না। সব Delete/Edit এর History দেখতে DATE সিলেক্ট করে History Button ক্লিক করুন।
-              
+              ⚠️ Deleting a Fine only sets that day's Fine amount to 0 (the
+              full Attendance record stays). Editing/Deleting an Advance does
+              not automatically update ADVANCE_ADJUSTMENT_SUMMARY
+              (Total/Paid/Pending) — reconcile that separately if needed.
+              🔒 Records from a month whose salary has already been posted
+              (PAID) cannot be edited/deleted. Every Delete/Edit action is
+              saved to History.
             </div>
           </div>
           <div id="deleteOutput" style="margin-top: 12px"></div>
@@ -1842,7 +1842,7 @@
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-    // ── Holiday Set (ক্যালেন্ডারে রবিবার/ছুটির দিন লাল দেখানোর জন্য) ──
+    // ── Holiday Set (to show Sundays/holidays in red on the calendar) ──
     let _holidaySet = new Set();
 
     const redDayConfig = {
@@ -1888,21 +1888,52 @@
             : { bg: "linear-gradient(135deg,#ef4444,#dc2626)", icon: "⚠️" };
         const toast = document.createElement("div");
         toast.style.cssText = `
-    position:fixed;top:24px;right:24px;z-index:100000;
-    background:${colors.bg};color:#fff;padding:13px 18px;border-radius:10px;
-    font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:9px;
-    box-shadow:0 8px 24px rgba(0,0,0,0.35);animation:delToastIn .2s ease-out;max-width:320px;`;
+    position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100001;
+    background:${colors.bg};color:#fff;padding:16px 24px;border-radius:12px;
+    font-size:13px;font-weight:700;display:flex;align-items:center;gap:10px;
+    box-shadow:0 12px 40px rgba(0,0,0,0.45);animation:delToastIn .2s ease-out;
+    max-width:400px;text-align:left;`;
         toast.innerHTML = `
     <style>
-      @keyframes delToastIn { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
-      @keyframes delToastOut { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(30px)} }
+      @keyframes delToastIn { from{opacity:0;transform:translate(-50%,-50%) scale(.92)} to{opacity:1;transform:translate(-50%,-50%) scale(1)} }
+      @keyframes delToastOut { from{opacity:1;transform:translate(-50%,-50%) scale(1)} to{opacity:0;transform:translate(-50%,-50%) scale(.92)} }
     </style>
-    <span style="font-size:15px">${colors.icon}</span><span>${message}</span>`;
+    <span style="font-size:18px">${colors.icon}</span><span>${message}</span>`;
         document.body.appendChild(toast);
         setTimeout(() => {
           toast.style.animation = "delToastOut .2s ease-in forwards";
           setTimeout(() => toast.remove(), 200);
         }, 3000);
+      }
+
+      // ── Background blur + spinner — while Delete/Edit is in progress ──
+      function showDeleteSpinner(message) {
+        hideDeleteSpinner();
+        const overlay = document.createElement("div");
+        overlay.id = "delSpinnerOverlay";
+        overlay.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,8,20,0.55);backdrop-filter:blur(6px);
+          -webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;
+          z-index:100000;animation:delFadeIn .12s ease-out;`;
+        overlay.innerHTML = `
+          <style>
+            @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+            @keyframes delSpin { to { transform: rotate(360deg); } }
+          </style>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+            <div style="
+              width:46px;height:46px;border-radius:50%;
+              border:4px solid rgba(255,215,0,0.25);
+              border-top-color:var(--brand-gold);
+              animation:delSpin .8s linear infinite;"></div>
+            <div style="color:var(--brand-gold);font-size:12.5px;font-weight:700">${message || "Processing..."}</div>
+          </div>`;
+        document.body.appendChild(overlay);
+      }
+
+      function hideDeleteSpinner() {
+        const existing = document.getElementById("delSpinnerOverlay");
+        if (existing) existing.remove();
       }
 
       function getMonthYearKey(dateStr) {
@@ -1935,7 +1966,7 @@
         );
       }
 
-      // ── ডিলিট/এডিট ম্যানেজারের স্টেট ভ্যারিয়েবল ──
+      // ── Delete/Edit manager state variables ──
       let _delRecordsCache = [];
       const DEL_AUDIT_COLLECTION = "DELETE_EDIT_AUDIT_LOG";
 
@@ -1961,7 +1992,7 @@
         const out = document.getElementById("deleteOutput");
         out.style.display = "";
         out.innerHTML =
-          '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ খুঁজছে...</p>';
+          '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px;font-style:italic">⏳ Searching...</p>';
         try {
           let rows = [];
           if (type === "attendance") {
@@ -1990,8 +2021,8 @@
         }
       }
 
-      // ── যে মাসের সেলারি POST/PAID হয়ে গেছে, সেই মাসের রেকর্ড
-      // Edit/Delete করা যাবে না — SALARY_POSTED/{monthKey}/{empId} চেক করে
+      // ── Records for a month whose salary has been POST/PAID
+      // cannot be Edit/Delete-d — checked via SALARY_POSTED/{monthKey}/{empId}
       async function annotatePostedStatus(rows) {
         const monthKeys = [
           ...new Set(
@@ -2159,10 +2190,10 @@
         return rows;
       }
 
-      // ── সাইট/প্রোজেক্টের তালিকা — ড্রপডাউনে দেখানোর জন্য (একবার লোড হয়ে ক্যাশ থাকবে) ──
+      // ── Site/Project list — for showing in the dropdown (loaded once and cached) ──
       let _knownSites = null;
 
-      // ── Emp ID অটোকমপ্লিট ──
+      // ── Emp ID autocomplete ──
       let _knownEmployees = null;
       async function getKnownEmployees() {
         if (_knownEmployees) return _knownEmployees;
@@ -2186,7 +2217,7 @@
         const box = document.getElementById("delIdSuggestions");
         if (!list.length) {
           box.innerHTML =
-            '<div style="padding:10px 12px;font-size:11.5px;color:#7d8aa3">কোনো মিল পাওয়া যায়নি</div>';
+            '<div style="padding:10px 12px;font-size:11.5px;color:#7d8aa3">No matches found</div>';
         } else {
           box.innerHTML = list
             .slice(0, 50)
@@ -2312,7 +2343,7 @@
 
       function delActionCell(type, r, i) {
         if (r.posted) {
-          return `<span title="সেলারি পোস্ট হয়ে গেছে (${r.monthKey}) — এডিট/ডিলিট বন্ধ" style="display:inline-block;padding:4px 10px;border-radius:12px;background:rgba(107,114,128,0.25);color:#9ca3af;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(107,114,128,0.4)">🔒 Posted</span>`;
+          return `<span title="Salary already posted (${r.monthKey}) — edit/delete disabled" style="display:inline-block;padding:4px 10px;border-radius:12px;background:rgba(107,114,128,0.25);color:#9ca3af;font-size:10px;font-weight:700;white-space:nowrap;border:1px solid rgba(107,114,128,0.4)">🔒 Posted</span>`;
         }
         return `<button class="btn-view" onclick="openDelEditModal('${type}', ${i})">✏️ Edit</button>
                 <button class="btn-view" style="background:#dc2626" onclick="confirmDelRecord('${type}', ${i})">🗑️ Delete</button>`;
@@ -2322,7 +2353,7 @@
         const out = document.getElementById("deleteOutput");
         if (!rows.length) {
           out.innerHTML =
-            '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 কোনো রেকর্ড পাওয়া যায়নি।</p>';
+            '<p style="padding:30px;text-align:center;color:#ffd700;font-size:14px">📭 No records found.</p>';
           return;
         }
         const lockedCount = rows.filter((r) => r.posted).length;
@@ -2395,13 +2426,13 @@
         out.innerHTML = `
           <div class="print-header">
             <span class="co-name">ALOMHOW CO LTD — Delete / Edit (${type.toUpperCase()})</span>
-            <span>মোট: ${rows.length} রেকর্ড${lockedCount ? ` | 🔒 ${lockedCount} টি পোস্টেড (লকড)` : ""}</span>
+            <span>Total: ${rows.length} records${lockedCount ? ` | 🔒 ${lockedCount} posted (locked)` : ""}</span>
             <span>Printed: ${formatDateTime()}</span>
           </div>
           <div id="delBulkBar" style="display:none;align-items:center;gap:10px;padding:8px 4px;margin-bottom:6px">
             <span id="delBulkCount" style="font-size:12px;color:var(--brand-gold);font-weight:700"></span>
-            <button class="btn btn-att" style="background:#dc2626;border-color:#dc2626" onclick="bulkDeleteSelected('${type}')">🗑️ সিলেক্টেড ডিলিট করুন</button>
-            <button class="btn btn-clear" onclick="toggleDelCheckAll({checked:false})">✕ বাতিল</button>
+            <button class="btn btn-att" style="background:#dc2626;border-color:#dc2626" onclick="bulkDeleteSelected('${type}')">🗑️ Delete Selected</button>
+            <button class="btn btn-clear" onclick="toggleDelCheckAll({checked:false})">✕ Cancel</button>
           </div>
           <table id="deleteTable">
             <thead><tr>${headCols}</tr></thead>
@@ -2429,7 +2460,7 @@
         if (!bar) return;
         if (checked.length > 0) {
           bar.style.display = "flex";
-          if (countEl) countEl.textContent = `✅ ${checked.length} টি রেকর্ড সিলেক্ট করা হয়েছে`;
+          if (countEl) countEl.textContent = `✅ ${checked.length} record(s) selected`;
         } else {
           bar.style.display = "none";
         }
@@ -2471,12 +2502,12 @@
               <div style="width:38px;height:38px;border-radius:50%;background:rgba(220,38,38,0.15);
                 display:flex;align-items:center;justify-content:center;font-size:19px">🗑️</div>
               <div>
-                <div style="color:#fff;font-size:15px;font-weight:800">${idxList.length} টি রেকর্ড ডিলিট করুন?</div>
-                <div style="color:#94a3b8;font-size:11px;margin-top:1px">এই কাজটি Undo করা যাবে না।</div>
+                <div style="color:#fff;font-size:15px;font-weight:800">Delete ${idxList.length} record(s)?</div>
+                <div style="color:#94a3b8;font-size:11px;margin-top:1px">This action cannot be undone.</div>
               </div>
             </div>
             <div style="margin-bottom:14px">
-              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">কারণ / আপনার নাম (ঐচ্ছিক)</label>
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Reason / Your Name (optional)</label>
               <input id="bulkDelReasonInput" type="text" placeholder="e.g. Ripon - wrong entries" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
             </div>
             <div style="display:flex;gap:10px">
@@ -2501,7 +2532,12 @@
           btn.disabled = true;
           btn.textContent = "⏳";
           close();
-          await executeBulkDelete(type, idxList, reason);
+          showDeleteSpinner(`Deleting ${idxList.length} record(s)...`);
+          try {
+            await executeBulkDelete(type, idxList, reason);
+          } finally {
+            hideDeleteSpinner();
+          }
         };
       }
 
@@ -2543,19 +2579,19 @@
           }
         }
         showDeleteToast(
-          `✅ ${successCount} টি রেকর্ড ডিলিট হয়েছে${failCount ? `, ${failCount} টি ব্যর্থ হয়েছে` : ""}${auditFailCount ? `, ⚠️ ${auditFailCount} টির History জমা ব্যর্থ হয়েছে` : ""}।`,
+          `✅ ${successCount} record(s) deleted${failCount ? `, ${failCount} failed` : ""}${auditFailCount ? `, ⚠️ ${auditFailCount} failed to save to History` : ""}.`,
           failCount || auditFailCount ? "error" : "success",
         );
         generateDeleteSearch();
       }
 
-      // ── EDIT মডাল ──
+      // ── EDIT modal ──
       async function openDelEditModal(type, idx) {
         const r = _delRecordsCache[idx];
         if (!r) return;
         if (r.posted) {
           showDeleteToast(
-            `⛔ ${r.monthKey} মাসের সেলারি পোস্ট হয়ে গেছে — এই রেকর্ড এডিট করা যাবে না।`,
+            `⛔ Salary for ${r.monthKey} has already been posted — this record cannot be edited.`,
             "error",
           );
           return;
@@ -2628,7 +2664,7 @@
               <input id="deField_note" type="text" value="${(r.note || "").replace(/"/g, "&quot;")}" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
             </div>
             <div style="padding:8px 10px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);border-radius:6px;font-size:10.5px;color:#fbbf24;margin-bottom:10px">
-              ⚠️ এটি সেভ করলে ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে পরিবর্তন হবে না।
+              ⚠️ Saving this will NOT automatically update ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending).
             </div>`;
         }
 
@@ -2652,13 +2688,13 @@
               <div style="width:38px;height:38px;border-radius:50%;background:rgba(37,99,235,0.15);
                 display:flex;align-items:center;justify-content:center;font-size:19px">✏️</div>
               <div>
-                <div style="color:#fff;font-size:15px;font-weight:800">রেকর্ড এডিট করুন</div>
+                <div style="color:#fff;font-size:15px;font-weight:800">Edit Record</div>
                 <div style="color:#94a3b8;font-size:11px;margin-top:1px">${r.date || ""} — ${r.id}${r.name ? " (" + r.name + ")" : ""}</div>
               </div>
             </div>
             ${fieldsHtml}
             <div style="margin-bottom:14px">
-              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">কারণ / আপনার নাম (ঐচ্ছিক)</label>
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Reason / Your Name (optional)</label>
               <input id="deField_reason" type="text" placeholder="e.g. Ripon - correction" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
             </div>
             <div style="display:flex;gap:10px">
@@ -2679,25 +2715,26 @@
           const btn = overlay.querySelector("#deSaveBtn");
           btn.disabled = true;
           btn.textContent = "⏳ Saving...";
+          close();
+          showDeleteSpinner("Saving changes...");
           try {
             const result = await saveDelEditRecord(type, r);
-            close();
             if (result && result.auditFailed) {
               showDeleteToast(
-                `⚠️ রেকর্ড আপডেট হয়েছে, কিন্তু History-তে জমা করা যায়নি: ${result.auditErrMsg}`,
+                `⚠️ Record updated, but failed to save to History: ${result.auditErrMsg}`,
                 "error",
               );
             } else {
               showDeleteToast(
-                "রেকর্ড আপডেট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
+                "Record updated and saved to History.",
                 "success",
               );
             }
             generateDeleteSearch();
           } catch (e2) {
-            btn.disabled = false;
-            btn.textContent = "💾 Save";
-            showDeleteToast("সেভ এরর: " + e2.message, "error");
+            showDeleteToast("Save error: " + e2.message, "error");
+          } finally {
+            hideDeleteSpinner();
           }
         };
       }
@@ -2774,13 +2811,13 @@
         return { auditFailed, auditErrMsg };
       }
 
-      // ── DELETE কনফার্ম ──
+      // ── DELETE confirm ──
       function confirmDelRecord(type, idx) {
         const r = _delRecordsCache[idx];
         if (!r) return;
         if (r.posted) {
           showDeleteToast(
-            `⛔ ${r.monthKey} মাসের সেলারি পোস্ট হয়ে গেছে — এই রেকর্ড ডিলিট করা যাবে না।`,
+            `⛔ Salary for ${r.monthKey} has already been posted — this record cannot be deleted.`,
             "error",
           );
           return;
@@ -2790,10 +2827,10 @@
 
         const warnText =
           type === "fine"
-            ? "শুধু এই দিনের Fine অ্যামাউন্ট ০ (শূন্য) করা হবে। পুরো Attendance রেকর্ড থাকবে।"
+            ? "Only this day's Fine amount will be set to 0. The full Attendance record will stay."
             : type === "advance"
-              ? "এই লেনদেনটি মুছে ফেলা হবে। Advance সামারি (Total/Paid/Pending) আলাদাভাবে মিলিয়ে নিতে হবে।"
-              : "এই কাজটি Undo করা যাবে না।";
+              ? "This transaction will be deleted. Reconcile the Advance summary (Total/Paid/Pending) separately."
+              : "This action cannot be undone.";
 
         const overlay = document.createElement("div");
         overlay.id = "delEditOverlay";
@@ -2815,7 +2852,7 @@
               <div style="width:38px;height:38px;border-radius:50%;background:rgba(220,38,38,0.15);
                 display:flex;align-items:center;justify-content:center;font-size:19px">🗑️</div>
               <div>
-                <div style="color:#fff;font-size:15px;font-weight:800">রেকর্ড ডিলিট করুন?</div>
+                <div style="color:#fff;font-size:15px;font-weight:800">Delete Record?</div>
                 <div style="color:#94a3b8;font-size:11px;margin-top:1px">${warnText}</div>
               </div>
             </div>
@@ -2832,7 +2869,7 @@
               </div>
             </div>
             <div style="margin-bottom:14px">
-              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">কারণ / আপনার নাম (ঐচ্ছিক)</label>
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">Reason / Your Name (optional)</label>
               <input id="delReasonInput" type="text" placeholder="e.g. Ripon - wrong entry" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
             </div>
             <div style="display:flex;gap:10px">
@@ -2856,6 +2893,8 @@
           ).trim();
           btn.disabled = true;
           btn.textContent = "⏳";
+          close();
+          showDeleteSpinner("Deleting record...");
           try {
             const before = r.raw;
             if (type === "attendance") {
@@ -2865,7 +2904,6 @@
             } else if (type === "ot" || type === "advance") {
               await firebase.database().ref(r.path).remove();
             }
-            close();
             let auditFailed = false,
               auditErrMsg = "";
             try {
@@ -2884,27 +2922,27 @@
               auditErrMsg = auditErr.message || String(auditErr);
               console.error("Audit log write failed:", auditErr);
             }
+            hideDeleteSpinner();
             if (auditFailed) {
               showDeleteToast(
-                `⚠️ রেকর্ড ডিলিট হয়েছে, কিন্তু History-তে জমা করা যায়নি: ${auditErrMsg}`,
+                `⚠️ Record deleted, but failed to save to History: ${auditErrMsg}`,
                 "error",
               );
             } else {
               showDeleteToast(
-                "রেকর্ড ডিলিট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
+                "Record deleted and saved to History.",
                 "success",
               );
             }
             generateDeleteSearch();
           } catch (e2) {
-            btn.disabled = false;
-            btn.textContent = "🗑️ Delete";
-            showDeleteToast("ডিলিট এরর: " + e2.message, "error");
+            hideDeleteSpinner();
+            showDeleteToast("Delete error: " + e2.message, "error");
           }
         };
       }
 
-      // ── অডিট লগ — ডিলিট/এডিট হিস্ট্রি (Firestore) ──
+      // ── Audit log — Delete/Edit history (Firestore) ──
       async function writeAuditLog({
         action,
         dataType,
@@ -2945,9 +2983,9 @@
         if (_auditDateFrom && _auditDateTo) {
           filterInfo += `📅 ${_auditDateFrom} → ${_auditDateTo}`;
         } else if (_auditDateFrom) {
-          filterInfo += `📅 ${_auditDateFrom} থেকে`;
+          filterInfo += `📅 From ${_auditDateFrom}`;
         } else if (_auditDateTo) {
-          filterInfo += `📅 ${_auditDateTo} পর্যন্ত`;
+          filterInfo += `📅 Until ${_auditDateTo}`;
         }
         if (_auditIdFilter) {
           filterInfo += (filterInfo ? "  |  " : "") + `🆔 ${_auditIdFilter}`;
@@ -2961,10 +2999,10 @@
             <span>Printed: ${formatDateTime()}</span>
           </div>
           <div style="padding:0 0 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-            <input id="auditSearchInput" type="text" placeholder="🔍 EMP ID / Date / Reason দিয়ে সার্চ করুন..." style="flex:1;min-width:200px;padding:8px 12px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none">
+            <input id="auditSearchInput" type="text" placeholder="🔍 Search by EMP ID / Date / Reason..." style="flex:1;min-width:200px;padding:8px 12px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none">
             ${
               filterInfo
-                ? `<button id="auditFilterChip" title="ফিল্টার বাদ দিতে ক্লিক করুন" style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.4);color:var(--brand-gold);padding:7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">${filterInfo} ✕</button>`
+                ? `<button id="auditFilterChip" title="Click to clear filter" style="background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.4);color:var(--brand-gold);padding:7px 12px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap">${filterInfo} ✕</button>`
                 : ""
             }
           </div>
@@ -3045,46 +3083,47 @@
         }
         const countEl = document.getElementById("auditResultCount");
         if (countEl)
-          countEl.textContent = `মোট ${rows.length} টি এন্ট্রি পাওয়া গেছে${_auditCache.length !== rows.length ? ` (সর্বমোট ${_auditCache.length} টির মধ্যে থেকে ফিল্টার করা)` : ""}`;
+          countEl.textContent = `Found ${rows.length} entries${_auditCache.length !== rows.length ? ` (filtered from ${_auditCache.length} total)` : ""}`;
         if (!rows.length) {
           if (_auditCache.length === 0) {
             body.innerHTML =
-              '<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 এখনো কোনো Delete/Edit করা হয়নি — তাই হিস্ট্রি এখনো খালি।<br><span style="font-size:11px;color:#7d8aa3">Search করে কোনো রেকর্ড Edit/Delete করলে তবেই এখানে জমা হবে।</span></p>';
+              '<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 No Delete/Edit actions yet — History is still empty.<br><span style="font-size:11px;color:#7d8aa3">History will fill up once you Search and Edit/Delete a record.</span></p>';
           } else {
-            body.innerHTML = `<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 এই ফিল্টারে কোনো Delete/Edit অ্যাকশন পাওয়া যায়নি।<br><span style="font-size:11px;color:#7d8aa3">ডাটাবেজে সর্বমোট ${_auditCache.length} টি এন্ট্রি আছে — ফিল্টার (${_auditDateFrom || "?"} ${_auditDateTo ? "→ " + _auditDateTo : ""} ${_auditIdFilter ? " | ID: " + _auditIdFilter : ""}) বাদ দিয়ে দেখুন।</span></p>`;
+            body.innerHTML = `<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 No Delete/Edit action found for this filter.<br><span style="font-size:11px;color:#7d8aa3">Database has ${_auditCache.length} entries in total — try removing the filter (${_auditDateFrom || "?"} ${_auditDateTo ? "→ " + _auditDateTo : ""} ${_auditIdFilter ? " | ID: " + _auditIdFilter : ""}).</span></p>`;
           }
           return;
         }
         body.innerHTML = `
           <table style="width:100%;border-collapse:collapse;font-size:11.5px;margin-top:6px">
             <thead><tr style="background:var(--brand-blue)">
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">Time</th>
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">Action</th>
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">Type</th>
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">Date</th>
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">EMP ID</th>
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">Reason</th>
-              <th style="color:white;padding:6px 8px;border:1px solid #335185">Details</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">Time</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">Action</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">Type</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">Date</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">EMP ID</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">Reason</th>
+              <th style="color:var(--brand-gold);padding:8px;border:1px solid #335185;background:var(--brand-blue)">Details</th>
             </tr></thead>
             <tbody>
               ${rows
-                .map((r) => {
+                .map((r, ri) => {
                   const ts = r.timestamp && r.timestamp.toDate
                     ? r.timestamp.toDate()
                     : null;
                   const timeStr = ts ? ts.toLocaleString() : "-";
                   const badgeColor =
                     r.action === "delete" ? "#dc2626" : "#2563eb";
+                  const rowBg = ri % 2 === 0 ? "#001d3d" : "#001530";
                   return `<tr>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e;white-space:nowrap">${timeStr}</td>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;text-align:center">
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};color:#e0e8f4;white-space:nowrap">${timeStr}</td>
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};text-align:center">
                   <span style="background:${badgeColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase">${r.action}</span>
                 </td>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e;text-transform:uppercase">${r.dataType || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e">${r.date || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;font-weight:700;color:var(--brand-blue)">${r.empId || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e">${r.reason || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;text-align:center">
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};color:#e0e8f4;text-transform:uppercase">${r.dataType || "-"}</td>
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};color:#e0e8f4">${r.date || "-"}</td>
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};font-weight:700;color:var(--brand-gold)">${r.empId || "-"}</td>
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};color:#e0e8f4">${r.reason || "-"}</td>
+                <td style="padding:7px 8px;border:1px solid #22406b;background:${rowBg};text-align:center">
                   <button class="btn-view" onclick="viewAuditDetail('${r._id}')">👁️ View</button>
                 </td>
               </tr>`;
@@ -3102,9 +3141,45 @@
         const existing = document.getElementById("delEditOverlay");
         if (existing) existing.remove();
 
-        function fmtBlock(obj) {
-          if (!obj) return '<span style="color:#7d8aa3;font-style:italic">— নেই —</span>';
-          return `<pre style="margin:0;white-space:pre-wrap;word-break:break-all;font-family:'Courier New',monospace;font-size:11px;color:#e0e8f4">${JSON.stringify(obj, null, 2).replace(/</g, "&lt;")}</pre>`;
+        function fmtVal(v) {
+          if (v === undefined || v === null || v === "")
+            return '<span style="color:#5b6b85;font-style:italic">—</span>';
+          if (typeof v === "object")
+            return `<span>${JSON.stringify(v).replace(/</g, "&lt;")}</span>`;
+          return String(v).replace(/</g, "&lt;");
+        }
+
+        function buildDiffTable(beforeObj, afterObj) {
+          const b = beforeObj || {};
+          const a = afterObj || {};
+          const keys = [
+            ...new Set([...Object.keys(b), ...Object.keys(a)]),
+          ].sort();
+          if (!keys.length)
+            return '<p style="padding:14px;color:#7d8aa3;font-style:italic;text-align:center">No data available</p>';
+          const isDeleteAction = afterObj === null || afterObj === undefined;
+          const rowsHtml = keys
+            .map((k) => {
+              const bVal = b[k];
+              const aVal = a[k];
+              const changed =
+                !isDeleteAction &&
+                JSON.stringify(bVal) !== JSON.stringify(aVal);
+              return `<tr>
+                <td style="padding:7px 10px;border:1px solid #22406b;background:#001d3d;color:#9ca3af;font-weight:700;white-space:nowrap">${k}</td>
+                <td style="padding:7px 10px;border:1px solid #22406b;background:${changed ? "rgba(220,38,38,0.12)" : "#001530"};color:#e0e8f4">${fmtVal(bVal)}</td>
+                <td style="padding:7px 10px;border:1px solid #22406b;background:${isDeleteAction ? "#001530" : changed ? "rgba(34,197,94,0.12)" : "#001530"};color:#e0e8f4">${isDeleteAction ? '<span style="color:#5b6b85;font-style:italic">— Deleted —</span>' : fmtVal(aVal)}</td>
+              </tr>`;
+            })
+            .join("");
+          return `<table style="width:100%;border-collapse:collapse;font-size:11.5px">
+            <thead><tr>
+              <th style="padding:7px 10px;border:1px solid #335185;background:var(--brand-blue);color:var(--brand-gold);text-align:left">Field</th>
+              <th style="padding:7px 10px;border:1px solid #335185;background:var(--brand-blue);color:#fca5a5;text-align:left">Before</th>
+              <th style="padding:7px 10px;border:1px solid #335185;background:var(--brand-blue);color:#86efac;text-align:left">After</th>
+            </tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>`;
         }
 
         const badgeColor = r.action === "delete" ? "#dc2626" : "#2563eb";
@@ -3124,7 +3199,7 @@
             @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
           </style>
           <div style="
-            width:640px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column;
+            width:700px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column;
             background:linear-gradient(160deg,#0a1a33,#001530);
             border:1.5px solid var(--brand-gold);border-radius:14px;
             box-shadow:0 12px 40px rgba(0,0,0,0.4);font-family:inherit;overflow:hidden;
@@ -3141,18 +3216,11 @@
             </div>
             ${
               r.reason
-                ? `<div style="padding:10px 20px 0;font-size:11.5px;color:#9ca3af">📝 কারণ: <span style="color:#e0e8f4">${r.reason}</span></div>`
+                ? `<div style="padding:10px 20px 0;font-size:11.5px;color:#9ca3af">📝 Reason: <span style="color:#e0e8f4">${r.reason}</span></div>`
                 : ""
             }
-            <div style="padding:14px 20px 20px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-              <div>
-                <div style="font-size:11px;font-weight:700;color:#fca5a5;margin-bottom:6px">আগে (Before)</div>
-                <div style="background:#001020;border:1px solid #2a3f5f;border-radius:8px;padding:10px;max-height:340px;overflow-y:auto">${fmtBlock(r.before)}</div>
-              </div>
-              <div>
-                <div style="font-size:11px;font-weight:700;color:#86efac;margin-bottom:6px">পরে (After)</div>
-                <div style="background:#001020;border:1px solid #2a3f5f;border-radius:8px;padding:10px;max-height:340px;overflow-y:auto">${fmtBlock(r.after)}</div>
-              </div>
+            <div style="padding:14px 20px 20px;overflow-y:auto">
+              ${buildDiffTable(r.before, r.after)}
             </div>
           </div>`;
         document.body.appendChild(overlay);
