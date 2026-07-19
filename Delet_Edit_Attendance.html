@@ -1725,21 +1725,67 @@
                 "
               />
               <label>Emp ID:</label>
-              <input
-                type="text"
-                id="delIdInput"
-                placeholder="e.g. ACL001"
-                style="
-                  width: 130px;
-                  padding: 8px 12px;
-                  font-size: 12px;
-                  border: 1.5px solid #3a5a8a;
-                  border-radius: 6px;
-                  background: #001530;
-                  color: #e0e8f4;
-                  outline: none;
-                "
-              />
+              <div
+                id="delIdWrap"
+                style="position: relative; display: inline-block; width: 150px"
+              >
+                <input
+                  type="text"
+                  id="delIdInput"
+                  placeholder="e.g. ACL001"
+                  autocomplete="off"
+                  onfocus="onDelIdFocus()"
+                  oninput="onDelIdInput()"
+                  onblur="onDelIdBlur()"
+                  style="
+                    width: 100%;
+                    padding: 8px 26px 8px 12px;
+                    font-size: 12px;
+                    border: 1.5px solid #3a5a8a;
+                    border-radius: 6px;
+                    background: #001530;
+                    color: #e0e8f4;
+                    outline: none;
+                    box-sizing: border-box;
+                  "
+                />
+                <span
+                  id="delIdClearBtn"
+                  onclick="clearDelIdInput()"
+                  style="
+                    display: none;
+                    position: absolute;
+                    right: 7px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    color: #9ca3af;
+                    font-size: 13px;
+                    font-weight: 700;
+                    cursor: pointer;
+                    line-height: 1;
+                    padding: 3px;
+                  "
+                  >×</span
+                >
+                <div
+                  id="delIdSuggestions"
+                  style="
+                    display: none;
+                    position: absolute;
+                    top: 100%;
+                    left: 0;
+                    right: 0;
+                    margin-top: 3px;
+                    max-height: 220px;
+                    overflow-y: auto;
+                    background: #001530;
+                    border: 1.5px solid #3a5a8a;
+                    border-radius: 6px;
+                    z-index: 500;
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+                  "
+                ></div>
+              </div>
               <button
                 class="btn btn-att"
                 onclick="generateDeleteSearch()"
@@ -1771,8 +1817,8 @@
               ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে
               আপডেট হয় না — প্রয়োজনে আলাদাভাবে মিলিয়ে নিন। 🔒 যে মাসের
               সেলারি পোস্ট (PAID) হয়ে গেছে, সেই মাসের কোনো রেকর্ড
-              এডিট/ডিলিট করা যাবে না। সব Delete/Edit অ্যাকশন History-তে জমা
-              থাকবে।
+              এডিট/ডিলিট হবে না। সব Delete/Edit এর History দেখতে DATE সিলেক্ট করে History Button ক্লিক করুন।
+              
             </div>
           </div>
           <div id="deleteOutput" style="margin-top: 12px"></div>
@@ -1889,6 +1935,10 @@
         );
       }
 
+      // ── ডিলিট/এডিট ম্যানেজারের স্টেট ভ্যারিয়েবল ──
+      let _delRecordsCache = [];
+      const DEL_AUDIT_COLLECTION = "DELETE_EDIT_AUDIT_LOG";
+
       function clearDeleteSearch() {
         document.getElementById("deleteOutput").innerHTML = "";
         document.getElementById("deleteOutput").style.display = "none";
@@ -1899,6 +1949,7 @@
           document.getElementById("delDateTo")._flatpickr.clear();
         } catch (e) {}
         document.getElementById("delIdInput").value = "";
+        document.getElementById("delIdClearBtn").style.display = "none";
         _delRecordsCache = [];
       }
 
@@ -2110,6 +2161,104 @@
 
       // ── সাইট/প্রোজেক্টের তালিকা — ড্রপডাউনে দেখানোর জন্য (একবার লোড হয়ে ক্যাশ থাকবে) ──
       let _knownSites = null;
+
+      // ── Emp ID অটোকমপ্লিট ──
+      let _knownEmployees = null;
+      async function getKnownEmployees() {
+        if (_knownEmployees) return _knownEmployees;
+        const list = [];
+        try {
+          const db = firebase.firestore();
+          const snap = await db.collection("EMPLOYEE_LIST").get();
+          snap.forEach((d) => {
+            const e = d.data();
+            list.push({ id: (e.id || d.id || "").trim(), name: e.name || "" });
+          });
+          list.sort((a, b) => a.id.localeCompare(b.id));
+        } catch (e) {
+          console.error("Employee list load error:", e);
+        }
+        _knownEmployees = list;
+        return _knownEmployees;
+      }
+
+      function renderDelIdSuggestions(list) {
+        const box = document.getElementById("delIdSuggestions");
+        if (!list.length) {
+          box.innerHTML =
+            '<div style="padding:10px 12px;font-size:11.5px;color:#7d8aa3">কোনো মিল পাওয়া যায়নি</div>';
+        } else {
+          box.innerHTML = list
+            .slice(0, 50)
+            .map(
+              (e) => `<div
+              class="del-id-suggestion-item"
+              onmousedown="selectDelIdSuggestion('${e.id.replace(/'/g, "\\'")}')"
+              style="padding:8px 12px;font-size:12px;color:#e0e8f4;cursor:pointer;border-bottom:1px solid #17233d"
+              onmouseover="this.style.background='#0d2547'"
+              onmouseout="this.style.background='transparent'"
+            ><span style="font-weight:700;color:var(--brand-gold)">${e.id}</span>${e.name ? ` — ${e.name}` : ""}</div>`,
+            )
+            .join("");
+        }
+        box.style.display = "block";
+      }
+
+      async function onDelIdFocus() {
+        const employees = await getKnownEmployees();
+        const val = document.getElementById("delIdInput").value.trim().toUpperCase();
+        const filtered = val
+          ? employees.filter(
+              (e) =>
+                e.id.toUpperCase().includes(val) ||
+                e.name.toUpperCase().includes(val),
+            )
+          : employees;
+        renderDelIdSuggestions(filtered);
+        document.getElementById("delIdClearBtn").style.display = val
+          ? "block"
+          : "none";
+      }
+
+      async function onDelIdInput() {
+        const val = document.getElementById("delIdInput").value.trim();
+        document.getElementById("delIdClearBtn").style.display = val
+          ? "block"
+          : "none";
+        const employees = await getKnownEmployees();
+        const upper = val.toUpperCase();
+        const filtered = upper
+          ? employees.filter(
+              (e) =>
+                e.id.toUpperCase().includes(upper) ||
+                e.name.toUpperCase().includes(upper),
+            )
+          : employees;
+        renderDelIdSuggestions(filtered);
+      }
+
+      function onDelIdBlur() {
+        setTimeout(() => {
+          const box = document.getElementById("delIdSuggestions");
+          if (box) box.style.display = "none";
+        }, 150);
+      }
+
+      function selectDelIdSuggestion(id) {
+        const input = document.getElementById("delIdInput");
+        input.value = id;
+        document.getElementById("delIdSuggestions").style.display = "none";
+        document.getElementById("delIdClearBtn").style.display = "block";
+        input.focus();
+      }
+
+      function clearDelIdInput() {
+        const input = document.getElementById("delIdInput");
+        input.value = "";
+        document.getElementById("delIdClearBtn").style.display = "none";
+        input.focus();
+        onDelIdInput();
+      }
       async function getKnownSites() {
         if (_knownSites) return _knownSites;
         const set = new Set();
@@ -2177,13 +2326,19 @@
           return;
         }
         const lockedCount = rows.filter((r) => r.posted).length;
+        const selectableCount = rows.length - lockedCount;
         let headCols = "",
           bodyRows = "";
+        const checkCell = (r, i) =>
+          r.posted
+            ? `<td style="text-align:center"></td>`
+            : `<td style="text-align:center"><input type="checkbox" class="del-row-check" data-idx="${i}" onchange="onDelCheckChange()" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626"></td>`;
         if (type === "attendance" || type === "fine") {
-          headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Status</th><th>Site</th><th>Holiday</th><th>Sunday</th><th>Fine</th><th>Action</th>`;
+          headCols = `<th style="width:34px"><input type="checkbox" id="delCheckAll" onchange="toggleDelCheckAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626"></th><th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Status</th><th>Site</th><th>Holiday</th><th>Sunday</th><th>Fine</th><th>Action</th>`;
           bodyRows = rows
             .map(
               (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              ${checkCell(r, i)}
               <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
               <td>${r.date}</td>
               <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
@@ -2200,10 +2355,11 @@
             )
             .join("");
         } else if (type === "ot") {
-          headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Site</th><th>OT Hours</th><th>OT Rate</th><th>Action</th>`;
+          headCols = `<th style="width:34px"><input type="checkbox" id="delCheckAll" onchange="toggleDelCheckAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626"></th><th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Site</th><th>OT Hours</th><th>OT Rate</th><th>Action</th>`;
           bodyRows = rows
             .map(
               (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              ${checkCell(r, i)}
               <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
               <td>${r.date || "-"}</td>
               <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
@@ -2218,10 +2374,11 @@
             )
             .join("");
         } else if (type === "advance") {
-          headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Type</th><th>Amount</th><th>Note</th><th>Action</th>`;
+          headCols = `<th style="width:34px"><input type="checkbox" id="delCheckAll" onchange="toggleDelCheckAll(this)" style="width:15px;height:15px;cursor:pointer;accent-color:#dc2626"></th><th>SL</th><th>Date</th><th>EMP ID</th><th>Type</th><th>Amount</th><th>Note</th><th>Action</th>`;
           bodyRows = rows
             .map(
               (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              ${checkCell(r, i)}
               <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
               <td>${r.date || "-"}</td>
               <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
@@ -2241,10 +2398,155 @@
             <span>মোট: ${rows.length} রেকর্ড${lockedCount ? ` | 🔒 ${lockedCount} টি পোস্টেড (লকড)` : ""}</span>
             <span>Printed: ${formatDateTime()}</span>
           </div>
+          <div id="delBulkBar" style="display:none;align-items:center;gap:10px;padding:8px 4px;margin-bottom:6px">
+            <span id="delBulkCount" style="font-size:12px;color:var(--brand-gold);font-weight:700"></span>
+            <button class="btn btn-att" style="background:#dc2626;border-color:#dc2626" onclick="bulkDeleteSelected('${type}')">🗑️ সিলেক্টেড ডিলিট করুন</button>
+            <button class="btn btn-clear" onclick="toggleDelCheckAll({checked:false})">✕ বাতিল</button>
+          </div>
           <table id="deleteTable">
             <thead><tr>${headCols}</tr></thead>
             <tbody>${bodyRows}</tbody>
           </table>`;
+      }
+
+      function toggleDelCheckAll(sourceCheckbox) {
+        const all = document.getElementById("delCheckAll");
+        const checked =
+          sourceCheckbox && "checked" in sourceCheckbox
+            ? sourceCheckbox.checked
+            : false;
+        if (all) all.checked = checked;
+        document
+          .querySelectorAll(".del-row-check")
+          .forEach((cb) => (cb.checked = checked));
+        onDelCheckChange();
+      }
+
+      function onDelCheckChange() {
+        const checked = document.querySelectorAll(".del-row-check:checked");
+        const bar = document.getElementById("delBulkBar");
+        const countEl = document.getElementById("delBulkCount");
+        if (!bar) return;
+        if (checked.length > 0) {
+          bar.style.display = "flex";
+          if (countEl) countEl.textContent = `✅ ${checked.length} টি রেকর্ড সিলেক্ট করা হয়েছে`;
+        } else {
+          bar.style.display = "none";
+        }
+        const allBoxes = document.querySelectorAll(".del-row-check");
+        const allChecked =
+          document.getElementById("delCheckAll");
+        if (allChecked)
+          allChecked.checked =
+            allBoxes.length > 0 && checked.length === allBoxes.length;
+      }
+
+      function bulkDeleteSelected(type) {
+        const checked = [
+          ...document.querySelectorAll(".del-row-check:checked"),
+        ];
+        if (!checked.length) return;
+        const idxList = checked.map((cb) => parseInt(cb.dataset.idx, 10));
+
+        const existing = document.getElementById("delEditOverlay");
+        if (existing) existing.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "delEditOverlay";
+        overlay.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,8,20,0.72);backdrop-filter:blur(3px);
+          display:flex;align-items:center;justify-content:center;z-index:99999;
+          animation:delFadeIn .15s ease-out;`;
+        overlay.innerHTML = `
+          <style>
+            @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+            @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+            #bulkDelBox button:hover { filter:brightness(1.12); transform:translateY(-1px); }
+          </style>
+          <div id="bulkDelBox" style="
+            width:360px;max-width:90vw;background:linear-gradient(160deg,#0a1a33,#001530);
+            border:1.5px solid #dc2626;border-radius:14px;box-shadow:0 12px 40px rgba(220,38,38,0.25);
+            padding:22px 22px 18px;animation:delPopIn .18s ease-out;font-family:inherit;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+              <div style="width:38px;height:38px;border-radius:50%;background:rgba(220,38,38,0.15);
+                display:flex;align-items:center;justify-content:center;font-size:19px">🗑️</div>
+              <div>
+                <div style="color:#fff;font-size:15px;font-weight:800">${idxList.length} টি রেকর্ড ডিলিট করুন?</div>
+                <div style="color:#94a3b8;font-size:11px;margin-top:1px">এই কাজটি Undo করা যাবে না।</div>
+              </div>
+            </div>
+            <div style="margin-bottom:14px">
+              <label style="display:block;color:#9ca3af;font-size:11px;margin-bottom:4px">কারণ / আপনার নাম (ঐচ্ছিক)</label>
+              <input id="bulkDelReasonInput" type="text" placeholder="e.g. Ripon - wrong entries" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
+            </div>
+            <div style="display:flex;gap:10px">
+              <button id="bulkDelCancelBtn" style="flex:1;padding:10px 0;border:1.5px solid #3a5a8a;
+                border-radius:8px;background:transparent;color:#cbd5e1;font-size:12.5px;font-weight:700;cursor:pointer">Cancel</button>
+              <button id="bulkDelOkBtn" style="flex:1;padding:10px 0;border:none;
+                border-radius:8px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;
+                font-size:12.5px;font-weight:800;cursor:pointer">🗑️ Delete</button>
+            </div>
+          </div>`;
+        document.body.appendChild(overlay);
+        const close = () => overlay.remove();
+        overlay.querySelector("#bulkDelCancelBtn").onclick = close;
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) close();
+        });
+        overlay.querySelector("#bulkDelOkBtn").onclick = async () => {
+          const btn = overlay.querySelector("#bulkDelOkBtn");
+          const reason = (
+            document.getElementById("bulkDelReasonInput").value || ""
+          ).trim();
+          btn.disabled = true;
+          btn.textContent = "⏳";
+          close();
+          await executeBulkDelete(type, idxList, reason);
+        };
+      }
+
+      async function executeBulkDelete(type, idxList, reason) {
+        let successCount = 0,
+          failCount = 0,
+          auditFailCount = 0;
+        for (const idx of idxList) {
+          const r = _delRecordsCache[idx];
+          if (!r || r.posted) continue;
+          try {
+            const before = r.raw;
+            if (type === "attendance") {
+              await firebase.firestore().doc(r.path).delete();
+            } else if (type === "fine") {
+              await firebase.firestore().doc(r.path).update({ FINE: 0 });
+            } else if (type === "ot" || type === "advance") {
+              await firebase.database().ref(r.path).remove();
+            }
+            successCount++;
+            try {
+              await writeAuditLog({
+                action: "delete",
+                dataType: type,
+                path: r.path,
+                empId: r.id || r.empId || "",
+                date: r.date || "",
+                before,
+                after: null,
+                reason: reason || "",
+              });
+            } catch (auditErr) {
+              auditFailCount++;
+              console.error("Audit log write failed:", auditErr);
+            }
+          } catch (e) {
+            console.error("Bulk delete error:", e);
+            failCount++;
+          }
+        }
+        showDeleteToast(
+          `✅ ${successCount} টি রেকর্ড ডিলিট হয়েছে${failCount ? `, ${failCount} টি ব্যর্থ হয়েছে` : ""}${auditFailCount ? `, ⚠️ ${auditFailCount} টির History জমা ব্যর্থ হয়েছে` : ""}।`,
+          failCount || auditFailCount ? "error" : "success",
+        );
+        generateDeleteSearch();
       }
 
       // ── EDIT মডাল ──
@@ -2378,9 +2680,19 @@
           btn.disabled = true;
           btn.textContent = "⏳ Saving...";
           try {
-            await saveDelEditRecord(type, r);
+            const result = await saveDelEditRecord(type, r);
             close();
-            showDeleteToast("রেকর্ড আপডেট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।", "success");
+            if (result && result.auditFailed) {
+              showDeleteToast(
+                `⚠️ রেকর্ড আপডেট হয়েছে, কিন্তু History-তে জমা করা যায়নি: ${result.auditErrMsg}`,
+                "error",
+              );
+            } else {
+              showDeleteToast(
+                "রেকর্ড আপডেট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
+                "success",
+              );
+            }
             generateDeleteSearch();
           } catch (e2) {
             btn.disabled = false;
@@ -2441,16 +2753,25 @@
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         }
-        await writeAuditLog({
-          action: "edit",
-          dataType: type,
-          path: r.path,
-          empId: r.id || r.empId || "",
-          date: r.date || "",
-          before,
-          after,
-          reason,
-        });
+        let auditFailed = false,
+          auditErrMsg = "";
+        try {
+          await writeAuditLog({
+            action: "edit",
+            dataType: type,
+            path: r.path,
+            empId: r.id || r.empId || "",
+            date: r.date || "",
+            before,
+            after,
+            reason,
+          });
+        } catch (auditErr) {
+          auditFailed = true;
+          auditErrMsg = auditErr.message || String(auditErr);
+          console.error("Audit log write failed:", auditErr);
+        }
+        return { auditFailed, auditErrMsg };
       }
 
       // ── DELETE কনফার্ম ──
@@ -2544,21 +2865,36 @@
             } else if (type === "ot" || type === "advance") {
               await firebase.database().ref(r.path).remove();
             }
-            await writeAuditLog({
-              action: "delete",
-              dataType: type,
-              path: r.path,
-              empId: r.id || r.empId || "",
-              date: r.date || "",
-              before,
-              after: null,
-              reason,
-            });
             close();
-            showDeleteToast(
-              "রেকর্ড ডিলিট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
-              "success",
-            );
+            let auditFailed = false,
+              auditErrMsg = "";
+            try {
+              await writeAuditLog({
+                action: "delete",
+                dataType: type,
+                path: r.path,
+                empId: r.id || r.empId || "",
+                date: r.date || "",
+                before,
+                after: null,
+                reason,
+              });
+            } catch (auditErr) {
+              auditFailed = true;
+              auditErrMsg = auditErr.message || String(auditErr);
+              console.error("Audit log write failed:", auditErr);
+            }
+            if (auditFailed) {
+              showDeleteToast(
+                `⚠️ রেকর্ড ডিলিট হয়েছে, কিন্তু History-তে জমা করা যায়নি: ${auditErrMsg}`,
+                "error",
+              );
+            } else {
+              showDeleteToast(
+                "রেকর্ড ডিলিট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
+                "success",
+              );
+            }
             generateDeleteSearch();
           } catch (e2) {
             btn.disabled = false;
@@ -2579,22 +2915,18 @@
         after,
         reason,
       }) {
-        try {
-          const db = firebase.firestore();
-          await db.collection(DEL_AUDIT_COLLECTION).add({
-            action,
-            dataType,
-            path: path || "",
-            empId: empId || "",
-            date: date || "",
-            before: before || null,
-            after: after || null,
-            reason: reason || "",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          });
-        } catch (e) {
-          console.error("Audit log write failed:", e);
-        }
+        const db = firebase.firestore();
+        await db.collection(DEL_AUDIT_COLLECTION).add({
+          action,
+          dataType,
+          path: path || "",
+          empId: empId || "",
+          date: date || "",
+          before: before || null,
+          after: after || null,
+          reason: reason || "",
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+        });
       }
 
       let _auditCache = null;
@@ -2691,17 +3023,18 @@
         let rows = _auditCache;
         if (_auditDateFrom || _auditDateTo) {
           rows = rows.filter((r) => {
-            if (!r.date) return false;
-            if (_auditDateFrom && r.date < _auditDateFrom) return false;
-            if (_auditDateTo && r.date > _auditDateTo) return false;
+            const rDate = String(r.date || "").trim();
+            if (!rDate) return false;
+            if (_auditDateFrom && rDate < _auditDateFrom) return false;
+            if (_auditDateTo && rDate > _auditDateTo) return false;
             return true;
           });
         }
         if (_auditIdFilter) {
           rows = rows.filter(
             (r) =>
-              String(r.empId || "").toUpperCase() ===
-              _auditIdFilter.toUpperCase(),
+              String(r.empId || "").trim().toUpperCase() ===
+              _auditIdFilter.trim().toUpperCase(),
           );
         }
         if (filter) {
@@ -2714,8 +3047,12 @@
         if (countEl)
           countEl.textContent = `মোট ${rows.length} টি এন্ট্রি পাওয়া গেছে${_auditCache.length !== rows.length ? ` (সর্বমোট ${_auditCache.length} টির মধ্যে থেকে ফিল্টার করা)` : ""}`;
         if (!rows.length) {
-          body.innerHTML =
-            '<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 কোনো হিস্ট্রি পাওয়া যায়নি।</p>';
+          if (_auditCache.length === 0) {
+            body.innerHTML =
+              '<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 এখনো কোনো Delete/Edit করা হয়নি — তাই হিস্ট্রি এখনো খালি।<br><span style="font-size:11px;color:#7d8aa3">Search করে কোনো রেকর্ড Edit/Delete করলে তবেই এখানে জমা হবে।</span></p>';
+          } else {
+            body.innerHTML = `<p style="padding:30px;text-align:center;color:#ffd700;font-size:13px">📭 এই ফিল্টারে কোনো Delete/Edit অ্যাকশন পাওয়া যায়নি।<br><span style="font-size:11px;color:#7d8aa3">ডাটাবেজে সর্বমোট ${_auditCache.length} টি এন্ট্রি আছে — ফিল্টার (${_auditDateFrom || "?"} ${_auditDateTo ? "→ " + _auditDateTo : ""} ${_auditIdFilter ? " | ID: " + _auditIdFilter : ""}) বাদ দিয়ে দেখুন।</span></p>`;
+          }
           return;
         }
         body.innerHTML = `
@@ -2739,15 +3076,15 @@
                   const badgeColor =
                     r.action === "delete" ? "#dc2626" : "#2563eb";
                   return `<tr>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1;white-space:nowrap">${timeStr}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center">
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e;white-space:nowrap">${timeStr}</td>
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;text-align:center">
                   <span style="background:${badgeColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase">${r.action}</span>
                 </td>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1;text-transform:uppercase">${r.dataType || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1">${r.date || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;font-weight:700;color:#ffd700">${r.empId || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1">${r.reason || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center">
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e;text-transform:uppercase">${r.dataType || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e">${r.date || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;font-weight:700;color:var(--brand-blue)">${r.empId || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;color:#1a1a2e">${r.reason || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid var(--border);background:#fff;text-align:center">
                   <button class="btn-view" onclick="viewAuditDetail('${r._id}')">👁️ View</button>
                 </td>
               </tr>`;
@@ -2761,12 +3098,69 @@
         if (!_auditCache) return;
         const r = _auditCache.find((x) => x._id === id);
         if (!r) return;
-        const text = JSON.stringify(
-          { action: r.action, before: r.before, after: r.after },
-          null,
-          2,
-        );
-        alert(text);
+
+        const existing = document.getElementById("delEditOverlay");
+        if (existing) existing.remove();
+
+        function fmtBlock(obj) {
+          if (!obj) return '<span style="color:#7d8aa3;font-style:italic">— নেই —</span>';
+          return `<pre style="margin:0;white-space:pre-wrap;word-break:break-all;font-family:'Courier New',monospace;font-size:11px;color:#e0e8f4">${JSON.stringify(obj, null, 2).replace(/</g, "&lt;")}</pre>`;
+        }
+
+        const badgeColor = r.action === "delete" ? "#dc2626" : "#2563eb";
+        const ts =
+          r.timestamp && r.timestamp.toDate ? r.timestamp.toDate() : null;
+        const timeStr = ts ? ts.toLocaleString() : "-";
+
+        const overlay = document.createElement("div");
+        overlay.id = "delEditOverlay";
+        overlay.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,8,20,0.72);backdrop-filter:blur(3px);
+          display:flex;align-items:center;justify-content:center;z-index:99999;
+          animation:delFadeIn .15s ease-out;`;
+        overlay.innerHTML = `
+          <style>
+            @keyframes delFadeIn { from{opacity:0} to{opacity:1} }
+            @keyframes delPopIn { from{opacity:0;transform:scale(.92) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+          </style>
+          <div style="
+            width:640px;max-width:94vw;max-height:82vh;display:flex;flex-direction:column;
+            background:linear-gradient(160deg,#0a1a33,#001530);
+            border:1.5px solid var(--brand-gold);border-radius:14px;
+            box-shadow:0 12px 40px rgba(0,0,0,0.4);font-family:inherit;overflow:hidden;
+            animation:delPopIn .18s ease-out;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #3a5a8a">
+              <div>
+                <div style="color:var(--brand-gold);font-size:15px;font-weight:800">👁️ Audit Detail</div>
+                <div style="color:#94a3b8;font-size:11px;margin-top:2px">
+                  <span style="background:${badgeColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:700;text-transform:uppercase;margin-right:6px">${r.action}</span>
+                  ${r.dataType ? r.dataType.toUpperCase() + " — " : ""}${r.empId || "-"} ${r.date ? "(" + r.date + ")" : ""} • ${timeStr}
+                </div>
+              </div>
+              <button id="viewDetailCloseBtn" style="background:transparent;border:none;color:#cbd5e1;font-size:18px;cursor:pointer">✕</button>
+            </div>
+            ${
+              r.reason
+                ? `<div style="padding:10px 20px 0;font-size:11.5px;color:#9ca3af">📝 কারণ: <span style="color:#e0e8f4">${r.reason}</span></div>`
+                : ""
+            }
+            <div style="padding:14px 20px 20px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#fca5a5;margin-bottom:6px">আগে (Before)</div>
+                <div style="background:#001020;border:1px solid #2a3f5f;border-radius:8px;padding:10px;max-height:340px;overflow-y:auto">${fmtBlock(r.before)}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#86efac;margin-bottom:6px">পরে (After)</div>
+                <div style="background:#001020;border:1px solid #2a3f5f;border-radius:8px;padding:10px;max-height:340px;overflow-y:auto">${fmtBlock(r.after)}</div>
+              </div>
+            </div>
+          </div>`;
+        document.body.appendChild(overlay);
+        const close = () => overlay.remove();
+        overlay.querySelector("#viewDetailCloseBtn").onclick = close;
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) close();
+        });
       }
 
   </script>
