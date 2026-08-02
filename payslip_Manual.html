@@ -1,1 +1,1328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Payslip</title>
+  <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <style>
+    :root { --brand-blue: #002147; --brand-gold: #ffd700; --border: #b0bdd4; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Source Sans 3", sans-serif; background: var(--brand-blue); color: #1a1a2e; font-size: 12px; }
+    .page-header { background: var(--brand-blue); padding: 18px 32px; display: flex; align-items: center; justify-content: space-between; border-bottom: 4px solid var(--brand-gold); }
+    .page-header h2 { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 22px; letter-spacing: 1.5px; text-transform: uppercase; }
+    .header-badge { background: var(--brand-gold); color: var(--brand-blue); font-weight: 700; font-size: 10px; letter-spacing: 1px; padding: 4px 12px; border-radius: 20px; text-transform: uppercase; }
+    .controls { background: var(--brand-blue); padding: 14px 32px; border-bottom: 3px solid var(--brand-gold); }
+    .row-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .controls label { color: var(--brand-gold); font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+    .controls input[type="text"] { padding: 8px 12px; font-size: 12px; font-family: "Source Sans 3", sans-serif; border: 1.5px solid #3a5a8a; border-radius: 6px; background: #001530; color: #e0e8f4; outline: none; transition: border-color 0.2s; }
+    .controls input[type="text"]::placeholder { color: #6a88aa; }
+    .controls input[type="text"]:focus { border-color: var(--brand-gold); box-shadow: 0 0 0 2px rgba(255,215,0,0.18); }
+    .btn { padding: 8px 18px; font-size: 12px; font-family: "Source Sans 3", sans-serif; font-weight: 700; border: 2px solid transparent; border-radius: 6px; cursor: pointer; letter-spacing: 0.4px; transition: all 0.2s; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    .btn-gold { background: var(--brand-gold); color: var(--brand-blue); border-color: var(--brand-gold); }
+    .btn-gold:hover { background: transparent; color: var(--brand-gold); }
+    .flatpickr-calendar { background: #001d3d !important; border: 1px solid var(--brand-gold) !important; }
+    .flatpickr-day { color: #cce !important; }
+    .flatpickr-day.selected, .flatpickr-day.today { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-gold) !important; }
+    .flatpickr-day:hover { background: var(--brand-gold) !important; color: black !important; border-color: var(--brand-gold) !important; }
+    .flatpickr-months .flatpickr-month, .flatpickr-weekdays, span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+    .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { visibility: hidden; }
+    .flatpickr-prev-month, .flatpickr-next-month { color: var(--brand-gold) !important; fill: var(--brand-gold) !important; }
+    .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: var(--brand-gold) !important; stroke: var(--brand-gold) !important; }
+    .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; border: none !important; }
+    .flatpickr-months .flatpickr-month select.flatpickr-monthDropdown-months option { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+    .flatpickr-day.is-sunday { color: #ff4d4d !important; font-weight: 700 !important; }
+    .flatpickr-day.is-holiday { color: #ff4d4d !important; font-weight: 700 !important; }
+    .emp-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 8000; align-items: center; justify-content: center; backdrop-filter: blur(3px); }
+    .emp-panel-overlay.active { display: flex; }
+    .emp-panel-box { background: white; border-radius: 12px; width: 700px; max-width: 95vw; max-height: 88vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+    .emp-panel-header { background: linear-gradient(135deg, #002147 0%, #003580 60%, #001a38 100%); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; border-radius: 12px 12px 0 0; border-bottom: 3px solid var(--brand-gold); flex-shrink: 0; }
+    .emp-panel-header h3 { color: var(--brand-gold); font-family: "Playfair Display", serif; font-size: 16px; }
+    .emp-panel-controls { background: var(--brand-blue); padding: 12px 16px; border-bottom: 2px solid var(--brand-gold); flex-shrink: 0; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .emp-panel-controls input { flex: 1; min-width: 160px; padding: 7px 12px; border: 1.5px solid var(--brand-gold); border-radius: 6px; font-size: 12px; outline: none; background: #001530; color: #e0e8f4; }
+    .date-input { padding: 7px 12px; border: 1.5px solid var(--brand-gold); border-radius: 6px; font-size: 12px; outline: none; background: #001530; color: #e0e8f4; width: 110px; }
+    .emp-panel-body { overflow-y: auto; flex: 1; }
+    .emp-panel-footer { padding: 12px 16px; border-top: 2px solid var(--brand-gold); flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; background: var(--brand-blue); border-radius: 0 0 12px 12px; }
+    .panel-close { background: var(--brand-gold); color: var(--brand-blue); border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .panel-close:hover { transform: rotate(90deg); }
+    .emp-panel-table { width: 100%; border-collapse: collapse; }
+    .emp-panel-table thead tr { background: #f3f4f6; position: sticky; top: 0; z-index: 1; }
+    .emp-panel-table th { padding: 9px 12px; font-size: 11px; font-weight: 700; color: #374151; border-bottom: 2px solid #e5e7eb; text-transform: uppercase; letter-spacing: 0.5px; }
+    .emp-panel-table td { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid #f3f4f6; }
+    .emp-panel-table tbody tr:hover td { background: #ede9fe; cursor: pointer; }
+    .sel-count { font-size: 12px; color: var(--brand-gold); font-weight: 700; }
+    .edit-card { border: 1.5px solid #d1d5db; border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+    .edit-card-head { background: #f3f4f6; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; }
+    .edit-card-head .emp-title { font-weight: 700; font-size: 13px; color: var(--brand-blue); }
+    .edit-card-head .emp-sub { font-size: 11px; color: #6b7280; }
+    .edit-reset-btn { background: none; border: 1.5px solid #9ca3af; color: #6b7280; border-radius: 6px; padding: 3px 10px; font-size: 11px; font-weight: 700; cursor: pointer; }
+    .edit-reset-btn:hover { border-color: var(--brand-blue); color: var(--brand-blue); }
+    .edit-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; padding: 12px 14px; }
+    .edit-col-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #6b7280; margin: 6px 0 4px; }
+    .edit-field-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 3px 0; }
+    .edit-field-row label { font-size: 11.5px; color: #374151; flex: 1; }
+    .edit-field-row input { width: 100px; text-align: right; font-family: monospace; font-size: 12px; padding: 4px 6px; border: 1.5px solid #d1d5db; border-radius: 5px; outline: none; }
+    .edit-field-row input:focus { border-color: var(--brand-blue); box-shadow: 0 0 0 2px rgba(0,33,71,0.1); }
+    .ded-auto-val { width: 100px; text-align: right; font-family: monospace; font-size: 12px; padding: 4px 6px; color: #6b7280; background: #f3f4f6; border: 1.5px dashed #d1d5db; border-radius: 5px; display: inline-block; }
+    .edit-totals { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 16px; padding: 10px 14px; margin-top: 4px; background: #f9fafb; border-top: 1px dashed #d1d5db; font-size: 12px; font-weight: 700; }
+    .edit-totals .gross-val { color: #15803d; }
+    .edit-totals .ded-val { color: #b91c1c; }
+    .edit-totals .net-val { color: var(--brand-blue); font-size: 13px; }
+    .btn-gen-selected { background: var(--brand-gold); color: var(--brand-blue); border: 2px solid var(--brand-gold); padding: 8px 20px; border-radius: 7px; font-size: 12px; font-weight: 700; font-family: "Source Sans 3", sans-serif; cursor: pointer; transition: all 0.2s; }
+    .btn-gen-selected:hover { background: transparent; color: var(--brand-gold); }
+    .btn-gen-selected:disabled { opacity: 0.4; cursor: not-allowed; }
+    .gen-loader { display: none; position: fixed; inset: 0; background: var(--brand-blue); z-index: 99990; flex-direction: column; align-items: center; justify-content: center; gap: 20px; }
+    .gen-loader.active { display: flex; }
+    .gen-loader-title { font-family: "Playfair Display", serif; color: var(--brand-gold); font-size: 24px; letter-spacing: 1.5px; }
+    .gen-count-display { display: flex; flex-direction: column; align-items: center; gap: 4px; background: rgba(255,215,0,0.08); border: 2px solid var(--brand-gold); border-radius: 16px; padding: 16px 48px; min-width: 220px; text-align: center; }
+    .gen-count-label { color: #a0b8d8; font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+    .gen-count-numbers { color: var(--brand-gold); font-family: "Playfair Display", serif; font-size: 48px; font-weight: 700; line-height: 1; }
+    .gen-count-of { color: #6a88aa; font-size: 13px; font-weight: 600; letter-spacing: 1px; }
+    .gen-progress-wrap { width: 320px; height: 8px; background: #001030; border-radius: 20px; overflow: hidden; border: 1px solid #1e3a5f; }
+    .gen-progress-bar { height: 100%; background: linear-gradient(90deg, #ffd700, #ffe87a, #ffd700); background-size: 200% 100%; animation: shimmer 1.5s linear infinite; border-radius: 20px; width: 0%; transition: width 0.4s ease; }
+    @keyframes shimmer { 0%{background-position:0% 50%} 100%{background-position:200% 50%} }
+    .gen-spinner { width: 52px; height: 52px; border: 4px solid #1e3a5f; border-top-color: var(--brand-gold); border-radius: 50%; animation: spin .7s linear infinite; }
+    @keyframes spin { to{transform:rotate(360deg)} }
+    .gen-emp-badge { background: #001530; border: 1.5px solid #335185; border-radius: 8px; padding: 6px 16px; color: #a0b8d8; font-size: 11px; font-weight: 600; min-height: 32px; }
+    .gen-emp-badge span { color: var(--brand-gold); font-weight: 700; }
+    .gen-loader-sub { color: #a0b8d8; font-size: 13px; font-weight: 600; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .status-ok { background: #10b981; }
+    .status-loading { background: #ffd700; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .msgbox-overlay { display:none; position:fixed; inset:0; background:rgba(0,21,48,0.82); z-index:99999; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+    .msgbox-overlay.active { display:flex; }
+    .msgbox-card { background:#fff; border-radius:14px; min-width:320px; max-width:420px; box-shadow:0 30px 70px rgba(0,0,0,0.5); overflow:hidden; animation:msgPop .22s cubic-bezier(.34,1.56,.64,1); }
+    @keyframes msgPop { from{transform:scale(.85);opacity:0} to{transform:scale(1);opacity:1} }
+    .msgbox-header { display:flex; align-items:center; gap:10px; padding:16px 20px 12px; border-bottom:2px solid #f0f0f0; }
+    .msgbox-icon { width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0; }
+    .msgbox-icon.warn { background:#fff8e1; }
+    .msgbox-icon.err  { background:#ffeaea; }
+    .msgbox-title { font-family:"Playfair Display",serif; font-size:15px; font-weight:700; color:var(--brand-blue); }
+    .msgbox-body { padding:14px 20px 18px; font-size:13px; color:#374151; line-height:1.6; }
+    .msgbox-footer { padding:10px 20px 16px; display:flex; justify-content:flex-end; }
+    .msgbox-btn { padding:8px 22px; border:2px solid transparent; border-radius:7px; font-size:12px; font-weight:700; cursor:pointer; font-family:"Source Sans 3",sans-serif; }
+    .msgbox-btn.primary { background:var(--brand-gold); color:var(--brand-blue); border-color:var(--brand-gold); }
+    .content { padding: 24px 32px; color: #a0b8d8; font-size: 13px; text-align: center; }
+    .home-summary { padding: 20px 32px; margin: 20px 32px; font-family: "Source Sans 3", monospace; text-align: left; color: #ffffff; overflow-x: auto; }
+    .home-summary-title { color: #ffffff; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 16px; }
+    .home-summary-table { border-collapse: collapse; min-width: 100%; }
+    .home-summary-table th, .home-summary-table td { padding: 8px 16px; text-align: left; white-space: nowrap; border-bottom: 1px solid rgba(255,255,255,0.15); }
+    .home-summary-table th { color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border-bottom: 2px solid rgba(255,255,255,0.3); }
+    .home-summary-table td { color: #ffffff; font-weight: 700; font-family: monospace; font-size: 15px; }
+  </style>
+</head>
+<body>
 
+<div class="page-header">
+  <h2>ALOMHOW CO LTD</h2>
+  <span class="header-badge">⚡ Payslip</span>
+</div>
+
+<div class="controls">
+  <div class="row-container">
+    <label>From:</label>
+    <input type="text" id="dateFrom" placeholder="Start Date" style="width:130px" />
+    <label>To:</label>
+    <input type="text" id="dateTo" placeholder="End Date" style="width:130px" />
+    <button class="btn btn-gold" onclick="openEmpPanel()">👥 Select Employees &amp; Payslip</button>
+    <button class="btn" style="background:#0d9488;color:#fff;border-color:#0d9488" onclick="refreshAllData()" id="refreshBtn">🔄 Refresh</button>
+    <span id="cacheStatus" style="color:#6a88aa;font-size:11px;font-weight:600">
+      <span class="status-dot status-loading"></span> Data not loaded yet
+    </span>
+  </div>
+</div>
+
+<!-- ── Home Page Total Salary Summary (auto-loads on page open) ── -->
+<div class="home-summary" id="homeSummary">
+  <div class="home-summary-title">⏳ Loading Total Salary Summary...</div>
+</div>
+
+<!-- Employee Panel -->
+<div class="emp-panel-overlay" id="empPanel">
+  <div class="emp-panel-box">
+    <div class="emp-panel-header">
+      <h3>👥 Payslip</h3>
+      <button class="panel-close" onclick="closeEmpPanel()">✕</button>
+    </div>
+    <div class="emp-panel-controls">
+      <input type="text" id="panelSearch" placeholder="🔍 Search by name or ID..." oninput="filterPanelList()" />
+      <label style="color:var(--brand-gold);font-size:11px">From:</label>
+      <input type="text" id="panelDateFrom" placeholder="Start" class="date-input" />
+      <label style="color:var(--brand-gold);font-size:11px">To:</label>
+      <input type="text" id="panelDateTo" placeholder="End" class="date-input" />
+    </div>
+    <div class="emp-panel-body">
+      <table class="emp-panel-table">
+        <thead>
+          <tr>
+            <th style="width:40px;text-align:center">
+              <input type="checkbox" id="panelSelectAll" onchange="togglePanelAll()" style="width:15px;height:15px;accent-color:var(--brand-blue);cursor:pointer" />
+            </th>
+            <th>EMP ID</th><th>Employee Name</th><th>Passport</th><th>Designation</th>
+          </tr>
+        </thead>
+        <tbody id="empPanelBody">
+          <tr><td colspan="5" style="text-align:center;padding:30px;color:#9ca3af">⏳ Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="emp-panel-footer">
+      <span class="sel-count" id="panelSelCount">0 selected</span>
+      <button class="btn-gen-selected" id="panelGenBtn" onclick="generateFromPanel()" disabled>⚡ Generate Payslip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Review & Edit Panel (auto-fetched data, manually editable) -->
+<div class="emp-panel-overlay" id="editPanel">
+  <div class="emp-panel-box" style="width:820px">
+    <div class="emp-panel-header">
+      <h3>✏️ Review &amp; Edit Earnings / Deductions</h3>
+      <button class="panel-close" onclick="closeEditPanel()">✕</button>
+    </div>
+    <div class="emp-panel-controls">
+      <span style="color:#a0b8d8;font-size:11px">অটো-ফেচ করা ডাটা নিচে দেখানো হয়েছে। প্রয়োজনে যেকোনো ফিল্ড ম্যানুয়ালি বদলে দিন — Gross/Total/Net নিজে থেকেই রিক্যালকুলেট হবে।</span>
+    </div>
+    <div class="emp-panel-body" id="editPanelBody" style="padding:14px 16px"></div>
+    <div class="emp-panel-footer">
+      <span class="sel-count" id="editPanelCount">0 employee(s)</span>
+      <button class="btn-gen-selected" id="editFinalBtn" onclick="finalizeGenerate()">🖨️ Generate Final Payslip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generation Loader -->
+<div class="gen-loader" id="genLoader">
+  <div class="gen-spinner"></div>
+  <div class="gen-loader-title">⚡ Generating Payslips</div>
+  <div class="gen-count-display">
+    <div class="gen-count-label">Completed</div>
+    <div class="gen-count-numbers" id="genCountCurrent">0</div>
+    <div class="gen-count-of">of <span id="genCountTotal">0</span> payslip(s) </div>
+  </div>
+  <div class="gen-progress-wrap"><div class="gen-progress-bar" id="genProgressBar"></div></div>
+  <div class="gen-emp-badge" id="genEmpBadge">🔄 Initializing...</div>
+  <div class="gen-loader-sub" id="genLoaderSub">Please wait...</div>
+</div>
+
+<!-- Message Box -->
+<div class="msgbox-overlay" id="msgboxOverlay">
+  <div class="msgbox-card">
+    <div class="msgbox-header">
+      <div class="msgbox-icon warn" id="msgboxIcon">⚠️</div>
+      <div class="msgbox-title" id="msgboxTitle">Notice</div>
+    </div>
+    <div class="msgbox-body" id="msgboxBody"></div>
+    <div class="msgbox-footer">
+      <button class="msgbox-btn primary" onclick="closeMsgBox()">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+  authDomain: "munna-acl-fda7c.firebaseapp.com",
+  databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "munna-acl-fda7c",
+  storageBucket: "munna-acl-fda7c.firebasestorage.app",
+  messagingSenderId: "371130316468",
+  appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+};
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+// ── Holiday Set ──
+let _holidaySet = new Set();
+
+// ── onDayCreate: রবিবার ও Holiday লাল ──
+function redDayCreate(dayElem) {
+  const d = dayElem.dateObj;
+  if (!d) return;
+  if (d.getDay() === 0) {
+    dayElem.classList.add("is-sunday");
+  }
+  const y   = d.getFullYear();
+  const m   = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  const ds  = `${y}-${m}-${day}`;
+  if (_holidaySet.has(ds)) {
+    dayElem.classList.add("is-holiday");
+    dayElem.title = "Holiday";
+  }
+}
+
+const redDayConfig = {
+  dateFormat: "Y-m-d",
+  onDayCreate: function(dObj, dStr, fp, dayElem) { redDayCreate(dayElem); }
+};
+
+// ── Default date range: 1st of current month → today ──
+function getDefaultDateRange() {
+  const now = new Date();
+  const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+  const pad = (n) => String(n).padStart(2, "0");
+  const toStr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  return { from: toStr(firstDay), to: toStr(now) };
+}
+const _defaultRange = getDefaultDateRange();
+
+flatpickr("#dateFrom",      { ...redDayConfig, defaultDate: _defaultRange.from, onChange: syncPanelDates });
+flatpickr("#dateTo",        { ...redDayConfig, defaultDate: _defaultRange.to,   onChange: syncPanelDates });
+flatpickr("#panelDateFrom", { ...redDayConfig, defaultDate: _defaultRange.from });
+flatpickr("#panelDateTo",   { ...redDayConfig, defaultDate: _defaultRange.to });
+
+// Holiday load from Firestore
+firebase.firestore().collection("HOLIDAY_LIST").get()
+  .then(snap => {
+    snap.forEach(doc => _holidaySet.add(doc.id));
+    // Redraw all datepickers after holidays loaded
+    ["dateFrom","dateTo","panelDateFrom","panelDateTo"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el._flatpickr) el._flatpickr.redraw();
+    });
+  })
+  .catch(e => console.error("Holiday load error:", e));
+
+async function getWorkingDays(dateStr) {
+  const d = new Date(dateStr);
+  const year = d.getFullYear();
+  const month = d.getMonth();
+  const totalDays = new Date(year, month + 1, 0).getDate();
+  let sundays = 0;
+  for (let i = 1; i <= totalDays; i++) {
+    if (new Date(year, month, i).getDay() === 0) sundays++;
+  }
+  const db = firebase.firestore();
+  const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+  let holidays = 0;
+  holidaySnap.forEach(doc => {
+    const hDate = new Date(doc.id);
+    if (hDate.getFullYear() === year && hDate.getMonth() === month) {
+      if (new Date(doc.id).getDay() !== 0) holidays++;
+    }
+  });
+  return totalDays - sundays - holidays;
+}
+
+function syncPanelDates() {
+  const f = document.getElementById("dateFrom").value;
+  const t = document.getElementById("dateTo").value;
+  if (f) try { document.getElementById("panelDateFrom")._flatpickr.setDate(f); } catch(e){}
+  if (t) try { document.getElementById("panelDateTo")._flatpickr.setDate(t); } catch(e){}
+  // ── From ও To দুটোই বাছা হলে, সেই রেঞ্জ অনুযায়ী হোম সামারি রিফ্রেশ করি ──
+  if (f && t) loadHomeSummary(f, t);
+}
+
+// ── Helper: "2026-06-01" → "JUNE_2026" ───────────────────────
+function getMonthKey(dateStr) {
+  const months = [
+    "JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE",
+    "JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"
+  ];
+  const d = new Date(dateStr);
+  return `${months[d.getMonth()]}_${d.getFullYear()}`;
+}
+
+// ── Helper: "2026-06-01" → "JUNE_2026" (for SALARY_POSTED path) ──
+function getMonthYearKey(dateStr) {
+  if (!dateStr) return "UNKNOWN";
+  const d = new Date(dateStr);
+  const monthNames = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+  return `${monthNames[d.getMonth()]}_${d.getFullYear()}`;
+}
+
+// ══════════════════════════════════════════
+//  GLOBAL CACHE
+// ══════════════════════════════════════════
+let _cache = {
+  loaded: false, loading: false,
+  empList: [], empMap: {}, advMap: {}, fineMap: {},
+};
+
+// ══════════════════════════════════════════
+//  REFRESH BUTTON — সব ক্যাশ ক্লিয়ার করে ডাটাবেস থেকে নতুন ডাটা আনে
+// ══════════════════════════════════════════
+async function refreshAllData() {
+  const btn = document.getElementById("refreshBtn");
+  const originalText = btn.innerHTML;
+  btn.disabled = true;
+  btn.innerHTML = "⏳ Refreshing...";
+  try {
+    // সব ক্যাশ রিসেট
+    _cache.loaded = false;
+    _cache.loading = false;
+    _cache.empList = [];
+    _cache.empMap = {};
+    _cache.advMap = {};
+    _cache.fineMap = {};
+    _attCache = {};
+
+    await preloadStaticData();
+    const f = document.getElementById("dateFrom").value || _defaultRange.from;
+    const t = document.getElementById("dateTo").value   || _defaultRange.to;
+    await loadHomeSummary(f, t);
+
+    showMsg("✅ ডাটাবেস থেকে নতুন ডাটা লোড করা হয়েছে।", { title: "Refreshed", type: "ok" });
+  } catch(e) {
+    showMsg(`Error: ${e.message}`, { title: "Refresh Error", type: "err" });
+  }
+  btn.disabled = false;
+  btn.innerHTML = originalText;
+}
+
+async function preloadStaticData() {
+  if (_cache.loaded || _cache.loading) return;
+  _cache.loading = true;
+  setStatus("loading", "⏳ Loading data...");
+  try {
+    const db   = firebase.firestore();
+    const rtdb = firebase.database();
+
+    const empSnap = await db.collection("EMPLOYEE_LIST").get();
+    _cache.empList = []; _cache.empMap = {};
+    empSnap.forEach(d => {
+      const e = d.data();
+      const emp = {
+        id: e.id || d.id, name: e.name || "",
+        passport: e.passport || "", desig: e.designation || "",
+        salary: parseInt(e.salary) || 0, joining: e.joining || "",
+        wpNo: e.wpNo || "", rpUidNo: e.rpUidNo || "",
+      };
+      _cache.empList.push(emp);
+      _cache.empMap[emp.id] = emp;
+    });
+    _cache.empList.sort((a,b) => a.id.localeCompare(b.id));
+
+    const advSnap = await rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value");
+    const advData = advSnap.val() || {};
+    _cache.advMap = {};
+    for (const id in advData) {
+      _cache.advMap[id] = parseInt(advData[id].pending) || 0;
+    }
+
+    // ── Fine pending — FINE_SUMMARY/USERS (same pattern as advance) ──
+    const fineSnap = await rtdb.ref("FINE_SUMMARY/USERS").once("value");
+    const fineData = fineSnap.val() || {};
+    _cache.fineMap = {};
+    for (const id in fineData) {
+      _cache.fineMap[id] = parseInt(fineData[id].pending) || 0;
+    }
+
+    _cache.loaded = true; _cache.loading = false;
+    setStatus("ok", `✅ ${_cache.empList.length} employees loaded`);
+  } catch(e) {
+    _cache.loading = false;
+    setStatus("err", "⚠️ Load error: " + e.message);
+  }
+}
+
+function setStatus(type, msg) {
+  const el = document.getElementById("cacheStatus");
+  const dotClass = type === "ok" ? "status-ok" : "status-loading";
+  el.innerHTML = `<span class="status-dot ${dotClass}"></span>${msg}`;
+}
+
+let _attCache = {};
+
+// ══════════════════════════════════════════
+//  ATTENDANCE + OT + OTHERS RANGE DATA
+// ══════════════════════════════════════════
+async function fetchRangeData(dFromVal, dToVal) {
+  const key = `${dFromVal}|${dToVal}`;
+  if (_attCache[key]) return _attCache[key];
+
+  setStatus("loading", "⏳ Fetching attendance & OT...");
+  const db   = firebase.firestore();
+  const rtdb = firebase.database();
+
+  // ── 1. Present_Absent (attendance + status + holiday/sunday work) ──
+  const snap = await db.collectionGroup("Present_Absent")
+    .where("DATE", ">=", dFromVal)
+    .where("DATE", "<=", dToVal)
+    .get();
+
+  const attendance = {};
+  snap.forEach(doc => {
+    const d = doc.data();
+    if (!d.ID || !d.DATE) return;
+    const id = String(d.ID).trim();
+    if (!attendance[id]) attendance[id] = { norm:0, hol:0, sun:0, abs:0, pres:0, fine:0, others:0 };
+    const rec = attendance[id];
+    if (d.STATUS === "ABSENT")  rec.abs++;
+    if (d.STATUS === "PRESENT") rec.pres++;
+    if (d.REMARK  === "NORMAL WORK") rec.norm++;
+    rec.hol    += parseFloat(d.HOLIDAY_WORK) || 0;
+    rec.sun    += parseFloat(d.SUNDAY_WORK)  || 0;
+    rec.fine   += parseFloat(d.FINE)         || 0;
+  });
+
+  // ── 2. "Others" — আলাদা sub-collection থেকে AMOUNT (client-side date filter) ──
+  const othersSnap = await db.collectionGroup("Others").get();
+  othersSnap.forEach(doc => {
+    const d = doc.data();
+    if (!d.ID || !d.DATE) return;
+    if (d.DATE < dFromVal || d.DATE > dToVal) return;
+    const id = String(d.ID).trim();
+    if (!attendance[id]) attendance[id] = { norm:0, hol:0, sun:0, abs:0, pres:0, fine:0, others:0 };
+    attendance[id].others += parseFloat(d.AMOUNT) || 0;
+  });
+
+  // ── 3. Overtime — Hours × Rate (RTDB: OVER_TIME) ──
+  const otMap  = {};
+  const otHrsMap = {};
+  const otSnap = await rtdb.ref("OVER_TIME").once("value");
+  const otData = otSnap.val() || {};
+  for (const monthKey in otData) {
+    const monthObj = otData[monthKey];
+    if (typeof monthObj !== "object" || !monthObj) continue;
+    for (const dateKey in monthObj) {
+      const dateObj = monthObj[dateKey];
+      if (typeof dateObj !== "object" || !dateObj) continue;
+      for (const recKey in dateObj) {
+        const row = dateObj[recKey];
+        if (!row || !row.ID) continue;
+        const otDateStr = String(row.OT_Date || "").trim();
+        if (!otDateStr || otDateStr < dFromVal || otDateStr > dToVal) continue;
+        const id = String(row.ID).trim();
+        const otHrs  = parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0);
+        const otRate = parseFloat(row.OT_Rate || row.ot_rate || row.OT_RATE || 0);
+        otMap[id]    = (otMap[id]    || 0) + (otHrs * otRate);
+        otHrsMap[id] = (otHrsMap[id] || 0) + otHrs;
+      }
+    }
+  }
+
+  const result = { attendance, otMap, otHrsMap };
+  _attCache[key] = result;
+  setStatus("ok", `✅ Data ready — ${Object.keys(attendance).length} employee records`);
+  return result;
+}
+
+// ══════════════════════════════════════════
+//  BONUS DATA (Performance + Attendance Bonus) — date range wise
+// ══════════════════════════════════════════
+async function fetchBonusForEmp(empId, dFromVal, dToVal) {
+  const rtdb = firebase.database();
+  const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+  const monthKey = getMonthKey(dFromVal);
+  const bonusSnap = await rtdb.ref(`BONUS_ENTRY/${monthKey}`).once("value");
+  const bonusMonthData = bonusSnap.val() || {};
+  let pBonus = 0, aBonus = 0;
+  for (const dateKey in bonusMonthData) {
+    const dr = bonusMonthData[dateKey];
+    if (!dr || typeof dr !== "object") continue;
+    if (!dr[empId]) continue;
+    const row = dr[empId];
+    const date = dateKey.replace("DATE_", "");
+    const bonusDate = new Date(row.DATE || date);
+    if (bonusDate >= dFrom && bonusDate <= dTo) {
+      pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
+      aBonus += parseFloat(row.ATTENDANCE_BONUS)  || 0;
+    }
+  }
+  return { pBonus, aBonus };
+}
+
+// ══════════════════════════════════════════
+//  BUILD PAYSLIP DATA
+// ══════════════════════════════════════════
+function getDaysInMonth(dateStr) {
+  if (!dateStr) return 26;
+  const d = new Date(dateStr);
+  return new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+}
+
+async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus = 0, aBonus = 0) {
+  const emp = _cache.empMap[empId] || { id:empId, name:"", desig:"", passport:"", joining:"", salary:0, wpNo:"", rpUidNo:"" };
+  const salary    = emp.salary;
+  const isCook    = (emp.desig || "").trim().toUpperCase() === "COOK";
+  const dailyRate = parseFloat((salary / workingDays).toFixed(2));
+
+  const att          = rangeData.attendance[empId] || { norm:0, hol:0, sun:0, abs:0, pres:0, others:0 };
+  const totalOT      = rangeData.otMap[empId]    || 0;
+  const totalOTHrs   = (rangeData.otHrsMap && rangeData.otHrsMap[empId]) || 0;
+  const totalAdvance = _cache.advMap[empId]      || 0;
+  const totalFine    = _cache.fineMap[empId]     || 0;
+
+  // ── Cook হলে Present দিয়ে হিসাব, বাকিদের জন্য Normal Work দিয়ে ──
+  const normalAmt    = isCook ? dailyRate * att.pres : dailyRate * att.norm;
+  const fixTravelling = 0, prgfEarn = 0, incomeTax = 0, prgfDed = 0; // manual-only fields, default 0
+  const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0) + pBonus + aBonus + fixTravelling + prgfEarn;
+  const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
+  const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
+  const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine + incomeTax + prgfDed;
+  const netPay    = Math.round(gross - totalDed);
+
+  const now = new Date();
+  let serviceLength = "";
+  if (emp.joining) {
+    const parts = emp.joining.split(/[\/\-\.]/);
+    let jDate;
+    if (parts[0].length === 4) jDate = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    else jDate = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+    if (!isNaN(jDate)) {
+      let months = (now.getFullYear()-jDate.getFullYear())*12+(now.getMonth()-jDate.getMonth());
+      if (now.getDate()<jDate.getDate()) months--;
+      if (months < 0) months = 0;
+      const years = Math.floor(months/12), rem = months%12;
+      const formatted = years===0 ? `${rem} Month${rem!==1?'s':''}` :
+        rem===0 ? `${years} Year${years!==1?'s':''}` :
+        `${years} Year${years!==1?'s':''} ${rem} Month${rem!==1?'s':''}`;
+      serviceLength = { total: months, formatted };
+    }
+  }
+
+  return {
+    empId: emp.id, name: emp.name, desig: emp.desig, passport: emp.passport,
+    joining: emp.joining, wpNo: emp.wpNo||"", rpUidNo: emp.rpUidNo||"",
+    entryDate: now.toLocaleDateString("en-GB"),
+    time: now.toLocaleTimeString("en-GB", { hour:"2-digit", minute:"2-digit" }),
+    serviceLength,
+    normalWork: normalAmt.toFixed(2), holidayWork: att.hol.toFixed(2),
+    sundayWork: att.sun.toFixed(2), overtime: totalOT.toFixed(2),
+    others: (att.others||0).toFixed(2), gross: gross.toFixed(2),
+    csgEmp: csgEmp.toFixed(2), npsEmp: npsEmp.toFixed(2),
+    advanceRefund: totalAdvance.toFixed(2),
+    fine: totalFine.toFixed(2),
+    absentDays: att.abs, totalDed: totalDed.toFixed(2),
+    netPay: netPay, netPayWords: numToWords(netPay),
+    pBonus: pBonus.toFixed(2), aBonus: aBonus.toFixed(2),
+    fixTravelling: fixTravelling.toFixed(2), prgfEarn: prgfEarn.toFixed(2),
+    incomeTax: incomeTax.toFixed(2), prgfDed: prgfDed.toFixed(2),
+  };
+}
+
+// ══════════════════════════════════════════
+//  EMPLOYEE PANEL
+// ══════════════════════════════════════════
+let _empListCache = null;
+
+async function openEmpPanel() {
+  document.getElementById("empPanel").classList.add("active");
+  document.body.style.overflow = "hidden";
+  syncPanelDates();
+  if (!_cache.loaded) await preloadStaticData();
+  _empListCache = _cache.empList;
+  renderPanelRows(_empListCache);
+}
+function closeEmpPanel() {
+  document.getElementById("empPanel").classList.remove("active");
+  document.body.style.overflow = "";
+}
+document.getElementById("empPanel").addEventListener("click", e => {
+  if (e.target === document.getElementById("empPanel")) closeEmpPanel();
+});
+
+function renderPanelRows(list) {
+  const tbody = document.getElementById("empPanelBody");
+  tbody.innerHTML = "";
+  list.forEach(e => {
+    const tr = document.createElement("tr");
+    tr.dataset.id = e.id;
+    tr.innerHTML = `
+      <td style="text-align:center"><input type="checkbox" class="panel-cb" value="${e.id}" onchange="updatePanelCount()" style="width:15px;height:15px;accent-color:#6366f1;cursor:pointer"/></td>
+      <td style="font-family:monospace;font-weight:700;color:var(--brand-blue)">${e.id}</td>
+      <td style="font-weight:600">${e.name}</td>
+      <td style="color:#6b7280;font-size:11px">${e.passport}</td>
+      <td style="color:#6b7280;font-size:11px">${e.desig}</td>`;
+    tr.addEventListener("click", ev => {
+      if (ev.target.tagName === "INPUT") return;
+      const cb = tr.querySelector(".panel-cb");
+      cb.checked = !cb.checked;
+      updatePanelCount();
+    });
+    tr.style.cursor = "pointer";
+    tbody.appendChild(tr);
+  });
+  updatePanelCount();
+}
+
+function filterPanelList() {
+  const q = document.getElementById("panelSearch").value.toLowerCase();
+  document.querySelectorAll("#empPanelBody tr").forEach(tr => {
+    tr.style.display = (tr.textContent||"").toLowerCase().includes(q) ? "" : "none";
+  });
+}
+
+function togglePanelAll() {
+  const master = document.getElementById("panelSelectAll").checked;
+  document.querySelectorAll("#empPanelBody tr").forEach(tr => {
+    if (tr.style.display === "none") return;
+    const cb = tr.querySelector(".panel-cb");
+    if (cb) cb.checked = master;
+  });
+  updatePanelCount();
+}
+
+function updatePanelCount() {
+  const checked = document.querySelectorAll(".panel-cb:checked").length;
+  const total   = document.querySelectorAll(".panel-cb").length;
+  document.getElementById("panelSelCount").textContent = `${checked} selected`;
+  document.getElementById("panelGenBtn").disabled = checked === 0;
+  const allCb = document.getElementById("panelSelectAll");
+  allCb.indeterminate = checked > 0 && checked < total;
+  allCb.checked = checked === total && total > 0;
+  document.querySelectorAll("#empPanelBody tr").forEach(tr => {
+    const cb = tr.querySelector(".panel-cb");
+    if (cb) tr.style.background = cb.checked ? "#ede9fe" : "";
+  });
+}
+
+// ══════════════════════════════════════════
+//  GENERATE PAYSLIPS
+// ══════════════════════════════════════════
+// ── এখানে প্রতিটি নির্বাচিত employee-এর অটো-ফেচ করা payslip data (edit করার আগে) রাখা হয় ──
+let _pendingSlipData = []; // [{ empId, name, d, orig }]
+let _pendingPeriod = "";
+
+async function generateFromPanel() {
+  const selected = [...document.querySelectorAll(".panel-cb:checked")].map(cb => cb.value);
+  if (!selected.length) return;
+  const dFromVal = document.getElementById("panelDateFrom").value;
+  const dToVal   = document.getElementById("panelDateTo").value;
+  if (!dFromVal || !dToVal) { showMsg("Date range required", { title:"Date Range Required", type:"warn" }); return; }
+  const period = `${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
+  const genBtn = document.getElementById("panelGenBtn");
+  genBtn.disabled = true; genBtn.textContent = "⏳ Fetching...";
+  document.getElementById("genLoader").classList.add("active");
+  updateLoader(0, selected.length, "");
+  document.getElementById("genLoaderSub").textContent = "Fetching all data at once...";
+
+  try {
+    if (!_cache.loaded) await preloadStaticData();
+    const rangeData   = await fetchRangeData(dFromVal, dToVal);
+    const workingDays = await getWorkingDays(dFromVal);
+
+    // ✅ BONUS: একবারে সব bonus data লোড করি
+    const rtdb = firebase.database();
+    const bonusSnap = await rtdb.ref("BONUS_ENTRY").once("value");
+    const bonusData = bonusSnap.val() || {};
+    const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+    const monthKey = getMonthKey(dFromVal);
+
+    // ── PAID status সব employee-এর জন্য একবারে প্যারালালি নিয়ে আসি (লুপের ভেতরে নয়) ──
+    const postedMonthKey = getMonthYearKey(dFromVal);
+    const postedSnaps = await Promise.all(
+      selected.map(empId => rtdb.ref(`SALARY_POSTED/${postedMonthKey}/${empId}`).once("value"))
+    );
+    selected.forEach((empId, idx) => {
+      const _postedInfo = postedSnaps[idx].val();
+      if (_postedInfo && _postedInfo.status === "PAID") {
+        _cache.advMap[empId]  = _postedInfo.adv  || 0;
+        _cache.fineMap[empId] = _postedInfo.fine || 0;
+      }
+    });
+
+    _pendingSlipData = [];
+    for (let i = 0; i < selected.length; i++) {
+      const empId = selected[i];
+      updateLoader(i, selected.length, empId);
+
+      // ✅ BONUS: এই employee-এর bonus হিসাব করুন
+      let pBonus = 0, aBonus = 0;
+      if (bonusData[monthKey] && typeof bonusData[monthKey] === "object") {
+        for (const df in bonusData[monthKey]) {
+          const dr = bonusData[monthKey][df];
+          if (!dr || typeof dr !== "object") continue;
+          if (!dr[empId]) continue;
+          const row = dr[empId];
+          const bonusDate = new Date(row.DATE || df);
+          if (bonusDate >= dFrom && bonusDate <= dTo) {
+            pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
+            aBonus += parseFloat(row.ATTENDANCE_BONUS)  || 0;
+          }
+        }
+      }
+
+      const d = await buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus, aBonus);
+      _pendingSlipData.push({ empId, name: d.name, d, orig: { ...d } });
+      updateLoader(i + 1, selected.length, empId);
+    }
+    _pendingPeriod = period;
+    closeEmpPanel();
+    openEditPanel();
+  } catch(e) {
+    showMsg(`Error: ${e.message}`, { title:"Fetch Error", type:"err" });
+  }
+  document.getElementById("genLoader").classList.remove("active");
+  genBtn.disabled = false; genBtn.textContent = "⚡ Generate Payslip";
+}
+
+// ══════════════════════════════════════════
+//  REVIEW & EDIT PANEL (auto data + manual override)
+// ══════════════════════════════════════════
+function openEditPanel() {
+  document.getElementById("editPanel").classList.add("active");
+  document.body.style.overflow = "hidden";
+  document.getElementById("editPanelCount").textContent = `${_pendingSlipData.length} employee(s) — ${_pendingPeriod}`;
+  renderEditCards();
+}
+function closeEditPanel() {
+  document.getElementById("editPanel").classList.remove("active");
+  document.body.style.overflow = "";
+}
+document.getElementById("editPanel").addEventListener("click", e => {
+  if (e.target === document.getElementById("editPanel")) closeEditPanel();
+});
+
+// প্রতিটি earning ফিল্ড যেগুলো ম্যানুয়ালি এডিট করা যাবে (Deduction গুলো নিচে অটোমেটিক ক্যালকুলেট হয়)
+const EDIT_EARNING_FIELDS = [
+  ["normalWork", "Normal Work"], ["holidayWork", "Holidays"], ["sundayWork", "Sundays"],
+  ["fixTravelling", "Fix Travelling"], ["overtime", "Overtime"],
+  ["pBonus", "Performance Bonus"], ["aBonus", "Attendance Bonus"],
+  ["prgfEarn", "P.R.G.F"], ["others", "Other"],
+];
+// Deduction লাইনগুলো — সব কটাই অটোমেটিক (CSG/NPS গ্রস থেকে % হিসাবে, বাকিগুলো সিস্টেম থেকে অটো-ফেচ করা, ম্যানুয়ালি টাইপ করার দরকার নেই)
+const AUTO_DEDUCTION_LABELS = [
+  ["csgEmp", "CSG Emp. (1.5%)"], ["npsEmp", "NPS Emp. (1%)"], ["incomeTax", "Income Tax"],
+  ["advanceRefund", "Advance Refund"], ["fine", "Fine"], ["prgfDed", "P.R.G.F"],
+];
+
+// ডাটা না থাকলে (0) ইনপুট বক্স ফাঁকা দেখাবে, টাইপ করা সহজ হবে
+function blankIfZero(val) {
+  const n = parseFloat(val);
+  return (!n || n === 0) ? "" : val;
+}
+
+function renderEditCards() {
+  const body = document.getElementById("editPanelBody");
+  body.innerHTML = _pendingSlipData.map(row => {
+    const d = row.d, id = row.empId;
+    const earnInputs = EDIT_EARNING_FIELDS.map(([key, label]) => `
+      <div class="edit-field-row">
+        <label>${label}</label>
+        <input type="number" step="0.01" id="ef_${id}_${key}" value="${blankIfZero(d[key])}" placeholder="0.00" oninput="recalcEditTotals('${id}')" />
+      </div>`).join("");
+    const dedDisplay = AUTO_DEDUCTION_LABELS.map(([key, label]) => `
+      <div class="edit-field-row">
+        <label>${label} <span style="color:#9ca3af;font-size:9px">(auto)</span></label>
+        <span class="ded-auto-val" id="ded_${id}_${key}">${d[key]}</span>
+      </div>`).join("");
+    return `
+    <div class="edit-card" data-emp="${id}">
+      <div class="edit-card-head">
+        <div><span class="emp-title">${id} — ${d.name}</span> <span class="emp-sub">(${d.desig || ""})</span></div>
+        <button class="edit-reset-btn" onclick="resetEditCard('${id}')">🔄 Reset to Auto</button>
+      </div>
+      <div class="edit-card-grid">
+        <div>
+          <div class="edit-col-title">Earnings (Manual Edit করা যাবে)</div>
+          ${earnInputs}
+        </div>
+        <div>
+          <div class="edit-col-title">Deductions (Automatic)</div>
+          ${dedDisplay}
+          <div class="edit-field-row" style="margin-top:6px">
+            <label style="color:#9ca3af">Absent (info, days)</label>
+            <input type="number" step="1" id="ef_${id}_absentDays" value="${blankIfZero(d.absentDays)}" placeholder="0" oninput="recalcEditTotals('${id}')" />
+          </div>
+        </div>
+        <div class="edit-totals">
+          <span>GROSS: <span class="gross-val" id="et_${id}_gross">${d.gross}</span></span>
+          <span>TOTAL DED: <span class="ded-val" id="et_${id}_totalDed">${d.totalDed}</span></span>
+          <span>NET PAY: <span class="net-val" id="et_${id}_netPay">${d.netPay}</span></span>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+  _pendingSlipData.forEach(row => recalcEditTotals(row.empId));
+}
+
+function recalcEditTotals(empId) {
+  const row = _pendingSlipData.find(r => r.empId === empId);
+  const num = key => parseFloat(document.getElementById(`ef_${empId}_${key}`).value) || 0;
+  const gross = EDIT_EARNING_FIELDS.reduce((s, [key]) => s + num(key), 0);
+
+  // ── Deductions অটোমেটিক ক্যালকুলেট: CSG/NPS গ্রস থেকে %, বাকিগুলো অটো-ফেচ করা ফিক্সড ভ্যালু ──
+  const csgEmp = Math.round(gross * 0.015 * 100) / 100;
+  const npsEmp = Math.round(gross * 0.01  * 100) / 100;
+  const incomeTax     = parseFloat(row.orig.incomeTax)     || 0;
+  const advanceRefund = parseFloat(row.orig.advanceRefund) || 0;
+  const fine           = parseFloat(row.orig.fine)         || 0;
+  const prgfDed        = parseFloat(row.orig.prgfDed)      || 0;
+
+  document.getElementById(`ded_${empId}_csgEmp`).textContent = csgEmp.toFixed(2);
+  document.getElementById(`ded_${empId}_npsEmp`).textContent = npsEmp.toFixed(2);
+  document.getElementById(`ded_${empId}_incomeTax`).textContent = incomeTax.toFixed(2);
+  document.getElementById(`ded_${empId}_advanceRefund`).textContent = advanceRefund.toFixed(2);
+  document.getElementById(`ded_${empId}_fine`).textContent = fine.toFixed(2);
+  document.getElementById(`ded_${empId}_prgfDed`).textContent = prgfDed.toFixed(2);
+
+  const totalDed = csgEmp + npsEmp + incomeTax + advanceRefund + fine + prgfDed;
+  const netPay   = Math.round(gross - totalDed);
+  document.getElementById(`et_${empId}_gross`).textContent    = gross.toFixed(2);
+  document.getElementById(`et_${empId}_totalDed`).textContent = totalDed.toFixed(2);
+  document.getElementById(`et_${empId}_netPay`).textContent   = netPay;
+}
+
+function resetEditCard(empId) {
+  const row = _pendingSlipData.find(r => r.empId === empId);
+  if (!row) return;
+  EDIT_EARNING_FIELDS.forEach(([key]) => {
+    const el = document.getElementById(`ef_${empId}_${key}`);
+    if (el) el.value = blankIfZero(row.orig[key]);
+  });
+  const absEl = document.getElementById(`ef_${empId}_absentDays`);
+  if (absEl) absEl.value = blankIfZero(row.orig.absentDays);
+  recalcEditTotals(empId);
+}
+
+// ══════════════════════════════════════════
+//  FINALIZE — এডিট করা earning + অটোমেটিক deduction দিয়ে প্রিন্ট-রেডি পেজ বানানো
+// ══════════════════════════════════════════
+async function finalizeGenerate() {
+  if (!_pendingSlipData.length) return;
+  const win = window.open("", "_blank");
+  if (!win) {
+    showMsg("Popup blocked! Browser-এ popup allow করুন।", { title:"Popup Blocked", type:"warn" });
+    return;
+  }
+  win.document.write(loaderPageHTML(_pendingSlipData.length));
+
+  const finalBtn = document.getElementById("editFinalBtn");
+  finalBtn.disabled = true; finalBtn.textContent = "⏳ Generating...";
+
+  try {
+    let allPages = "";
+    for (let i = 0; i < _pendingSlipData.length; i++) {
+      const row = _pendingSlipData[i];
+      const empId = row.empId;
+      try {
+        if (win && !win.closed) {
+          win.document.getElementById("cc").textContent = i;
+          win.document.getElementById("pb").style.width = (i / _pendingSlipData.length * 100) + "%";
+          win.document.getElementById("st").textContent = `Processing: ${empId}`;
+        }
+      } catch(e2) {}
+
+      const num = key => parseFloat(document.getElementById(`ef_${empId}_${key}`).value) || 0;
+      const gross = EDIT_EARNING_FIELDS.reduce((s, [key]) => s + num(key), 0);
+
+      const csgEmp = Math.round(gross * 0.015 * 100) / 100;
+      const npsEmp = Math.round(gross * 0.01  * 100) / 100;
+      const incomeTax     = parseFloat(row.orig.incomeTax)     || 0;
+      const advanceRefund = parseFloat(row.orig.advanceRefund) || 0;
+      const fine           = parseFloat(row.orig.fine)         || 0;
+      const prgfDed        = parseFloat(row.orig.prgfDed)      || 0;
+      const totalDed = csgEmp + npsEmp + incomeTax + advanceRefund + fine + prgfDed;
+      const netPay   = Math.round(gross - totalDed);
+      const absentDays = parseInt(document.getElementById(`ef_${empId}_absentDays`).value) || 0;
+
+      const finalD = { ...row.d };
+      EDIT_EARNING_FIELDS.forEach(([key]) => { finalD[key] = num(key).toFixed(2); });
+      finalD.csgEmp = csgEmp.toFixed(2); finalD.npsEmp = npsEmp.toFixed(2);
+      finalD.incomeTax = incomeTax.toFixed(2); finalD.advanceRefund = advanceRefund.toFixed(2);
+      finalD.fine = fine.toFixed(2); finalD.prgfDed = prgfDed.toFixed(2);
+      finalD.absentDays = absentDays;
+      finalD.gross    = gross.toFixed(2);
+      finalD.totalDed = totalDed.toFixed(2);
+      finalD.netPay   = netPay;
+      finalD.netPayWords = numToWords(netPay);
+
+      allPages += `<div class="page">${buildOneSlip(finalD, _pendingPeriod, "EMPLOYEE COPY")}${buildOneSlip(finalD, _pendingPeriod, "OFFICE COPY")}</div>`;
+    }
+    const fullHtml = `<!doctype html><html><head>
+      <meta charset="UTF-8"><title>Payslips — ${_pendingPeriod}</title>
+      <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">
+      ${payslipWindowCSS()}
+    </head><body>
+      <div class="no-print">
+        <button onclick="window.print()">🖨️ Print</button>
+        &nbsp;&nbsp;<span style="font-size:13px;color:#555;font-weight:700">${_pendingSlipData.length} payslip — ${_pendingPeriod}</span>
+      </div>
+      ${allPages}
+      <script>
+        function numToWords(amount) {
+          const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+          const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+          function b100(n){if(n<20)return ones[n];return tens[Math.floor(n/10)]+(n%10?" "+ones[n%10]:"")}
+          function b1000(n){if(n<100)return b100(n);return ones[Math.floor(n/100)]+" Hundred"+(n%100?" "+b100(n%100):"")}
+          const num=Math.floor(Number(amount)||0);
+          if(num===0)return"Zero MUR Only";
+          let r="";
+          if(num>=1000000)r+=b1000(Math.floor(num/1000000))+" Million ";
+          if(num>=1000)r+=b1000(Math.floor((num%1000000)/1000))+" Thousand ";
+          if(num%1000)r+=b1000(num%1000);
+          return r.trim()+" MUR Only";
+        }
+        const EARN_KEYS = ["normalWork","holidayWork","sundayWork","fixTravelling","overtime","pBonus","aBonus","prgfEarn","others"];
+        function recalcSlip(uid) {
+          const page = document.querySelector('.slip-page[data-uid="' + uid + '"]');
+          if (!page) return;
+          const num = key => { const el = document.getElementById('si_' + uid + '_' + key); return el ? (parseFloat(el.value) || 0) : 0; };
+          const gross = EARN_KEYS.reduce((s, key) => s + num(key), 0);
+          const csgEmp = Math.round(gross * 0.015 * 100) / 100;
+          const npsEmp = Math.round(gross * 0.01  * 100) / 100;
+          const adv  = parseFloat(page.dataset.adv)  || 0;
+          const fine = parseFloat(page.dataset.fine) || 0;
+          const tax  = parseFloat(page.dataset.tax)  || 0;
+          const prgfDed = parseFloat(page.dataset.prgfded) || 0;
+          const totalDed = csgEmp + npsEmp + adv + fine + tax + prgfDed;
+          const netPay = Math.round(gross - totalDed);
+          const set = (key, val) => { const el = document.getElementById('si_' + uid + '_' + key); if (el) el.textContent = val; };
+          set('gross', gross.toFixed(2));
+          set('grossBottom', gross.toFixed(2));
+          set('csgEmp', csgEmp.toFixed(2));
+          set('npsEmp', npsEmp.toFixed(2));
+          set('totalDed', totalDed.toFixed(2));
+          set('totalDedBottom', totalDed.toFixed(2));
+          set('netPay', netPay);
+          set('netPayBottom', netPay);
+          set('netPayWords', numToWords(netPay));
+        }
+        document.querySelectorAll('.slip-page').forEach(p => recalcSlip(p.dataset.uid));
+      <\/script>
+    </body></html>`;
+    win.document.open(); win.document.write(fullHtml); win.document.close();
+    closeEditPanel();
+  } catch(e) {
+    win.document.write(`<p style="color:red;padding:20px">Error: ${e.message}</p>`);
+    showMsg(`Error: ${e.message}`, { title:"Generation Error", type:"err" });
+  }
+  finalBtn.disabled = false; finalBtn.textContent = "🖨️ Generate Final Payslip";
+}
+
+function updateLoader(current, total, empId) {
+  document.getElementById("genCountCurrent").textContent = current;
+  document.getElementById("genCountTotal").textContent   = total;
+  document.getElementById("genProgressBar").style.width  = (total > 0 ? (current / total * 100) : 0) + "%";
+  document.getElementById("genEmpBadge").innerHTML = empId ? `🔄 Processing: <span>${empId}</span>` : `🔄 Initializing...`;
+  document.getElementById("genLoaderSub").textContent = total > 0 ? `${current} of ${total} payslip${total>1?'s':''} completed` : "Please wait...";
+}
+
+// ══════════════════════════════════════════
+//  PAYSLIP HTML BUILDER
+// ══════════════════════════════════════════
+function buildOneSlip(d, period, title) {
+  const uid = `${d.empId}__${title === "OFFICE COPY" ? "OFF" : "EMP"}`;
+  const ei = (key, val) => `<input type="number" step="0.01" class="slip-input" id="si_${uid}_${key}" value="${blankIfZero(val)}" placeholder="0.00" oninput="recalcSlip('${uid}')" />`;
+  return `
+  <div class="slip-page" data-uid="${uid}" data-adv="${d.advanceRefund}" data-fine="${d.fine}" data-tax="${d.incomeTax}" data-prgfded="${d.prgfDed}" style="position:relative;overflow:hidden;background:white;padding:8mm;border:1px solid #d1d5db;border-radius:4px;height:100%">
+    <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);opacity:.04;width:55%;z-index:0;pointer-events:none" alt="">
+    <div style="position:relative;z-index:1;font-family:'Source Sans 3',Arial,sans-serif;font-size:11px;color:#111">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px">
+        <img src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo" style="width:36px;height:36px;object-fit:contain" alt="">
+        <div style="text-align:center">
+          <div style="font-size:17px;font-weight:800;text-transform:uppercase">ALAMHOW CO LTD</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;border-top:1px solid #ccc;padding-top:2px">PAYSLIP</div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #ccc;padding-bottom:4px;margin-bottom:6px">
+        <span style="font-size:10px;font-weight:700;text-decoration:underline">${title}</span>
+        <span style="font-size:10px">PERIOD: ${period}</span>
+        <span style="font-size:9px;color:#666">TIME: ${d.time}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1.4fr 1fr;gap:0 8px;margin-bottom:8px">
+        <div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP ID</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.empId}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">EMP NAME</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.name}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">DESIGNATION</span><span style="width:10px;font-weight:700">:</span><span>${d.desig}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PASSPORT NO</span><span style="width:10px;font-weight:700">:</span><span>${d.passport}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">JOINING DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.joining}</span></div>
+          <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength ? d.serviceLength.total + ' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>' : ''}</span></div>
+        </div>
+        <div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.entryDate}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">GANG</span><span style="width:10px;font-weight:700">:</span><span></span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">SRN</span><span style="width:10px;font-weight:700">:</span><span></span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">NPS NO</span><span style="width:10px;font-weight:700">:</span><span></span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">WP NO</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.wpNo}</span></div>
+          <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">RP UID NO</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700">${d.rpUidNo}</span></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div>
+          <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings <span style="font-weight:400;text-transform:none;font-size:8px;color:#6b7280">(editable)</span></div>
+          <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('normalWork', d.normalWork)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('holidayWork', d.holidayWork)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('sundayWork', d.sundayWork)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('fixTravelling', d.fixTravelling)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('overtime', d.overtime)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('pBonus', d.pBonus)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('aBonus', d.aBonus)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('prgfEarn', d.prgfEarn)}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Other</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${ei('others', d.others)}</td></tr>
+            <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px" id="si_${uid}_gross">${d.gross}</td></tr>
+          </table>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Deductions <span style="font-weight:400;text-transform:none;font-size:8px;color:#6b7280">(auto)</span></div>
+          <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">CSG Emp. <span style="color:#888">(1.5%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px" id="si_${uid}_csgEmp">${d.csgEmp}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">NPS Emp. <span style="color:#888">(1%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px" id="si_${uid}_npsEmp">${d.npsEmp}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Income Tax</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.incomeTax}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Advance Refund</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.advanceRefund}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fine</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fine}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Absent <span style="color:#aaa;font-size:9px">(info)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.absentDays} Days</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.prgfDed}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
+            <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">TOTAL</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px" id="si_${uid}_totalDed">${d.totalDed}</td></tr>
+          </table>
+        </div>
+      </div>
+      <div style="margin-top:8px;border-top:2px solid black;padding-top:6px">
+        <div style="font-weight:700;font-size:13px;display:flex;justify-content:space-between;text-transform:uppercase">
+          <span>Net Payable</span><span style="color:#15803d;font-family:monospace" id="si_${uid}_netPay">${d.netPay}</span>
+        </div>
+        <div style="margin-top:3px;font-size:10px;color:#444;border:1px dashed #aaa;border-radius:4px;padding:3px 6px">
+          <span style="font-weight:700">IN WORDS:</span> <span id="si_${uid}_netPayWords">${d.netPayWords}</span>
+        </div>
+      </div>
+      <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
+        <thead><tr style="background:#f3f4f6">
+          <th style="border:1px solid #9ca3af;padding:3px">A.L</th>
+          <th style="border:1px solid #9ca3af;padding:3px">S.L</th>
+          <th style="border:1px solid #9ca3af;padding:3px">L.L</th>
+          <th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
+          <th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
+        </tr></thead>
+        <tbody><tr>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+          <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+        </tr></tbody>
+      </table>
+      <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:16px">
+        <tr style="background:#f3f4f6;font-weight:700">
+          <th style="border:1px solid #9ca3af;padding:3px">GROSS PAY</th>
+          <th style="border:1px solid #9ca3af;padding:3px">DEDUCTIONS</th>
+          <th style="border:1px solid #9ca3af;padding:3px">B/F CENTS</th>
+        </tr>
+        <tr>
+          <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace" id="si_${uid}_grossBottom">${d.gross}</td>
+          <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace" id="si_${uid}_totalDedBottom">${d.totalDed}</td>
+          <td style="border:1px solid #9ca3af;padding:3px">-</td>
+        </tr>
+        <tr style="background:#f9fafb;font-weight:700">
+          <td style="border:1px solid #9ca3af;padding:2px">PAID BY CASH/CHQ/D.D</td>
+          <td style="border:1px solid #9ca3af;padding:2px">TO BE PAID</td>
+          <td style="border:1px solid #9ca3af;padding:2px">C/F CENTS</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #9ca3af;padding:3px">CASH</td>
+          <td style="border:1px solid #9ca3af;padding:3px;font-family:monospace;font-weight:700" id="si_${uid}_netPayBottom">${d.netPay}</td>
+          <td style="border:1px solid #9ca3af;padding:3px"></td>
+        </tr>
+      </table>
+      ${title === "OFFICE COPY" ? `
+      <div style="margin-top:64px;font-size:10px;text-transform:uppercase">
+        EMPLOYEE SIGNATURE:..........................................<br>
+        <span style="margin-top:4px;display:inline-block">DATE:...............................</span>
+      </div>` : `
+      <div style="margin-top:64px;font-size:10px;text-transform:uppercase">
+        DIRECTOR SIGNATURE:..........................................<br>
+        <span style="margin-top:4px;display:inline-block">DATE:...............................</span>
+      </div>`}
+    </div>
+  </div>`;
+}
+
+function payslipWindowCSS() {
+  return `<style>
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact;color-adjust:exact}
+    body{background:#f3f4f6;font-family:'Source Sans 3',Arial,sans-serif;padding:10mm}
+    .page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}
+    .page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}
+    .page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%) scaleY(-1);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}
+    .no-print{text-align:center;margin-bottom:8mm}
+    .no-print button{background:#002147;color:#ffd700;border:2px solid #ffd700;padding:10px 28px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .2s}
+    .no-print button:hover{background:#ffd700;color:#002147}
+    .slip-input{width:100%;text-align:right;font-family:monospace;font-size:10px;border:1px dashed #c7d2e0;border-radius:3px;background:#fffdf0;padding:0 2px;box-sizing:border-box}
+    .slip-input:focus{outline:none;border-color:#002147;background:#fff}
+    .slip-input::-webkit-inner-spin-button,.slip-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    @media print{
+      @page{size:A4 landscape;margin:2mm 6mm 6mm 6mm}
+      body{background:white;padding:0}
+      .no-print{display:none!important}
+      .page{box-shadow:none;border-radius:0;padding:0;max-width:100%;gap:22mm;margin:0;page-break-after:always;break-after:page}
+      .page:last-child{page-break-after:avoid;break-after:avoid}
+      .slip-input{border:none;background:transparent;padding:0}
+    }
+  </style>`;
+}
+
+function loaderPageHTML(total) {
+  return `<!doctype html><html><head><title>Generating...</title><style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{display:flex;align-items:center;justify-content:center;height:100vh;background:#002147;font-family:sans-serif;flex-direction:column;gap:20px}
+    .spinner{width:56px;height:56px;border:5px solid #1e3a5f;border-top-color:#ffd700;border-right-color:rgba(255,215,0,0.4);border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .title{color:#ffd700;font-size:22px;font-weight:700;letter-spacing:1.5px}
+    .count-box{background:rgba(255,215,0,0.08);border:2px solid #ffd700;border-radius:14px;padding:14px 40px;text-align:center}
+    .count-big{color:#ffd700;font-size:44px;font-weight:700;line-height:1}
+    .count-of{color:#6a88aa;font-size:13px;font-weight:600;margin-top:4px}
+    .bar-wrap{width:280px;height:8px;background:#001030;border-radius:20px;overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,#ffd700,#ffe87a);width:0%;border-radius:20px;transition:width .4s}
+    .sub{color:#6a88aa;font-size:12px;font-weight:600}
+  </style></head><body>
+    <div class="spinner"></div>
+    <div class="title">⚡ Generating Payslips</div>
+    <div class="count-box">
+      <div class="count-big" id="cc">0</div>
+      <div class="count-of">of ${total} payslip${total>1?'s':''}</div>
+    </div>
+    <div class="bar-wrap"><div class="bar" id="pb"></div></div>
+    <div class="sub" id="st">Fetching data...</div>
+  </body></html>`;
+}
+
+// ══════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════
+function numToWords(amount) {
+  const ones=["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+  const tens=["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+  function b100(n){if(n<20)return ones[n];return tens[Math.floor(n/10)]+(n%10?" "+ones[n%10]:"")}
+  function b1000(n){if(n<100)return b100(n);return ones[Math.floor(n/100)]+" Hundred"+(n%100?" "+b100(n%100):"")}
+  const num=Math.floor(Number(amount)||0);
+  if(num===0)return"Zero MUR Only";
+  let r="";
+  if(num>=1000000)r+=b1000(Math.floor(num/1000000))+" Million ";
+  if(num>=1000)r+=b1000(Math.floor((num%1000000)/1000))+" Thousand ";
+  if(num%1000)r+=b1000(num%1000);
+  return r.trim()+" MUR Only";
+}
+
+function fmtDate(d) {
+  const day = String(d.getDate()).padStart(2,"0");
+  const m   = d.toLocaleString("en-US",{month:"short"}).toUpperCase();
+  return `${day}-${m}-${d.getFullYear()}`;
+}
+
+function showMsg(msg, { title="Notice", type="warn" }={}) {
+  const icons = { warn:"⚠️", err:"❌", ok:"✅", info:"ℹ️" };
+  document.getElementById("msgboxIcon").textContent = icons[type] || "ℹ️";
+  document.getElementById("msgboxIcon").className   = "msgbox-icon " + type;
+  document.getElementById("msgboxTitle").textContent = title;
+  document.getElementById("msgboxBody").innerHTML    = msg;
+  document.getElementById("msgboxOverlay").classList.add("active");
+}
+function closeMsgBox() { document.getElementById("msgboxOverlay").classList.remove("active"); }
+
+// ══════════════════════════════════════════
+//  HOME PAGE — TOTAL SALARY SUMMARY (auto, on page load)
+// ══════════════════════════════════════════
+async function loadHomeSummary(dFromOverride, dToOverride) {
+  const box = document.getElementById("homeSummary");
+  if (!box) return;
+  try {
+    const now = new Date();
+    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+    const pad = (n) => String(n).padStart(2, "0");
+    const toStr = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    const dFromVal = dFromOverride || toStr(firstDay);
+    const dToVal   = dToOverride   || toStr(now);
+
+    box.innerHTML = `<div class="home-summary-title">⏳ Loading Total Salary Summary...</div>`;
+
+    if (!_cache.loaded) await preloadStaticData();
+    const workingDays = await getWorkingDays(dFromVal);
+    const rangeData    = await fetchRangeData(dFromVal, dToVal);
+
+    const rtdb = firebase.database();
+    const dFrom = new Date(dFromVal), dTo = new Date(dToVal);
+
+    // ── তারিখ রেঞ্জ একাধিক মাস স্প্যান করলেও সব মাসের bonus আনি ──
+    const bonusMonthKeys = new Set();
+    for (let d = new Date(dFrom.getFullYear(), dFrom.getMonth(), 1); d <= dTo; d.setMonth(d.getMonth()+1)) {
+      bonusMonthKeys.add(getMonthKey(toStr(d)));
+    }
+    const bonusMonthData = {};
+    await Promise.all([...bonusMonthKeys].map(async mk => {
+      const snap = await rtdb.ref(`BONUS_ENTRY/${mk}`).once("value");
+      Object.assign(bonusMonthData, snap.val() || {});
+    }));
+
+    let totPresent=0, totAbsent=0, totSunday=0, totHoliday=0, totOT=0, totOthers=0;
+    let totPBonus=0, totABonus=0, totGross=0, totAdv=0, totFine=0, totNps=0, totCsg=0, totNet=0;
+
+    _cache.empList.forEach(emp => {
+      const empId = emp.id;
+      const att = rangeData.attendance[empId] || { norm:0, hol:0, sun:0, abs:0, pres:0, others:0 };
+      const isCook = (emp.desig || "").trim().toUpperCase() === "COOK";
+      const dailyRate = parseFloat((emp.salary / workingDays).toFixed(2));
+      const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
+      const totalOT = rangeData.otMap[empId] || 0;
+
+      // Bonus lookup for this employee within range
+      let pBonus = 0, aBonus = 0;
+      for (const dateKey in bonusMonthData) {
+        const dr = bonusMonthData[dateKey];
+        if (!dr || typeof dr !== "object" || !dr[empId]) continue;
+        const row = dr[empId];
+        const date = dateKey.replace("DATE_", "");
+        const bonusDate = new Date(row.DATE || date);
+        if (bonusDate >= dFrom && bonusDate <= dTo) {
+          pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
+          aBonus += parseFloat(row.ATTENDANCE_BONUS)  || 0;
+        }
+      }
+
+      const adv  = _cache.advMap[empId]  || 0;
+      const fine = _cache.fineMap[empId] || 0;
+      const gross = normalAmt + att.hol + att.sun + totalOT + (att.others || 0) + pBonus + aBonus;
+      const csg   = Math.round(gross * 0.015 * 100) / 100;
+      const nps   = Math.round(gross * 0.01  * 100) / 100;
+      const net   = Math.round(gross - (csg + nps + adv + fine));
+
+      totPresent += att.pres;  totAbsent += att.abs;
+      totSunday  += att.sun;   totHoliday += att.hol;
+      totOT      += totalOT;   totOthers += (att.others || 0);
+      totPBonus  += pBonus;    totABonus += aBonus;
+      totAdv     += adv;       totFine   += fine;
+      totNps     += nps;       totCsg    += csg;
+      totGross   += gross;     totNet    += net;
+    });
+
+    const fmt = (n) => Number(n||0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const rows = [
+      ["TOTAL PRESENT",   totPresent, ""],
+      ["TOTAL ABSENT",    totAbsent,  ""],
+      ["TOTAL SUNDAY",    totSunday.toFixed(2), ""],
+      ["TOTAL HOLI DAY",  totHoliday.toFixed(2), ""],
+      ["TOTAL OT AMOUNT", fmt(totOT), ""],
+      ["TOTAL OTHERS",    fmt(totOthers), ""],
+      ["A BONUS",         fmt(totABonus), ""],
+      ["P BONUS",         fmt(totPBonus), ""],
+      ["GROSS SALARY",    fmt(totGross), "positive"],
+      ["ADV",             fmt(totAdv), "negative"],
+      ["FINE",            fmt(totFine), "negative"],
+      ["NPS 1%",          fmt(totNps), "negative"],
+      ["CSG 1.5%",        fmt(totCsg), "negative"],
+      ["NET SALARY",      fmt(totNet), "positive"],
+    ];
+
+    box.innerHTML = `
+      <div class="home-summary-title">📊 Total Salary Summary &nbsp; <span style="color:#a0b8d8;font-size:10px;letter-spacing:0.5px;text-transform:none">(${dFromVal} to ${dToVal})</span></div>
+      <table class="home-summary-table">
+        <thead>
+          <tr>${rows.map(([label]) => `<th>${label}</th>`).join("")}</tr>
+        </thead>
+        <tbody>
+          <tr>${rows.map(([, value]) => `<td>${value}</td>`).join("")}</tr>
+        </tbody>
+      </table>
+    `;
+  } catch(e) {
+    box.innerHTML = `<div class="home-summary-title" style="color:#ff6b6b">⚠️ Summary load error: ${e.message}</div>`;
+  }
+}
+
+window.addEventListener("load", preloadStaticData);
+window.addEventListener("load", () => loadHomeSummary(_defaultRange.from, _defaultRange.to));
+</script>
+</body>
+</html>
