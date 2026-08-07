@@ -189,7 +189,7 @@
   <body>
     <div class="page-header">
       <h2>ALAMHOW CO LTD</h2>
-      <span class="header-badge">SALARY POSTING</span>
+      <span class="header-badge">SALARY & PAYSLIP</span>
     </div>
 
     <div class="controls" id="monthly-controls">
@@ -379,6 +379,21 @@
           empSnap.forEach(d => {
             const e = d.data();
             const emp = { id: e.id||d.id, name: e.name||"", passport: e.passport||"", desig: e.designation||"", salary: parseInt(e.salary)||0, joining: e.joining||"", wpNo: e.wpNo||"", rpUidNo: e.rpUidNo||"" };
+            // ✅ point-in-time salary timeline from "history" array.
+            // NOTE: each history entry stores the OLD salary + editedAt = when it
+            // was REPLACED (see new_employee_add_firestore.html: historyEntry =
+            // {...oldData, editedAt: now} pushed BEFORE writing the new payload).
+            // So entry.salary was effective UP UNTIL (not including) entry.editedAt.
+            emp.salaryHistory = [];
+            if (Array.isArray(e.history)) {
+              e.history.forEach(h => {
+                if (!h||!h.editedAt||h.salary===undefined) return;
+                const dt=new Date(h.editedAt);
+                if (isNaN(dt)) return;
+                emp.salaryHistory.push({ editedAt: dt, salary: parseInt(h.salary)||0 });
+              });
+            }
+            emp.salaryHistory.sort((a,b) => a.editedAt-b.editedAt);
             _cache.empList.push(emp); _cache.empMap[emp.id] = emp;
           });
           _cache.empList.sort((a,b) => a.id.localeCompare(b.id));
@@ -394,6 +409,24 @@
           setStatus("ok", `✅ ${_cache.empList.length} employees loaded`);
         } catch(e) { _cache.loading = false; setStatus("err", "⚠️ Load error: "+e.message); }
       }
+
+      // ✅ Point-in-time salary lookup. History entries record an OLD salary and
+      // the date it was REPLACED (editedAt). So the salary effective at a given
+      // date is: the first history entry whose editedAt is AFTER that date
+      // (i.e. still hadn't been replaced yet); if the date is after every edit,
+      // the employee's current top-level salary applies.
+      function getSalaryAsOf(emp, dateStr) {
+        if (!emp) return 0;
+        const target = new Date(dateStr);
+        target.setHours(23,59,59,999);
+        if (Array.isArray(emp.salaryHistory)) {
+          for (const h of emp.salaryHistory) { // ascending by editedAt
+            if (target < h.editedAt) return h.salary;
+          }
+        }
+        return emp.salary||0; // after the last edit -> current salary
+      }
+
 
       async function fetchRangeData(dFromVal, dToVal) {
         const key = `${dFromVal}|${dToVal}`;
@@ -473,8 +506,9 @@
         const totalFine    = _cache.fineMap[empId]   ||0;
         const normalAmt = isCook ? dailyRate*att.pres : dailyRate*att.norm;
         const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others||0) + pBonus + aBonus;
-        const csgEmp    = Math.round(gross*0.015*100)/100;
-        const npsEmp    = Math.round(gross*0.01 *100)/100;
+        const npsCsgBase= normalAmt + totalOT; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
+        const csgEmp    = Math.round(npsCsgBase*0.015*100)/100;
+        const npsEmp    = Math.round(npsCsgBase*0.01 *100)/100;
         const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
         const netPay    = Math.round(gross - totalDed);
         const now = new Date();
@@ -498,14 +532,14 @@
           joining:emp.joining, wpNo:emp.wpNo||"", rpUidNo:emp.rpUidNo||"",
           entryDate:now.toLocaleDateString("en-GB"),
           time:now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),
-          serviceLength, normalWork:normalAmt.toFixed(2), holidayWork:att.hol.toFixed(2),
-          sundayWork:att.sun.toFixed(2), overtime:totalOT.toFixed(2),
-          others:(att.others||0).toFixed(2), gross:gross.toFixed(2),
-          csgEmp:csgEmp.toFixed(2), npsEmp:npsEmp.toFixed(2),
-          advanceRefund:totalAdvance.toFixed(2), fine:totalFine.toFixed(2),
-          absentDays:att.abs, totalDed:totalDed.toFixed(2),
+          serviceLength, normalWork:Math.round(normalAmt), holidayWork:Math.round(att.hol),
+          sundayWork:Math.round(att.sun), overtime:Math.round(totalOT),
+          others:Math.round(att.others||0), gross:Math.round(gross),
+          csgEmp:Math.round(csgEmp), npsEmp:Math.round(npsEmp),
+          advanceRefund:Math.round(totalAdvance), fine:Math.round(totalFine),
+          absentDays:att.abs, totalDed:Math.round(totalDed),
           netPay:netPay, netPayWords:numToWords(netPay),
-          pBonus:pBonus.toFixed(2), aBonus:aBonus.toFixed(2),
+          pBonus:Math.round(pBonus), aBonus:Math.round(aBonus),
         };
       }
 
@@ -982,6 +1016,9 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
         const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
         function getDailyRate(salary) { return parseFloat((salary/workingDays).toFixed(2)); }
         try {
+          // ✅ Always use LIVE (point-in-time) salary from EMPLOYEE_LIST, not the
+          // SALARY value frozen inside old Present_Absent attendance docs.
+          if (!_cache.loaded) await preloadStaticData();
           const db=firebase.firestore(), rtdb=firebase.database();
           const monthYearKey=getMonthYearKey(dFromVal);
           const monthKey=getMonthKey(dFromVal);
@@ -1009,7 +1046,9 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             if (filterId&&d.ID!==filterId) return;
             if (dFromVal&&dToVal&&(docDate<dFrom||docDate>dTo)) return;
             if (!workers[d.ID]) {
-              const sal=parseInt(d.SALARY)||0;
+              // ✅ Point-in-time salary as of the end of this report period (dToVal)
+              const liveEmp=_cache.empMap[d.ID];
+              const sal=liveEmp?getSalaryAsOf(liveEmp,dToVal):(parseInt(d.SALARY)||0);
               workers[d.ID]={ id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
                 sal, daily:getDailyRate(sal),
                 norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
@@ -1094,8 +1133,9 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             const baseGross    =rowTotalBasic+w.hol+w.sun+w.otA+w.others;
             const initPB=w.pBonus||0, initAB=w.aBonus||0;
             const gross  =baseGross+initPB+initAB;
-            const nps    =Math.round(gross*0.01);
-            const csg    =Math.round(gross*0.015);
+            const npsCsgBase=rowTotalBasic+w.otA; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
+            const nps    =Math.round(npsCsgBase*0.01);
+            const csg    =Math.round(npsCsgBase*0.015);
             const totDed =w.adv+w.fine+nps+csg;
             const net    =Math.round(gross-totDed);
 
@@ -1283,9 +1323,10 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
         showMsg("⏳ Processing salary post...",{title:"Please Wait",type:"info"});
 
         try {
+          // ✅ Always use LIVE (point-in-time) salary from EMPLOYEE_LIST, not the
+          // SALARY value frozen inside old Present_Absent attendance docs.
+          if (!_cache.loaded) await preloadStaticData();
           const db=firebase.firestore(), rtdb=firebase.database();
-
-          // ✅ bonusSnap + othersSnap যোগ করা হয়েছে
           const [snap, otSnap, advSnap, postedSnap, globalSnap, fineSnap, fineGlobalSnap, bonusSnap, othersSnap] = await Promise.all([
             db.collectionGroup("Present_Absent").get(),
             rtdb.ref("OVER_TIME").once("value"),
@@ -1314,7 +1355,9 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             const docDate=new Date(d.DATE);
             if (dFromVal&&dToVal&&(docDate<dFrom||docDate>dTo)) return;
             if (!workers[d.ID]) {
-              const sal=parseInt(d.SALARY)||0;
+              // ✅ Point-in-time salary as of the end of this post period (dToVal)
+              const liveEmp=_cache.empMap[d.ID];
+              const sal=liveEmp?getSalaryAsOf(liveEmp,dToVal):(parseInt(d.SALARY)||0);
               workers[d.ID]={ id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
                 sal, daily:0, norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0,
                 others:0, pBonus:0, aBonus:0  // ✅ NEW
@@ -1398,8 +1441,9 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             const rowTotalBasic=isCook?w.daily*w.pres:w.daily*w.norm;
             // ✅ others + pBonus + aBonus gross এ যোগ হচ্ছে
             const gross=rowTotalBasic+w.hol+w.sun+w.otA+w.others+w.pBonus+w.aBonus;
-            const nps  =Math.round(gross*0.01);
-            const csg  =Math.round(gross*0.015);
+            const npsCsgBase=rowTotalBasic+w.otA; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
+            const nps  =Math.round(npsCsgBase*0.01);
+            const csg  =Math.round(npsCsgBase*0.015);
             const totDed=advPending+finePending+nps+csg;
             const net  =Math.round(gross-totDed);
 
@@ -1496,6 +1540,3 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
     </script>
   </body>
 </html>
-
-
-
