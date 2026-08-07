@@ -521,8 +521,9 @@ async function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays,
   // ── Cook হলে Present দিয়ে হিসাব, বাকিদের জন্য Normal Work দিয়ে ──
   const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
   const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others || 0) + pBonus + aBonus;
-  const csgEmp    = Math.round(gross * 0.015 * 100) / 100;
-  const npsEmp    = Math.round(gross * 0.01  * 100) / 100;
+  const dedBasis  = normalAmt + totalOT;
+  const csgEmp    = Math.round(dedBasis * 0.015);
+  const npsEmp    = Math.round(dedBasis * 0.01);
   const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
   const netPay    = Math.round(gross - totalDed);
 
@@ -1018,8 +1019,9 @@ async function loadHomeSummary(dFromOverride, dToOverride) {
       const adv  = _cache.advMap[empId]  || 0;
       const fine = _cache.fineMap[empId] || 0;
       const gross = normalAmt + att.hol + att.sun + totalOT + (att.others || 0) + pBonus + aBonus;
-      const csg   = Math.round(gross * 0.015 * 100) / 100;
-      const nps   = Math.round(gross * 0.01  * 100) / 100;
+      const dedBasis = normalAmt + totalOT;
+      const csg   = Math.round(dedBasis * 0.015);
+      const nps   = Math.round(dedBasis * 0.01);
       const net   = Math.round(gross - (csg + nps + adv + fine));
 
       totPresent += att.pres;  totAbsent += att.abs;
