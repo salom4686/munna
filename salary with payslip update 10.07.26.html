@@ -2956,7 +2956,7 @@
         const totalAdvance = _cache.advMap[empId] || 0;
         const totalFine = _cache.fineMap[empId] || 0;
         const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
-        // NPS/CSG basis excludes Fix Travelling (not subject to these deductions)
+        // Gross paid still includes Holiday/Sunday/Others/Bonus (F Trv excluded, added separately)
         const grossBase =
           normalAmt +
           att.hol +
@@ -2965,11 +2965,13 @@
           (att.others || 0) +
           pBonus +
           aBonus;
+        // ✅ NPS/CSG basis = Normal Pay + OT only (Holiday, Sunday, Others, Bonus, F Trv excluded)
+        const npsCsgBasis = normalAmt + totalOT;
         // ✅ FIX: Round to whole Taka, same as Monthly Summary's nps/csg —
         // previously this rounded to 2 decimals here but whole numbers in the
         // summary table, causing a 1-taka Net Pay mismatch for some employees.
-        const csgEmp = Math.round(grossBase * 0.015);
-        const npsEmp = Math.round(grossBase * 0.01);
+        const csgEmp = Math.round(npsCsgBasis * 0.015);
+        const npsEmp = Math.round(npsCsgBasis * 0.01);
         const totalDed = csgEmp + npsEmp + totalAdvance + totalFine;
         // Gross shown/paid includes Fix Travelling, added straight through
         const gross = grossBase + fTrv;
@@ -3339,6 +3341,15 @@
           const monthKeySet = new Set(records.map((r) => getMonthKey(r.DATE)));
           const monthKeys = [...monthKeySet];
 
+          // ── 2b. Working Days (same rule as Monthly Summary/Payslip):
+          // manual override (window._manualWD) wins if set, otherwise a
+          // single getWorkingDays() call for the report's From date —
+          // NOT a per-record-month lookup — so all three reports agree.
+          const workingDays =
+            window._manualWD && window._manualWD > 0
+              ? window._manualWD
+              : await getWorkingDays(dFromVal || records[0].DATE);
+
           // ── 3. BONUS_ENTRY — month-wise একবারে লোড ───────────────
           // bonusMap[date][empId] = { ATTENDANCE_BONUS, PERFORMANCE_BONUS }
           const bonusMap = {};
@@ -3447,8 +3458,31 @@
               const status = (r.STATUS || "").toUpperCase();
               const holW = parseInt(r.HOLIDAY_WORK) || 0;
               const sunW = parseInt(r.SUNDAY_WORK) || 0;
+              const holAmt = parseFloat(r.HOLIDAY_WORK) || 0;
+              const sunAmt = parseFloat(r.SUNDAY_WORK) || 0;
               const empId = String(r.ID || "").trim();
               const date = r.DATE;
+              const isCook = (r.DESIGNATION || "").trim().toUpperCase() === "COOK";
+
+              // Daily earned share = monthly SALARY ÷ report's working days
+              // — Holiday/Sunday work days use their own HOLIDAY_WORK/
+              // SUNDAY_WORK amount instead, and ABSENT earns nothing.
+              // ✅ Cooks are the exception: same rule as Payslip/Summary
+              // (isCook uses att.pres, not att.norm) — a Cook working on a
+              // Sunday/Holiday is just a normal present day at the flat daily
+              // rate, no separate Holiday/Sunday pay on top.
+              const monthlySalary = parseFloat(r.SALARY) || 0;
+              const wd = workingDays || 0;
+              const dailyRate =
+                status === "ABSENT"
+                  ? 0
+                  : !isCook && holAmt > 0
+                    ? holAmt
+                    : !isCook && sunAmt > 0
+                      ? sunAmt
+                      : wd
+                        ? parseFloat((monthlySalary / wd).toFixed(2))
+                        : 0;
 
               // Others & Bonus lookup
               const othersAmt = othersMap[date]?.[empId] || 0;
@@ -3497,7 +3531,7 @@
         <td style="text-align:center">${othersAmt > 0 ? othersAmt : "-"}</td>
         <td style="text-align:center">${aBonus > 0 ? aBonus : "-"}</td>
         <td style="text-align:center">${pBonus > 0 ? pBonus : "-"}</td>
-        <td style="text-align:right;font-size:10px;color:${isDup ? "#ff4d4d" : "#000000"}">${r.SALARY || "-"}</td>
+        <td style="text-align:right;font-size:10px;color:${isDup ? "#ff4d4d" : "#000000"}" title="${status === "ABSENT" ? "Absent — no salary earned" : !isCook && holAmt > 0 ? `Holiday pay: ${holAmt}` : !isCook && sunAmt > 0 ? `Sunday pay: ${sunAmt}` : `Monthly Salary: ${monthlySalary || "-"} ÷ ${wd || "-"} working days${isCook ? " (Cook rate)" : ""}`}">${status === "ABSENT" ? "-" : dailyRate.toFixed(2)}</td>
         <td>${r.REMARK || "-"}</td>
       </tr>`;
             })
@@ -3564,7 +3598,7 @@
           <th>Passport</th><th>Designation</th><th>Status</th>
           <th>Project / Site</th><th>Holiday</th><th>Sunday</th>
           <th>Others</th><th>A Bonus</th><th>P Bonus</th>
-          <th>Salary</th><th>Remark</th>
+          <th>Salary/Day</th><th>Remark</th>
         </tr></thead>
         <tbody>${rows}</tbody>
       </table>`;
@@ -5218,17 +5252,16 @@
         const pBonus = parseFloat(pBonusInput.value) || 0;
         const aBonus = parseFloat(aBonusInput.value) || 0;
         const fTrv = parseFloat(fTrvInput?.value) || 0;
-        // NPS/CSG basis excludes Fix Travelling
+        // NPS/CSG basis = Normal Pay + OT only — fixed at render time, unaffected by
+        // Bonus/F Trv edits, so we keep whatever is already shown in the cells.
+        const nps = parseFloat(npsCell.textContent) || 0;
+        const csg = parseFloat(csgCell.textContent) || 0;
         const newGrossBase = baseGross + pBonus + aBonus;
-        const newNps = Math.round(newGrossBase * 0.01);
-        const newCsg = Math.round(newGrossBase * 0.015);
-        const newTotDed = advVal + fineVal + newNps + newCsg;
+        const newTotDed = advVal + fineVal + nps + csg;
         // Gross Salary shown includes F Trv (added straight through, no NPS/CSG on it)
         const newGross = newGrossBase + fTrv;
         const newNet = Math.round(newGross - newTotDed);
         grossCell.textContent = newGross.toFixed(2);
-        npsCell.textContent = newNps;
-        csgCell.textContent = newCsg;
         totDedCell.textContent = newTotDed;
         netCell.innerHTML = `<strong>${newNet.toFixed(2)}</strong>`;
         // Update grand total row
@@ -5654,10 +5687,12 @@
               const initPB = w.pBonus || 0;
               const initAB = w.aBonus || 0;
               const initFTrv = w.fTrv || 0;
-              // NPS/CSG basis excludes Fix Travelling (F Trv is not subject to these deductions)
+              // Gross paid still includes Holiday/Sunday/Others/Bonus (F Trv excluded, added separately)
               const grossBase = baseGross + initPB + initAB;
-              const nps = Math.round(grossBase * 0.01);
-              const csg = Math.round(grossBase * 0.015);
+              // ✅ NPS/CSG basis = Normal Pay + OT only (Holiday, Sunday, Others, Bonus, F Trv excluded)
+              const npsCsgBasis = rowTotalBasic + w.otA;
+              const nps = Math.round(npsCsgBasis * 0.01);
+              const csg = Math.round(npsCsgBasis * 0.015);
               const totDed = w.adv + w.fine + nps + csg;
               // Gross Salary shown includes F Trv (added straight through, no NPS/CSG on it)
               const gross = grossBase + initFTrv;
