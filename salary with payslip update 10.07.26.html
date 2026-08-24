@@ -1534,28 +1534,72 @@
         #reportTable {
           table-layout: fixed !important;
         }
-        #reportTable colgroup col:nth-child(1)  { width: 2.5% !important; } /* SL */
-        #reportTable colgroup col:nth-child(2)  { width: 5.5% !important; } /* EMP ID */
-        #reportTable colgroup col:nth-child(3)  { width: 13%  !important; } /* Name/Passport */
-        #reportTable colgroup col:nth-child(4)  { width: 9%   !important; } /* Designation */
-        #reportTable colgroup col:nth-child(5)  { width: 6%   !important; } /* Total Basic */
-        #reportTable colgroup col:nth-child(6)  { width: 3.2% !important; } /* P */
-        #reportTable colgroup col:nth-child(7)  { width: 3.2% !important; } /* H Day */
-        #reportTable colgroup col:nth-child(8)  { width: 3.2% !important; } /* S Day */
-        #reportTable colgroup col:nth-child(9)  { width: 3.2% !important; } /* A */
-        #reportTable colgroup col:nth-child(10) { width: 3.7% !important; } /* Total P */
-        #reportTable colgroup col:nth-child(14) { width: 3.2% !important; } /* OT Hours */
-        #reportTable colgroup col:nth-child(15) { width: 3.2% !important; } /* Oth */
-        #reportTable colgroup col:nth-child(16) { width: 3.7% !important; } /* P-Bonus */
-        #reportTable colgroup col:nth-child(17) { width: 3.7% !important; } /* A-Bonus */
-        #reportTable colgroup col:nth-child(18) { width: 3.2% !important; } /* F Trv */
-        #reportTable colgroup col:nth-child(19) { width: 5%   !important; } /* Gross Salary */
-        #reportTable colgroup col:nth-child(20) { width: 3.2% !important; } /* Adv */
-        #reportTable colgroup col:nth-child(21) { width: 3.2% !important; } /* Fine */
-        #reportTable colgroup col:nth-child(22) { width: 3.7% !important; } /* NPS 1% */
-        #reportTable colgroup col:nth-child(23) { width: 4.2% !important; } /* CSG 1.5% */
-        #reportTable colgroup col:nth-child(24) { width: 3.7% !important; } /* Total (deductions) */
-        #reportTable colgroup col:nth-child(25) { width: 5%   !important; } /* Net Salary */
+        #reportTable colgroup col:nth-child(1) {
+          width: 2.5% !important;
+        } /* SL */
+        #reportTable colgroup col:nth-child(2) {
+          width: 5.5% !important;
+        } /* EMP ID */
+        #reportTable colgroup col:nth-child(3) {
+          width: 13% !important;
+        } /* Name/Passport */
+        #reportTable colgroup col:nth-child(4) {
+          width: 9% !important;
+        } /* Designation */
+        #reportTable colgroup col:nth-child(5) {
+          width: 6% !important;
+        } /* Total Basic */
+        #reportTable colgroup col:nth-child(6) {
+          width: 3.2% !important;
+        } /* P */
+        #reportTable colgroup col:nth-child(7) {
+          width: 3.2% !important;
+        } /* H Day */
+        #reportTable colgroup col:nth-child(8) {
+          width: 3.2% !important;
+        } /* S Day */
+        #reportTable colgroup col:nth-child(9) {
+          width: 3.2% !important;
+        } /* A */
+        #reportTable colgroup col:nth-child(10) {
+          width: 3.7% !important;
+        } /* Total P */
+        #reportTable colgroup col:nth-child(14) {
+          width: 3.2% !important;
+        } /* OT Hours */
+        #reportTable colgroup col:nth-child(15) {
+          width: 3.2% !important;
+        } /* Oth */
+        #reportTable colgroup col:nth-child(16) {
+          width: 3.7% !important;
+        } /* P-Bonus */
+        #reportTable colgroup col:nth-child(17) {
+          width: 3.7% !important;
+        } /* A-Bonus */
+        #reportTable colgroup col:nth-child(18) {
+          width: 3.2% !important;
+        } /* F Trv */
+        #reportTable colgroup col:nth-child(19) {
+          width: 5% !important;
+        } /* Gross Salary */
+        #reportTable colgroup col:nth-child(20) {
+          width: 3.2% !important;
+        } /* Adv */
+        #reportTable colgroup col:nth-child(21) {
+          width: 3.2% !important;
+        } /* Fine */
+        #reportTable colgroup col:nth-child(22) {
+          width: 3.7% !important;
+        } /* NPS 1% */
+        #reportTable colgroup col:nth-child(23) {
+          width: 4.2% !important;
+        } /* CSG 1.5% */
+        #reportTable colgroup col:nth-child(24) {
+          width: 3.7% !important;
+        } /* Total (deductions) */
+        #reportTable colgroup col:nth-child(25) {
+          width: 5% !important;
+        } /* Net Salary */
         #reportTable th:nth-child(1),
         #reportTable th:nth-child(2),
         #reportTable th:nth-child(4),
@@ -1770,6 +1814,9 @@
         </div>
         <button class="btn btn-report" onclick="generateReport()">
           &#9654; Report View
+        </button>
+        <button class="btn btn-report" onclick="saveBonusEntries()">
+          💾 Save P/A/F Bonus
         </button>
         <div style="display: flex; gap: 6px; align-items: center">
           <input
@@ -2279,12 +2326,12 @@
           font-style: italic;
         "
       >
-        ⚠️ Fine ডিলিট করলে শুধু ওই দিনের Fine অ্যামাউন্ট ০ হবে (পুরো
-        Attendance রেকর্ড থাকবে)। Advance এডিট/ডিলিট করলে
-        ADVANCE_ADJUSTMENT_SUMMARY (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে
-        আপডেট হয় না — প্রয়োজনে আলাদাভাবে মিলিয়ে নিন। 🔒 যে মাসের সেলারি
-        পোস্ট (PAID) হয়ে গেছে, সেই মাসের কোনো রেকর্ড এডিট/ডিলিট করা যাবে
-        না। সব Delete/Edit অ্যাকশন History-তে জমা থাকবে।
+        ⚠️ Fine ডিলিট করলে শুধু ওই দিনের Fine অ্যামাউন্ট ০ হবে (পুরো Attendance
+        রেকর্ড থাকবে)। Advance এডিট/ডিলিট করলে ADVANCE_ADJUSTMENT_SUMMARY
+        (Total/Paid/Pending) স্বয়ংক্রিয়ভাবে আপডেট হয় না — প্রয়োজনে আলাদাভাবে
+        মিলিয়ে নিন। 🔒 যে মাসের সেলারি পোস্ট (PAID) হয়ে গেছে, সেই মাসের কোনো
+        রেকর্ড এডিট/ডিলিট করা যাবে না। সব Delete/Edit অ্যাকশন History-তে জমা
+        থাকবে।
       </div>
     </div>
 
@@ -2678,7 +2725,10 @@
                 });
               });
             }
-            emp.salaryHistory.push({ editedAt: new Date(), salary: emp.salary });
+            emp.salaryHistory.push({
+              editedAt: new Date(),
+              salary: emp.salary,
+            });
             emp.salaryHistory.sort((a, b) => a.editedAt - b.editedAt);
             _cache.empList.push(emp);
             _cache.empMap[emp.id] = emp;
@@ -2714,7 +2764,8 @@
       // later — only the report period covering/after the edit date changes.
       function getSalaryAsOf(emp, dateStr) {
         if (!emp) return 0;
-        if (!emp.salaryHistory || !emp.salaryHistory.length) return emp.salary || 0;
+        if (!emp.salaryHistory || !emp.salaryHistory.length)
+          return emp.salary || 0;
         const target = new Date(dateStr);
         target.setHours(23, 59, 59, 999); // end of that day — same-day edits still count
         let result = emp.salaryHistory[0].salary;
@@ -3462,7 +3513,8 @@
               const sunAmt = parseFloat(r.SUNDAY_WORK) || 0;
               const empId = String(r.ID || "").trim();
               const date = r.DATE;
-              const isCook = (r.DESIGNATION || "").trim().toUpperCase() === "COOK";
+              const isCook =
+                (r.DESIGNATION || "").trim().toUpperCase() === "COOK";
 
               // Daily earned share = monthly SALARY ÷ report's working days
               // — Holiday/Sunday work days use their own HOLIDAY_WORK/
@@ -4390,7 +4442,13 @@
       // ══════════════════════════════════════════
       function showMsg(
         msg,
-        { title = "Notice", type = "warn", confirm = false, onOk = null } = {},
+        {
+          title = "Notice",
+          type = "warn",
+          confirm = false,
+          onOk = null,
+          onCancel = null,
+        } = {},
       ) {
         const icons = { warn: "⚠️", err: "❌", ok: "✅", info: "ℹ️" };
         document.getElementById("msgboxIcon").textContent = icons[type] || "ℹ️";
@@ -4410,7 +4468,10 @@
           const btnNo = document.createElement("button");
           btnNo.className = "msgbox-btn secondary";
           btnNo.textContent = "No";
-          btnNo.onclick = closeMsgBox;
+          btnNo.onclick = () => {
+            closeMsgBox();
+            if (onCancel) onCancel();
+          };
           footer.appendChild(btnNo);
           footer.appendChild(btnOk);
         } else {
@@ -4884,7 +4945,8 @@
 
             // ✅ BONUS: এই employee-এর bonus হিসাব করুন
             let pBonus = 0,
-              aBonus = 0;
+              aBonus = 0,
+              fTrv = 0;
             if (
               bonusData[monthKey] &&
               typeof bonusData[monthKey] === "object"
@@ -4898,6 +4960,7 @@
                 if (bonusDate >= dFrom && bonusDate <= dTo) {
                   pBonus += parseFloat(row.PERFORMANCE_BONUS) || 0;
                   aBonus += parseFloat(row.ATTENDANCE_BONUS) || 0;
+                  fTrv += parseFloat(row.FIX_TRAVELLING) || 0;
                 }
               }
             }
@@ -4910,6 +4973,7 @@
               workingDays,
               pBonus,
               aBonus,
+              fTrv,
             );
             allPages += `<div class="page">${buildOneSlip(d, period, "OFFICE COPY")}${buildOneSlip(d, period, "EMPLOYEE COPY")}</div>`;
             updateLoader(i + 1, selected.length, empId);
@@ -5266,6 +5330,185 @@
         netCell.innerHTML = `<strong>${newNet.toFixed(2)}</strong>`;
         // Update grand total row
         updateGrandTotals();
+      }
+
+      function rememberBonusValue(input) {
+        input.dataset.previousValue = input.value;
+      }
+
+      function askCustomConfirm(message, title = "Confirm Action") {
+        return new Promise((resolve) => {
+          showMsg(message, {
+            title,
+            type: "warn",
+            confirm: true,
+            onOk: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        });
+      }
+
+      async function persistBonusField(input, restorePreviousValue) {
+        const date = document.getElementById("dateFrom").value;
+        if (!date) {
+          restorePreviousValue();
+          showMsg("Select a date before editing bonus data.", {
+            title: "Date Required",
+            type: "warn",
+          });
+          return;
+        }
+        const empId = input.id.startsWith("ftrv_")
+          ? input.id.slice(5)
+          : input.id.slice(3);
+        const field = input.id.startsWith("pb_")
+          ? "PERFORMANCE_BONUS"
+          : input.id.startsWith("ab_")
+            ? "ATTENDANCE_BONUS"
+            : "FIX_TRAVELLING";
+        const ref = firebase
+          .database()
+          .ref(
+            `BONUS_ENTRY/${getMonthKey(date)}/DATE_${date}/${empId}/${field}`,
+          );
+        try {
+          if (input.value.trim() === "") await ref.remove();
+          else await ref.set(parseFloat(input.value) || 0);
+          input.dataset.previousValue = input.value;
+        } catch (error) {
+          restorePreviousValue();
+          showMsg(`Save error: ${error.message}`, {
+            title: "Database Error",
+            type: "err",
+          });
+        }
+      }
+
+      function confirmBonusEdit(input) {
+        const previousValue = input.dataset.previousValue ?? "";
+        if (input.value === previousValue) return;
+        const isClearing = input.value.trim() === "";
+        const fieldName = input.id.startsWith("pb_")
+          ? "P Bonus"
+          : input.id.startsWith("ab_")
+            ? "A Bonus"
+            : "F Trv";
+        const message = isClearing
+          ? `${fieldName} data will be cleared. Are you sure?`
+          : `${fieldName} will change from ${previousValue || "0"} to ${input.value}. Continue?`;
+        const restorePreviousValue = () => {
+          input.value = previousValue;
+          const empId = input.id.startsWith("ftrv_")
+            ? input.id.slice(5)
+            : input.id.slice(3);
+          recalcRow(empId);
+        };
+        askCustomConfirm(
+          message,
+          isClearing ? "Clear Bonus Data" : "Confirm Edit",
+        ).then((confirmed) => {
+          if (!confirmed) {
+            restorePreviousValue();
+            return;
+          }
+          persistBonusField(input, restorePreviousValue);
+        });
+      }
+
+      async function saveBonusEntries() {
+        const date = document.getElementById("dateFrom").value;
+        if (!date) {
+          showMsg("Select a date before saving bonus data.", {
+            title: "Date Required",
+            type: "warn",
+          });
+          return;
+        }
+        const rows = [
+          ...document.querySelectorAll("#reportTable tbody tr[data-empid]"),
+        ];
+        if (!rows.length) {
+          showMsg("Generate the monthly report first.", {
+            title: "Report Required",
+            type: "warn",
+          });
+          return;
+        }
+        const btn = document.querySelector(
+          'button[onclick="saveBonusEntries()"]',
+        );
+        if (btn) {
+          btn.disabled = true;
+          btn.textContent = "⏳ Saving...";
+        }
+        try {
+          const monthKey = getMonthKey(date);
+          const dateKey = `DATE_${date}`;
+          const bonusDateRef = firebase
+            .database()
+            .ref(`BONUS_ENTRY/${monthKey}/${dateKey}`);
+          const existingData = (await bonusDateRef.once("value")).val() || {};
+          const updates = {};
+          const clearedIds = [];
+          const removedFields = [];
+          rows.forEach((row) => {
+            const id = row.dataset.empid;
+            const inputs = {
+              PERFORMANCE_BONUS: document.getElementById(`pb_${id}`),
+              ATTENDANCE_BONUS: document.getElementById(`ab_${id}`),
+              FIX_TRAVELLING: document.getElementById(`ftrv_${id}`),
+            };
+            const oldValues = existingData[id] || {};
+            const fieldValues = {};
+            let hasNewValue = false;
+            let hasOldValue = false;
+            Object.entries(inputs).forEach(([field, input]) => {
+              const rawValue = (input?.value || "").trim();
+              fieldValues[field] = rawValue;
+              if (rawValue) hasNewValue = true;
+              if ((parseFloat(oldValues[field]) || 0) !== 0) hasOldValue = true;
+              if (!rawValue && (parseFloat(oldValues[field]) || 0) !== 0)
+                removedFields.push(`${id}: ${field}`);
+            });
+            if (hasOldValue && !hasNewValue) {
+              clearedIds.push(id);
+              updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}`] = null;
+              return;
+            }
+            if (hasNewValue || hasOldValue) {
+              updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/ID`] = id;
+              updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/DATE`] = date;
+              Object.entries(fieldValues).forEach(([field, rawValue]) => {
+                updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/${field}`] =
+                  rawValue ? parseFloat(rawValue) || 0 : null;
+              });
+            }
+          });
+          if (
+            removedFields.length &&
+            !(await askCustomConfirm(
+              `${removedFields.length} bonus field(s) will be deleted from the database. Continue?`,
+              "Delete Bonus Data",
+            ))
+          ) {
+            return;
+          }
+          await firebase.database().ref().update(updates);
+          showMsg(`${rows.length} employee bonus records saved successfully.`, {
+            title: "Saved",
+            type: "ok",
+          });
+        } catch (e) {
+          showMsg(`Save error: ${e.message}`, {
+            title: "Save Error",
+            type: "err",
+          });
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = "💾 Save P/A/F Bonus";
+          }
+        }
       }
 
       function updateGrandTotals() {
@@ -5626,6 +5869,7 @@
                 workers[row.ID].pBonus +=
                   parseFloat(row.PERFORMANCE_BONUS) || 0;
                 workers[row.ID].aBonus += parseFloat(row.ATTENDANCE_BONUS) || 0;
+                workers[row.ID].fTrv += parseFloat(row.FIX_TRAVELLING) || 0;
               }
             }
           }
@@ -5751,20 +5995,26 @@
               <td class="text-right" style="padding:0">
                 <input type="number" id="pb_${id}" class="bonus-input" value="${initPB || ""}"
                   placeholder="0" min="0" step="1"
+                  onfocus="rememberBonusValue(this)"
                   oninput="recalcRow('${id}')"
+                  onchange="confirmBonusEdit(this)"
                   title="Performance Bonus" />
                 <input type="hidden" id="basegross_${id}" value="${baseGross}" />
               </td>
               <td class="text-right" style="padding:0">
                 <input type="number" id="ab_${id}" class="bonus-input" value="${initAB || ""}"
                   placeholder="0" min="0" step="1"
+                  onfocus="rememberBonusValue(this)"
                   oninput="recalcRow('${id}')"
+                  onchange="confirmBonusEdit(this)"
                   title="Attendance Bonus" />
               </td>
               <td class="text-right" style="padding:0">
                 <input type="number" id="ftrv_${id}" class="bonus-input" value="${initFTrv || ""}"
                   placeholder="0" min="0" step="1"
+                  onfocus="rememberBonusValue(this)"
                   oninput="recalcRow('${id}')"
+                  onchange="confirmBonusEdit(this)"
                   title="Fix Travelling (not subject to NPS/CSG, added directly to Net)" />
               </td>
               <td class="text-right" id="gross_${id}"><strong>${gross.toFixed(2)}</strong></td>
@@ -6777,9 +7027,7 @@
                 id: String(row.ID).trim(),
                 name: row.Name || "",
                 date: otDateStr,
-                hrs: parseFloat(
-                  row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0,
-                ),
+                hrs: parseFloat(row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0),
                 rate: parseFloat(
                   row.OT_Rate || row.ot_rate || row.OT_RATE || 0,
                 ),
@@ -6861,7 +7109,10 @@
           headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Status</th><th>Holiday</th><th>Sunday</th><th>Fine</th><th>Action</th>`;
           bodyRows = rows
             .map(
-              (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              (
+                r,
+                i,
+              ) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
               <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
               <td>${r.date}</td>
               <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
@@ -6880,7 +7131,10 @@
           headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Name</th><th>Site</th><th>OT Hours</th><th>OT Rate</th><th>Action</th>`;
           bodyRows = rows
             .map(
-              (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              (
+                r,
+                i,
+              ) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
               <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
               <td>${r.date || "-"}</td>
               <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
@@ -6898,7 +7152,10 @@
           headCols = `<th>SL</th><th>Date</th><th>EMP ID</th><th>Type</th><th>Amount</th><th>Note</th><th>Action</th>`;
           bodyRows = rows
             .map(
-              (r, i) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
+              (
+                r,
+                i,
+              ) => `<tr${r.posted ? ' style="opacity:0.65;background:rgba(107,114,128,0.06)"' : ""}>
               <td style="text-align:center;color:#9ca3af;font-size:10px">${i + 1}</td>
               <td>${r.date || "-"}</td>
               <td style="font-weight:700;color:var(--brand-blue)">${r.id}</td>
@@ -7039,7 +7296,10 @@
           try {
             await saveDelEditRecord(type, r);
             close();
-            showDeleteToast("রেকর্ড আপডেট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।", "success");
+            showDeleteToast(
+              "রেকর্ড আপডেট হয়েছে ও হিস্ট্রিতে জমা হয়েছে।",
+              "success",
+            );
             generateDeleteSearch();
           } catch (e2) {
             btn.disabled = false;
@@ -7058,8 +7318,7 @@
         if (type === "attendance" || type === "fine") {
           const status = document.getElementById("deField_status").value;
           const holiday =
-            parseFloat(document.getElementById("deField_holiday").value) ||
-            0;
+            parseFloat(document.getElementById("deField_holiday").value) || 0;
           const sunday =
             parseFloat(document.getElementById("deField_sunday").value) || 0;
           const fine =
@@ -7318,7 +7577,8 @@
         let rows = _auditCache;
         if (filter) {
           rows = rows.filter((r) => {
-            const hay = `${r.empId || ""} ${r.date || ""} ${r.reason || ""} ${r.dataType || ""}`.toUpperCase();
+            const hay =
+              `${r.empId || ""} ${r.date || ""} ${r.reason || ""} ${r.dataType || ""}`.toUpperCase();
             return hay.includes(filter);
           });
         }
@@ -7341,9 +7601,10 @@
             <tbody>
               ${rows
                 .map((r) => {
-                  const ts = r.timestamp && r.timestamp.toDate
-                    ? r.timestamp.toDate()
-                    : null;
+                  const ts =
+                    r.timestamp && r.timestamp.toDate
+                      ? r.timestamp.toDate()
+                      : null;
                   const timeStr = ts ? ts.toLocaleString() : "-";
                   const badgeColor =
                     r.action === "delete" ? "#dc2626" : "#2563eb";
