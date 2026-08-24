@@ -5336,6 +5336,14 @@
         input.dataset.previousValue = input.value;
       }
 
+      function showPostedSalaryLock(input) {
+        if (!input.readOnly) return;
+        showMsg("All Ready Salary Post, Contact Developer", {
+          title: "Month Locked",
+          type: "warn",
+        });
+      }
+
       function askCustomConfirm(message, title = "Confirm Action") {
         return new Promise((resolve) => {
           showMsg(message, {
@@ -5372,6 +5380,19 @@
             `BONUS_ENTRY/${getMonthKey(date)}/DATE_${date}/${empId}/${field}`,
           );
         try {
+          const postedSnap = await firebase
+            .database()
+            .ref(`SALARY_POSTED/${getMonthYearKey(date)}/${empId}`)
+            .once("value");
+          const postedInfo = postedSnap.val();
+          if (postedInfo && postedInfo.status === "PAID") {
+            restorePreviousValue();
+            showMsg(
+              "This salary month is already PAID. P Bonus, A Bonus and F Trv cannot be edited or deleted.",
+              { title: "Month Locked", type: "warn" },
+            );
+            return;
+          }
           if (input.value.trim() === "") await ref.remove();
           else await ref.set(parseFloat(input.value) || 0);
           input.dataset.previousValue = input.value;
@@ -5422,6 +5443,21 @@
             title: "Date Required",
             type: "warn",
           });
+          return;
+        }
+        const postedMonthSnap = await firebase
+          .database()
+          .ref(`SALARY_POSTED/${getMonthYearKey(date)}`)
+          .once("value");
+        const postedMonthData = postedMonthSnap.val() || {};
+        const postedIds = Object.keys(postedMonthData).filter(
+          (id) => postedMonthData[id]?.status === "PAID",
+        );
+        if (postedIds.length) {
+          showMsg(
+            "This salary month is already PAID. P Bonus, A Bonus and F Trv cannot be edited or deleted.",
+            { title: "Month Locked", type: "warn" },
+          );
           return;
         }
         const rows = [
@@ -5798,6 +5834,9 @@
                 pBonus: 0,
                 aBonus: 0,
                 fTrv: 0, // ✅ NEW: fTrv = Fix Travelling
+                posted: !!(
+                  postedData[d.ID] && postedData[d.ID].status === "PAID"
+                ),
                 hDay: 0,
                 sDay: 0, // ✅ NEW: Holiday Day count / Sunday Day count
               };
@@ -5995,7 +6034,9 @@
               <td class="text-right" style="padding:0">
                 <input type="number" id="pb_${id}" class="bonus-input" value="${initPB || ""}"
                   placeholder="0" min="0" step="1"
+                  ${w.posted ? "readonly" : ""}
                   onfocus="rememberBonusValue(this)"
+                  onclick="showPostedSalaryLock(this)"
                   oninput="recalcRow('${id}')"
                   onchange="confirmBonusEdit(this)"
                   title="Performance Bonus" />
@@ -6004,7 +6045,9 @@
               <td class="text-right" style="padding:0">
                 <input type="number" id="ab_${id}" class="bonus-input" value="${initAB || ""}"
                   placeholder="0" min="0" step="1"
+                  ${w.posted ? "readonly" : ""}
                   onfocus="rememberBonusValue(this)"
+                  onclick="showPostedSalaryLock(this)"
                   oninput="recalcRow('${id}')"
                   onchange="confirmBonusEdit(this)"
                   title="Attendance Bonus" />
@@ -6012,7 +6055,9 @@
               <td class="text-right" style="padding:0">
                 <input type="number" id="ftrv_${id}" class="bonus-input" value="${initFTrv || ""}"
                   placeholder="0" min="0" step="1"
+                  ${w.posted ? "readonly" : ""}
                   onfocus="rememberBonusValue(this)"
+                  onclick="showPostedSalaryLock(this)"
                   oninput="recalcRow('${id}')"
                   onchange="confirmBonusEdit(this)"
                   title="Fix Travelling (not subject to NPS/CSG, added directly to Net)" />
