@@ -2671,6 +2671,11 @@
 
       let _currentTab = "monthly";
 
+      // ✅ Holiday / Sunday work pay = Daily Rate × multiplier (auto-calculated).
+      // Change these two values if the multiplier ever needs updating.
+      const HOLIDAY_RATE_MULTIPLIER = 1.5;
+      const SUNDAY_RATE_MULTIPLIER = 1.5;
+
       let _cache = {
         loaded: false,
         loading: false,
@@ -2894,8 +2899,11 @@
           if (!attendance[id])
             attendance[id] = {
               norm: 0,
-              hol: 0,
-              sun: 0,
+              // ✅ AUTO-CALC: holDays/sunDays = worked-day counts, the actual
+              // pay is derived later as Daily Rate × multiplier (not read
+              // from the raw HOLIDAY_WORK/SUNDAY_WORK field anymore).
+              holDays: 0,
+              sunDays: 0,
               abs: 0,
               pres: 0,
               fine: 0,
@@ -2905,8 +2913,8 @@
           if (d.STATUS === "ABSENT") rec.abs++;
           if (d.STATUS === "PRESENT") rec.pres++;
           if (d.REMARK === "NORMAL WORK") rec.norm++;
-          rec.hol += parseFloat(d.HOLIDAY_WORK) || 0;
-          rec.sun += parseFloat(d.SUNDAY_WORK) || 0;
+          if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) rec.holDays++;
+          if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) rec.sunDays++;
           rec.fine += parseFloat(d.FINE) || 0;
         });
         // ── "Others" আলাদা sub-collection থেকে AMOUNT যোগ করা হচ্ছে ──
@@ -2996,8 +3004,8 @@
         const dailyRate = parseFloat((salary / workingDays).toFixed(2));
         const att = rangeData.attendance[empId] || {
           norm: 0,
-          hol: 0,
-          sun: 0,
+          holDays: 0,
+          sunDays: 0,
           abs: 0,
           pres: 0,
           fine: 0,
@@ -3007,17 +3015,31 @@
         const totalAdvance = _cache.advMap[empId] || 0;
         const totalFine = _cache.fineMap[empId] || 0;
         const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
+        // ✅ AUTO-CALC: Holiday/Sunday pay = Daily Rate × multiplier × worked days.
+        // Cooks are excluded — a Cook working a Holiday/Sunday is just a normal
+        // present day at the flat daily rate, no separate Holiday/Sunday pay.
+        const holidayPay = isCook
+          ? 0
+          : parseFloat(
+              (dailyRate * HOLIDAY_RATE_MULTIPLIER * att.holDays).toFixed(2),
+            );
+        const sundayPay = isCook
+          ? 0
+          : parseFloat(
+              (dailyRate * SUNDAY_RATE_MULTIPLIER * att.sunDays).toFixed(2),
+            );
         // Gross paid still includes Holiday/Sunday/Others/Bonus (F Trv excluded, added separately)
         const grossBase =
           normalAmt +
-          att.hol +
-          att.sun +
+          holidayPay +
+          sundayPay +
           totalOT +
           (att.others || 0) +
           pBonus +
           aBonus;
-        // ✅ NPS/CSG basis = Normal Pay + OT only (Holiday, Sunday, Others, Bonus, F Trv excluded)
-        const npsCsgBasis = normalAmt + totalOT;
+        // ✅ NPS/CSG basis = Basic + Holiday + Sunday + OT
+        // (Others, P Bonus, A Bonus, F Trv excluded)
+        const npsCsgBasis = normalAmt + holidayPay + sundayPay + totalOT;
         // ✅ FIX: Round to whole Taka, same as Monthly Summary's nps/csg —
         // previously this rounded to 2 decimals here but whole numbers in the
         // summary table, causing a 1-taka Net Pay mismatch for some employees.
@@ -3076,8 +3098,8 @@
           }),
           serviceLength,
           normalWork: normalAmt.toFixed(2),
-          holidayWork: att.hol.toFixed(2),
-          sundayWork: att.sun.toFixed(2),
+          holidayWork: holidayPay.toFixed(2),
+          sundayWork: sundayPay.toFixed(2),
           overtime: totalOT.toFixed(2),
           others: (att.others || 0).toFixed(2),
           gross: gross.toFixed(2),
@@ -3509,32 +3531,45 @@
               const status = (r.STATUS || "").toUpperCase();
               const holW = parseInt(r.HOLIDAY_WORK) || 0;
               const sunW = parseInt(r.SUNDAY_WORK) || 0;
-              const holAmt = parseFloat(r.HOLIDAY_WORK) || 0;
-              const sunAmt = parseFloat(r.SUNDAY_WORK) || 0;
               const empId = String(r.ID || "").trim();
               const date = r.DATE;
               const isCook =
                 (r.DESIGNATION || "").trim().toUpperCase() === "COOK";
 
               // Daily earned share = monthly SALARY ÷ report's working days
-              // — Holiday/Sunday work days use their own HOLIDAY_WORK/
-              // SUNDAY_WORK amount instead, and ABSENT earns nothing.
+              // — Holiday/Sunday work days get Daily Rate × multiplier
+              // (auto-calculated, no longer read from the raw field), and
+              // ABSENT earns nothing.
               // ✅ Cooks are the exception: same rule as Payslip/Summary
               // (isCook uses att.pres, not att.norm) — a Cook working on a
               // Sunday/Holiday is just a normal present day at the flat daily
               // rate, no separate Holiday/Sunday pay on top.
               const monthlySalary = parseFloat(r.SALARY) || 0;
               const wd = workingDays || 0;
+              const baseDailyRate = wd
+                ? parseFloat((monthlySalary / wd).toFixed(2))
+                : 0;
+              // ✅ AUTO-CALC: Holiday/Sunday pay = Daily Rate × multiplier
+              const holAmt =
+                !isCook && holW > 0
+                  ? parseFloat(
+                      (baseDailyRate * HOLIDAY_RATE_MULTIPLIER).toFixed(2),
+                    )
+                  : 0;
+              const sunAmt =
+                !isCook && sunW > 0
+                  ? parseFloat(
+                      (baseDailyRate * SUNDAY_RATE_MULTIPLIER).toFixed(2),
+                    )
+                  : 0;
               const dailyRate =
                 status === "ABSENT"
                   ? 0
-                  : !isCook && holAmt > 0
+                  : holAmt > 0
                     ? holAmt
-                    : !isCook && sunAmt > 0
+                    : sunAmt > 0
                       ? sunAmt
-                      : wd
-                        ? parseFloat((monthlySalary / wd).toFixed(2))
-                        : 0;
+                      : baseDailyRate;
 
               // Others & Bonus lookup
               const othersAmt = othersMap[date]?.[empId] || 0;
@@ -4774,6 +4809,13 @@
           await Promise.all(othersPromises);
 
           // ── 6. Table rows ─────────────────────────────────────────
+          let totOtHrs = 0,
+            totOtAmt = 0,
+            totHol = 0,
+            totSun = 0,
+            totOthers = 0,
+            totABonus = 0,
+            totPBonus = 0;
           let rows = att
             .map((r, i) => {
               const ot = otMap[r.DATE] || {};
@@ -4781,12 +4823,27 @@
               const others = othersMap[r.DATE] || 0;
               const aBonus = bonus.ATTENDANCE_BONUS || 0;
               const pBonus = bonus.PERFORMANCE_BONUS || 0;
+              const otHrs = parseFloat(ot.TOTAL_OT_HOURS) || 0;
+              const otRate =
+                parseFloat(ot.OT_Rate || ot.ot_rate || ot.OT_RATE) || 0;
+              const otAmt = otHrs * otRate;
+              const holWork = parseFloat(r.HOLIDAY_WORK) || 0;
+              const sunWork = parseFloat(r.SUNDAY_WORK) || 0;
+              totOtHrs += otHrs;
+              totOtAmt += otAmt;
+              totHol += holWork;
+              totSun += sunWork;
+              totOthers += others;
+              totABonus += aBonus;
+              totPBonus += pBonus;
+              const otDisplay =
+                otHrs > 0 ? `${otHrs}×${otRate}=${otAmt.toFixed(2)}` : "0";
               return `<tr>
         <td style="text-align:center">${i + 1}</td>
         <td>${r.DATE}</td>
         <td style="text-align:center">${r.STATUS}</td>
         <td>${r.SIDE_NAME || "-"}</td>
-        <td style="text-align:center">${ot.TOTAL_OT_HOURS || 0}</td>
+        <td style="text-align:left">${otDisplay}</td>
         <td style="text-align:center">${r.HOLIDAY_WORK || 0}</td>
         <td style="text-align:center">${r.SUNDAY_WORK || 0}</td>
         <td style="text-align:center">${others > 0 ? others : "-"}</td>
@@ -4797,6 +4854,17 @@
             })
             .join("");
 
+          const totalsRow = `<tr style="background:#e8edf4;font-weight:700">
+        <td colspan="4" style="text-align:right">GRAND TOTAL</td>
+        <td style="text-align:left">${totOtHrs.toFixed(1)}h = ${totOtAmt.toFixed(2)}</td>
+        <td style="text-align:center">${totHol.toFixed(2)}</td>
+        <td style="text-align:center">${totSun.toFixed(2)}</td>
+        <td style="text-align:center">${totOthers.toFixed(2)}</td>
+        <td style="text-align:center">${totABonus.toFixed(2)}</td>
+        <td style="text-align:center">${totPBonus.toFixed(2)}</td>
+        <td></td>
+      </tr>`;
+
           // ── 7. Final HTML ─────────────────────────────────────────
           const html = `<!doctype html><html><head><title>Details - ${empId}</title><style>
       body{font-family:'Source Sans 3',sans-serif;padding:30px;background:#f4f7f6;color:#1a1a2e}
@@ -4805,6 +4873,7 @@
       th{background:#002147;color:white;padding:12px;font-size:11px;text-transform:uppercase;border:1px solid #335185}
       td{padding:10px;border:1px solid #eee;font-size:12px}
       tr:hover{background:#fffecb}
+      tfoot tr{border-top:2px solid #002147}
       .btn-print{background:#ffd700;color:#002147;border:2px solid #ffd700;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer}
       @media print{.no-print{display:none}}
     </style></head><body>
@@ -4823,6 +4892,7 @@
           <th>Others</th><th>A Bonus</th><th>P Bonus</th><th>Remark</th>
         </tr></thead>
         <tbody>${rows}</tbody>
+        <tfoot>${totalsRow}</tfoot>
       </table>
     </body></html>`;
 
@@ -5844,8 +5914,8 @@
             if (d.STATUS === "PRESENT") workers[d.ID].pres++;
             else if (d.STATUS === "ABSENT") workers[d.ID].abs++;
             if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
-            workers[d.ID].sun += parseFloat(d.SUNDAY_WORK) || 0;
-            workers[d.ID].hol += parseFloat(d.HOLIDAY_WORK) || 0;
+            // ✅ AUTO-CALC: only count worked-days here; hol/sun AMOUNT is
+            // derived below as Daily Rate × multiplier × day count.
             if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) workers[d.ID].sDay++;
             if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) workers[d.ID].hDay++;
           });
@@ -5964,6 +6034,18 @@
               const rowTotalBasic = isCook
                 ? w.daily * w.pres
                 : w.daily * w.norm;
+              // ✅ AUTO-CALC: Holiday/Sunday pay = Daily Rate × multiplier ×
+              // worked days. Cooks excluded (flat daily rate only, no extra).
+              w.hol = isCook
+                ? 0
+                : parseFloat(
+                    (w.daily * HOLIDAY_RATE_MULTIPLIER * w.hDay).toFixed(2),
+                  );
+              w.sun = isCook
+                ? 0
+                : parseFloat(
+                    (w.daily * SUNDAY_RATE_MULTIPLIER * w.sDay).toFixed(2),
+                  );
               const baseGross =
                 rowTotalBasic + w.hol + w.sun + w.otA + w.others;
               // ✅ UPDATED: Use DB bonus values instead of hardcoded 0
@@ -5972,8 +6054,9 @@
               const initFTrv = w.fTrv || 0;
               // Gross paid still includes Holiday/Sunday/Others/Bonus (F Trv excluded, added separately)
               const grossBase = baseGross + initPB + initAB;
-              // ✅ NPS/CSG basis = Normal Pay + OT only (Holiday, Sunday, Others, Bonus, F Trv excluded)
-              const npsCsgBasis = rowTotalBasic + w.otA;
+              // ✅ NPS/CSG basis = Basic + Holiday + Sunday + OT
+              // (Others, P Bonus, A Bonus, F Trv excluded)
+              const npsCsgBasis = rowTotalBasic + w.hol + w.sun + w.otA;
               const nps = Math.round(npsCsgBasis * 0.01);
               const csg = Math.round(npsCsgBasis * 0.015);
               const totDed = w.adv + w.fine + nps + csg;
