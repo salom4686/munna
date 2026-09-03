@@ -1815,9 +1815,6 @@
         <button class="btn btn-report" onclick="generateReport()">
           &#9654; Report View
         </button>
-        <button class="btn btn-report" onclick="saveBonusEntries()">
-          💾 Save P/A/F Bonus
-        </button>
         <div style="display: flex; gap: 6px; align-items: center">
           <input
             type="text"
@@ -4774,13 +4771,55 @@
           const bonusMonthData = bonusSnap.val() || {};
           // bonusMap[date] = { ATTENDANCE_BONUS, PERFORMANCE_BONUS }
           let bonusMap = {};
+          let periodOthers = 0,
+            periodABonus = 0,
+            periodPBonus = 0,
+            periodFTrv = 0;
+          let hasManualOthers = false;
+          const normalizedEmpId = String(empId).trim().toUpperCase();
+          const normalizeDateKey = (value) => {
+            if (!value) return "";
+            const raw = String(value).trim();
+            const isoMatch = raw.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/);
+            if (isoMatch)
+              return `${isoMatch[1]}-${String(isoMatch[2]).padStart(2, "0")}-${String(isoMatch[3]).padStart(2, "0")}`;
+            const dmyMatch = raw.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+            if (dmyMatch)
+              return `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, "0")}-${String(dmyMatch[1]).padStart(2, "0")}`;
+            return raw;
+          };
           for (const dateKey in bonusMonthData) {
             const dateData = bonusMonthData[dateKey];
             if (typeof dateData !== "object") continue;
-            if (dateData[empId]) {
-              // dateKey format: DATE_2026-06-01 → date: 2026-06-01
-              const date = dateKey.replace("DATE_", "");
-              bonusMap[date] = dateData[empId];
+            const matchingEntry = Object.entries(dateData).find(
+              ([storedId, value]) =>
+                storedId !== "ID" &&
+                storedId !== "DATE" &&
+                value &&
+                (String(storedId).trim().toUpperCase() === normalizedEmpId ||
+                  (typeof value === "object" &&
+                    String(value.ID || "")
+                      .trim()
+                      .toUpperCase() === normalizedEmpId)),
+            );
+            if (!matchingEntry) continue;
+            // dateKey format: DATE_2026-06-01 -> date: 2026-06-01
+            const date = normalizeDateKey(
+              matchingEntry[1].DATE || dateKey.replace("DATE_", ""),
+            );
+            bonusMap[date] = matchingEntry[1];
+            const bonusRecord = matchingEntry[1];
+            if (
+              date >= normalizeDateKey(dFromVal) &&
+              date <= normalizeDateKey(dToVal)
+            ) {
+              if (Object.prototype.hasOwnProperty.call(bonusRecord, "OTHERS")) {
+                hasManualOthers = true;
+                periodOthers += parseFloat(bonusRecord.OTHERS) || 0;
+              }
+              periodABonus += parseFloat(bonusRecord.ATTENDANCE_BONUS) || 0;
+              periodPBonus += parseFloat(bonusRecord.PERFORMANCE_BONUS) || 0;
+              periodFTrv += parseFloat(bonusRecord.FIX_TRAVELLING) || 0;
             }
           }
 
@@ -4804,10 +4843,9 @@
             othersSnap.forEach((doc) => {
               total += Number(doc.data().AMOUNT || 0);
             });
-            othersMap[date] = total;
+            othersMap[normalizeDateKey(date)] = total;
           });
           await Promise.all(othersPromises);
-
           // ── 6. Table rows ─────────────────────────────────────────
           let totOtHrs = 0,
             totOtAmt = 0,
@@ -4815,14 +4853,19 @@
             totSun = 0,
             totOthers = 0,
             totABonus = 0,
-            totPBonus = 0;
+            totPBonus = 0,
+            totFTrv = 0;
           let rows = att
             .map((r, i) => {
               const ot = otMap[r.DATE] || {};
-              const bonus = bonusMap[r.DATE] || {};
-              const others = othersMap[r.DATE] || 0;
+              const bonus = bonusMap[normalizeDateKey(r.DATE)] || {};
+              const others =
+                bonus.OTHERS !== undefined
+                  ? parseFloat(bonus.OTHERS) || 0
+                  : othersMap[normalizeDateKey(r.DATE)] || 0;
               const aBonus = bonus.ATTENDANCE_BONUS || 0;
               const pBonus = bonus.PERFORMANCE_BONUS || 0;
+              const fTrv = parseFloat(bonus.FIX_TRAVELLING) || 0;
               const otHrs = parseFloat(ot.TOTAL_OT_HOURS) || 0;
               const otRate =
                 parseFloat(ot.OT_Rate || ot.ot_rate || ot.OT_RATE) || 0;
@@ -4836,6 +4879,7 @@
               totOthers += others;
               totABonus += aBonus;
               totPBonus += pBonus;
+              totFTrv += fTrv;
               const otDisplay =
                 otHrs > 0 ? `${otHrs}×${otRate}=${otAmt.toFixed(2)}` : "0";
               return `<tr>
@@ -4849,10 +4893,20 @@
         <td style="text-align:center">${others > 0 ? others : "-"}</td>
         <td style="text-align:center">${aBonus > 0 ? aBonus : "-"}</td>
         <td style="text-align:center">${pBonus > 0 ? pBonus : "-"}</td>
+        <td style="text-align:center">${fTrv > 0 ? fTrv : "-"}</td>
         <td>${r.REMARK || "-"}</td>
       </tr>`;
             })
             .join("");
+
+          // Bonus entries are period-based and may be saved on a date that has
+          // no attendance row, so the grand total must use all saved entries.
+          totOthers = hasManualOthers
+            ? periodOthers
+            : Object.values(othersMap).reduce((sum, value) => sum + value, 0);
+          totABonus = periodABonus;
+          totPBonus = periodPBonus;
+          totFTrv = periodFTrv;
 
           const totalsRow = `<tr style="background:#e8edf4;font-weight:700">
         <td colspan="4" style="text-align:right">GRAND TOTAL</td>
@@ -4862,6 +4916,7 @@
         <td style="text-align:center">${totOthers.toFixed(2)}</td>
         <td style="text-align:center">${totABonus.toFixed(2)}</td>
         <td style="text-align:center">${totPBonus.toFixed(2)}</td>
+        <td style="text-align:center">${totFTrv.toFixed(2)}</td>
         <td></td>
       </tr>`;
 
@@ -4889,7 +4944,7 @@
         <thead><tr>
           <th>SL</th><th>Date</th><th>Status</th><th>Project Name</th>
           <th>OT Hours</th><th>Holiday Work</th><th>Sunday Work</th>
-          <th>Others</th><th>A Bonus</th><th>P Bonus</th><th>Remark</th>
+          <th>Others</th><th>A Bonus</th><th>P Bonus</th><th>F Trv</th><th>Remark</th>
         </tr></thead>
         <tbody>${rows}</tbody>
         <tfoot>${totalsRow}</tfoot>
@@ -5371,6 +5426,7 @@
         const pBonusInput = document.getElementById(`pb_${empId}`);
         const aBonusInput = document.getElementById(`ab_${empId}`);
         const fTrvInput = document.getElementById(`ftrv_${empId}`);
+        const othersInput = document.getElementById(`oth_${empId}`);
         const grossCell = document.getElementById(`gross_${empId}`);
         const npsCell = document.getElementById(`nps_${empId}`);
         const csgCell = document.getElementById(`csg_${empId}`);
@@ -5386,11 +5442,12 @@
         const pBonus = parseFloat(pBonusInput.value) || 0;
         const aBonus = parseFloat(aBonusInput.value) || 0;
         const fTrv = parseFloat(fTrvInput?.value) || 0;
+        const others = parseFloat(othersInput?.value) || 0;
         // NPS/CSG basis = Normal Pay + OT only — fixed at render time, unaffected by
         // Bonus/F Trv edits, so we keep whatever is already shown in the cells.
         const nps = parseFloat(npsCell.textContent) || 0;
         const csg = parseFloat(csgCell.textContent) || 0;
-        const newGrossBase = baseGross + pBonus + aBonus;
+        const newGrossBase = baseGross + others + pBonus + aBonus;
         const newTotDed = advVal + fineVal + nps + csg;
         // Gross Salary shown includes F Trv (added straight through, no NPS/CSG on it)
         const newGross = newGrossBase + fTrv;
@@ -5407,10 +5464,68 @@
       }
 
       function showPostedSalaryLock(input) {
-        if (!input.readOnly) return;
-        showMsg("All Ready Salary Post, Contact Developer", {
-          title: "Month Locked",
+        const fieldName = input.id.startsWith("pb_")
+          ? "P Bonus"
+          : input.id.startsWith("ab_")
+            ? "A Bonus"
+            : input.id.startsWith("ftrv_")
+              ? "F Trv"
+              : "Oth";
+        if (input.readOnly) {
+          showMsg(
+            `${fieldName} cannot be edited. This month's salary has already been paid.`,
+            {
+              title: "Paid Salary Locked",
+              type: "warn",
+            },
+          );
+          return;
+        }
+        showMsg(`${fieldName} input selected. Enter the amount and save.`, {
+          title: "Edit Salary Entry",
           type: "warn",
+        });
+      }
+
+      function confirmBonusFocus(input, event) {
+        if (input.readOnly) {
+          event.preventDefault();
+          showPostedSalaryLock(input);
+          return false;
+        }
+        if (input.dataset.editConfirmed === "true") return true;
+        event.preventDefault();
+        const fieldName = input.id.startsWith("pb_")
+          ? "P Bonus"
+          : input.id.startsWith("ab_")
+            ? "A Bonus"
+            : input.id.startsWith("ftrv_")
+              ? "F Trv"
+              : "Oth";
+        askCustomConfirm(`${fieldName} edit করতে চান?`, "Confirm Edit").then(
+          (confirmed) => {
+            if (!confirmed) return;
+            input.dataset.editConfirmed = "true";
+            input.focus();
+            input.select();
+          },
+        );
+        return false;
+      }
+
+      function saveBonusOnBlur(input) {
+        if (input.dataset.editConfirmed !== "true") return;
+        input.dataset.editConfirmed = "false";
+        const previousValue = input.dataset.previousValue ?? "";
+        if (input.value === previousValue) return;
+        persistBonusField(input, () => {
+          input.value = previousValue;
+          const empId = input.id.startsWith("ftrv_")
+            ? input.id.slice(5)
+            : input.id.startsWith("oth_")
+              ? input.id.slice(4)
+              : input.id.slice(3);
+          recalcRow(empId);
         });
       }
 
@@ -5438,12 +5553,16 @@
         }
         const empId = input.id.startsWith("ftrv_")
           ? input.id.slice(5)
-          : input.id.slice(3);
+          : input.id.startsWith("oth_")
+            ? input.id.slice(4)
+            : input.id.slice(3);
         const field = input.id.startsWith("pb_")
           ? "PERFORMANCE_BONUS"
           : input.id.startsWith("ab_")
             ? "ATTENDANCE_BONUS"
-            : "FIX_TRAVELLING";
+            : input.id.startsWith("ftrv_")
+              ? "FIX_TRAVELLING"
+              : "OTHERS";
         const ref = firebase
           .database()
           .ref(
@@ -5463,8 +5582,18 @@
             );
             return;
           }
-          if (input.value.trim() === "") await ref.remove();
-          else await ref.set(parseFloat(input.value) || 0);
+          if (input.value.trim() === "") {
+            await ref.remove();
+          } else {
+            await firebase
+              .database()
+              .ref(`BONUS_ENTRY/${getMonthKey(date)}/DATE_${date}/${empId}`)
+              .update({
+                ID: empId,
+                DATE: date,
+                [field]: parseFloat(input.value) || 0,
+              });
+          }
           input.dataset.previousValue = input.value;
         } catch (error) {
           restorePreviousValue();
@@ -5483,7 +5612,9 @@
           ? "P Bonus"
           : input.id.startsWith("ab_")
             ? "A Bonus"
-            : "F Trv";
+            : input.id.startsWith("ftrv_")
+              ? "F Trv"
+              : "Oth";
         const message = isClearing
           ? `${fieldName} data will be cleared. Are you sure?`
           : `${fieldName} will change from ${previousValue || "0"} to ${input.value}. Continue?`;
@@ -5491,7 +5622,9 @@
           input.value = previousValue;
           const empId = input.id.startsWith("ftrv_")
             ? input.id.slice(5)
-            : input.id.slice(3);
+            : input.id.startsWith("oth_")
+              ? input.id.slice(4)
+              : input.id.slice(3);
           recalcRow(empId);
         };
         askCustomConfirm(
@@ -5560,6 +5693,7 @@
           rows.forEach((row) => {
             const id = row.dataset.empid;
             const inputs = {
+              OTHERS: document.getElementById(`oth_${id}`),
               PERFORMANCE_BONUS: document.getElementById(`pb_${id}`),
               ATTENDANCE_BONUS: document.getElementById(`ab_${id}`),
               FIX_TRAVELLING: document.getElementById(`ftrv_${id}`),
@@ -5662,7 +5796,7 @@
           totAbs += parseFloat(tr.dataset.abs || 0);
           totOt += parseFloat(tr.dataset.ot || 0);
           totOtHrs += parseFloat(tr.dataset.othrs || 0);
-          totOth += parseFloat(tr.dataset.oth || 0);
+          totOth += getVal(`oth_${empId}`);
           const pb = getVal(`pb_${empId}`);
           const ab = getVal(`ab_${empId}`);
           const ftrv = getVal(`ftrv_${empId}`);
@@ -5901,6 +6035,7 @@
                 adv: 0,
                 fine: 0,
                 others: 0,
+                manualOthers: null,
                 pBonus: 0,
                 aBonus: 0,
                 fTrv: 0, // ✅ NEW: fTrv = Fix Travelling
@@ -5979,6 +6114,8 @@
                   parseFloat(row.PERFORMANCE_BONUS) || 0;
                 workers[row.ID].aBonus += parseFloat(row.ATTENDANCE_BONUS) || 0;
                 workers[row.ID].fTrv += parseFloat(row.FIX_TRAVELLING) || 0;
+                if (row.OTHERS !== undefined && row.OTHERS !== null)
+                  workers[row.ID].manualOthers = parseFloat(row.OTHERS) || 0;
               }
             }
           }
@@ -6046,8 +6183,11 @@
                 : parseFloat(
                     (w.daily * SUNDAY_RATE_MULTIPLIER * w.sDay).toFixed(2),
                   );
-              const baseGross =
-                rowTotalBasic + w.hol + w.sun + w.otA + w.others;
+              const baseGrossWithoutOthers =
+                rowTotalBasic + w.hol + w.sun + w.otA;
+              const initOth =
+                w.manualOthers !== null ? w.manualOthers : w.others;
+              const baseGross = baseGrossWithoutOthers + initOth;
               // ✅ UPDATED: Use DB bonus values instead of hardcoded 0
               const initPB = w.pBonus || 0;
               const initAB = w.aBonus || 0;
@@ -6075,7 +6215,7 @@
               totals.hDay += w.hDay;
               totals.sDay += w.sDay;
               totals.otH += w.otH;
-              totals.others += w.others;
+              totals.others += initOth;
               totals.gross += gross;
               totals.adv += w.adv;
               totals.fine += w.fine;
@@ -6113,26 +6253,35 @@
 <td class="text-right">${w.sun.toFixed(2)}</td>
               <td class="text-right">${w.otA.toFixed(2)}</td>
               <td class="text-right">${w.otH.toFixed(1)}</td>
-              <td class="text-right">${w.others.toFixed(2)}</td>
+              <td class="text-right" style="padding:0">
+                <input type="number" id="oth_${id}" class="bonus-input" value="${initOth || ""}"
+                  placeholder="0" min="0" step="1"
+                  ${w.posted ? "readonly" : ""}
+                  onfocus="rememberBonusValue(this)"
+                  onmousedown="return confirmBonusFocus(this, event)"
+                  oninput="recalcRow('${id}')"
+                  onblur="saveBonusOnBlur(this)"
+                  title="Others" />
+              </td>
               <td class="text-right" style="padding:0">
                 <input type="number" id="pb_${id}" class="bonus-input" value="${initPB || ""}"
                   placeholder="0" min="0" step="1"
                   ${w.posted ? "readonly" : ""}
                   onfocus="rememberBonusValue(this)"
-                  onclick="showPostedSalaryLock(this)"
+                  onmousedown="return confirmBonusFocus(this, event)"
                   oninput="recalcRow('${id}')"
-                  onchange="confirmBonusEdit(this)"
+                  onblur="saveBonusOnBlur(this)"
                   title="Performance Bonus" />
-                <input type="hidden" id="basegross_${id}" value="${baseGross}" />
+                <input type="hidden" id="basegross_${id}" value="${baseGrossWithoutOthers}" />
               </td>
               <td class="text-right" style="padding:0">
                 <input type="number" id="ab_${id}" class="bonus-input" value="${initAB || ""}"
                   placeholder="0" min="0" step="1"
                   ${w.posted ? "readonly" : ""}
                   onfocus="rememberBonusValue(this)"
-                  onclick="showPostedSalaryLock(this)"
+                  onmousedown="return confirmBonusFocus(this, event)"
                   oninput="recalcRow('${id}')"
-                  onchange="confirmBonusEdit(this)"
+                  onblur="saveBonusOnBlur(this)"
                   title="Attendance Bonus" />
               </td>
               <td class="text-right" style="padding:0">
@@ -6140,9 +6289,9 @@
                   placeholder="0" min="0" step="1"
                   ${w.posted ? "readonly" : ""}
                   onfocus="rememberBonusValue(this)"
-                  onclick="showPostedSalaryLock(this)"
+                  onmousedown="return confirmBonusFocus(this, event)"
                   oninput="recalcRow('${id}')"
-                  onchange="confirmBonusEdit(this)"
+                  onblur="saveBonusOnBlur(this)"
                   title="Fix Travelling (not subject to NPS/CSG, added directly to Net)" />
               </td>
               <td class="text-right" id="gross_${id}"><strong>${gross.toFixed(2)}</strong></td>
