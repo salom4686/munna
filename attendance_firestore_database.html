@@ -426,6 +426,11 @@
         backdrop-filter: blur(4px);
       }
 
+      .working-days-editing {
+        position: relative;
+        z-index: 10001;
+      }
+
       @media print {
         .no-print {
           display: none !important;
@@ -843,20 +848,67 @@
           >
             Employee Details
           </h2>
-         <div class="flex gap-2">
-  <button onclick="bulkEntry()" class="text-[10px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold">
-    All Attendance 
-  </button>
-  <button onclick="bulkEntry('OTHERS')" class="text-[10px] bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold">
-    Others Entry
-  </button>
-  <button onclick="bonusEntry()" class="text-[10px] bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-bold">
-    Bonus Entry
-  </button>
-  <button id="refreshBtn" onclick="refreshAllData(true)" class="text-[10px] bg-[#1e3a5f] text-white px-4 py-2 rounded-lg font-bold">
-    Refresh Server
-  </button>
-</div>
+          <div class="flex gap-2">
+            <div
+              class="flex items-center gap-1 bg-yellow-100 text-[#002147] px-2 py-1 rounded-lg font-bold whitespace-nowrap"
+              title="Double-click to edit working days"
+            >
+              <span class="text-[9px]">Working Day:</span>
+              <input
+                id="workingDaysInput"
+                type="number"
+                min="1"
+                step="1"
+                value=""
+                placeholder="--"
+                readonly
+                ondblclick="editWorkingDays(this)"
+                oninput="handleWorkingDaysInput(this)"
+                onkeydown="
+                  if (event.key === 'Enter') confirmWorkingDaysEdit(this);
+                "
+                class="text-[10px] bg-transparent text-[#002147] font-bold w-[32px] outline-none text-center cursor-default"
+                aria-label="Working days"
+              />
+              <button
+                id="workingDaysOkButton"
+                type="button"
+                onclick="
+                  confirmWorkingDaysEdit(
+                    document.getElementById('workingDaysInput'),
+                  )
+                "
+                class="hidden text-[9px] bg-green-600 text-white px-1.5 py-1 rounded font-bold"
+              >
+                OK
+              </button>
+            </div>
+            <button
+              onclick="bulkEntry()"
+              class="text-[10px] bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+              All Attendance
+            </button>
+            <button
+              onclick="bulkEntry('OTHERS')"
+              class="text-[10px] bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+              Others Entry
+            </button>
+            <button
+              onclick="bonusEntry()"
+              class="text-[10px] bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-bold"
+            >
+              Bonus Entry
+            </button>
+            <button
+              id="refreshBtn"
+              onclick="refreshAllData(true)"
+              class="text-[10px] bg-[#1e3a5f] text-white px-4 py-2 rounded-lg font-bold"
+            >
+              Refresh Server
+            </button>
+          </div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div class="input-group relative">
@@ -1123,14 +1175,15 @@
       try {
         // --- ?????????? ---
         const firebaseConfig = {
-  apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
-  authDomain: "munna-acl-fda7c.firebaseapp.com",
-  databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "munna-acl-fda7c",
-  storageBucket: "munna-acl-fda7c.firebasestorage.app",
-  messagingSenderId: "371130316468",
-  appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
-};
+          apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+          authDomain: "munna-acl-fda7c.firebaseapp.com",
+          databaseURL:
+            "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "munna-acl-fda7c",
+          storageBucket: "munna-acl-fda7c.firebasestorage.app",
+          messagingSenderId: "371130316468",
+          appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+        };
 
         // Google Apps Script Web App URL (????? URL ?? ????? ????)
         const SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
@@ -1246,7 +1299,7 @@
         /**
          * বাল্ক এন্ট্রি ফাংশন: সকল এমপ্লয়িকে একসাথে লিস্টে যোগ করার জন্য
          */
-       async function bulkEntry(forcedStatus = null) {
+        async function bulkEntry(forcedStatus = null) {
           console.log("bulkEntry called, employees:", employees.length);
           try {
             if (!employees || employees.length === 0) {
@@ -1257,10 +1310,12 @@
                 width: "320px",
               });
             }
-const initialDate = document.getElementById("attDate").value || "";
-const initialSite = document.getElementById("sideName").value || "";
-const initialStatus =
-  forcedStatus || document.getElementById("attStatus").value || "PRESENT";
+            const initialDate = document.getElementById("attDate").value || "";
+            const initialSite = document.getElementById("sideName").value || "";
+            const initialStatus =
+              forcedStatus ||
+              document.getElementById("attStatus").value ||
+              "PRESENT";
 
             // Check if there are any cook employees
             const hasCooks = employees.some((emp) =>
@@ -1462,7 +1517,9 @@ const initialStatus =
       <h3 style="font-size: 1.25rem; font-weight: 700; color: #ffd700;">ALL EMPLOYEES ENTRY & SELECTION FORM</h3>
       <button type="button" id="closeBulkModalBtn" style="background: transparent; color: #ffd700; border: 2px solid #ffd700; padding: 0.5rem; border-radius: 0.375rem; font-size: 0.9rem; font-weight: 700; cursor: pointer;">✕</button>
     </div>
-    ${forcedStatus === "OTHERS" ? `
+    ${
+      forcedStatus === "OTHERS"
+        ? `
     <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px;">
       <div>
         <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">PROJECT NAME</label>
@@ -1486,7 +1543,8 @@ const initialStatus =
         <input type="number" id="bulkAmount" placeholder="Amount" class="input-field" style="width: 100%; height: 42px; background: rgba(255, 255, 255, 0.9); color: #002147; border: 1px solid #ffd700;" step="0.01" />
       </div>
     </div>
-    ` : `
+    `
+        : `
     <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px;">
       <div>
         <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">Selection Date</label>
@@ -1512,7 +1570,8 @@ const initialStatus =
         </select>
       </div>
     </div>
-    `}
+    `
+    }
     <div style="margin-bottom: 14px;">
       <label style="display: block; font-weight: 700; margin-bottom: 6px; color: #ffd700;">Filter Employees</label>
       <input type="text" id="bulkFilterInput" placeholder="Search by ID, Name, or Designation..." style="width: 100%; padding: 10px 12px; border: 1px solid #ffd700; border-radius: 8px; background: rgba(255, 255, 255, 0.9); color: #002147; font-size: 14px;" />
@@ -1553,32 +1612,40 @@ const initialStatus =
                 updateBulkProjectName();
 
                 if (forcedStatus === "OTHERS") {
-  const bulkStatusSelect = document.getElementById("bulkStatus");
-  if (bulkStatusSelect) bulkStatusSelect.disabled = true;
-  const wrapper = bulkStatusSelect?.parentElement?.querySelector(".custom-select-wrapper");
-  if (wrapper) {
-    const trigger = wrapper.querySelector(".custom-select-trigger");
-    if (trigger) {
-      trigger.style.pointerEvents = "none";
-      trigger.style.opacity = "0.6";
-      trigger.style.cursor = "not-allowed";
-    }
-  }
+                  const bulkStatusSelect =
+                    document.getElementById("bulkStatus");
+                  if (bulkStatusSelect) bulkStatusSelect.disabled = true;
+                  const wrapper =
+                    bulkStatusSelect?.parentElement?.querySelector(
+                      ".custom-select-wrapper",
+                    );
+                  if (wrapper) {
+                    const trigger = wrapper.querySelector(
+                      ".custom-select-trigger",
+                    );
+                    if (trigger) {
+                      trigger.style.pointerEvents = "none";
+                      trigger.style.opacity = "0.6";
+                      trigger.style.cursor = "not-allowed";
+                    }
+                  }
 
-  // ✅ PROJECT NAME ডিফল্ট "OTHERS" সেট
-  const bulkSideName = document.getElementById("bulkSideName");
-  if (bulkSideName) {
-    let exists = Array.from(bulkSideName.options).some(opt => opt.value === "OTHERS");
-    if (!exists) {
-      const newOpt = document.createElement("option");
-      newOpt.value = "OTHERS";
-      newOpt.text = "OTHERS";
-      bulkSideName.add(newOpt);
-    }
-    bulkSideName.value = "OTHERS";
-    initCustomSelect("bulkSideName");
-  }
-}
+                  // ✅ PROJECT NAME ডিফল্ট "OTHERS" সেট
+                  const bulkSideName = document.getElementById("bulkSideName");
+                  if (bulkSideName) {
+                    let exists = Array.from(bulkSideName.options).some(
+                      (opt) => opt.value === "OTHERS",
+                    );
+                    if (!exists) {
+                      const newOpt = document.createElement("option");
+                      newOpt.value = "OTHERS";
+                      newOpt.text = "OTHERS";
+                      bulkSideName.add(newOpt);
+                    }
+                    bulkSideName.value = "OTHERS";
+                    initCustomSelect("bulkSideName");
+                  }
+                }
 
                 const dateInput = document.getElementById("bulkAttDate");
                 const filterInput = document.getElementById("bulkFilterInput");
@@ -1865,6 +1932,7 @@ const initialStatus =
               }
 
               const salary = parseFloat(emp.salary) || 0;
+              const workingDays = getSelectedWorkingDays(selectedDate);
               const designation = (emp.designation || "").toLowerCase();
               let hWork = "";
               let sWork = "";
@@ -1883,14 +1951,14 @@ const initialStatus =
                 } else if (isSunday) {
                   rem = "Sunday";
                   sWork =
-                    salary > 0
-                      ? parseFloat(((salary / 26) * 1.5).toFixed(2))
+                    salary > 0 && workingDays > 0
+                      ? parseFloat(((salary / workingDays) * 1.5).toFixed(2))
                       : 0;
                 } else if (isInHoli) {
                   rem = "Public Holiday";
                   hWork =
-                    salary > 0
-                      ? parseFloat(((salary / 26) * 1.5).toFixed(2))
+                    salary > 0 && workingDays > 0
+                      ? parseFloat(((salary / workingDays) * 1.5).toFixed(2))
                       : 0;
                 } else {
                   rem = "NORMAL WORK";
@@ -1948,90 +2016,115 @@ const initialStatus =
           }
         }
 
-      async function bonusEntry() {
-  if (!employees || employees.length === 0) {
-    return Swal.fire({ title: "No Employees", text: "Employee list is not loaded yet.", icon: "error", width: "320px" });
-  }
+        async function bonusEntry() {
+          if (!employees || employees.length === 0) {
+            return Swal.fire({
+              title: "No Employees",
+              text: "Employee list is not loaded yet.",
+              icon: "error",
+              width: "320px",
+            });
+          }
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const selectedEmployeeIndexes = new Set();
-  const bonusValues = {};
+          const todayStr = new Date().toISOString().split("T")[0];
+          const selectedEmployeeIndexes = new Set();
+          const bonusValues = {};
 
-  const updateCount = () => {
-    const el = document.getElementById("bonusSelectionCount");
-    if (el) el.textContent = `Selected: ${selectedEmployeeIndexes.size} employees`;
-  };
+          const updateCount = () => {
+            const el = document.getElementById("bonusSelectionCount");
+            if (el)
+              el.textContent = `Selected: ${selectedEmployeeIndexes.size} employees`;
+          };
 
-  const getMonthYearAndDocId = (dateStr) => {
-    const parts = dateStr.split("-");
-    const monthNames = ["JANUARY","FEBRUARY","MARCH","APRIL","MAY","JUNE","JULY","AUGUST","SEPTEMBER","OCTOBER","NOVEMBER","DECEMBER"];
-    const monthName = monthNames[parseInt(parts[1]) - 1];
-    const monthYear = `${monthName}_${parts[0]}`;
-    const dateDocId = "DATE_" + dateStr;
-    return { monthYear, dateDocId };
-  };
+          const getMonthYearAndDocId = (dateStr) => {
+            const parts = dateStr.split("-");
+            const monthNames = [
+              "JANUARY",
+              "FEBRUARY",
+              "MARCH",
+              "APRIL",
+              "MAY",
+              "JUNE",
+              "JULY",
+              "AUGUST",
+              "SEPTEMBER",
+              "OCTOBER",
+              "NOVEMBER",
+              "DECEMBER",
+            ];
+            const monthName = monthNames[parseInt(parts[1]) - 1];
+            const monthYear = `${monthName}_${parts[0]}`;
+            const dateDocId = "DATE_" + dateStr;
+            return { monthYear, dateDocId };
+          };
 
-  const buildRows = (filterText = "") => {
-    const filtered = employees.filter((emp) => {
-      if (!filterText) return true;
-      const q = filterText.toLowerCase();
-      return (emp.id || "").toLowerCase().includes(q) ||
-             (emp.name || "").toLowerCase().includes(q) ||
-             (emp.designation || "").toLowerCase().includes(q);
-    });
+          const buildRows = (filterText = "") => {
+            const filtered = employees.filter((emp) => {
+              if (!filterText) return true;
+              const q = filterText.toLowerCase();
+              return (
+                (emp.id || "").toLowerCase().includes(q) ||
+                (emp.name || "").toLowerCase().includes(q) ||
+                (emp.designation || "").toLowerCase().includes(q)
+              );
+            });
 
-    const rows = filtered.map((emp) => {
-      const idx = employees.indexOf(emp);
-      const fId = normalizeEmpId(emp.id);
-      const v = bonusValues[idx] || { att: 0, perf: 0 };
-      const checked = selectedEmployeeIndexes.has(idx) ? "checked" : "";
+            const rows = filtered
+              .map((emp) => {
+                const idx = employees.indexOf(emp);
+                const fId = normalizeEmpId(emp.id);
+                const v = bonusValues[idx] || { att: 0, perf: 0 };
+                const checked = selectedEmployeeIndexes.has(idx)
+                  ? "checked"
+                  : "";
 
-      return `
+                return `
         <div class="bonus-row" style="display:grid;grid-template-columns:30px 90px 1fr 110px 110px;gap:10px;align-items:center;padding:10px 8px;margin-bottom:6px;border-radius:8px;background:rgba(0,33,71,0.05);border:1px solid rgba(255,215,0,0.1);">
           <input type="checkbox" class="bonus-checkbox" id="bemp_${idx}" value="${idx}" style="width:20px;height:20px;accent-color:#002147;" ${checked} />
           <span style="font-weight:700;color:#ffd700;font-size:13px;">${fId}</span>
           <span style="color:#fff;font-size:14px;">${emp.name}${emp.designation ? ` <span style="color:#aab;font-size:11px;">(${emp.designation})</span>` : ""}</span>
-          <input type="number" class="bonus-att-input" data-idx="${idx}" value="${v.att > 0 ? v.att : ''}" placeholder="0"
+          <input type="number" class="bonus-att-input" data-idx="${idx}" value="${v.att > 0 ? v.att : ""}" placeholder="0"
             style="width:100%;height:38px;text-align:center;background:rgba(255,255,255,0.9);color:#002147;border:1px solid #ffd700;border-radius:6px;font-weight:700;" />
-          <input type="number" class="bonus-perf-input" data-idx="${idx}" value="${v.perf > 0 ? v.perf : ''}" placeholder="0"
+          <input type="number" class="bonus-perf-input" data-idx="${idx}" value="${v.perf > 0 ? v.perf : ""}" placeholder="0"
             style="width:100%;height:38px;text-align:center;background:rgba(255,255,255,0.9);color:#002147;border:1px solid #ffd700;border-radius:6px;font-weight:700;" />
         </div>`;
-    }).join("");
+              })
+              .join("");
 
-    const container = document.getElementById("bonusEmployeeRows");
-    if (container) {
-      container.innerHTML = rows;
-      attachBonusHandlers();
-    }
-    updateCount();
-  };
+            const container = document.getElementById("bonusEmployeeRows");
+            if (container) {
+              container.innerHTML = rows;
+              attachBonusHandlers();
+            }
+            updateCount();
+          };
 
-  const attachBonusHandlers = () => {
-    document.querySelectorAll(".bonus-checkbox").forEach((cb) => {
-      cb.addEventListener("change", () => {
-        const idx = parseInt(cb.value, 10);
-        if (cb.checked) selectedEmployeeIndexes.add(idx);
-        else selectedEmployeeIndexes.delete(idx);
-        updateCount();
-      });
-    });
-    document.querySelectorAll(".bonus-att-input").forEach((inp) => {
-      inp.addEventListener("input", () => {
-        const idx = parseInt(inp.dataset.idx, 10);
-        bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
-        bonusValues[idx].att = parseFloat(inp.value) || 0;
-      });
-    });
-    document.querySelectorAll(".bonus-perf-input").forEach((inp) => {
-      inp.addEventListener("input", () => {
-        const idx = parseInt(inp.dataset.idx, 10);
-        bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
-        bonusValues[idx].perf = parseFloat(inp.value) || 0;
-      });
-    });
-  };
+          const attachBonusHandlers = () => {
+            document.querySelectorAll(".bonus-checkbox").forEach((cb) => {
+              cb.addEventListener("change", () => {
+                const idx = parseInt(cb.value, 10);
+                if (cb.checked) selectedEmployeeIndexes.add(idx);
+                else selectedEmployeeIndexes.delete(idx);
+                updateCount();
+              });
+            });
+            document.querySelectorAll(".bonus-att-input").forEach((inp) => {
+              inp.addEventListener("input", () => {
+                const idx = parseInt(inp.dataset.idx, 10);
+                bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
+                bonusValues[idx].att = parseFloat(inp.value) || 0;
+              });
+            });
+            document.querySelectorAll(".bonus-perf-input").forEach((inp) => {
+              inp.addEventListener("input", () => {
+                const idx = parseInt(inp.dataset.idx, 10);
+                bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
+                bonusValues[idx].perf = parseFloat(inp.value) || 0;
+              });
+            });
+          };
 
-  const modalHtml = `
+          const modalHtml = `
     <div style="font-family:Inter,sans-serif;text-align:left;background:linear-gradient(135deg,#002147 0%,#001a38 100%);color:#fff;padding:20px;border-radius:12px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
         <h3 style="font-size:1.25rem;font-weight:700;color:#ffd700;">BONUS ENTRY</h3>
@@ -2076,35 +2169,38 @@ const initialStatus =
     </div>
   `;
 
-  let fp = null;
+          let fp = null;
 
-  const result = await Swal.fire({
-    title: "",
-    html: modalHtml,
-    width: 850,
-    showConfirmButton: true,
-    showCancelButton: true,
-    confirmButtonText: "Save Bonus",
-    cancelButtonText: "Cancel",
-    confirmButtonColor: "#002147",
-    cancelButtonColor: "#555",
-    allowOutsideClick: false,
-    background: "linear-gradient(135deg, #002147 0%, #001a38 100%)",
-    color: "#ffffff",
-    customClass: { popup: "bulk-modal-popup", title: "bulk-modal-title" },
-    didOpen: () => {
-      buildRows();
+          const result = await Swal.fire({
+            title: "",
+            html: modalHtml,
+            width: 850,
+            showConfirmButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Save Bonus",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#002147",
+            cancelButtonColor: "#555",
+            allowOutsideClick: false,
+            background: "linear-gradient(135deg, #002147 0%, #001a38 100%)",
+            color: "#ffffff",
+            customClass: {
+              popup: "bulk-modal-popup",
+              title: "bulk-modal-title",
+            },
+            didOpen: () => {
+              buildRows();
 
-      const dateInput = document.getElementById("bonusDate");
+              const dateInput = document.getElementById("bonusDate");
 
-      fp = flatpickr(dateInput, {
-        dateFormat: "Y-m-d",
-        altInput: true,
-        altFormat: "d M Y",
-        defaultDate: todayStr,
-        onReady: function(selectedDates, dateStr, instance) {
-          if (instance.altInput) {
-            instance.altInput.style.cssText = `
+              fp = flatpickr(dateInput, {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d M Y",
+                defaultDate: todayStr,
+                onReady: function (selectedDates, dateStr, instance) {
+                  if (instance.altInput) {
+                    instance.altInput.style.cssText = `
               width: 100% !important;
               height: 42px !important;
               background: rgba(255,255,255,0.9) !important;
@@ -2116,172 +2212,204 @@ const initialStatus =
               font-size: 16px !important;
               box-sizing: border-box !important;
             `;
+                  }
+                },
+              });
+
+              const filterInput = document.getElementById("bonusFilterInput");
+              filterInput.addEventListener("input", (e) =>
+                buildRows(e.target.value),
+              );
+
+              document
+                .getElementById("closeBonusBtn")
+                .addEventListener("click", () => Swal.close());
+
+              document
+                .getElementById("bonusSelectAllBtn")
+                .addEventListener("click", () => {
+                  document.querySelectorAll(".bonus-checkbox").forEach((cb) => {
+                    cb.checked = true;
+                    selectedEmployeeIndexes.add(parseInt(cb.value, 10));
+                  });
+                  updateCount();
+                });
+
+              document
+                .getElementById("bonusUnselectAllBtn")
+                .addEventListener("click", () => {
+                  document
+                    .querySelectorAll(".bonus-checkbox")
+                    .forEach((cb) => (cb.checked = false));
+                  selectedEmployeeIndexes.clear();
+                  updateCount();
+                });
+
+              // ✅ NEW: Typing in bulk fields instantly applies the amount to all currently selected employees
+              const bulkAttInput = document.getElementById("bulkAttAmount");
+              const bulkPerfInput = document.getElementById("bulkPerfAmount");
+
+              bulkAttInput.addEventListener("input", () => {
+                if (selectedEmployeeIndexes.size === 0) return;
+                const raw = bulkAttInput.value;
+                const val = raw === "" ? 0 : parseFloat(raw) || 0;
+                selectedEmployeeIndexes.forEach((idx) => {
+                  bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
+                  bonusValues[idx].att = val;
+                });
+                buildRows(filterInput.value);
+              });
+
+              bulkPerfInput.addEventListener("input", () => {
+                if (selectedEmployeeIndexes.size === 0) return;
+                const raw = bulkPerfInput.value;
+                const val = raw === "" ? 0 : parseFloat(raw) || 0;
+                selectedEmployeeIndexes.forEach((idx) => {
+                  bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
+                  bonusValues[idx].perf = val;
+                });
+                buildRows(filterInput.value);
+              });
+
+              // ✅ FIX 1: Load path সঠিক করা হয়েছে
+              document
+                .getElementById("loadBonusBtn")
+                .addEventListener("click", async () => {
+                  const dateVal =
+                    fp && fp.selectedDates.length > 0
+                      ? fp.formatDate(fp.selectedDates[0], "Y-m-d")
+                      : dateInput.value;
+                  if (!dateVal) return;
+                  const btn = document.getElementById("loadBonusBtn");
+                  btn.innerHTML = `<span class="spinner"></span> Loading...`;
+                  try {
+                    const { monthYear, dateDocId } =
+                      getMonthYearAndDocId(dateVal);
+                    const snap = await db
+                      .ref(`BONUS_ENTRY/${monthYear}/${dateDocId}`) // ✅ Fixed path
+                      .once("value");
+
+                    const data = snap.val() || {};
+                    let loadCount = 0;
+
+                    Object.values(data).forEach((record) => {
+                      const fId = normalizeEmpId(record.ID);
+                      const idx = employees.findIndex(
+                        (e) => normalizeEmpId(e.id) === fId,
+                      );
+                      if (idx >= 0) {
+                        bonusValues[idx] = {
+                          att: Number(record.ATTENDANCE_BONUS) || 0,
+                          perf: Number(record.PERFORMANCE_BONUS) || 0,
+                        };
+                        selectedEmployeeIndexes.add(idx);
+                        loadCount++;
+                      }
+                    });
+                    buildRows(filterInput.value);
+                    Swal.fire({
+                      toast: true,
+                      position: "top-end",
+                      icon: "success",
+                      title: `Loaded ${loadCount} record(s)`,
+                      showConfirmButton: false,
+                      timer: 1500,
+                    });
+                  } catch (err) {
+                    Swal.fire({
+                      toast: true,
+                      position: "top-end",
+                      icon: "error",
+                      title: "Load failed: " + err.message,
+                      showConfirmButton: false,
+                      timer: 2000,
+                    });
+                  } finally {
+                    btn.innerHTML = `📥 Load Data`;
+                  }
+                });
+            },
+
+            preConfirm: () => {
+              const dateVal =
+                fp && fp.selectedDates.length > 0
+                  ? fp.formatDate(fp.selectedDates[0], "Y-m-d")
+                  : document.getElementById("bonusDate").value;
+
+              if (!dateVal) {
+                Swal.showValidationMessage("Please select a date.");
+                return false;
+              }
+              if (selectedEmployeeIndexes.size === 0) {
+                Swal.showValidationMessage(
+                  "Please select at least one employee.",
+                );
+                return false;
+              }
+              return { date: dateVal };
+            },
+          });
+
+          if (!result.isConfirmed || !result.value) return;
+
+          const { date: selectedDate } = result.value;
+          const { monthYear, dateDocId } = getMonthYearAndDocId(selectedDate);
+
+          Swal.fire({
+            title: "Saving Bonus...",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+          });
+
+          try {
+            const updates = {};
+            let count = 0;
+            let lastFId = "";
+
+            selectedEmployeeIndexes.forEach((idx) => {
+              const emp = employees[idx];
+              const fId = normalizeEmpId(emp.id);
+              const v = bonusValues[idx] || { att: 0, perf: 0 };
+              lastFId = fId;
+
+              // ✅ FIX 2: Save path সঠিক করা হয়েছে
+              updates[`BONUS_ENTRY/${monthYear}/${dateDocId}/${fId}`] = {
+                ID: fId,
+                EMPLOYEE_NAME: emp.name,
+                DESIGNATION: emp.designation || "",
+                DATE: selectedDate,
+                ATTENDANCE_BONUS: v.att || 0,
+                PERFORMANCE_BONUS: v.perf || 0,
+                UPDATED_AT: new Date().toISOString(),
+              };
+              count++;
+            });
+
+            await db.ref().update(updates);
+
+            Swal.close();
+            // ✅ FIX 3: Success message-এ lastFId ব্যবহার করা হয়েছে
+            Swal.fire({
+              title: "✅ Saved!",
+              html: `<b>${count}</b> bonus record(s) saved successfully.<br><small style="color:#aaa;"> Success Bonus Entry/${monthYear}/${dateDocId}/</small>`,
+              icon: "success",
+              timer: 3000,
+              showConfirmButton: false,
+              background: "#002147",
+              color: "#ffffff",
+            });
+          } catch (err) {
+            Swal.close();
+            console.error("Bonus save error:", err);
+            Swal.fire({
+              title: "Save Failed",
+              text: err.message,
+              icon: "error",
+              background: "#002147",
+              color: "#ffffff",
+            });
           }
         }
-      });
-
-      const filterInput = document.getElementById("bonusFilterInput");
-      filterInput.addEventListener("input", (e) => buildRows(e.target.value));
-
-      document.getElementById("closeBonusBtn").addEventListener("click", () => Swal.close());
-
-      document.getElementById("bonusSelectAllBtn").addEventListener("click", () => {
-        document.querySelectorAll(".bonus-checkbox").forEach((cb) => {
-          cb.checked = true;
-          selectedEmployeeIndexes.add(parseInt(cb.value, 10));
-        });
-        updateCount();
-      });
-
-      document.getElementById("bonusUnselectAllBtn").addEventListener("click", () => {
-        document.querySelectorAll(".bonus-checkbox").forEach((cb) => (cb.checked = false));
-        selectedEmployeeIndexes.clear();
-        updateCount();
-      });
-
-      // ✅ NEW: Typing in bulk fields instantly applies the amount to all currently selected employees
-      const bulkAttInput = document.getElementById("bulkAttAmount");
-      const bulkPerfInput = document.getElementById("bulkPerfAmount");
-
-      bulkAttInput.addEventListener("input", () => {
-        if (selectedEmployeeIndexes.size === 0) return;
-        const raw = bulkAttInput.value;
-        const val = raw === "" ? 0 : (parseFloat(raw) || 0);
-        selectedEmployeeIndexes.forEach((idx) => {
-          bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
-          bonusValues[idx].att = val;
-        });
-        buildRows(filterInput.value);
-      });
-
-      bulkPerfInput.addEventListener("input", () => {
-        if (selectedEmployeeIndexes.size === 0) return;
-        const raw = bulkPerfInput.value;
-        const val = raw === "" ? 0 : (parseFloat(raw) || 0);
-        selectedEmployeeIndexes.forEach((idx) => {
-          bonusValues[idx] = bonusValues[idx] || { att: 0, perf: 0 };
-          bonusValues[idx].perf = val;
-        });
-        buildRows(filterInput.value);
-      });
-
-      // ✅ FIX 1: Load path সঠিক করা হয়েছে
-      document.getElementById("loadBonusBtn").addEventListener("click", async () => {
-        const dateVal = fp && fp.selectedDates.length > 0
-          ? fp.formatDate(fp.selectedDates[0], "Y-m-d")
-          : dateInput.value;
-        if (!dateVal) return;
-        const btn = document.getElementById("loadBonusBtn");
-        btn.innerHTML = `<span class="spinner"></span> Loading...`;
-        try {
-          const { monthYear, dateDocId } = getMonthYearAndDocId(dateVal);
-          const snap = await db
-            .ref(`BONUS_ENTRY/${monthYear}/${dateDocId}`)  // ✅ Fixed path
-            .once("value");
-
-          const data = snap.val() || {};
-          let loadCount = 0;
-
-          Object.values(data).forEach((record) => {
-            const fId = normalizeEmpId(record.ID);
-            const idx = employees.findIndex((e) => normalizeEmpId(e.id) === fId);
-            if (idx >= 0) {
-              bonusValues[idx] = {
-                att: Number(record.ATTENDANCE_BONUS) || 0,
-                perf: Number(record.PERFORMANCE_BONUS) || 0,
-              };
-              selectedEmployeeIndexes.add(idx);
-              loadCount++;
-            }
-          });
-          buildRows(filterInput.value);
-          Swal.fire({ toast: true, position: "top-end", icon: "success", title: `Loaded ${loadCount} record(s)`, showConfirmButton: false, timer: 1500 });
-        } catch (err) {
-          Swal.fire({ toast: true, position: "top-end", icon: "error", title: "Load failed: " + err.message, showConfirmButton: false, timer: 2000 });
-        } finally {
-          btn.innerHTML = `📥 Load Data`;
-        }
-      });
-    },
-
-    preConfirm: () => {
-      const dateVal = fp && fp.selectedDates.length > 0
-        ? fp.formatDate(fp.selectedDates[0], "Y-m-d")
-        : document.getElementById("bonusDate").value;
-
-      if (!dateVal) {
-        Swal.showValidationMessage("Please select a date.");
-        return false;
-      }
-      if (selectedEmployeeIndexes.size === 0) {
-        Swal.showValidationMessage("Please select at least one employee.");
-        return false;
-      }
-      return { date: dateVal };
-    },
-  });
-
-  if (!result.isConfirmed || !result.value) return;
-
-  const { date: selectedDate } = result.value;
-  const { monthYear, dateDocId } = getMonthYearAndDocId(selectedDate);
-
-  Swal.fire({
-    title: "Saving Bonus...",
-    allowOutsideClick: false,
-    didOpen: () => Swal.showLoading(),
-  });
-
-  try {
-    const updates = {};
-    let count = 0;
-    let lastFId = "";
-
-    selectedEmployeeIndexes.forEach((idx) => {
-      const emp = employees[idx];
-      const fId = normalizeEmpId(emp.id);
-      const v = bonusValues[idx] || { att: 0, perf: 0 };
-      lastFId = fId;
-
-      // ✅ FIX 2: Save path সঠিক করা হয়েছে
-      updates[`BONUS_ENTRY/${monthYear}/${dateDocId}/${fId}`] = {
-        ID: fId,
-        EMPLOYEE_NAME: emp.name,
-        DESIGNATION: emp.designation || "",
-        DATE: selectedDate,
-        ATTENDANCE_BONUS: v.att || 0,
-        PERFORMANCE_BONUS: v.perf || 0,
-        UPDATED_AT: new Date().toISOString(),
-      };
-      count++;
-    });
-
-    await db.ref().update(updates);
-
-    Swal.close();
-    // ✅ FIX 3: Success message-এ lastFId ব্যবহার করা হয়েছে
-    Swal.fire({ 
-      title: "✅ Saved!", 
-      html: `<b>${count}</b> bonus record(s) saved successfully.<br><small style="color:#aaa;"> Success Bonus Entry/${monthYear}/${dateDocId}/</small>`, 
-      icon: "success", 
-      timer: 3000, 
-      showConfirmButton: false,
-      background: "#002147",
-      color: "#ffffff"
-    });
-  } catch (err) {
-    Swal.close();
-    console.error("Bonus save error:", err);
-    Swal.fire({ 
-      title: "Save Failed", 
-      text: err.message, 
-      icon: "error",
-      background: "#002147",
-      color: "#ffffff"
-    });
-  }
-}
-      
 
         let editModeId = null;
         let currentMonthAttendance = [];
@@ -2292,7 +2420,10 @@ const initialStatus =
             dateFormat: "Y-m-d",
             altInput: true,
             altFormat: "F j, Y",
-            onChange: (d, dateStr) => handleDateChange(dateStr),
+            onChange: (d, dateStr) => {
+              updateWorkingDaysDisplay(dateStr);
+              handleDateChange(dateStr);
+            },
             // ????? ??? ????? ??? ???? ????
             onDayCreate: (dObj, dStr, fp, dayElem) => {
               const dateProp = dayElem.dateObj;
@@ -2367,6 +2498,7 @@ const initialStatus =
               // Firebase unavailable, use default/empty data
               console.warn("Firebase not available, using offline mode");
               HOLIDAY_LIST = [];
+              updateWorkingDaysDisplay();
               // Dummy employees for testing
               employees = [
                 {
@@ -2752,6 +2884,7 @@ const initialStatus =
 
             console.log("Loaded Firebase holidays:", HOLIDAY_LIST);
             renderHolidayInfo();
+            updateWorkingDaysDisplay();
 
             // ?. ???? ???? ???????? (??????? ? ????)
             if (Array.isArray(empRawData)) {
@@ -3455,6 +3588,107 @@ const initialStatus =
 
         console.log("Before handleDateChange");
         // --- ??? ???? ---
+        function getMonthlyWorkingDays(dateStr) {
+          const date = new Date(dateStr);
+          const year = date.getFullYear();
+          const month = date.getMonth();
+          const totalDays = new Date(year, month + 1, 0).getDate();
+          let sundays = 0;
+
+          for (let day = 1; day <= totalDays; day++) {
+            if (new Date(year, month, day).getDay() === 0) sundays++;
+          }
+
+          const holidays = HOLIDAY_LIST.filter((holiday) => {
+            const holidayDate = new Date(holiday.date);
+            return (
+              holidayDate.getFullYear() === year &&
+              holidayDate.getMonth() === month &&
+              holidayDate.getDay() !== 0
+            );
+          }).length;
+
+          return totalDays - sundays - holidays;
+        }
+
+        function updateWorkingDaysDisplay(dateStr) {
+          const input = document.getElementById("workingDaysInput");
+          if (!input) return;
+          const selectedDate =
+            dateStr ||
+            document.getElementById("attDate")?.value ||
+            new Date().toISOString().split("T")[0];
+          input.value = getMonthlyWorkingDays(selectedDate);
+          input.dataset.manual = "false";
+        }
+
+        function editWorkingDays(input) {
+          showCustomAlert(
+            "Edit Working Day",
+            "Edit mode চালু করতে OK চাপুন।",
+            "warning",
+          );
+          const okButton = document.getElementById("alertOkBtn");
+          if (okButton) okButton.onclick = () => beginWorkingDaysEdit(input);
+        }
+
+        function beginWorkingDaysEdit(input) {
+          input.readOnly = false;
+          input.classList.remove("cursor-default");
+          input.classList.add(
+            "cursor-text",
+            "bg-white",
+            "working-days-editing",
+          );
+          const workingDaysOkButton = document.getElementById(
+            "workingDaysOkButton",
+          );
+          if (workingDaysOkButton)
+            workingDaysOkButton.classList.remove("hidden");
+          input.focus();
+          input.select();
+          closeAlert();
+        }
+
+        function confirmWorkingDaysEdit(input) {
+          if (!input.value || parseInt(input.value, 10) < 1) {
+            showCustomAlert(
+              "Invalid Working Day",
+              "১ বা তার বেশি দিন দিন।",
+              "error",
+            );
+            input.focus();
+            return;
+          }
+          input.readOnly = true;
+          input.classList.remove("cursor-text", "bg-white");
+          input.classList.add("cursor-default");
+          input.classList.remove("working-days-editing");
+          const workingDaysOkButton = document.getElementById(
+            "workingDaysOkButton",
+          );
+          if (workingDaysOkButton) workingDaysOkButton.classList.add("hidden");
+          input.dataset.manual = "true";
+          const dateStr = document.getElementById("attDate")?.value;
+          if (dateStr) handleDateChange(dateStr);
+        }
+
+        function getSelectedWorkingDays(dateStr) {
+          const input = document.getElementById("workingDaysInput");
+          const manualDays = parseInt(input?.value, 10);
+          return manualDays > 0
+            ? manualDays
+            : getMonthlyWorkingDays(
+                dateStr || new Date().toISOString().split("T")[0],
+              );
+        }
+
+        function handleWorkingDaysInput(input) {
+          input.dataset.manual = input.value ? "true" : "false";
+          const dateStr = document.getElementById("attDate")?.value;
+          if (dateStr) handleDateChange(dateStr);
+        }
+
         function handleDateChange(dateStr) {
           if (!dateStr) return;
           const status = document.getElementById("attStatus").value;
@@ -3464,6 +3698,7 @@ const initialStatus =
             holEl = document.getElementById("holidayWork");
           const salary =
             parseFloat(document.getElementById("basicSalary").value) || 0;
+          const workingDays = getSelectedWorkingDays(dateStr);
           const designation = (
             document.getElementById("designation").value || ""
           ).toLowerCase();
@@ -3487,12 +3722,12 @@ const initialStatus =
               if (remarkEl) remarkEl.value = "NORMAL WORK";
             } else if (isSunday) {
               if (remarkEl) remarkEl.value = "Sunday";
-              if (salary > 0 && sunEl)
-                sunEl.value = ((salary / 26) * 1.5).toFixed(2);
+              if (salary > 0 && workingDays > 0 && sunEl)
+                sunEl.value = ((salary / workingDays) * 1.5).toFixed(2);
             } else if (isInHoli) {
               if (remarkEl) remarkEl.value = "Public Holiday";
-              if (salary > 0 && holEl)
-                holEl.value = ((salary / 26) * 1.5).toFixed(2);
+              if (salary > 0 && workingDays > 0 && holEl)
+                holEl.value = ((salary / workingDays) * 1.5).toFixed(2);
             } else {
               if (remarkEl) remarkEl.value = "NORMAL WORK";
             }
@@ -4374,6 +4609,12 @@ const initialStatus =
           const box = overlay.querySelector("div.bg-white"); // ????? ???? ??????
 
           if (!overlay || !box) return;
+
+          const okButton = document.getElementById("alertOkBtn");
+          if (okButton) {
+            okButton.style.display = "block";
+            okButton.onclick = closeAlert;
+          }
 
           // ???? ??? ???
           document.getElementById("alertTitle").innerText = title;
