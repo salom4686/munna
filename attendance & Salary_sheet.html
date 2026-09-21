@@ -63,11 +63,27 @@
         animation: header-logo-showcase 7s ease-in-out infinite;
       }
       @keyframes header-logo-showcase {
-        0%, 100% { transform: translateY(0) rotate(0deg) scale(1); filter: brightness(1); }
-        20% { transform: translateY(-3px) rotate(-4deg) scale(1.04); filter: brightness(1.12); }
-        40% { transform: translateY(0) rotate(4deg) scale(1); filter: brightness(1); }
-        60% { transform: translateY(-2px) rotate(0deg) scale(1.06); filter: brightness(1.18); }
-        80% { transform: translateY(0) rotate(-2deg) scale(1.02); filter: brightness(1.05); }
+        0%,
+        100% {
+          transform: translateY(0) rotate(0deg) scale(1);
+          filter: brightness(1);
+        }
+        20% {
+          transform: translateY(-3px) rotate(-4deg) scale(1.04);
+          filter: brightness(1.12);
+        }
+        40% {
+          transform: translateY(0) rotate(4deg) scale(1);
+          filter: brightness(1);
+        }
+        60% {
+          transform: translateY(-2px) rotate(0deg) scale(1.06);
+          filter: brightness(1.18);
+        }
+        80% {
+          transform: translateY(0) rotate(-2deg) scale(1.02);
+          filter: brightness(1.05);
+        }
       }
       .page-header h2 {
         font-family: "Playfair Display", serif;
@@ -78,10 +94,23 @@
         animation: header-title-showcase 7s ease-in-out infinite;
       }
       @keyframes header-title-showcase {
-        0%, 100% { text-shadow: 0 0 0 rgba(255, 215, 0, 0); transform: translateX(0) scale(1); }
-        25% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.42); transform: translateX(2px) scale(1.01); }
-        50% { text-shadow: 0 0 16px rgba(255, 215, 0, 0.58); transform: translateX(0) scale(1.025); }
-        75% { text-shadow: 0 0 8px rgba(255, 215, 0, 0.32); transform: translateX(-2px) scale(1.01); }
+        0%,
+        100% {
+          text-shadow: 0 0 0 rgba(255, 215, 0, 0);
+          transform: translateX(0) scale(1);
+        }
+        25% {
+          text-shadow: 0 0 10px rgba(255, 215, 0, 0.42);
+          transform: translateX(2px) scale(1.01);
+        }
+        50% {
+          text-shadow: 0 0 16px rgba(255, 215, 0, 0.58);
+          transform: translateX(0) scale(1.025);
+        }
+        75% {
+          text-shadow: 0 0 8px rgba(255, 215, 0, 0.32);
+          transform: translateX(-2px) scale(1.01);
+        }
       }
       @media (prefers-reduced-motion: reduce) {
         .page-header-logo,
@@ -624,9 +653,16 @@
         right: 32px;
       }
       @media (max-width: 700px) {
-        .page-header { padding: 12px 16px 42px; }
-        .page-header .header-badge { right: 16px; bottom: 10px; }
-        .page-header-logo { height: 28px; }
+        .page-header {
+          padding: 12px 16px 42px;
+        }
+        .page-header .header-badge {
+          right: 16px;
+          bottom: 10px;
+        }
+        .page-header-logo {
+          height: 28px;
+        }
       }
       .earning-others-print {
         display: none;
@@ -1551,9 +1587,15 @@
           font-size: 10px;
           font-weight: 700;
         }
-        .salary-print-info > :first-child { text-align: left; }
-        .salary-print-info > :nth-child(2) { text-align: center; }
-        .salary-print-info > :last-child { text-align: right; }
+        .salary-print-info > :first-child {
+          text-align: left;
+        }
+        .salary-print-info > :nth-child(2) {
+          text-align: center;
+        }
+        .salary-print-info > :last-child {
+          text-align: right;
+        }
         .salary-print-info {
           display: none !important;
         }
@@ -1868,7 +1910,11 @@
   <body>
     <div class="page-header">
       <div class="page-header-brand">
-        <img class="page-header-logo" src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w200" alt="ALOMHOW logo" />
+        <img
+          class="page-header-logo"
+          src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w200"
+          alt="ALOMHOW logo"
+        />
         <h2>ALOMHOW CO LTD</h2>
       </div>
       <span class="header-badge">SALARY ATTENDANCE &amp; PAYSLIP </span>
@@ -2917,6 +2963,18 @@
         el.innerHTML = `<span class="status-dot ${dotClass}"></span>${msg}`;
       }
 
+      async function getActiveEmployeeDocs() {
+        const db = firebase.firestore();
+        const snap = await db.collection("EMPLOYEE_LIST").get();
+        return snap.docs.filter((doc) => {
+          const e = doc.data() || {};
+          const statusValue = String(e.status ?? e.STATUS ?? "active")
+            .trim()
+            .toLowerCase();
+          return statusValue !== "inactive";
+        });
+      }
+
       async function preloadStaticData() {
         if (_cache.loaded || _cache.loading) return;
         _cache.loading = true;
@@ -2924,11 +2982,14 @@
         try {
           const db = firebase.firestore();
           const rtdb = firebase.database();
-          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empDocs = await getActiveEmployeeDocs();
           _cache.empList = [];
           _cache.empMap = {};
-          empSnap.forEach((d) => {
+          empDocs.forEach((d) => {
             const e = d.data();
+            const statusValue = String(e.status ?? e.STATUS ?? "active")
+              .trim()
+              .toLowerCase();
             const emp = {
               id: e.id || d.id,
               name: e.name || "",
@@ -2938,6 +2999,7 @@
               joining: e.joining || "",
               wpNo: e.wpNo || "",
               rpUidNo: e.rpUidNo || "",
+              status: statusValue === "inactive" ? "inactive" : "active",
             };
             // ✅ NEW: build a point-in-time salary timeline from the "history" array
             // so past months keep using the salary that was effective back then,
@@ -3418,11 +3480,11 @@
         if (_attEmpLoaded) return;
         try {
           const db = firebase.firestore();
-          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empDocs = await getActiveEmployeeDocs();
           const empSel = document.getElementById("attEmpSelect");
           empSel.innerHTML = '<option value="">All Employees</option>';
           const empList = [];
-          empSnap.forEach((d) => {
+          empDocs.forEach((d) => {
             const e = d.data();
             empList.push({ id: e.id || d.id, name: e.name || "" });
           });
@@ -4878,7 +4940,21 @@
       function renderPanelRows(list) {
         const tbody = document.getElementById("empPanelBody");
         tbody.innerHTML = "";
-        list.forEach((e) => {
+        const visibleList = (list || []).filter(
+          (e) => (e.status || "active") !== "inactive",
+        );
+        if (!visibleList.length) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="5" style="text-align:center;padding:30px;color:#9ca3af;">
+                No active employee found.
+              </td>
+            </tr>`;
+          document.getElementById("panelSelCount").textContent = "0 selected";
+          document.getElementById("panelGenBtn").disabled = true;
+          return;
+        }
+        visibleList.forEach((e) => {
           const tr = document.createElement("tr");
           tr.dataset.id = e.id;
           tr.dataset.name = (e.name || "").toLowerCase();
@@ -6747,11 +6823,11 @@
         try {
           const db = firebase.firestore();
           const rtdb = firebase.database();
-          const empSnap = await db.collection("EMPLOYEE_LIST").get();
+          const empDocs = await getActiveEmployeeDocs();
           const empSel = document.getElementById("otEmpSelect");
           empSel.innerHTML = '<option value="">All Employees</option>';
           const empList = [];
-          empSnap.forEach((d) => {
+          empDocs.forEach((d) => {
             const e = d.data();
             empList.push({ id: e.id || d.id, name: e.name || "" });
           });
@@ -7137,13 +7213,13 @@
         try {
           const rtdb = firebase.database();
           const db = firebase.firestore();
-          const [advSnap, empSnap] = await Promise.all([
+          const [advSnap, empDocs] = await Promise.all([
             rtdb.ref("ADVANCE_ADJUSTMENT_SUMMARY/USERS").once("value"),
-            db.collection("EMPLOYEE_LIST").get(),
+            getActiveEmployeeDocs(),
           ]);
           const advData = advSnap.val() || {};
           const empMap = {};
-          empSnap.forEach((d) => {
+          empDocs.forEach((d) => {
             const e = d.data();
             empMap[e.id || d.id] = e.name || "";
           });
@@ -8118,15 +8194,15 @@
                   const badgeColor =
                     r.action === "delete" ? "#dc2626" : "#2563eb";
                   return `<tr>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1;white-space:nowrap">${timeStr}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center">
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#000000;background:#f3f7fb;white-space:nowrap">${timeStr}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center;background:#f3f7fb">
                   <span style="background:${badgeColor};color:#fff;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase">${r.action}</span>
                 </td>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1;text-transform:uppercase">${r.dataType || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1">${r.date || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;font-weight:700;color:#ffd700">${r.empId || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;color:#cbd5e1">${r.reason || "-"}</td>
-                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center">
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#000000;background:#f3f7fb;text-transform:uppercase">${r.dataType || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#000000;background:#f3f7fb">${r.date || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;font-weight:700;color:#000000;background:#f3f7fb">${r.empId || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;color:#000000;background:#f3f7fb">${r.reason || "-"}</td>
+                <td style="padding:6px 8px;border:1px solid #22406b;text-align:center;background:#f3f7fb">
                   <button class="btn-view" onclick="viewAuditDetail('${r._id}')">👁️ View</button>
                 </td>
               </tr>`;
@@ -8136,16 +8212,118 @@
           </table>`;
       }
 
+      function escapeAuditHtml(value) {
+        return String(value ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/\"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      function getAuditFieldRows(value) {
+        if (value === null || value === undefined) return [];
+        if (typeof value !== "object") return [["Value", String(value)]];
+        const rows = [];
+        Object.keys(value).forEach((key) => {
+          const raw = value[key];
+          rows.push([
+            escapeAuditHtml(key),
+            escapeAuditHtml(
+              typeof raw === "object"
+                ? JSON.stringify(raw, null, 2)
+                : String(raw ?? ""),
+            ),
+          ]);
+        });
+        return rows;
+      }
+
+      function renderAuditValuePanel(title, value) {
+        const rows = getAuditFieldRows(value);
+        if (!rows.length) {
+          return `
+            <div style="background:#091c34;border:1px solid #2d4f82;border-radius:10px;padding:12px;">
+              <div style="font-size:11px;font-weight:800;color:${title === "Before" ? "#fca5a5" : "#86efac"};text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">${title}</div>
+              <div style="color:#94a3b8;font-size:11px;">No data</div>
+            </div>`;
+        }
+
+        return `
+          <div style="background:#091c34;border:1px solid #2d4f82;border-radius:10px;padding:12px;">
+            <div style="font-size:11px;font-weight:800;color:${title === "Before" ? "#fca5a5" : "#86efac"};text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">${title}</div>
+            <div style="max-height:45vh;overflow:auto;border:1px solid #23406d;border-radius:8px;">
+              <table style="width:100%;border-collapse:collapse;font-size:11px;">
+                <thead>
+                  <tr style="background:#102845;">
+                    <th style="text-align:left;padding:7px 8px;border-bottom:1px solid #23406d;color:#dbeafe;width:38%;">Field</th>
+                    <th style="text-align:left;padding:7px 8px;border-bottom:1px solid #23406d;color:#dbeafe;">Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${rows
+                    .map(
+                      ([field, val]) => `
+                        <tr>
+                          <td style="padding:7px 8px;border-bottom:1px solid #16355d;vertical-align:top;color:#000000;background:#f7f7f7;font-weight:700;">${field}</td>
+                          <td style="padding:7px 8px;border-bottom:1px solid #16355d;vertical-align:top;color:#000000;background:#ffffff;white-space:pre-wrap;word-break:break-word;">${val}</td>
+                        </tr>`,
+                    )
+                    .join("")}
+                </tbody>
+              </table>
+            </div>
+          </div>`;
+      }
+
       function viewAuditDetail(id) {
         if (!_auditCache) return;
         const r = _auditCache.find((x) => x._id === id);
         if (!r) return;
-        const text = JSON.stringify(
-          { action: r.action, before: r.before, after: r.after },
-          null,
-          2,
-        );
-        alert(text);
+
+        const overlay = document.createElement("div");
+        overlay.style.cssText = `
+          position:fixed;inset:0;background:rgba(0,8,20,0.76);backdrop-filter:blur(3px);
+          display:flex;align-items:center;justify-content:center;z-index:999999;padding:20px;
+          animation:delFadeIn .15s ease-out;`;
+
+        const detailBox = document.createElement("div");
+        detailBox.style.cssText = `
+          width:min(1200px, 94vw);max-height:82vh;overflow:hidden;border-radius:14px;
+          background:linear-gradient(160deg,#0a1a33,#001530);border:1.5px solid var(--brand-gold);
+          box-shadow:0 12px 40px rgba(0,0,0,0.45);font-family:inherit;color:#e2e8f0;`;
+
+        const ts =
+          r.timestamp && r.timestamp.toDate ? r.timestamp.toDate() : null;
+        const timeStr = ts ? ts.toLocaleString() : "-";
+
+        detailBox.innerHTML = `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #3a5a8a;">
+            <div style="color:var(--brand-gold);font-size:15px;font-weight:800;">📄 Audit Detail</div>
+            <button type="button" style="background:transparent;border:none;color:#fff;font-size:18px;cursor:pointer;padding:4px 8px;">✕</button>
+          </div>
+          <div style="padding:14px 20px;background:#07182f;border-bottom:1px solid #23406d;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;">
+            <div><div style="color:#9db5d8;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Action</div><div style="font-weight:700;color:#ffd700;text-transform:uppercase;">${escapeAuditHtml(r.action || "-")}</div></div>
+            <div><div style="color:#9db5d8;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Type</div><div style="font-weight:700;color:#e2e8f0;text-transform:uppercase;">${escapeAuditHtml(r.dataType || "-")}</div></div>
+            <div><div style="color:#9db5d8;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Date</div><div style="font-weight:700;color:#e2e8f0;">${escapeAuditHtml(r.date || "-")}</div></div>
+            <div><div style="color:#9db5d8;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">EMP ID</div><div style="font-weight:700;color:#ffd700;">${escapeAuditHtml(r.empId || "-")}</div></div>
+            <div><div style="color:#9db5d8;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Time</div><div style="font-weight:700;color:#e2e8f0;">${escapeAuditHtml(timeStr)}</div></div>
+            <div><div style="color:#9db5d8;font-size:10px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:4px;">Reason</div><div style="font-weight:700;color:#e2e8f0;">${escapeAuditHtml(r.reason || "-")}</div></div>
+          </div>
+          <div style="padding:14px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;max-height:56vh;overflow:auto;">
+            ${renderAuditValuePanel("Before", r.before)}
+            ${renderAuditValuePanel("After", r.after)}
+          </div>
+        `;
+
+        detailBox
+          .querySelector("button")
+          .addEventListener("click", () => overlay.remove());
+        overlay.addEventListener("click", (e) => {
+          if (e.target === overlay) overlay.remove();
+        });
+        overlay.appendChild(detailBox);
+        document.body.appendChild(overlay);
       }
 
       // Auto-preload on page load
