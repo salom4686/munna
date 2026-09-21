@@ -1933,6 +1933,13 @@
 
               const salary = parseFloat(emp.salary) || 0;
               const workingDays = getSelectedWorkingDays(selectedDate);
+              const otMultiplier = isSunday || isInHoli ? 2 : 1.5;
+              const calculatedOtRate =
+                salary > 0 && workingDays > 0
+                  ? parseFloat(
+                      ((salary / workingDays / 8) * otMultiplier).toFixed(2),
+                    )
+                  : 0;
               const designation = (emp.designation || "").toLowerCase();
               let hWork = "";
               let sWork = "";
@@ -1952,13 +1959,13 @@
                   rem = "Sunday";
                   sWork =
                     salary > 0 && workingDays > 0
-                      ? parseFloat(((salary / workingDays) * 1.5).toFixed(2))
+                      ? parseFloat(((salary / workingDays) * 2).toFixed(2))
                       : 0;
                 } else if (isInHoli) {
                   rem = "Public Holiday";
                   hWork =
                     salary > 0 && workingDays > 0
-                      ? parseFloat(((salary / workingDays) * 1.5).toFixed(2))
+                      ? parseFloat(((salary / workingDays) * 2).toFixed(2))
                       : 0;
                 } else {
                   rem = "NORMAL WORK";
@@ -1988,7 +1995,7 @@
                 joiningDate: emp.joining || "",
                 passport: emp.passport || "",
                 salary: emp.salary || 0,
-                otRate: emp.otRate || 0,
+                otRate: calculatedOtRate,
                 ot: 0,
                 site: siteValue,
                 status: statusValue,
@@ -2943,6 +2950,7 @@
                   emp.Designation ||
                   emp.designation ||
                   "",
+                status: String(emp.status || emp.STATUS || "").toLowerCase(),
               }));
             } else {
               employees = Object.keys(empRawData).map((key) => {
@@ -2996,12 +3004,16 @@
                     emp.WorkingAs ||
                     emp.WORKING_AS ||
                     emp.DESIGNATION ||
-                    emp.DESignation ||
-                    emp.designation ||
-                    "",
+                  emp.DESignation ||
+                  emp.designation ||
+                  "",
+                  status: String(emp.status || emp.STATUS || "").toLowerCase(),
                 };
               });
             }
+
+            // Attendance, Others and Bonus entry only use active employees.
+            employees = employees.filter((emp) => emp.status === "active");
 
             if (Array.isArray(attData)) {
               currentMonthAttendance = attData;
@@ -3705,6 +3717,16 @@
           const isSunday = dateObj.getDay() === 0,
             isInHoli = HOLIDAY_LIST.some((h) => h.date === dateStr);
 
+          // OT rate: normal day = hourly basic × 1.5; Sunday/holiday = hourly basic × 2.
+          const otRateEl = document.getElementById("globalOtRate");
+          if (otRateEl) {
+            const multiplier = isSunday || isInHoli ? 2 : 1.5;
+            otRateEl.value =
+              salary > 0 && workingDays > 0
+                ? ((salary / workingDays / 8) * multiplier).toFixed(2)
+                : "0.00";
+          }
+
           if (status === "ABSENT") {
             if (sunEl) sunEl.value = "";
             if (holEl) holEl.value = "";
@@ -3723,11 +3745,11 @@
             } else if (isSunday) {
               if (remarkEl) remarkEl.value = "Sunday";
               if (salary > 0 && workingDays > 0 && sunEl)
-                sunEl.value = ((salary / workingDays) * 1.5).toFixed(2);
+                sunEl.value = ((salary / workingDays) * 2).toFixed(2);
             } else if (isInHoli) {
               if (remarkEl) remarkEl.value = "Public Holiday";
               if (salary > 0 && workingDays > 0 && holEl)
-                holEl.value = ((salary / workingDays) * 1.5).toFixed(2);
+                holEl.value = ((salary / workingDays) * 2).toFixed(2);
             } else {
               if (remarkEl) remarkEl.value = "NORMAL WORK";
             }
@@ -3829,7 +3851,7 @@
           document.getElementById("period").value =
             getMonthsSinceJoining(emp.joining) || emp.period || "";
           document.getElementById("basicSalary").value = emp.salary || "0";
-          document.getElementById("globalOtRate").value = emp.otRate || "0";
+          document.getElementById("globalOtRate").value = "0.00";
           document.getElementById("idSuggestions").style.display = "none";
 
           if (document.getElementById("attDate").value)
