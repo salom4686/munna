@@ -358,6 +358,57 @@
         return totalDays - sundays - holidays;
       }
 
+      // Same calculation rules as the 21.09.2026 salary/payslip page.
+      const HOLIDAY_RATE_MULTIPLIER = 2;
+      const SUNDAY_RATE_MULTIPLIER = 2;
+
+      function getWorkingDaysForPayDate(dateStr) {
+        const parts = String(dateStr || "").split("-").map(Number);
+        if (parts.length !== 3 || parts.some(Number.isNaN)) return 0;
+        const [year, month, day] = parts;
+        const totalDays = new Date(year, month, 0).getDate();
+        let sundays = 0, holidays = 0;
+        for (let d = 1; d <= totalDays; d++) {
+          const current = new Date(year, month - 1, d);
+          if (current.getDay() === 0) sundays++;
+          else if (_holidaySet.has(`${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`)) holidays++;
+        }
+        return totalDays - sundays - holidays;
+      }
+
+      function getPayDateInfo(dateStr) {
+        const parts = String(dateStr || "").split("-").map(Number);
+        if (parts.length !== 3 || parts.some(Number.isNaN)) return { workingDays: 0, premium: false };
+        const [year, month, day] = parts;
+        const normalized = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+        const isSunday = new Date(year, month - 1, day).getDay() === 0;
+        return { workingDays: getWorkingDaysForPayDate(normalized), premium: isSunday || _holidaySet.has(normalized) };
+      }
+
+      function getSalaryForPayDate(empId, dateStr) {
+        const emp = _cache.empMap[String(empId).trim()];
+        return emp ? Number(getSalaryAsOf(emp, dateStr)) || 0 : 0;
+      }
+
+      function calculateOTAmount(empId, dateStr, hours, savedRate) {
+        const salary = getSalaryForPayDate(empId, dateStr);
+        const { workingDays, premium } = getPayDateInfo(dateStr);
+        if (salary > 0 && workingDays > 0) {
+          const multiplier = premium ? 2 : 1.5;
+          return (Number(hours) || 0) * (salary / workingDays / 8) * multiplier;
+        }
+        return (Number(hours) || 0) * (Number(savedRate) || 0);
+      }
+
+      function calculateHolidaySundayPay(empId, dateStr, savedAmount) {
+        if (!(Number(savedAmount) > 0)) return 0;
+        const salary = getSalaryForPayDate(empId, dateStr);
+        const { workingDays } = getPayDateInfo(dateStr);
+        return salary > 0 && workingDays > 0
+          ? (salary / workingDays) * 2
+          : Number(savedAmount) || 0;
+      }
+
       // ── GLOBAL CACHE ──
       let _cache = { loaded: false, loading: false, empList: [], empMap: {}, advMap: {}, fineMap: {} };
       let _attRangeCache = {};
@@ -439,13 +490,13 @@
           const d = doc.data();
           if (!d.ID || !d.DATE) return;
           const id = String(d.ID).trim();
-          if (!attendance[id]) attendance[id] = { norm:0, hol:0, sun:0, abs:0, pres:0, fine:0, others:0 };
+          if (!attendance[id]) attendance[id] = { norm:0, holDays:0, sunDays:0, abs:0, pres:0, fine:0, others:0 };
           const rec = attendance[id];
           if (d.STATUS==="PRESENT") rec.pres++;
           if (d.STATUS==="ABSENT")  rec.abs++;
           if (d.REMARK==="NORMAL WORK") rec.norm++;
-          rec.hol    += parseFloat(d.HOLIDAY_WORK)||0;
-          rec.sun    += parseFloat(d.SUNDAY_WORK) ||0;
+          if ((parseFloat(d.HOLIDAY_WORK)||0)>0) rec.holDays++;
+          if ((parseFloat(d.SUNDAY_WORK)||0)>0) rec.sunDays++;
           rec.fine   += parseFloat(d.FINE)        ||0;
           rec.others += parseFloat(d.OTHERS)      ||0;
         });
@@ -456,7 +507,7 @@
           if (!d.ID || !d.DATE) return;
           if (d.DATE < dFromVal || d.DATE > dToVal) return;
           const id = String(d.ID).trim();
-          if (!attendance[id]) attendance[id] = { norm:0, hol:0, sun:0, abs:0, pres:0, fine:0, others:0 };
+          if (!attendance[id]) attendance[id] = { norm:0, holDays:0, sunDays:0, abs:0, pres:0, fine:0, others:0 };
           attendance[id].others += parseFloat(d.AMOUNT)||0;
         });
         const otMap = {};
@@ -476,7 +527,7 @@
               const id = String(row.ID).trim();
               const otHrs  = parseFloat(row.TOTAL_OT_HOURS||row.Total_OT_Hours||0);
               const otRate = parseFloat(row.OT_Rate||row.ot_rate||row.OT_RATE||0);
-              otMap[id] = (otMap[id]||0) + (otHrs*otRate);
+              otMap[id] = (otMap[id]||0) + (otHrs * otRate);
             }
           }
         }
@@ -500,15 +551,18 @@
         const salary    = emp.salary;
         const isCook    = (emp.desig||"").trim().toUpperCase()==="COOK";
         const dailyRate = parseFloat((salary/workingDays).toFixed(2));
-        const att          = rangeData.attendance[empId]||{ norm:0, hol:0, sun:0, abs:0, pres:0, others:0 };
+        const att          = rangeData.attendance[empId]||{ norm:0, holDays:0, sunDays:0, abs:0, pres:0, others:0 };
         const totalOT      = rangeData.otMap[empId]  ||0;
         const totalAdvance = _cache.advMap[empId]    ||0;
         const totalFine    = _cache.fineMap[empId]   ||0;
         const normalAmt = isCook ? dailyRate*att.pres : dailyRate*att.norm;
-        const gross     = normalAmt + att.hol + att.sun + totalOT + (att.others||0) + pBonus + aBonus;
+        const holidayPay = isCook ? 0 : parseFloat((dailyRate * HOLIDAY_RATE_MULTIPLIER * att.holDays).toFixed(2));
+        const sundayPay = isCook ? 0 : parseFloat((dailyRate * SUNDAY_RATE_MULTIPLIER * att.sunDays).toFixed(2));
+        const gross     = normalAmt + holidayPay + sundayPay + totalOT + (att.others||0) + pBonus + aBonus;
         const npsCsgBase= normalAmt + totalOT; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
-        const csgEmp    = Math.round(npsCsgBase*0.015*100)/100;
-        const npsEmp    = Math.round(npsCsgBase*0.01 *100)/100;
+        const premiumNpsCsgBase = normalAmt + holidayPay + sundayPay + totalOT;
+        const csgEmp    = Math.round(premiumNpsCsgBase*0.015);
+        const npsEmp    = Math.round(premiumNpsCsgBase*0.01);
         const totalDed  = csgEmp + npsEmp + totalAdvance + totalFine;
         const netPay    = Math.round(gross - totalDed);
         const now = new Date();
@@ -532,8 +586,8 @@
           joining:emp.joining, wpNo:emp.wpNo||"", rpUidNo:emp.rpUidNo||"",
           entryDate:now.toLocaleDateString("en-GB"),
           time:now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),
-          serviceLength, normalWork:Math.round(normalAmt), holidayWork:Math.round(att.hol),
-          sundayWork:Math.round(att.sun), overtime:Math.round(totalOT),
+          serviceLength, normalWork:Math.round(normalAmt), holidayWork:Math.round(holidayPay),
+          sundayWork:Math.round(sundayPay), overtime:Math.round(totalOT),
           others:Math.round(att.others||0), gross:Math.round(gross),
           csgEmp:Math.round(csgEmp), npsEmp:Math.round(npsEmp),
           advanceRefund:Math.round(totalAdvance), fine:Math.round(totalFine),
@@ -1058,8 +1112,8 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             if (d.STATUS==="PRESENT") workers[d.ID].pres++;
             else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
             if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-            workers[d.ID].sun += parseFloat(d.SUNDAY_WORK) ||0;
-            workers[d.ID].hol += parseFloat(d.HOLIDAY_WORK)||0;
+            workers[d.ID].sDay = (workers[d.ID].sDay || 0) + ((parseFloat(d.SUNDAY_WORK)||0) > 0 ? 1 : 0);
+            workers[d.ID].hDay = (workers[d.ID].hDay || 0) + ((parseFloat(d.HOLIDAY_WORK)||0) > 0 ? 1 : 0);
           });
 
           // ✅ Others sub-collection
@@ -1130,12 +1184,15 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             const w=workers[id];
             const isCook=(w.des||"").trim().toUpperCase()==="COOK";
             const rowTotalBasic=isCook?w.daily*w.pres:w.daily*w.norm;
+            w.hol=isCook ? 0 : parseFloat((w.daily*HOLIDAY_RATE_MULTIPLIER*(w.hDay||0)).toFixed(2));
+            w.sun=isCook ? 0 : parseFloat((w.daily*SUNDAY_RATE_MULTIPLIER*(w.sDay||0)).toFixed(2));
             const baseGross    =rowTotalBasic+w.hol+w.sun+w.otA+w.others;
             const initPB=w.pBonus||0, initAB=w.aBonus||0;
             const gross  =baseGross+initPB+initAB;
             const npsCsgBase=rowTotalBasic+w.otA; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
-            const nps    =Math.round(npsCsgBase*0.01);
-            const csg    =Math.round(npsCsgBase*0.015);
+            const premiumNpsCsgBase=rowTotalBasic+w.hol+w.sun+w.otA;
+            const nps    =Math.round(premiumNpsCsgBase*0.01);
+            const csg    =Math.round(premiumNpsCsgBase*0.015);
             const totDed =w.adv+w.fine+nps+csg;
             const net    =Math.round(gross-totDed);
 
@@ -1366,8 +1423,8 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             if (d.STATUS==="PRESENT") workers[d.ID].pres++;
             else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
             if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-            workers[d.ID].sun += parseFloat(d.SUNDAY_WORK) ||0;
-            workers[d.ID].hol += parseFloat(d.HOLIDAY_WORK)||0;
+            workers[d.ID].sDay = (workers[d.ID].sDay || 0) + ((parseFloat(d.SUNDAY_WORK)||0) > 0 ? 1 : 0);
+            workers[d.ID].hDay = (workers[d.ID].hDay || 0) + ((parseFloat(d.HOLIDAY_WORK)||0) > 0 ? 1 : 0);
           });
 
           // ✅ Others sub-collection
