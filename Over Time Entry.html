@@ -46,7 +46,7 @@
       .ot-input:focus {
         border-color: var(--brand-blue);
         ring: 2px;
-        ring-color: var(--brand-blue);
+        ring-color:var(--brand-blue);
         outline: none;
       }
 
@@ -129,7 +129,8 @@
         color: var(--brand-gold);
         border: 2px solid var(--brand-gold);
         border-radius: 0.75rem;
-        padding: 0.75rem 1rem;
+        height: 40px;
+        padding: 0 1rem;
         font-weight: bold;
         cursor: pointer;
         display: flex;
@@ -137,6 +138,35 @@
         align-items: center;
         font-size: 0.875rem;
         transition: all 0.3s ease;
+      }
+      /* History table: বন্ধ অবস্থায় আগের সাধারণ field-এর রং বজায় থাকবে। */
+      .history-site-select .custom-select-trigger {
+        background-color: #f1f5f9;
+        border: 1px solid rgba(0, 33, 71, 0.1);
+        color: #002147;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+      }
+      .history-site-select .custom-select-trigger i {
+        color: #64748b !important;
+        font-size: 0.65rem;
+      }
+      #workerTableScroll.history-table-scroll,
+      #workerTableScroll.entry-table-scroll {
+        max-height: 600px;
+        overflow: auto;
+      }
+      #workerTableScroll.history-table-scroll #workerTable thead,
+      #workerTableScroll.entry-table-scroll #workerTable thead {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+      }
+      .history-site-select.is-editing .custom-select-trigger {
+        background-color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px #dbeafe;
       }
       .custom-select-options {
         position: absolute;
@@ -363,73 +393,37 @@
         }
       }
 
-      /* Flatpickr কাস্টম থিম */
-      .flatpickr-calendar {
-        background: #ffffff;
-        border: 2px solid var(--brand-gold) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      }
-      .flatpickr-months {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-month {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-current-month .flatpickr-monthDropdown-months {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-current-month .numInputWrapper span.arrowUp:after {
-        border-bottom-color: var(--brand-gold) !important;
-      }
-      .flatpickr-current-month .numInputWrapper span.arrowDown:after {
-        border-top-color: var(--brand-gold) !important;
-      }
-      .flatpickr-months .flatpickr-prev-month,
-      .flatpickr-months .flatpickr-next-month {
-        color: var(--brand-gold) !important;
-        fill: var(--brand-gold) !important;
-      }
-      .flatpickr-weekdays {
-        background: var(--brand-blue) !important;
-      }
-      span.flatpickr-weekday {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-        font-weight: bold;
-      }
-      .flatpickr-day.selected,
-      .flatpickr-day.startRange,
-      .flatpickr-day.endRange,
-      .flatpickr-day.selected:hover,
-      .flatpickr-day.selected:focus {
-        background: var(--brand-blue) !important;
-        border-color: var(--brand-gold) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-day:hover {
-        background: var(--brand-gold) !important;
-        color: var(--brand-blue) !important;
-        border-color: var(--brand-blue) !important;
-      }
-      .flatpickr-day.today {
-        border-color: var(--brand-blue) !important;
-        color: var(--brand-blue) !important;
-        font-weight: bold;
-      }
-      .flatpickr-day.today:hover {
-        background: var(--brand-blue) !important;
-        color: var(--brand-gold) !important;
-      }
-      .flatpickr-day {
-        color: var(--brand-blue) !important;
-      }
-      .flatpickr-calendar.arrowTop:after,
-      .flatpickr-calendar.arrowTop:before {
-        border-bottom-color: var(--brand-blue) !important;
-      }
+    /* ── Flatpickr Custom Theme ── */
+.flatpickr-calendar { background: #001d3d; border: 2px solid var(--brand-gold) !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+.flatpickr-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+.flatpickr-month { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+.flatpickr-current-month .flatpickr-monthDropdown-months { background: var(--brand-blue) !important; color: var(--brand-gold) !important; }
+.flatpickr-current-month .numInputWrapper span.arrowUp:after { border-bottom-color: var(--brand-gold) !important; }
+.flatpickr-current-month .numInputWrapper span.arrowDown:after { border-top-color: var(--brand-gold) !important; }
+.flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: var(--brand-gold) !important; fill: var(--brand-gold) !important; }
+.flatpickr-weekdays { background: var(--brand-blue) !important; }
+span.flatpickr-weekday { background: var(--brand-blue) !important; color: var(--brand-gold) !important; font-weight: bold; }
+.flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange, .flatpickr-day.selected:hover, .flatpickr-day.selected:focus { background: var(--brand-blue) !important; border-color: var(--brand-gold) !important; color: var(--brand-gold) !important; }
+.flatpickr-day:hover { background: var(--brand-gold) !important; color: var(--brand-blue) !important; border-color: var(--brand-blue) !important; }
+.flatpickr-day.today { background: var(--brand-gold) !important; border-color: var(--brand-gold) !important; color: var(--brand-blue) !important; font-weight: bold; box-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
+.flatpickr-day.today:hover { background: var(--brand-gold) !important; border-color: var(--brand-gold) !important; color: var(--brand-blue) !important; }
+.flatpickr-day { color: var(--brand-gold) !important; }
+.flatpickr-calendar.arrowTop:after, .flatpickr-calendar.arrowTop:before { border-bottom-color: var(--brand-blue) !important; }
+.flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay {
+  visibility: hidden !important;
+  pointer-events: none;
+}
+/* Sunday ও Public Holiday: OT Rate/Pay ×2 — ক্যালেন্ডারে লাল গোল চিহ্ন */
+.flatpickr-day.ot-double-hours-day,
+.flatpickr-day.ot-double-hours-day.selected,
+.flatpickr-day.ot-double-hours-day:hover {
+  /* রঙটি পুরো date cell নয়—ভেতরে ছোট আলাদা গোল চিহ্ন */
+  background: radial-gradient(circle, #dc2626 0 13px, transparent 14px) !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
 
       /* স্ক্রোলবার স্টাইল */
       .suggestion-box::-webkit-scrollbar {
@@ -440,13 +434,7 @@
         border-radius: 10px;
       }
 
-      /* অন্যান্য মাসের তারিখ ব্লার এবং ডিজেবল করার স্টাইল */
-      .flatpickr-day.prevMonthDay,
-      .flatpickr-day.nextMonthDay {
-        opacity: 0.1 !important;
-        filter: blur(1.5px);
-        pointer-events: none;
-      }
+      
     </style>
 
     <script>
@@ -537,7 +525,7 @@
                   <th class="w-32 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Project</th>
                   <th class="w-24 p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase text-center hide-on-print">OT Rate</th>
                   <th class="w-20 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">OT Hours</th>
-                  <th class="w-28 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Total Taka</th>
+                  <th class="w-28 text-center p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Total MUR</th>
                   <th class="p-3 text-[10px] font-bold border border-[#ffd700]/30 uppercase">Remark</th>
                 </tr>
               </thead>
@@ -616,7 +604,7 @@
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">OT Date</label>
             <div class="relative">
               <input type="text" id="targetDate" placeholder="Select Date" 
-                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[200px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
+                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl h-10 px-3 outline-none cursor-pointer font-bold text-sm min-w-[200px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
                      readonly>
             </div>
           </div>
@@ -626,7 +614,7 @@
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">Start Date</label>
             <div class="relative">
               <input type="text" id="startDateRange" placeholder="Start Date" 
-                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
+                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl h-10 px-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
                      readonly>
             </div>
           </div>
@@ -636,7 +624,7 @@
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">End Date</label>
             <div class="relative">
               <input type="text" id="endDateRange" placeholder="End Date" 
-                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl p-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
+                     class="bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] rounded-xl h-10 px-3 outline-none cursor-pointer font-bold text-sm min-w-[180px] focus:ring-4 ring-yellow-500/20 placeholder-[#ffd700]/70" 
                      readonly>
             </div>
           </div>
@@ -644,7 +632,7 @@
           <!-- প্রজেক্ট লোকেশন ফিল্ড (সর্বদা দৃশ্যমান) -->
           <div class="flex flex-col w-full md:w-auto">
             <label class="text-[10px] font-black uppercase mb-2 text-[#002147]/70 tracking-wider ml-1 text-[#002147]">Project Location</label>
-            <select id="targetSite" class="bg-[#002147] text-[#ffd700] px-4 py-3 rounded-xl font-bold text-sm min-w-[280px] outline-none border-2 border-[#ffd700] focus:ring-4 ring-yellow-500/20 transition-all duration-300 cursor-pointer">
+            <select id="targetSite" class="bg-[#002147] text-[#ffd700] h-10 px-4 rounded-xl font-bold text-sm min-w-[280px] outline-none border-2 border-[#ffd700] focus:ring-4 ring-yellow-500/20 transition-all duration-300 cursor-pointer">
               <option value="">Choose Project</option>
             </select>
           </div>
@@ -654,16 +642,8 @@
             <div class="flex items-end w-full md:w-auto">
               <button onclick="fetchWorkersFromDatabase()" id="loadBtn" 
                       class="w-full md:w-auto bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-blue-900 hover:shadow-blue-500/20 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                 Search
-              </button>
-            </div>
-
-            <div class="flex items-end w-full md:w-auto">
-              <button onclick="window.location.reload()" 
-                      class="w-full md:w-auto bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-blue-900 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-               Refresh
               </button>
             </div>
           </div>
@@ -692,6 +672,14 @@
             </button>
           </div>
 
+          <div class="flex items-end w-full md:w-auto" id="refreshActionBtn">
+            <button onclick="window.location.reload()" 
+                    class="w-full md:w-auto bg-[#002147] text-[#ffd700] border-2 border-[#ffd700] px-6 py-2.5 rounded-xl font-bold text-xs uppercase hover:bg-blue-900 active:scale-95 transition-all shadow-md flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+              Refresh
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -708,6 +696,16 @@
             <div id="suggestionBox" class="suggestion-box"></div>
           </div>
 
+          <div class="w-full md:flex-1 rounded-xl border border-[#d4af37]/50 bg-[#002147]/5 px-4 py-2 text-[#002147]">
+            <p class="text-[10px] font-black tracking-wider text-[#002147] uppercase">OT Calculation</p>
+            <p class="mt-0.5 text-[10px] leading-4 font-semibold">
+              Hourly OT Rate = (Monthly Basic Salary ÷ Working Days ÷ 8) × 1.5
+              <span class="mx-1 text-[#d4af37]">|</span>
+              Total OT = Hourly OT Rate × Entered OT Hours
+            </p>
+            <p class="text-[9px] leading-3 text-red-600 font-bold">Sunday / Public Holiday: OT Rate and Pay × 2</p>
+          </div>
+
           <!-- প্রিভিউ বার (শুধুমাত্র সিঙ্গেল মোডে দৃশ্যমান) -->
           <div id="actionBar" class="opacity-0 pointer-events-none transition-all flex items-center gap-6">
             <div class="text-right">
@@ -721,7 +719,7 @@
         </div>
 
         <div class="md:col-span-12 bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div class="overflow-x-auto">
+          <div id="workerTableScroll" class="overflow-x-auto entry-table-scroll">
             <table id="workerTable" class="w-full text-left border-collapse">
               <thead class="bg-[#002147] border-b border-[#ffd700]/30">
                 <!-- হেডারসমূহ ডাইনামিকলি স্ক্রিপ্ট দিয়ে লোড হবে -->
@@ -775,8 +773,33 @@
       let employees = [],
         currentSites = [],
         preparedData = [],
+        currentOtRateMultiplier = 1,
+        holidayDateKeys = new Set(),
+        datePickers = [],
         existingDbRecordsMap = {}, // ডুপ্লিকেট ফিল্টারিং ম্যাপ
         currentViewMode = "SINGLE"; // মোড ট্র্যাকিং
+
+      function toDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function markDoubleOtDays(_, __, ___, dayElem) {
+        const date = dayElem.dateObj;
+        if (!date) return;
+        const isSunday = date.getDay() === 0;
+        const isPublicHoliday = holidayDateKeys.has(toDateKey(date));
+        if (!isSunday && !isPublicHoliday) return;
+
+        dayElem.classList.add("ot-double-hours-day");
+        dayElem.title = isSunday && isPublicHoliday
+          ? "Sunday & Public Holiday — OT Rate / Pay ×2"
+          : isSunday
+            ? "Sunday — OT Rate / Pay ×2"
+            : "Public Holiday — OT Rate / Pay ×2";
+      }
 
       // ডাটাবেস এরর হলে বিকল্প প্রজেক্ট লিস্ট
       const defaultProjectFallbackList = [
@@ -802,30 +825,42 @@
         updateTableHeader();
 
         if (typeof flatpickr !== "undefined") {
-          flatpickr("#targetDate", {
+          datePickers.push(flatpickr("#targetDate", {
             dateFormat: "Y-m-d",
             placeholder: "Select Date",
             allowInput: false,
             clickOpens: true,
-          });
+            onDayCreate: markDoubleOtDays,
+          }));
 
-          flatpickr("#startDateRange", {
+          datePickers.push(flatpickr("#startDateRange", {
             dateFormat: "Y-m-d",
             placeholder: "Start Date",
             allowInput: false,
             clickOpens: true,
-          });
+            onDayCreate: markDoubleOtDays,
+          }));
 
-          flatpickr("#endDateRange", {
+          datePickers.push(flatpickr("#endDateRange", {
             dateFormat: "Y-m-d",
             placeholder: "End Date",
             allowInput: false,
             clickOpens: true,
-          });
+            onDayCreate: markDoubleOtDays,
+          }));
           console.log("Calendars active.");
         }
 
         fetchLastUpdate();
+
+        try {
+          const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+          holidaySnap.forEach((doc) => holidayDateKeys.add(doc.id));
+          // Holiday data আসার পরে খোলা ক্যালেন্ডারগুলোতে লাল চিহ্ন দেখান।
+          datePickers.forEach((picker) => picker.redraw());
+        } catch (error) {
+          console.error("Holiday calendar markers could not be loaded:", error);
+        }
 
         try {
           const [empSnap, siteSnap] = await Promise.all([
@@ -932,6 +967,7 @@
 
         wrapper = document.createElement("div");
         wrapper.className = "custom-select-wrapper";
+        if (id.startsWith("site-select-")) wrapper.classList.add("history-site-select");
         wrapper.style.position = "relative";
 
         const trigger = document.createElement("div");
@@ -957,6 +993,7 @@
 
         trigger.onclick = (e) => {
           e.stopPropagation();
+          if (select.disabled) return;
           const isOpen = optionsContainer.style.display === "block";
           document.querySelectorAll(".custom-select-options").forEach(el => el.style.display = "none");
           optionsContainer.style.display = isOpen ? "none" : "block";
@@ -1037,14 +1074,18 @@
         const rangeActionBtns = document.getElementById("rangeActionBtns");
         
         const modeBadge = document.getElementById("currentModeBadge");
+        const tableScroll = document.getElementById("workerTableScroll");
+        const refreshActionBtn = document.getElementById("refreshActionBtn");
         
         clearAllInputsAndDropdowns();
         
         if (currentViewMode === "SINGLE") {
           currentViewMode = "RANGE";
+          if (tableScroll) tableScroll.classList.add("history-table-scroll");
           
           singleDateGroup.classList.add("hidden");
           singleActionBtns.classList.add("hidden");
+          if (refreshActionBtn) refreshActionBtn.classList.add("hidden");
           
           startDateGroup.classList.remove("hidden");
           endDateGroup.classList.remove("hidden");
@@ -1058,6 +1099,7 @@
           document.getElementById("placeholderText").innerText = "Select Start Date, End Date, and Project Name, then click 'SEARCH'.";
         } else {
           currentViewMode = "SINGLE";
+          if (tableScroll) tableScroll.classList.remove("history-table-scroll");
           
           startDateGroup.classList.add("hidden");
           endDateGroup.classList.add("hidden");
@@ -1065,6 +1107,7 @@
           
           singleDateGroup.classList.remove("hidden");
           singleActionBtns.classList.remove("hidden");
+          if (refreshActionBtn) refreshActionBtn.classList.remove("hidden");
           
           btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg> View History`;
           btn.classList.replace("bg-red-500", "bg-[#d4af37]");
@@ -1101,6 +1144,45 @@
         }
       }
 
+      // Sunday ও HOLIDAY_LIST বাদ দিয়ে Working Days নির্ণয় করা হয়।
+      // Monthly Salary Summary-এর নিয়মের সঙ্গেই OT rate হিসাব করা হবে।
+      async function getWorkingDays(dateStr) {
+        const [year, month] = dateStr.split("-").map(Number);
+        const selectedDate = new Date(`${dateStr}T00:00:00`);
+        const totalDays = new Date(year, month, 0).getDate();
+        let sundays = 0;
+        let isPublicHoliday = false;
+
+        for (let day = 1; day <= totalDays; day++) {
+          if (new Date(year, month - 1, day).getDay() === 0) sundays++;
+        }
+
+        const holidaySnap = await db.collection("HOLIDAY_LIST").get();
+        let holidays = 0;
+        holidaySnap.forEach((doc) => {
+          const holidayDate = new Date(`${doc.id}T00:00:00`);
+          if (doc.id === dateStr) isPublicHoliday = true;
+          if (
+            holidayDate.getFullYear() === year &&
+            holidayDate.getMonth() === month - 1 &&
+            holidayDate.getDay() !== 0
+          ) {
+            holidays++;
+          }
+        });
+
+        // Sunday অথবা Public Holiday হলে OT Rate/Pay দ্বিগুণ হবে।
+        currentOtRateMultiplier =
+          selectedDate.getDay() === 0 || isPublicHoliday ? 2 : 1;
+        return totalDays - sundays - holidays;
+      }
+
+      function getOtHourlyRate(monthlySalary, workingDays) {
+        if (!workingDays) return 0;
+        // (Monthly Basic ÷ Working Days ÷ 8) × 1.5
+        return parseFloat(((monthlySalary / workingDays / 8) * 1.5).toFixed(2));
+      }
+
       // ৫. ওটি এন্ট্রি সার্চ তালিকা লোড
       async function fetchWorkersFromDatabase() {
         const date = document.getElementById("targetDate").value;
@@ -1115,6 +1197,26 @@
         }
 
         showToast("Loading active session...", "info");
+
+        let workingDays;
+        try {
+          workingDays = await getWorkingDays(date);
+        } catch (error) {
+          console.error("Working Days calculation error:", error);
+          return showMessage(
+            "Unable to Calculate",
+            "Working Days could not be loaded. Please try again.",
+            "error",
+          );
+        }
+
+        if (workingDays <= 0) {
+          return showMessage(
+            "Invalid Working Days",
+            "No working days were found for the selected OT month.",
+            "error",
+          );
+        }
         
         await loadExistingRecordsForValidation(date, site);
 
@@ -1142,7 +1244,13 @@
           const name = w.name || "Unknown";
           const designation = w.designation || "-";
           const passport = w.passport || "-";
-          const rate = parseFloat(w.otRate) || 0;
+          const monthlySalary = parseFloat(w.salary) || 0;
+          const rate = parseFloat(
+            (getOtHourlyRate(monthlySalary, workingDays) * currentOtRateMultiplier).toFixed(2),
+          );
+          const doubleRateNote = currentOtRateMultiplier === 2
+            ? '<div class="text-[9px] font-bold text-red-600 mt-1">Sunday / Public Holiday: OT Rate ×2</div>'
+            : "";
           const rowKey = `${id}_${date}`;
 
           const row = document.createElement("tr");
@@ -1163,6 +1271,7 @@
               </td>
               <td class="p-4 text-center">
                   <input type="number" step="0.5" id="ot-${rowKey}" oninput="calculateTaka('${rowKey}')" onkeydown="handleOtEnter(event, '${rowKey}')" class="ot-input text-sm input-hidden outline-none bg-white text-[#002147]" placeholder="0.0">
+                  ${doubleRateNote}
               </td>
               <td class="p-4 text-center"><span id="taka-${rowKey}" class="font-black text-[#002147]/40 text-xs">0.00</span></td>
               <td class="p-4">
@@ -1313,6 +1422,8 @@
                 </td>
             `;
             tbody.appendChild(row);
+            // History-এর Project edit field-এও মূল পেজের একই custom dropdown ব্যবহার করুন।
+            initCustomSelect(`site-select-${rowKey}`);
           });
 
         } catch (err) {
@@ -1327,6 +1438,7 @@
         const otInput = document.getElementById(`ot-${rowKey}`);
         const remarkInput = document.getElementById(`remark-${rowKey}`);
         const siteSelect = document.getElementById(`site-select-${rowKey}`);
+        const siteWrapper = siteSelect?.parentElement.querySelector(".history-site-select");
 
         if (otInput.hasAttribute("readonly")) {
           // ইনপুট এবং ড্রপডাউনগুলো আনলক করা হচ্ছে
@@ -1342,6 +1454,7 @@
             siteSelect.classList.replace("bg-slate-100", "bg-white");
             siteSelect.classList.add("border-blue-500", "ring-2", "ring-blue-100");
           }
+          if (siteWrapper) siteWrapper.classList.add("is-editing");
           
           btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Save`;
           btn.classList.replace("bg-blue-600", "bg-green-600");
@@ -1359,6 +1472,7 @@
         const otInput = document.getElementById(`ot-${rowKey}`);
         const remarkInput = document.getElementById(`remark-${rowKey}`);
         const siteSelect = document.getElementById(`site-select-${rowKey}`);
+        const siteWrapper = siteSelect?.parentElement.querySelector(".history-site-select");
 
         const [id, date] = rowKey.split("_");
         const ot = parseFloat(otInput.value) || 0;
@@ -1407,6 +1521,7 @@
             siteSelect.classList.replace("bg-white", "bg-slate-100");
             siteSelect.classList.remove("border-blue-500", "ring-2", "ring-blue-100");
           }
+          if (siteWrapper) siteWrapper.classList.remove("is-editing");
 
           btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg> Edit`;
           btn.classList.replace("bg-green-600", "bg-blue-600");
