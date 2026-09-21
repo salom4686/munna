@@ -42,8 +42,32 @@
         padding: 18px 32px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: center;
+        position: relative;
         border-bottom: 4px solid var(--brand-gold);
+      }
+      .page-header-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.25s ease;
+      }
+      .page-header-brand:hover {
+        transform: translateY(-2px) scale(1.015);
+      }
+      .page-header-logo {
+        height: 34px;
+        width: auto;
+        object-fit: contain;
+        animation: header-logo-showcase 7s ease-in-out infinite;
+      }
+      @keyframes header-logo-showcase {
+        0%, 100% { transform: translateY(0) rotate(0deg) scale(1); filter: brightness(1); }
+        20% { transform: translateY(-3px) rotate(-4deg) scale(1.04); filter: brightness(1.12); }
+        40% { transform: translateY(0) rotate(4deg) scale(1); filter: brightness(1); }
+        60% { transform: translateY(-2px) rotate(0deg) scale(1.06); filter: brightness(1.18); }
+        80% { transform: translateY(0) rotate(-2deg) scale(1.02); filter: brightness(1.05); }
       }
       .page-header h2 {
         font-family: "Playfair Display", serif;
@@ -51,6 +75,22 @@
         font-size: 22px;
         letter-spacing: 1.5px;
         text-transform: uppercase;
+        animation: header-title-showcase 7s ease-in-out infinite;
+      }
+      @keyframes header-title-showcase {
+        0%, 100% { text-shadow: 0 0 0 rgba(255, 215, 0, 0); transform: translateX(0) scale(1); }
+        25% { text-shadow: 0 0 10px rgba(255, 215, 0, 0.42); transform: translateX(2px) scale(1.01); }
+        50% { text-shadow: 0 0 16px rgba(255, 215, 0, 0.58); transform: translateX(0) scale(1.025); }
+        75% { text-shadow: 0 0 8px rgba(255, 215, 0, 0.32); transform: translateX(-2px) scale(1.01); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .page-header-logo,
+        .page-header h2 {
+          animation: none;
+        }
+        .page-header-brand {
+          transition: none;
+        }
       }
       .header-badge {
         background: var(--brand-gold);
@@ -552,10 +592,60 @@
       th.th-att-sub {
         background: #14588f !important;
         color: #dbeeff !important;
+        position: relative;
+        padding: 3px 1px !important;
+        line-height: 1;
+      }
+      .att-status-main {
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .att-status-total {
+        font-size: 10px;
+        font-weight: 800;
+      }
+      .att-status-label {
+        display: block;
+        font-size: 5px;
+        font-weight: 700;
+        line-height: 1;
+        letter-spacing: 0;
+        white-space: nowrap;
+      }
+      .print-merged-emp-header,
+      .print-emp-id {
+        display: none;
+      }
+      .print-repeat-report-info {
+        display: none;
+      }
+      .page-header .header-badge {
+        position: absolute;
+        right: 32px;
+      }
+      @media (max-width: 700px) {
+        .page-header { padding: 12px 16px 42px; }
+        .page-header .header-badge { right: 16px; bottom: 10px; }
+        .page-header-logo { height: 28px; }
+      }
+      .earning-others-print {
+        display: none;
+      }
+      .earning-label-print {
+        display: none;
       }
       th.th-earn-sub {
         background: #0a6b4d !important;
         color: #d1fae5 !important;
+      }
+      th.ot-compact-header {
+        padding: 3px 1px !important;
+        line-height: 1.1;
+      }
+      .ot-total-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0;
       }
       th.th-ded-sub {
         background: #9b2e2e !important;
@@ -1415,7 +1505,7 @@
           display: none !important;
         }
         .content {
-          padding: 6px 2px;
+          padding: 2px 2px;
         }
         .print-header {
           display: flex !important;
@@ -1432,11 +1522,79 @@
           font-family: "Playfair Display", serif;
           font-size: 13px;
         }
+        .salary-print-header {
+          display: block !important;
+          margin-bottom: 4px !important;
+        }
+        .salary-print-brand {
+          display: flex !important;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          margin-bottom: 5px;
+        }
+        .salary-print-brand img {
+          height: 28px !important;
+          width: auto !important;
+        }
+        .salary-print-company {
+          font-family: "Playfair Display", serif;
+          font-size: 15px;
+          font-weight: 700;
+          white-space: nowrap;
+        }
+        .salary-print-info {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr 1fr;
+          align-items: center;
+          width: 100%;
+          font-size: 10px;
+          font-weight: 700;
+        }
+        .salary-print-info > :first-child { text-align: left; }
+        .salary-print-info > :nth-child(2) { text-align: center; }
+        .salary-print-info > :last-child { text-align: right; }
+        .salary-print-info {
+          display: none !important;
+        }
+        #reportTable .print-repeat-report-info {
+          display: table-row !important;
+        }
+        #reportTable .print-repeat-report-info th {
+          padding: 3px 5px !important;
+          font-size: 10px !important;
+          text-align: left;
+          background: #fff !important;
+          color: #000 !important;
+          border: 0.5pt solid #000 !important;
+        }
+        .print-repeat-report-info .repeat-period {
+          display: inline-block;
+          width: 52%;
+          text-align: center;
+        }
+        .print-repeat-report-info .repeat-printed {
+          display: inline-block;
+          width: 27%;
+          text-align: right;
+        }
         table {
           font-size: 8px;
           border: none !important;
           box-shadow: none;
           border-collapse: collapse !important;
+        }
+        #reportTable thead {
+          display: table-header-group;
+        }
+        #reportTable tbody tr {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+        /* Print 11 employee rows per page. */
+        #reportTable tbody tr:nth-child(11n) {
+          break-after: page;
+          page-break-after: always;
         }
         th {
           background: #f2f2f2 !important;
@@ -1456,6 +1614,19 @@
           background: #e0e0e0 !important;
           color: #000 !important;
           border-bottom: 0.5pt solid #000 !important;
+        }
+        /* Keep the Attendance Status group border visible on the first page. */
+        #reportTable thead th.th-att-group {
+          border: 0.5pt solid #000 !important;
+          border-top: 0.5pt solid #000 !important;
+        }
+        #reportTable thead th.th-att-sub {
+          border: 0.5pt solid #000 !important;
+        }
+        #reportTable th.th-pbonus .bonus-label,
+        #reportTable th.th-abonus .bonus-label {
+          font-size: 7px !important;
+          letter-spacing: 0 !important;
         }
         th.th-pbonus,
         th.th-abonus {
@@ -1543,6 +1714,41 @@
         #reportTable colgroup col:nth-child(3) {
           width: 13% !important;
         } /* Name/Passport */
+        /* Print only: combine ID, employee name and passport without changing
+           the table's column count, so footer colspans remain aligned. */
+        #reportTable colgroup col:nth-child(2) {
+          width: 0 !important;
+        }
+        #reportTable colgroup col:nth-child(3) {
+          width: 18.5% !important;
+        }
+        #reportTable thead tr:first-child th:nth-child(2),
+        #reportTable tbody td:nth-child(2) {
+          width: 0 !important;
+          min-width: 0 !important;
+          max-width: 0 !important;
+          padding: 0 !important;
+          border: none !important;
+          overflow: hidden !important;
+          font-size: 0 !important;
+        }
+        #reportTable .screen-emp-header {
+          display: none !important;
+        }
+        #reportTable .print-merged-emp-header,
+        #reportTable .print-emp-id {
+          display: block !important;
+        }
+        #reportTable .print-emp-id {
+          font-size: 8px;
+          font-weight: 700;
+          color: #000 !important;
+        }
+        #reportTable .print-net-words,
+        #reportTable .print-net-words-label {
+          font-size: 13px !important;
+          line-height: 1.3;
+        }
         #reportTable colgroup col:nth-child(4) {
           width: 9% !important;
         } /* Designation */
@@ -1628,9 +1834,28 @@
         .bonus-input {
           border: none !important;
         }
+        /* Chrome print preview renders 0.5pt grid lines too heavily; use a
+           lighter hairline for the complete salary table. */
+        #reportTable,
+        #reportTable th,
+        #reportTable td {
+          border: 0.25pt solid #000 !important;
+        }
+        .earning-others-screen {
+          display: none !important;
+        }
+        .earning-others-print {
+          display: inline !important;
+        }
+        .earning-label-screen {
+          display: none !important;
+        }
+        .earning-label-print {
+          display: inline !important;
+        }
         @page {
           size: A4 landscape;
-          margin: 10mm 5mm 14mm 5mm;
+          margin: 4mm 5mm 14mm 5mm;
           @bottom-right {
             content: "Page " counter(page) " of " counter(pages);
             font-size: 8pt;
@@ -1642,7 +1867,10 @@
   </head>
   <body>
     <div class="page-header">
-      <h2>ALOMHOW CO LTD</h2>
+      <div class="page-header-brand">
+        <img class="page-header-logo" src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w200" alt="ALOMHOW logo" />
+        <h2>ALOMHOW CO LTD</h2>
+      </div>
       <span class="header-badge">SALARY ATTENDANCE &amp; PAYSLIP </span>
     </div>
 
@@ -2670,8 +2898,8 @@
 
       // ✅ Holiday / Sunday work pay = Daily Rate × multiplier (auto-calculated).
       // Change these two values if the multiplier ever needs updating.
-      const HOLIDAY_RATE_MULTIPLIER = 1.5;
-      const SUNDAY_RATE_MULTIPLIER = 1.5;
+      const HOLIDAY_RATE_MULTIPLIER = 2;
+      const SUNDAY_RATE_MULTIPLIER = 2;
 
       let _cache = {
         loaded: false,
@@ -6238,7 +6466,7 @@
               data-adv="${w.adv}" data-fine="${w.fine}">
               <td style="text-align:center">${count++}</td>
               <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
-              <td class="text-left"><div style="font-weight:700;font-size:11px">${w.name}</div><div style="font-size:9px;color:#666;font-style:italic">${w.passport}</div></td>
+              <td class="text-left"><div class="print-emp-id">ID: ${w.id}</div><div style="font-weight:700;font-size:11px">${w.name}</div><div style="font-size:9px;color:#666;font-style:italic">${w.passport}</div></td>
               <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
               <td class="text-right">
                 <div style="font-weight:bold">${rowTotalBasic.toFixed(2)}</div>
@@ -6311,14 +6539,15 @@
             });
 
           output.innerHTML = `
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;width:100%;margin-bottom:6px;">
-            <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+          <div class="salary-print-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:nowrap;width:100%;margin-bottom:6px;">
+            <div class="salary-print-brand" style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
               <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" style="height:32px;width:auto;object-fit:contain" />
-              <span class="co-name print-header" style="white-space:nowrap;font-size:13px;font-weight:700;">ALAMHOW CO LTD &nbsp;|&nbsp; Monthly Salary Sheet</span>
+              <span class="salary-print-company">ALAMHOW CO LTD</span>
             </div>
-            <div style="font-size:12px;font-weight:700;color:#000;white-space:nowrap;">Period: ${dFromVal || "…"} to ${dToVal || "…"}</div>
-            <div style="display:flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
-              <span style="font-size:11px;font-weight:600;color:#000;">Printed: ${formatDateTime()}</span>
+            <div class="salary-print-info">
+              <span>Monthly Salary Sheet</span>
+              <span>Period: ${dFromVal || "…"} to ${dToVal || "…"}</span>
+              <span>Printed: ${formatDateTime()}</span>
               <div class="no-print" style="display:flex;align-items:center;gap:6px;background:rgba(255,215,0,0.08);border:1.5px solid var(--brand-gold);border-radius:8px;padding:5px 10px;white-space:nowrap;">
                 <span style="color:var(--brand-gold);font-size:11px;font-weight:700;">⚙️ Working Days:</span>
                 <input type="number" id="manualWDInput" placeholder="day input" value="${window._manualWD || ""}" style="width:70px;padding:4px 8px;font-size:14px;border:1.5px solid var(--brand-gold);border-radius:5px;background:#001530;color:#ffd700;font-weight:700;text-align:center;" min="1" max="31" />
@@ -6340,11 +6569,14 @@
               <col class="col-signature">
             </colgroup>
             <thead>
+              <tr class="print-repeat-report-info">
+                <th colspan="26">Monthly Salary Sheet <span class="repeat-period">Period: ${dFromVal || "…"} to ${dToVal || "…"}</span><span class="repeat-printed">Printed: ${formatDateTime()}</span></th>
+              </tr>
               <!-- ══ ROW 1: Main Group Headers ══ -->
               <tr>
                 <th rowspan="3">SL</th>
-                <th rowspan="3">EMP ID</th>
-                <th rowspan="3">Employee Name Passport</th>
+                <th rowspan="3"><span class="screen-emp-header">EMP ID</span></th>
+                <th rowspan="3"><span class="screen-emp-header">Employee Name Passport</span><span class="print-merged-emp-header">EMP ID<br>EMPLOYEE NAME<br>PASSPORT</span></th>
                 <th rowspan="3">Designation</th>
                 <th rowspan="3"> Basic</th>
                 <!-- ATTENDANCE STATUS group -->
@@ -6352,7 +6584,7 @@
                 <!-- EARNING DETAILS group -->
                 <th colspan="8" class="th-earn-group">EARNING DETAILS</th>
                 <!-- Gross -->
-                <th rowspan="3">Gross Salary</th>
+                <th rowspan="3">Gross<br>Salary</th>
                 <!-- DEDUCTIONS group -->
                 <th colspan="5" class="th-ded-group">DEDUCTIONS</th>
                 <th rowspan="3">Net Salary</th>
@@ -6361,30 +6593,30 @@
               <!-- ══ ROW 2: Sub Headers ══ -->
               <tr>
                 <!-- Attendance sub -->
-                <th rowspan="2" class="th-att-sub">P</th>
-                <th rowspan="2" class="th-att-sub">H<br>Day</th>
-                <th rowspan="2" class="th-att-sub">S Day</th>
-                <th rowspan="2" class="th-att-sub">A</th>
-                <th rowspan="2" class="th-att-sub">Total<br>P</th>
+                <th rowspan="2" class="th-att-sub"><span class="att-status-main">P</span><span class="att-status-label">PRESENT</span></th>
+                <th rowspan="2" class="th-att-sub">HILI<br>DAY</th>
+                <th rowspan="2" class="th-att-sub">SUN<br>DAY</th>
+                <th rowspan="2" class="th-att-sub"><span class="att-status-main">A</span><span class="att-status-label">ABSENT</span></th>
+                <th rowspan="2" class="th-att-sub"><span class="att-status-total">Total</span><span class="att-status-label">PRESENT</span></th>
                 <!-- Earning sub -->
                 <th rowspan="2" class="th-earn-sub">Holi day</th>
                 <th rowspan="2" class="th-earn-sub">Sun day</th>
-                <th colspan="2" class="th-earn-sub" style="border-bottom:1.5px solid #d1fae5">OT</th>
-                <th rowspan="2" class="th-earn-sub">Oth</th>
-                <th rowspan="2" class="th-pbonus" title="Performance Bonus">P Bonus</th>
-                <th rowspan="2" class="th-abonus" title="Attendance Bonus">A Bonus</th>
-                <th rowspan="2" class="th-earn-sub" title="Fix Travelling (no NPS/CSG deduction)">F Trv</th>
+                <th colspan="2" class="th-earn-sub" style="border-bottom:1.5px solid #065f46">OVER TIME</th>
+                <th rowspan="2" class="th-earn-sub"><span class="earning-others-screen">OTHERS</span><span class="earning-others-print">Oth</span></th>
+                <th rowspan="2" class="th-pbonus" title="Performance Bonus"><span class="earning-label-screen">PERFO<br>BONUS</span><span class="earning-label-print">P<br><span class="bonus-label">Bonus</span></span></th>
+                <th rowspan="2" class="th-abonus" title="Attendance Bonus"><span class="earning-label-screen">ATTEN<br>BONUS</span><span class="earning-label-print">A<br><span class="bonus-label">Bonus</span></span></th>
+                <th rowspan="2" class="th-earn-sub" title="Fix Travelling (no NPS/CSG deduction)"><span class="earning-label-screen">Fix<br>TRAVE</span><span class="earning-label-print">F Trv</span></th>
                 <!-- Deductions sub -->
                 <th rowspan="2" class="th-ded-sub">Adv</th>
                 <th rowspan="2" class="th-ded-sub">Fine</th>
-                <th rowspan="2" class="th-ded-sub">NPS 1%</th>
-                <th rowspan="2" class="th-ded-sub">CSG 1.5%</th>
+                <th rowspan="2" class="th-ded-sub">NPS<br>1%</th>
+                <th rowspan="2" class="th-ded-sub">CSG<br>1.5%</th>
                 <th rowspan="2" class="th-ded-sub">Total</th>
               </tr>
               <!-- ══ ROW 3: OT Sub-Sub Headers ══ -->
               <tr>
-                <th class="th-earn-sub">Amount</th>
-                <th class="th-earn-sub">Hrs</th>
+                <th class="th-earn-sub ot-compact-header"><span class="ot-total-label">TOTAL</span><br>Amount</th>
+                <th class="th-earn-sub ot-compact-header"><span class="ot-total-label">TOTAL</span><br>Hrs</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -6419,8 +6651,8 @@
               </tr>
               <tr class="no-print-hide">
                 <td colspan="26" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
-                  <span style="font-weight:bold;font-size:9px">In Words: </span>
-                  <span id="netWordsRow" style="font-size:9px;font-style:italic">${numberToWordsGlobal(totals.net)}</span>
+                  <span class="print-net-words-label" style="font-weight:bold;font-size:9px">In Words: </span>
+                  <span id="netWordsRow" class="print-net-words" style="font-size:9px;font-style:italic">${numberToWordsGlobal(totals.net)}</span>
                 </td>
               </tr>
               <tr class="print-footer-signature">
