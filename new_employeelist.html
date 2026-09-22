@@ -127,6 +127,36 @@
         max-height: 70vh;
         border: 1px solid #eee;
       }
+      .employee-summary {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 40px;
+        margin-top: 16px;
+        padding: 14px 24px;
+        background: #002147;
+        border: 1px solid #ffd700;
+        border-radius: 10px;
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 700;
+        text-align: center;
+      }
+      .employee-summary .active-count {
+        color: #90ee90;
+      }
+      .employee-summary .inactive-count {
+        color: #ffb3b3;
+      }
+      .employee-summary .total-count {
+        color: #ffd700;
+      }
+      .employee-summary .category-count {
+        color: #9ddcff;
+      }
+      .pdf-mode-active .employee-summary {
+        display: none !important;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -169,10 +199,21 @@
         font-weight: 700;
         text-align: center;
       }
-      .status-active { background: #d4edda; color: #155724; }
-      .status-inactive { background: #f8d7da; color: #721c24; }
-      tr.inactive-employee td { color: #777; background: #fff0f0; }
-      tr.inactive-employee:hover td { background: #ffe2e2; }
+      .status-active {
+        background: #d4edda;
+        color: #155724;
+      }
+      .status-inactive {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      tr.inactive-employee td {
+        color: #777;
+        background: #fff0f0;
+      }
+      tr.inactive-employee:hover td {
+        background: #ffe2e2;
+      }
       .status-select {
         min-width: 92px;
         padding: 5px 7px;
@@ -490,6 +531,15 @@
               ><input type="text" id="regWorkAs" required />
             </div>
             <div class="form-group">
+              <label class="required">CATEGORY</label>
+              <select id="regCategory" required>
+                <option value="" selected disabled>SELECT CATEGORY</option>
+                <option value="OFFICE STAFF">OFFICE STAFF</option>
+                <option value="NONE OFFICE STAFF">NONE OFFICE STAFF</option>
+                <option value="OTHER">OTHER</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label class="required">PASSPORT NO</label
               ><input type="text" id="regPassport" required />
             </div>
@@ -506,8 +556,8 @@
               ><input type="number" id="regSalary" required />
             </div>
             <div class="form-group">
-              <label class="required">OT RATE (HOUR)</label
-              ><input type="number" id="regOT" step="0.01" required />
+              <label>OT RATE (HOUR)</label
+              ><input type="number" id="regOT" step="0.01" readonly />
             </div>
             <div class="form-group">
               <label class="required">STATUS</label>
@@ -533,6 +583,26 @@
           <thead id="table-head"></thead>
           <tbody id="table-body"></tbody>
         </table>
+      </div>
+      <div class="employee-summary" id="employeeSummary" style="display: none">
+        <span class="active-count"
+          >Active Employee: <strong id="activeCount">0</strong></span
+        >
+        <span class="inactive-count"
+          >Inactive Employee: <strong id="inactiveCount">0</strong></span
+        >
+        <span class="total-count"
+          >Total Employee: <strong id="totalCount">0</strong></span
+        >
+        <span class="category-count"
+          >OFFICE STAFF: <strong id="officeStaffCount">0</strong></span
+        >
+        <span class="category-count"
+          >NONE OFFICE STAFF: <strong id="noneOfficeStaffCount">0</strong></span
+        >
+        <span class="category-count"
+          >OTHER: <strong id="otherCount">0</strong></span
+        >
       </div>
     </div>
 
@@ -584,11 +654,35 @@
         const body = document.getElementById("table-body");
         document.getElementById("loader").style.display = "none";
         document.getElementById("table-display").style.display = "block";
+        document.getElementById("employeeSummary").style.display = "flex";
+        document.getElementById("activeCount").textContent = dataRows.filter(
+          (item) => item.status === "active",
+        ).length;
+        document.getElementById("inactiveCount").textContent = dataRows.filter(
+          (item) => item.status === "inactive",
+        ).length;
+        document.getElementById("totalCount").textContent = dataRows.length;
+        const categoryCount = (category) =>
+          dataRows.filter((item) => {
+            const value = String(item.category || "")
+              .trim()
+              .toUpperCase();
+            return category === "OFFICE STAFF"
+              ? value === "OFF SATF" || value === "OFFICE STAFF"
+              : value === category;
+          }).length;
+        document.getElementById("officeStaffCount").textContent =
+          categoryCount("OFFICE STAFF");
+        document.getElementById("noneOfficeStaffCount").textContent =
+          categoryCount("NONE OFFICE STAFF");
+        document.getElementById("otherCount").textContent =
+          categoryCount("OTHER");
 
         const headers = [
           "SL",
           "ID",
           "Name",
+          "Category",
           "Status",
           "Period",
           "Designation",
@@ -610,6 +704,7 @@
             <td>${item.row[0]}</td>
             <td>${item.row[1]}</td>
             <td>${item.row[2]}</td>
+            <td>${item.category || "NONE OFFICE STAFF"}</td>
             <td>
               <select class="status-select ${item.status === "inactive" ? "status-inactive" : "status-active"}" onchange="changeEmployeeStatus('${item.key}', this)">
                 <option value="active" ${item.status === "inactive" ? "" : "selected"}>ACTIVE</option>
@@ -638,7 +733,8 @@
       function loadData() {
         db.collection("EMPLOYEE_LIST").onSnapshot((snapshot) => {
           const legacyDocs = snapshot.docs.filter(
-            (doc) => !Object.prototype.hasOwnProperty.call(doc.data(), "status"),
+            (doc) =>
+              !Object.prototype.hasOwnProperty.call(doc.data(), "status"),
           );
           if (legacyDocs.length) migrateLegacyEmployeeStatuses(legacyDocs);
 
@@ -647,6 +743,7 @@
             return {
               key: doc.id,
               status: d.status === "inactive" ? "inactive" : "active",
+              category: d.category || "NONE OFFICE STAFF",
               row: [
                 index + 1,
                 d.id || "-",
@@ -728,6 +825,8 @@
         document.getElementById("regJoinDate").value = item.row[5];
         document.getElementById("regPost").value = item.row[4];
         document.getElementById("regWorkAs").value = item.row[6];
+        document.getElementById("regCategory").value =
+          item.category || "NONE OFFICE STAFF";
         document.getElementById("regPassport").value = item.row[7];
         document.getElementById("regWP").value =
           item.row[10] === "-" ? "" : item.row[10];
@@ -753,6 +852,7 @@
             joining: document.getElementById("regJoinDate").value,
             designation: document.getElementById("regPost").value,
             workingAs: document.getElementById("regWorkAs").value,
+            category: document.getElementById("regCategory").value,
             passport: document.getElementById("regPassport").value,
             wpNo: document.getElementById("regWP").value,
             rpUidNo: document.getElementById("regRPUID").value,
