@@ -551,6 +551,11 @@
       .text-right {
         text-align: right;
       }
+      #reportTable th:nth-child(n + 6),
+      #reportTable td:nth-child(n + 6),
+      #reportTable td:nth-child(n + 6) .bonus-input {
+        text-align: center !important;
+      }
       .total-row td {
         font-weight: 700;
         background: var(--brand-blue) !important;
@@ -1664,6 +1669,31 @@
         }
         #reportTable thead th.th-att-sub {
           border: 0.5pt solid #000 !important;
+          font-size: 7px !important;
+          line-height: 1 !important;
+        }
+        #reportTable thead th.th-att-sub .att-status-main {
+          font-size: 9px !important;
+        }
+        #reportTable thead th.th-att-sub .att-status-total {
+          font-size: 8px !important;
+        }
+        #reportTable thead th.th-att-sub .att-status-label {
+          font-size: 4px !important;
+        }
+        #reportTable thead th.ot-group-header {
+          border: 0.75pt solid #000 !important;
+        }
+        #reportTable thead th.ot-compact-header {
+          border: 0.75pt solid #000 !important;
+          font-size: 7px !important;
+          line-height: 1 !important;
+        }
+        #reportTable thead th.ot-compact-header:first-of-type {
+          border-left: 0.75pt solid #000 !important;
+        }
+        #reportTable thead th.ot-compact-header:last-of-type {
+          border-right: 0.75pt solid #000 !important;
         }
         #reportTable th.th-pbonus .bonus-label,
         #reportTable th.th-abonus .bonus-label {
@@ -1731,9 +1761,11 @@
           display: none !important;
         }
         col.col-holiday,
-        col.col-sunday,
-        col.col-otamt {
+        col.col-sunday {
           visibility: collapse;
+        }
+        col.col-otamt {
+          visibility: visible;
         }
         col.col-signature {
           width: 140px !important;
@@ -1815,6 +1847,9 @@
         #reportTable colgroup col:nth-child(14) {
           width: 3.2% !important;
         } /* OT Hours */
+        #reportTable colgroup col:nth-child(13) {
+          width: 4.2% !important;
+        } /* OT Amount */
         #reportTable colgroup col:nth-child(15) {
           width: 3.2% !important;
         } /* Oth */
@@ -1881,6 +1916,31 @@
         #reportTable,
         #reportTable th,
         #reportTable td {
+          border: 0.25pt solid #000 !important;
+        }
+        #reportTable th,
+        #reportTable th.th-att-group,
+        #reportTable th.th-earn-group,
+        #reportTable th.th-ded-group,
+        #reportTable th.th-att-sub,
+        #reportTable th.th-earn-sub,
+        #reportTable th.th-ded-sub {
+          background: #e6e6e6 !important;
+          color: #000 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        #reportTable td,
+        #reportTable tbody tr:nth-child(even) td,
+        #reportTable .total-row td {
+          background: #fff !important;
+          color: #000 !important;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        #reportTable thead th.th-att-sub,
+        #reportTable thead th.ot-group-header,
+        #reportTable thead th.ot-compact-header {
           border: 0.25pt solid #000 !important;
         }
         .earning-others-screen {
@@ -6677,7 +6737,7 @@
                 <!-- Earning sub -->
                 <th rowspan="2" class="th-earn-sub">Holi day</th>
                 <th rowspan="2" class="th-earn-sub">Sun day</th>
-                <th colspan="2" class="th-earn-sub" style="border-bottom:1.5px solid #065f46">OVER TIME</th>
+                <th colspan="2" class="th-earn-sub ot-group-header">OVER TIME</th>
                 <th rowspan="2" class="th-earn-sub"><span class="earning-others-screen">OTHERS</span><span class="earning-others-print">Oth</span></th>
                 <th rowspan="2" class="th-pbonus" title="Performance Bonus"><span class="earning-label-screen">PERFO<br>BONUS</span><span class="earning-label-print">P<br><span class="bonus-label">Bonus</span></span></th>
                 <th rowspan="2" class="th-abonus" title="Attendance Bonus"><span class="earning-label-screen">ATTEN<br>BONUS</span><span class="earning-label-print">A<br><span class="bonus-label">Bonus</span></span></th>
@@ -6691,8 +6751,8 @@
               </tr>
               <!-- ══ ROW 3: OT Sub-Sub Headers ══ -->
               <tr>
-                <th class="th-earn-sub ot-compact-header"><span class="ot-total-label">TOTAL</span><br>Amount</th>
-                <th class="th-earn-sub ot-compact-header"><span class="ot-total-label">TOTAL</span><br>Hrs</th>
+                <th class="th-earn-sub ot-compact-header">Amount</th>
+                <th class="th-earn-sub ot-compact-header">Hrs</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
