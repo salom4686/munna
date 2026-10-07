@@ -3007,6 +3007,22 @@
       const HOLIDAY_RATE_MULTIPLIER = 2;
       const SUNDAY_RATE_MULTIPLIER = 2;
 
+      // ✅ Per-employee, date-limited override: for these employees, Holiday /
+      // Sunday work inside [from, to] is paid at SINGLE rate (= that day's
+      // normal attendance pay, multiplier 1). Outside the range the normal
+      // multiplier (2x) applies again automatically.
+      const SINGLE_PAY_OVERRIDES = [
+        { id: "ACL-0012", from: "2026-09-01", to: "2026-09-30" },
+      ];
+      function getRateMultiplier(empId, dateStr, baseMultiplier) {
+        const id = String(empId || "").trim().toUpperCase();
+        const ds = String(dateStr || "").slice(0, 10);
+        for (const o of SINGLE_PAY_OVERRIDES) {
+          if (o.id === id && ds >= o.from && ds <= o.to) return 1;
+        }
+        return baseMultiplier;
+      }
+
       let _cache = {
         loaded: false,
         loading: false,
@@ -3251,6 +3267,8 @@
               // from the raw HOLIDAY_WORK/SUNDAY_WORK field anymore).
               holDays: 0,
               sunDays: 0,
+              holUnits: 0,
+              sunUnits: 0,
               abs: 0,
               pres: 0,
               fine: 0,
@@ -3260,8 +3278,14 @@
           if (d.STATUS === "ABSENT") rec.abs++;
           if (d.STATUS === "PRESENT") rec.pres++;
           if (d.REMARK === "NORMAL WORK") rec.norm++;
-          if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) rec.holDays++;
-          if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) rec.sunDays++;
+          if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) {
+            rec.holDays++;
+            rec.holUnits += getRateMultiplier(id, d.DATE, HOLIDAY_RATE_MULTIPLIER);
+          }
+          if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) {
+            rec.sunDays++;
+            rec.sunUnits += getRateMultiplier(id, d.DATE, SUNDAY_RATE_MULTIPLIER);
+          }
           rec.fine += parseFloat(d.FINE) || 0;
         });
         // ── "Others" আলাদা sub-collection থেকে AMOUNT যোগ করা হচ্ছে ──
@@ -3353,6 +3377,8 @@
           norm: 0,
           holDays: 0,
           sunDays: 0,
+          holUnits: 0,
+          sunUnits: 0,
           abs: 0,
           pres: 0,
           fine: 0,
@@ -3368,12 +3394,12 @@
         const holidayPay = isCook
           ? 0
           : parseFloat(
-              (dailyRate * HOLIDAY_RATE_MULTIPLIER * att.holDays).toFixed(2),
+              (dailyRate * (att.holUnits || 0)).toFixed(2),
             );
         const sundayPay = isCook
           ? 0
           : parseFloat(
-              (dailyRate * SUNDAY_RATE_MULTIPLIER * att.sunDays).toFixed(2),
+              (dailyRate * (att.sunUnits || 0)).toFixed(2),
             );
         // Gross paid still includes Holiday/Sunday/Others/Bonus (F Trv excluded, added separately)
         const grossBase =
@@ -3900,13 +3926,13 @@
               const holAmt =
                 !isCook && holW > 0
                   ? parseFloat(
-                      (baseDailyRate * HOLIDAY_RATE_MULTIPLIER).toFixed(2),
+                      (baseDailyRate * getRateMultiplier(empId, date, HOLIDAY_RATE_MULTIPLIER)).toFixed(2),
                     )
                   : 0;
               const sunAmt =
                 !isCook && sunW > 0
                   ? parseFloat(
-                      (baseDailyRate * SUNDAY_RATE_MULTIPLIER).toFixed(2),
+                      (baseDailyRate * getRateMultiplier(empId, date, SUNDAY_RATE_MULTIPLIER)).toFixed(2),
                     )
                   : 0;
               const dailyRate =
@@ -6408,6 +6434,8 @@
                 ),
                 hDay: 0,
                 sDay: 0, // ✅ NEW: Holiday Day count / Sunday Day count
+                hUnits: 0,
+                sUnits: 0,
               };
             }
             if (d.STATUS === "PRESENT") workers[d.ID].pres++;
@@ -6415,8 +6443,14 @@
             if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
             // ✅ AUTO-CALC: only count worked-days here; hol/sun AMOUNT is
             // derived below as Daily Rate × multiplier × day count.
-            if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) workers[d.ID].sDay++;
-            if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) workers[d.ID].hDay++;
+            if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) {
+              workers[d.ID].sDay++;
+              workers[d.ID].sUnits += getRateMultiplier(d.ID, d.DATE, SUNDAY_RATE_MULTIPLIER);
+            }
+            if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) {
+              workers[d.ID].hDay++;
+              workers[d.ID].hUnits += getRateMultiplier(d.ID, d.DATE, HOLIDAY_RATE_MULTIPLIER);
+            }
           });
 
           // ✅ NEW: "Others" sub-collection থেকে AMOUNT যোগ করা হচ্ছে
@@ -6540,12 +6574,12 @@
               w.hol = isCook
                 ? 0
                 : parseFloat(
-                    (w.daily * HOLIDAY_RATE_MULTIPLIER * w.hDay).toFixed(2),
+                    (w.daily * (w.hUnits || 0)).toFixed(2),
                   );
               w.sun = isCook
                 ? 0
                 : parseFloat(
-                    (w.daily * SUNDAY_RATE_MULTIPLIER * w.sDay).toFixed(2),
+                    (w.daily * (w.sUnits || 0)).toFixed(2),
                   );
               const baseGrossWithoutOthers =
                 rowTotalBasic + w.hol + w.sun + w.otA;
