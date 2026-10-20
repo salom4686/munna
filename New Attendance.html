@@ -1317,11 +1317,6 @@
               document.getElementById("attStatus").value ||
               "PRESENT";
 
-            // Check if there are any cook employees
-            const hasCooks = employees.some((emp) =>
-              (emp.designation || "").toLowerCase().includes("cook"),
-            );
-
             // Include Kitchen in site options if there are cooks
             const availableSites = [...currentSites];
 
@@ -1349,9 +1344,7 @@
               );
               const allCooks =
                 selectedEmps.length > 0 &&
-                selectedEmps.every((emp) =>
-                  (emp.designation || "").toLowerCase().includes("cook"),
-                );
+                selectedEmps.every(isCookEmployee);
               const bulkSideName = document.getElementById("bulkSideName");
               if (bulkStatus === "PRESENT") {
                 if (allCooks) {
@@ -1940,7 +1933,7 @@
                       ((salary / workingDays / 8) * otMultiplier).toFixed(2),
                     )
                   : 0;
-              const designation = (emp.designation || "").toLowerCase();
+              const isCook = isCookEmployee(emp);
               let hWork = "";
               let sWork = "";
               let rem = "NORMAL WORK";
@@ -1951,7 +1944,7 @@
                 hWork = 0;
                 sWork = 0;
               } else if (selectedStatus === "PRESENT") {
-                if (designation.includes("cook")) {
+                if (isCook) {
                   rem = "NORMAL WORK";
                   hWork = 0;
                   sWork = 0;
@@ -1979,9 +1972,10 @@
               }
 
               // --- পরিবর্তন ৩: ডাটা সেভ করার সময় কুকদের জন্য কিচেন নিশ্চিত করা ---
-              const siteValue = designation.includes("cook")
-                ? "Kitchen"
-                : selectedSite;
+              const siteValue =
+                selectedStatus === "PRESENT" && isCook
+                  ? "Kitchen"
+                  : selectedSite;
 
               attendanceData.push({
                 id: Date.now() + Math.random(),
@@ -2942,10 +2936,7 @@
                   emp.otRate ||
                   "0",
                 workingAs:
-                  emp["WARKING AS"] ||
-                  emp.WARKING_AS ||
-                  emp.WorkingAs ||
-                  emp.WORKING_AS ||
+                  getWorkingAsValue(emp) ||
                   emp.DESIGNATION ||
                   emp.Designation ||
                   emp.designation ||
@@ -2999,14 +2990,11 @@
                     emp.ot_rate ||
                     "0",
                   workingAs:
-                    emp["WARKING AS"] ||
-                    emp.WARKING_AS ||
-                    emp.WorkingAs ||
-                    emp.WORKING_AS ||
+                    getWorkingAsValue(emp) ||
                     emp.DESIGNATION ||
-                  emp.DESignation ||
-                  emp.designation ||
-                  "",
+                    emp.DESignation ||
+                    emp.designation ||
+                    "",
                   status: String(emp.status || emp.STATUS || "").toLowerCase(),
                 };
               });
@@ -3020,6 +3008,25 @@
             } else {
               currentMonthAttendance = Object.values(attData || {});
             }
+            const attendanceWorkingAs = new Map();
+            currentMonthAttendance.forEach((record) => {
+              const employeeId = normalizeEmpId(record.ID || record.empId);
+              const workingAs = getWorkingAsValue(record);
+              if (!employeeId || !workingAs) return;
+              const current = attendanceWorkingAs.get(employeeId) || "";
+              if (
+                !current ||
+                workingAs.trim().toLowerCase().includes("cook")
+              ) {
+                attendanceWorkingAs.set(employeeId, workingAs);
+              }
+            });
+            employees.forEach((emp) => {
+              const attendanceRole = attendanceWorkingAs.get(
+                normalizeEmpId(emp.id),
+              );
+              if (attendanceRole) emp.workingAs = attendanceRole;
+            });
             const siteEntries = Array.isArray(siteRawData)
               ? siteRawData
               : Object.keys(siteRawData)
@@ -3285,10 +3292,12 @@
           const amountGroup = document.getElementById("amountGroup");
           const remarkEl = document.getElementById("attRemark");
 
-          const designation = (
-            document.getElementById("designation").value || ""
-          ).toLowerCase();
-          if (designation.includes("cook")) {
+          if (
+            isCookEmployee({
+              designation: document.getElementById("designation").value,
+              workingAs: window.currentWorkingAs,
+            })
+          ) {
             // Add Kitchen option if needed
             let exists = Array.from(sideSelect.options).some(
               (opt) => opt.value.toLowerCase() === "kitchen",
@@ -3711,9 +3720,10 @@
           const salary =
             parseFloat(document.getElementById("basicSalary").value) || 0;
           const workingDays = getSelectedWorkingDays(dateStr);
-          const designation = (
-            document.getElementById("designation").value || ""
-          ).toLowerCase();
+          const isCook = isCookEmployee({
+            designation: document.getElementById("designation").value,
+            workingAs: window.currentWorkingAs,
+          });
           const isSunday = dateObj.getDay() === 0,
             isInHoli = HOLIDAY_LIST.some((h) => h.date === dateStr);
 
@@ -3740,7 +3750,7 @@
             if (holEl) holEl.value = 0;
 
             // Cook always gets normal work, no holiday/Sunday pay
-            if (designation.includes("cook")) {
+            if (isCook) {
               if (remarkEl) remarkEl.value = "NORMAL WORK";
             } else if (isSunday) {
               if (remarkEl) remarkEl.value = "Sunday";
@@ -3825,10 +3835,11 @@
           document.getElementById("passport").value = emp.passport || "";
           const desig = (emp.designation || "").trim();
           document.getElementById("designation").value = desig;
+          window.currentWorkingAs = emp.workingAs || "";
 
           const siteSelect = document.getElementById("sideName");
           siteSelect.disabled = false; // Reset disabled state first
-          if (desig.toLowerCase() === "cook") {
+          if (isCookEmployee(emp)) {
             // Add Kitchen option if needed
             let exists = Array.from(siteSelect.options).some(
               (opt) => opt.value.toLowerCase() === "kitchen",
@@ -3846,7 +3857,6 @@
           }
           initCustomSelect("sideName"); // Re-initialize custom select to reflect the disabled state and value
 
-          window.currentWorkingAs = emp.workingAs || "";
           document.getElementById("joiningDate").value = emp.joining || "";
           document.getElementById("period").value =
             getMonthsSinceJoining(emp.joining) || emp.period || "";
@@ -3866,6 +3876,42 @@
               String(targetValue).toLowerCase(),
           );
           select.value = match ? match.value : targetValue;
+        }
+
+        function isCookEmployee(employee) {
+          const hasCookRole = [
+            employee?.designation,
+            getWorkingAsValue(employee),
+          ].some((value) =>
+            String(value || "")
+              .trim()
+              .toLowerCase()
+              .includes("cook"),
+          );
+          if (hasCookRole) return true;
+          const employeeId = normalizeEmpId(employee?.id || employee?.ID);
+          if (!employeeId) return false;
+          return currentMonthAttendance.some(
+            (record) =>
+              normalizeEmpId(record.ID || record.empId) === employeeId &&
+              getWorkingAsValue(record).toLowerCase().includes("cook"),
+          );
+        }
+
+        function getWorkingAsValue(record) {
+          if (!record) return "";
+          for (const [key, rawValue] of Object.entries(record)) {
+            const normalizedKey = key.replace(/[^a-z]/gi, "").toLowerCase();
+            if (
+              normalizedKey !== "workingas" &&
+              normalizedKey !== "warkingas"
+            ) {
+              continue;
+            }
+            const value = String(rawValue || "").trim();
+            if (value) return value;
+          }
+          return "";
         }
 
         function getMonthsSinceJoining(joiningDate) {
@@ -3930,6 +3976,7 @@
         }
 
         function resetAllInputs() {
+          window.currentWorkingAs = "";
           const ids = [
             "dailyOt",
             "holidayWork",
@@ -4031,6 +4078,7 @@
           // ????????? ???? ??????? ???? (??? ????? ????)
           setVal("passport", item.passport);
           setVal("designation", item.designation);
+          window.currentWorkingAs = item.workingAs || "";
           setVal("basicSalary", item.salary);
           setVal("globalOtRate", item.otRate);
 
@@ -4077,7 +4125,35 @@
         function requestAddEntry() {
           let rawEmpId = document.getElementById("empId").value.trim();
           const attDate = document.getElementById("attDate").value;
-          const site = document.getElementById("sideName").value;
+          const selectedStatus = document.getElementById("attStatus").value;
+          const formattedId = normalizeEmpId(rawEmpId);
+          const selectedEmployee = employees.find(
+            (emp) => normalizeEmpId(emp.id) === formattedId,
+          );
+          const isCook =
+            isCookEmployee(selectedEmployee || {}) ||
+            isCookEmployee({
+              designation: document.getElementById("designation").value,
+              workingAs: window.currentWorkingAs,
+            });
+          const sideSelect = document.getElementById("sideName");
+            const forceKitchen =
+              isCook && selectedStatus !== "ABSENT" && selectedStatus !== "OTHERS";
+            if (forceKitchen) {
+            let kitchenOption = Array.from(sideSelect.options).find(
+              (opt) => opt.value.trim().toLowerCase() === "kitchen",
+            );
+            if (!kitchenOption) {
+              kitchenOption = document.createElement("option");
+              kitchenOption.value = "Kitchen";
+              kitchenOption.text = "Kitchen";
+              sideSelect.add(kitchenOption);
+            }
+            sideSelect.value = kitchenOption.value;
+            sideSelect.disabled = false;
+            initCustomSelect("sideName");
+          }
+          const site = forceKitchen ? "Kitchen" : sideSelect.value;
 
           // ?. ?????????? (??? ???????? ???? ?????????)
           if (!rawEmpId) {
@@ -4100,8 +4176,6 @@
             });
           }
 
-          let formattedId = normalizeEmpId(rawEmpId);
-
           const normalizeCheck = (value) => {
             const raw = String(value || "").trim();
             if (/^ACL-\d+$/i.test(raw)) return raw.toUpperCase();
@@ -4110,7 +4184,6 @@
           };
 
           // ?. ????????? ??? (????? ? ???????)
-          const selectedStatus = document.getElementById("attStatus").value;
           const shouldCheckDuplicate = selectedStatus !== "OTHERS";
 
           const isLocalDuplicate =
