@@ -444,6 +444,7 @@
                 emp.salaryHistory.push({ editedAt: dt, salary: parseInt(h.salary)||0 });
               });
             }
+            emp.salaryHistory.push({ editedAt: new Date(), salary: emp.salary });
             emp.salaryHistory.sort((a,b) => a.editedAt-b.editedAt);
             _cache.empList.push(emp); _cache.empMap[emp.id] = emp;
           });
@@ -490,13 +491,23 @@
           const d = doc.data();
           if (!d.ID || !d.DATE) return;
           const id = String(d.ID).trim();
-          if (!attendance[id]) attendance[id] = { norm:0, holDays:0, sunDays:0, abs:0, pres:0, fine:0, others:0 };
+          if (!attendance[id]) attendance[id] = { norm:0, holDays:0, sunDays:0, holUnits:0, sunUnits:0, abs:0, pres:0, sickLeave:0, injury:0, isCook:false, fine:0, others:0 };
           const rec = attendance[id];
-          if (d.STATUS==="PRESENT") rec.pres++;
-          if (d.STATUS==="ABSENT")  rec.abs++;
-          if (d.REMARK==="NORMAL WORK") rec.norm++;
-          if ((parseFloat(d.HOLIDAY_WORK)||0)>0) rec.holDays++;
-          if ((parseFloat(d.SUNDAY_WORK)||0)>0) rec.sunDays++;
+          const status = String(d.STATUS || "").trim().toUpperCase();
+          rec.isCook = rec.isCook || isCookWorkingAs(d);
+          if (isPaidPresentStatus(status)) rec.pres++;
+          if (status==="ABSENT") rec.abs++;
+          if (status==="SICK LEAVE") rec.sickLeave++;
+          else if (status==="INJURY") rec.injury++;
+          if (status==="PRESENT" && d.REMARK==="NORMAL WORK") rec.norm++;
+          if ((parseFloat(d.HOLIDAY_WORK)||0)>0) {
+            rec.holDays++;
+            rec.holUnits += getRateMultiplier(id, d.DATE, HOLIDAY_RATE_MULTIPLIER);
+          }
+          if ((parseFloat(d.SUNDAY_WORK)||0)>0) {
+            rec.sunDays++;
+            rec.sunUnits += getRateMultiplier(id, d.DATE, SUNDAY_RATE_MULTIPLIER);
+          }
           rec.fine   += parseFloat(d.FINE)        ||0;
           rec.others += parseFloat(d.OTHERS)      ||0;
         });
@@ -507,7 +518,7 @@
           if (!d.ID || !d.DATE) return;
           if (d.DATE < dFromVal || d.DATE > dToVal) return;
           const id = String(d.ID).trim();
-          if (!attendance[id]) attendance[id] = { norm:0, holDays:0, sunDays:0, abs:0, pres:0, fine:0, others:0 };
+          if (!attendance[id]) attendance[id] = { norm:0, holDays:0, sunDays:0, holUnits:0, sunUnits:0, abs:0, pres:0, sickLeave:0, injury:0, isCook:false, fine:0, others:0 };
           attendance[id].others += parseFloat(d.AMOUNT)||0;
         });
         const otMap = {};
@@ -537,6 +548,30 @@
         return result;
       }
 
+      const SINGLE_PAY_OVERRIDES = [
+        { id: "ACL-0012", from: "2026-09-01", to: "2026-09-30" },
+      ];
+
+      function getRateMultiplier(empId, dateStr, baseMultiplier) {
+        const id = String(empId || "").trim().toUpperCase();
+        const date = String(dateStr || "").slice(0, 10);
+        return SINGLE_PAY_OVERRIDES.some(
+          (item) => item.id === id && date >= item.from && date <= item.to,
+        )
+          ? 1
+          : baseMultiplier;
+      }
+
+      function isCookWorkingAs(record) {
+        return String(record.WORKING_AS || "").trim().toUpperCase() === "COOK";
+      }
+
+      function isPaidPresentStatus(status) {
+        return ["PRESENT", "INJURY", "SICK LEAVE"].includes(
+          String(status || "").trim().toUpperCase(),
+        );
+      }
+
       function invalidateRangeCache() { _attRangeCache = {}; _cache.loaded=false; _cache.loading=false; }
 
       function getDaysInMonth(dateStr) {
@@ -546,20 +581,20 @@
       }
 
       // ── BUILD PAYSLIP DATA ──
-      function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus=0, aBonus=0) {
+      function buildPayslipData(empId, dFromVal, dToVal, rangeData, workingDays, pBonus=0, aBonus=0, fTrv=0, othersOverride=null) {
         const emp       = _cache.empMap[empId]||{ id:empId, name:"", desig:"", passport:"", joining:"", salary:0 };
-        const salary    = emp.salary;
-        const isCook    = (emp.desig||"").trim().toUpperCase()==="COOK";
+        const salary    = getSalaryAsOf(emp, dToVal);
         const dailyRate = parseFloat((salary/workingDays).toFixed(2));
-        const att          = rangeData.attendance[empId]||{ norm:0, holDays:0, sunDays:0, abs:0, pres:0, others:0 };
+        const att          = rangeData.attendance[empId]||{ norm:0, holDays:0, sunDays:0, holUnits:0, sunUnits:0, abs:0, pres:0, sickLeave:0, injury:0, isCook:false, others:0 };
+        const isCook = att.isCook;
         const totalOT      = rangeData.otMap[empId]  ||0;
         const totalAdvance = _cache.advMap[empId]    ||0;
         const totalFine    = _cache.fineMap[empId]   ||0;
-        const normalAmt = isCook ? dailyRate*att.pres : dailyRate*att.norm;
-        const holidayPay = isCook ? 0 : parseFloat((dailyRate * HOLIDAY_RATE_MULTIPLIER * att.holDays).toFixed(2));
-        const sundayPay = isCook ? 0 : parseFloat((dailyRate * SUNDAY_RATE_MULTIPLIER * att.sunDays).toFixed(2));
-        const gross     = normalAmt + holidayPay + sundayPay + totalOT + (att.others||0) + pBonus + aBonus;
-        const npsCsgBase= normalAmt + totalOT; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
+        const normalAmt = isCook ? dailyRate*att.pres : dailyRate*(att.norm + (att.sickLeave||0) + (att.injury||0));
+        const holidayPay = isCook ? 0 : parseFloat((dailyRate * (att.holUnits||0)).toFixed(2));
+        const sundayPay = isCook ? 0 : parseFloat((dailyRate * (att.sunUnits||0)).toFixed(2));
+        const others = othersOverride===null ? (att.others||0) : othersOverride;
+        const gross     = normalAmt + holidayPay + sundayPay + totalOT + others + pBonus + aBonus + fTrv;
         const premiumNpsCsgBase = normalAmt + holidayPay + sundayPay + totalOT;
         const csgEmp    = Math.round(premiumNpsCsgBase*0.015);
         const npsEmp    = Math.round(premiumNpsCsgBase*0.01);
@@ -586,14 +621,19 @@
           joining:emp.joining, wpNo:emp.wpNo||"", rpUidNo:emp.rpUidNo||"",
           entryDate:now.toLocaleDateString("en-GB"),
           time:now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}),
-          serviceLength, normalWork:Math.round(normalAmt), holidayWork:Math.round(holidayPay),
-          sundayWork:Math.round(sundayPay), overtime:Math.round(totalOT),
-          others:Math.round(att.others||0), gross:Math.round(gross),
-          csgEmp:Math.round(csgEmp), npsEmp:Math.round(npsEmp),
-          advanceRefund:Math.round(totalAdvance), fine:Math.round(totalFine),
-          absentDays:att.abs, totalDed:Math.round(totalDed),
+          serviceLength, normalWork:(normalAmt-(dailyRate*(att.sickLeave||0))-(dailyRate*(att.injury||0))).toFixed(2),
+          sickLeavePay:(dailyRate*(att.sickLeave||0)).toFixed(2),
+          injuryPay:(dailyRate*(att.injury||0)).toFixed(2),
+          holidayWork:holidayPay.toFixed(2), sundayWork:sundayPay.toFixed(2),
+          holidaySundayPay:(holidayPay+sundayPay).toFixed(2),
+          leavePay:(dailyRate*((att.sickLeave||0)+(att.injury||0))).toFixed(2),
+          overtime:totalOT.toFixed(2), others:others.toFixed(2), gross:gross.toFixed(2),
+          csgEmp:csgEmp.toFixed(2), npsEmp:npsEmp.toFixed(2),
+          advanceRefund:totalAdvance.toFixed(2), fine:totalFine.toFixed(2),
+          absentDays:att.abs, sickLeaveDays:att.sickLeave||0, injuryDays:att.injury||0,
+          totalDed:totalDed.toFixed(2),
           netPay:netPay, netPayWords:numToWords(netPay),
-          pBonus:Math.round(pBonus), aBonus:Math.round(aBonus),
+          pBonus:pBonus.toFixed(2), aBonus:aBonus.toFixed(2), fTrv:fTrv.toFixed(2),
         };
       }
 
@@ -731,8 +771,6 @@
           const bonusSnap=await rtdb2.ref("BONUS_ENTRY").once("value");
           const bonusData=bonusSnap.val()||{};
           const dFrom=new Date(dFromVal), dTo=new Date(dToVal);
-          const monthKey=getMonthKey(dFromVal);
-
           const rangeData=await fetchRangeData(dFromVal,dToVal);
           const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
           let allPages="";
@@ -749,19 +787,32 @@
             }
 
             // Bonus calculation per employee
-            let pBonus=0, aBonus=0;
-            if (bonusData[monthKey]&&typeof bonusData[monthKey]==="object") {
-              for (const df in bonusData[monthKey]) {
-                const dr=bonusData[monthKey][df];
-                if (!dr||typeof dr!=="object") continue;
-                if (!dr[empId]) continue;
+            let pBonus=0, aBonus=0, fTrv=0, othersOverride=null;
+            for (const bonusMonthKey in bonusData) {
+              const bonusMonth=bonusData[bonusMonthKey];
+              if (!bonusMonth||typeof bonusMonth!=="object") continue;
+              for (const df in bonusMonth) {
+                const dr=bonusMonth[df];
+                if (!dr||typeof dr!=="object"||!dr[empId]) continue;
                 const row=dr[empId];
                 const bonusDate=new Date(row.DATE||df);
-                if (bonusDate>=dFrom&&bonusDate<=dTo) { pBonus+=parseFloat(row.PERFORMANCE_BONUS)||0; aBonus+=parseFloat(row.ATTENDANCE_BONUS)||0; }
+                if (bonusDate>=dFrom&&bonusDate<=dTo) {
+                  pBonus+=parseFloat(row.PERFORMANCE_BONUS)||0;
+                  aBonus+=parseFloat(row.ATTENDANCE_BONUS)||0;
+                  fTrv+=parseFloat(row.FIX_TRAVELLING)||0;
+                  if (row.OTHERS!==undefined && row.OTHERS!==null)
+                    othersOverride=parseFloat(row.OTHERS)||0;
+                }
               }
             }
 
-            const d=buildPayslipData(empId,dFromVal,dToVal,rangeData,workingDays,pBonus,aBonus);
+            if (postedInfoEmp&&postedInfoEmp.status==="PAID") {
+              pBonus=postedInfoEmp.pBonus!==undefined?postedInfoEmp.pBonus:pBonus;
+              aBonus=postedInfoEmp.aBonus!==undefined?postedInfoEmp.aBonus:aBonus;
+              fTrv=postedInfoEmp.fTrv!==undefined?postedInfoEmp.fTrv:fTrv;
+              if (postedInfoEmp.others!==undefined) othersOverride=postedInfoEmp.others;
+            }
+            const d=buildPayslipData(empId,dFromVal,dToVal,rangeData,workingDays,pBonus,aBonus,fTrv,othersOverride);
             allPages+=`<div class="page">${buildOneSlip(d,period,"OFFICE COPY")}${buildOneSlip(d,period,"EMPLOYEE COPY")}</div>`;
             updateLoader(i+1,selected.length,empId);
           }
@@ -801,7 +852,7 @@
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">DESIGNATION</span><span style="width:10px;font-weight:700">:</span><span>${d.desig}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PASSPORT NO</span><span style="width:10px;font-weight:700">:</span><span>${d.passport}</span></div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">JOINING DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.joining}</span></div>
-                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">SERVICE</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength?d.serviceLength.total+' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>':''}</span></div>
+                <div style="display:flex;margin-bottom:2px;align-items:center"><span style="width:88px;font-weight:700;font-size:11px;flex-shrink:0">PERIOD</span><span style="width:10px;font-weight:700">:</span><span style="font-weight:700;font-size:11px">${d.serviceLength?d.serviceLength.total+' Months <span style="font-size:10px;font-weight:600;color:#374151">('+d.serviceLength.formatted+')</span>':''}</span></div>
               </div>
               <div>
                 <div style="display:flex;margin-bottom:2px"><span style="width:60px;font-weight:700;font-size:11px;flex-shrink:0">DATE</span><span style="width:10px;font-weight:700">:</span><span>${d.entryDate}</span></div>
@@ -817,9 +868,9 @@
                 <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings</div>
                 <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWork}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidayWork}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.sundayWork}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">0.00</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays/Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidaySundayPay}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">SICK LEAVE / INJURY</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.leavePay}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fTrv}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.pBonus}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.aBonus}</td></tr>
@@ -848,9 +899,9 @@
               <div style="font-weight:700;font-size:13px;display:flex;justify-content:space-between;text-transform:uppercase"><span>Net Payable</span><span style="color:#15803d;font-family:monospace">${d.netPay}</span></div>
               <div style="margin-top:3px;font-size:10px;color:#444;border:1px dashed #aaa;border-radius:4px;padding:3px 6px"><span style="font-weight:700">IN WORDS:</span> ${d.netPayWords}</div>
             </div>
-            <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
-              <thead><tr style="background:#f3f4f6"><th style="border:1px solid #9ca3af;padding:3px">A.L</th><th style="border:1px solid #9ca3af;padding:3px">S.L</th><th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th></tr></thead>
-              <tbody><tr><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td></tr></tbody>
+            <table style="width:100%;table-layout:fixed;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
+              <thead><tr style="background:#f3f4f6"><th style="border:1px solid #9ca3af;padding:3px">A.L</th><th style="border:1px solid #9ca3af;padding:3px">S.L</th><th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">INJURY</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th></tr></thead>
+              <tbody><tr><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">${d.sickLeaveDays}</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">${d.injuryDays}</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td></tr></tbody>
             </table>
             <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:16px">
               <tr style="background:#f3f4f6;font-weight:700"><th style="border:1px solid #9ca3af;padding:3px">GROSS PAY</th><th style="border:1px solid #9ca3af;padding:3px">DEDUCTIONS</th><th style="border:1px solid #9ca3af;padding:3px">B/F CENTS</th></tr>
@@ -895,22 +946,35 @@
           // Bonus
           const bonusSnap=await rtdb.ref("BONUS_ENTRY").once("value");
           const bonusData=bonusSnap.val()||{};
-          let pBonus=0, aBonus=0;
+          let pBonus=0, aBonus=0, fTrv=0, othersOverride=null;
           const dFrom=new Date(dFromVal), dTo=new Date(dToVal);
-          const monthKey=getMonthKey(dFromVal);
-          if (bonusData[monthKey]&&typeof bonusData[monthKey]==="object") {
-            for (const df in bonusData[monthKey]) {
-              const dr=bonusData[monthKey][df];
+          for (const bonusMonthKey in bonusData) {
+            const bonusMonth=bonusData[bonusMonthKey];
+            if (!bonusMonth||typeof bonusMonth!=="object") continue;
+            for (const df in bonusMonth) {
+              const dr=bonusMonth[df];
               if (!dr||typeof dr!=="object"||!dr[empId]) continue;
               const row=dr[empId];
               const bonusDate=new Date(row.DATE||df);
-              if (bonusDate>=dFrom&&bonusDate<=dTo) { pBonus+=parseFloat(row.PERFORMANCE_BONUS)||0; aBonus+=parseFloat(row.ATTENDANCE_BONUS)||0; }
+              if (bonusDate>=dFrom&&bonusDate<=dTo) {
+                pBonus+=parseFloat(row.PERFORMANCE_BONUS)||0;
+                aBonus+=parseFloat(row.ATTENDANCE_BONUS)||0;
+                fTrv+=parseFloat(row.FIX_TRAVELLING)||0;
+                if (row.OTHERS!==undefined && row.OTHERS!==null)
+                  othersOverride=parseFloat(row.OTHERS)||0;
+              }
             }
           }
 
           const rangeData=await fetchRangeData(dFromVal,dToVal);
           const workingDays=(window._manualWD&&window._manualWD>0)?window._manualWD:await getWorkingDays(dFromVal);
-          const d=buildPayslipData(empId,dFromVal,dToVal,rangeData,workingDays,pBonus,aBonus);
+          if (postedInfo&&postedInfo.status==="PAID") {
+            pBonus=postedInfo.pBonus!==undefined?postedInfo.pBonus:pBonus;
+            aBonus=postedInfo.aBonus!==undefined?postedInfo.aBonus:aBonus;
+            fTrv=postedInfo.fTrv!==undefined?postedInfo.fTrv:fTrv;
+            if (postedInfo.others!==undefined) othersOverride=postedInfo.others;
+          }
+          const d=buildPayslipData(empId,dFromVal,dToVal,rangeData,workingDays,pBonus,aBonus,fTrv,othersOverride);
           const period=`${fmtDate(new Date(dFromVal))} TO ${fmtDate(new Date(dToVal))}`;
           const html=`<!doctype html><html><head><meta charset="UTF-8"><title>Payslip — ${d.empId}</title><link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap" rel="stylesheet">${payslipWindowCSS()}</head><body><div class="no-print"><button onclick="window.print()">🖨️ Print </button></div><div class="page">${buildOneSlip(d,period,"OFFICE COPY")}${buildOneSlip(d,period,"EMPLOYEE COPY")}</div></body></html>`;
           win.document.open(); win.document.write(html); win.document.close();
@@ -1075,8 +1139,6 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
           if (!_cache.loaded) await preloadStaticData();
           const db=firebase.firestore(), rtdb=firebase.database();
           const monthYearKey=getMonthYearKey(dFromVal);
-          const monthKey=getMonthKey(dFromVal);
-
           const [snap, otSnap, advSnap, postedSnap, fineSnap, bonusSnap, othersSnap] = await Promise.all([
             db.collectionGroup("Present_Absent").get(),
             rtdb.ref("OVER_TIME").once("value"),
@@ -1104,16 +1166,27 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
               const liveEmp=_cache.empMap[d.ID];
               const sal=liveEmp?getSalaryAsOf(liveEmp,dToVal):(parseInt(d.SALARY)||0);
               workers[d.ID]={ id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
-                sal, daily:getDailyRate(sal),
-                norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
-                others:0, pBonus:0, aBonus:0  // ✅ NEW
+                sal, daily:getDailyRate(sal), isCook:isCookWorkingAs(d),
+                norm:0, sl:0, inj:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0, adv:0, fine:0,
+                others:0, manualOthers:null, pBonus:0, aBonus:0, fTrv:0,
+                hDay:0, sDay:0, hUnits:0, sUnits:0
               };
             }
-            if (d.STATUS==="PRESENT") workers[d.ID].pres++;
-            else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
-            if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-            workers[d.ID].sDay = (workers[d.ID].sDay || 0) + ((parseFloat(d.SUNDAY_WORK)||0) > 0 ? 1 : 0);
-            workers[d.ID].hDay = (workers[d.ID].hDay || 0) + ((parseFloat(d.HOLIDAY_WORK)||0) > 0 ? 1 : 0);
+            workers[d.ID].isCook = workers[d.ID].isCook || isCookWorkingAs(d);
+            const status=String(d.STATUS||"").trim().toUpperCase();
+            if (isPaidPresentStatus(status)) workers[d.ID].pres++;
+            else if (status==="ABSENT") workers[d.ID].abs++;
+            if (status==="SICK LEAVE") workers[d.ID].sl++;
+            else if (status==="INJURY") workers[d.ID].inj++;
+            if (status==="PRESENT" && d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
+            if ((parseFloat(d.SUNDAY_WORK)||0)>0) {
+              workers[d.ID].sDay++;
+              workers[d.ID].sUnits+=getRateMultiplier(d.ID,d.DATE,SUNDAY_RATE_MULTIPLIER);
+            }
+            if ((parseFloat(d.HOLIDAY_WORK)||0)>0) {
+              workers[d.ID].hDay++;
+              workers[d.ID].hUnits+=getRateMultiplier(d.ID,d.DATE,HOLIDAY_RATE_MULTIPLIER);
+            }
           });
 
           // ✅ Others sub-collection
@@ -1154,8 +1227,13 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
                 if (!row||!workers[empId]) continue;
                 const bonusDate=new Date(row.DATE||df);
                 if (dFromVal&&dToVal&&(bonusDate<dFrom||bonusDate>dTo)) continue;
-                workers[empId].pBonus += parseFloat(row.PERFORMANCE_BONUS)||0;
-                workers[empId].aBonus += parseFloat(row.ATTENDANCE_BONUS) ||0;
+                const rowId=row.ID||empId;
+                if (!workers[rowId]) continue;
+                workers[rowId].pBonus += parseFloat(row.PERFORMANCE_BONUS)||0;
+                workers[rowId].aBonus += parseFloat(row.ATTENDANCE_BONUS) ||0;
+                workers[rowId].fTrv += parseFloat(row.FIX_TRAVELLING)||0;
+                if (row.OTHERS!==undefined && row.OTHERS!==null)
+                  workers[rowId].manualOthers=parseFloat(row.OTHERS)||0;
               }
             }
           }
@@ -1174,22 +1252,25 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
               workers[id].others = pi.others !== undefined ? pi.others : workers[id].others;
               workers[id].pBonus = pi.pBonus !== undefined ? pi.pBonus : workers[id].pBonus;
               workers[id].aBonus = pi.aBonus !== undefined ? pi.aBonus : workers[id].aBonus;
+              workers[id].fTrv = pi.fTrv !== undefined ? pi.fTrv : workers[id].fTrv;
+              if (pi.others !== undefined) workers[id].manualOthers=pi.others;
             }
           }
 
-          let totals={norm:0,hol:0,sun:0,pres:0,abs:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0,pBonus:0,aBonus:0};
+          let totals={norm:0,hol:0,sun:0,hDay:0,sDay:0,pres:0,abs:0,sl:0,inj:0,otA:0,otH:0,others:0,gross:0,adv:0,fine:0,nps:0,csg:0,totDed:0,net:0,totBasic:0,totDaily:0,pBonus:0,aBonus:0,fTrv:0};
           let rows="", count=1, hasUnpaid=false;
 
           Object.keys(workers).sort().forEach(id => {
             const w=workers[id];
-            const isCook=(w.des||"").trim().toUpperCase()==="COOK";
-            const rowTotalBasic=isCook?w.daily*w.pres:w.daily*w.norm;
-            w.hol=isCook ? 0 : parseFloat((w.daily*HOLIDAY_RATE_MULTIPLIER*(w.hDay||0)).toFixed(2));
-            w.sun=isCook ? 0 : parseFloat((w.daily*SUNDAY_RATE_MULTIPLIER*(w.sDay||0)).toFixed(2));
-            const baseGross    =rowTotalBasic+w.hol+w.sun+w.otA+w.others;
+            const isCook=w.isCook;
+            const rowTotalBasic=isCook?w.daily*w.pres:w.daily*(w.norm+w.sl+w.inj);
+            w.hol=isCook ? 0 : parseFloat((w.daily*(w.hUnits||0)).toFixed(2));
+            w.sun=isCook ? 0 : parseFloat((w.daily*(w.sUnits||0)).toFixed(2));
+            const initOthers=w.manualOthers!==null?w.manualOthers:w.others;
+            const baseGross    =rowTotalBasic+w.hol+w.sun+w.otA+initOthers;
             const initPB=w.pBonus||0, initAB=w.aBonus||0;
-            const gross  =baseGross+initPB+initAB;
-            const npsCsgBase=rowTotalBasic+w.otA; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
+            const initFTrv=w.fTrv||0;
+            const gross  =baseGross+initPB+initAB+initFTrv;
             const premiumNpsCsgBase=rowTotalBasic+w.hol+w.sun+w.otA;
             const nps    =Math.round(premiumNpsCsgBase*0.01);
             const csg    =Math.round(premiumNpsCsgBase*0.015);
@@ -1198,11 +1279,12 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
 
             totals.totBasic+=rowTotalBasic; totals.totDaily+=w.daily;
             totals.norm+=w.norm; totals.hol+=w.hol; totals.sun+=w.sun;
-            totals.pres+=w.pres; totals.abs+=w.abs; totals.otA+=w.otA;
-            totals.otH+=w.otH; totals.others+=w.others; totals.gross+=gross;
+            totals.hDay+=w.hDay; totals.sDay+=w.sDay;
+            totals.pres+=w.pres; totals.abs+=w.abs; totals.sl+=w.sl; totals.inj+=w.inj; totals.otA+=w.otA;
+            totals.otH+=w.otH; totals.others+=initOthers; totals.gross+=gross;
             totals.adv+=w.adv; totals.fine+=w.fine; totals.nps+=nps;
             totals.csg+=csg; totals.totDed+=totDed; totals.net+=net;
-            totals.pBonus+=initPB; totals.aBonus+=initAB;
+            totals.pBonus+=initPB; totals.aBonus+=initAB; totals.fTrv+=initFTrv;
 
             const dailyDisplay=`${w.daily.toFixed(2)} <span class="no-print" style="color:${isCook?'#dc2626':'#0369a1'};font-size:8px">÷${workingDays}d${isCook?' ×P':' ×N'}</span>`;
             const postedInfo=postedData[id];
@@ -1221,14 +1303,17 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
               <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
               <td class="text-right"><div style="font-weight:bold">${rowTotalBasic.toFixed(2)}</div><div style="font-size:9px;color:#666;font-style:italic">(${dailyDisplay})</div></td>
               <td class="text-right">${w.norm}</td>
-              <td class="text-right">${w.hol.toFixed(2)}</td>
-              <td class="text-right">${w.sun.toFixed(2)}</td>
+              <td class="text-right"><div>${w.hol.toFixed(2)}</div><div style="font-size:9px;color:#666">${w.hDay} days</div></td>
+              <td class="text-right"><div>${w.sun.toFixed(2)}</div><div style="font-size:9px;color:#666">${w.sDay} days</div></td>
               <td class="text-right">${w.pres}</td>
               <td class="text-right">${w.abs}</td>
+              <td class="text-right">${w.sl}</td>
+              <td class="text-right">${w.inj}</td>
               <td class="text-right">${w.otA.toFixed(2)}<div class="ot-hours-preview" style="font-size:9px;color:#666;font-style:italic">${w.otH.toFixed(1)}</div></td>
-              <td class="text-right">${w.others.toFixed(2)}</td>
+              <td class="text-right">${initOthers.toFixed(2)}</td>
               <td class="text-right" style="color:#065f46;font-weight:700">${initPB.toFixed(2)}</td>
               <td class="text-right" style="color:#92400e;font-weight:700">${initAB.toFixed(2)}</td>
+              <td class="text-right">${initFTrv.toFixed(2)}</td>
               <td class="text-right"><strong>${gross.toFixed(2)}</strong></td>
               <td class="text-right">${w.adv}</td>
               <td class="text-right">${w.fine}</td>
@@ -1281,10 +1366,12 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
                 <th rowspan="2">Employee Name / Passport</th><th rowspan="2">Designation</th>
                 <th rowspan="2">Total Basic</th><th rowspan="2">P</th><th rowspan="2">Holiday</th>
                 <th rowspan="2">Sunday</th><th rowspan="2">Total P</th><th rowspan="2">A</th>
+                <th rowspan="2">SL</th><th rowspan="2">INJ</th>
                 <th rowspan="2">OT Amt</th>
                 <th rowspan="2" class="th-others">Others</th>
                 <th rowspan="2" class="th-pbonus">P Bonus</th>
                 <th rowspan="2" class="th-abonus">A Bonus</th>
+                <th rowspan="2">F Trv</th>
                 <th rowspan="2">Gross Salary</th>
                 <th colspan="5">DEDUCTIONS</th>
                 <th rowspan="2">Net Salary</th><th rowspan="2" class="no-print">Actions</th><th rowspan="2">Status</th>
@@ -1298,14 +1385,17 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
                 <td colspan="4" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
                 <td class="text-right"><div>${totals.totBasic.toFixed(2)}</div><div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div></td>
                 <td class="text-right">${totals.norm}</td>
-                <td class="text-right">${totals.hol.toFixed(2)}</td>
-                <td class="text-right">${totals.sun.toFixed(2)}</td>
+                <td class="text-right"><div>${totals.hol.toFixed(2)}</div><div style="font-size:8px;color:#cbd5e1;font-weight:normal">${totals.hDay} days</div></td>
+                <td class="text-right"><div>${totals.sun.toFixed(2)}</div><div style="font-size:8px;color:#cbd5e1;font-weight:normal">${totals.sDay} days</div></td>
                 <td class="text-right">${totals.pres}</td>
                 <td class="text-right">${totals.abs}</td>
+                <td class="text-right">${totals.sl}</td>
+                <td class="text-right">${totals.inj}</td>
                 <td style="text-align:center;vertical-align:bottom"><div>${totals.otA.toFixed(2)}</div><div class="ot-hours-preview" style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">${totals.otH.toFixed(1)}</div></td>
                 <td class="text-right">${totals.others.toFixed(2)}</td>
                 <td class="text-right">${totals.pBonus.toFixed(2)}</td>
                 <td class="text-right">${totals.aBonus.toFixed(2)}</td>
+                <td class="text-right">${totals.fTrv.toFixed(2)}</td>
                 <td class="text-right">${totals.gross.toFixed(2)}</td>
                 <td class="text-right">${totals.adv}</td>
                 <td class="text-right">${totals.fine}</td>
@@ -1316,13 +1406,13 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
                 <td class="no-print"></td><td></td>
               </tr>
               <tr>
-                <td colspan="26" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
+                <td colspan="29" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
                   <span style="font-weight:bold;font-size:9px">In Words: </span>
                   <span style="font-size:9px;font-style:italic">${numberToWordsLocal(totals.net)}</span>
                 </td>
               </tr>
               <tr class="print-footer-signature">
-                <td colspan="26" style="border:none!important;padding:80px 0 20px 0!important">
+                <td colspan="29" style="border:none!important;padding:80px 0 20px 0!important">
                   <div class="signature-area" style="margin-top:0;display:flex;justify-content:space-around">
                     <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
                     <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
@@ -1373,7 +1463,6 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
         const tsDate      =today.toLocaleDateString("en-GB");
         const tsTime      =today.toLocaleTimeString("en-GB");
         const monthYearKey=getMonthYearKey(dFromVal);
-        const monthKey    =getMonthKey(dFromVal);
         const d0          =new Date(dFromVal);
         const yearMonthNum=`${d0.getFullYear()}${String(d0.getMonth()+1).padStart(2,"0")}`;
 
@@ -1416,15 +1505,27 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
               const liveEmp=_cache.empMap[d.ID];
               const sal=liveEmp?getSalaryAsOf(liveEmp,dToVal):(parseInt(d.SALARY)||0);
               workers[d.ID]={ id:d.ID, name:d.EMPLOYEE_NAME, passport:d.PASSPORT, des:d.DESIGNATION,
-                sal, daily:0, norm:0, hol:0, sun:0, pres:0, abs:0, otH:0, otA:0,
-                others:0, pBonus:0, aBonus:0  // ✅ NEW
+                sal, daily:0, isCook:isCookWorkingAs(d), norm:0, sl:0, inj:0,
+                hol:0, sun:0, pres:0, abs:0, otH:0, otA:0,
+                others:0, manualOthers:null, pBonus:0, aBonus:0, fTrv:0,
+                hDay:0, sDay:0, hUnits:0, sUnits:0
               };
             }
-            if (d.STATUS==="PRESENT") workers[d.ID].pres++;
-            else if (d.STATUS==="ABSENT") workers[d.ID].abs++;
-            if (d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
-            workers[d.ID].sDay = (workers[d.ID].sDay || 0) + ((parseFloat(d.SUNDAY_WORK)||0) > 0 ? 1 : 0);
-            workers[d.ID].hDay = (workers[d.ID].hDay || 0) + ((parseFloat(d.HOLIDAY_WORK)||0) > 0 ? 1 : 0);
+            workers[d.ID].isCook = workers[d.ID].isCook || isCookWorkingAs(d);
+            const status=String(d.STATUS||"").trim().toUpperCase();
+            if (isPaidPresentStatus(status)) workers[d.ID].pres++;
+            else if (status==="ABSENT") workers[d.ID].abs++;
+            if (status==="SICK LEAVE") workers[d.ID].sl++;
+            else if (status==="INJURY") workers[d.ID].inj++;
+            if (status==="PRESENT" && d.REMARK==="NORMAL WORK") workers[d.ID].norm++;
+            if ((parseFloat(d.SUNDAY_WORK)||0)>0) {
+              workers[d.ID].sDay++;
+              workers[d.ID].sUnits+=getRateMultiplier(d.ID,d.DATE,SUNDAY_RATE_MULTIPLIER);
+            }
+            if ((parseFloat(d.HOLIDAY_WORK)||0)>0) {
+              workers[d.ID].hDay++;
+              workers[d.ID].hUnits+=getRateMultiplier(d.ID,d.DATE,HOLIDAY_RATE_MULTIPLIER);
+            }
           });
 
           // ✅ Others sub-collection
@@ -1464,8 +1565,13 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
                 if (!row||!workers[empId]) continue;
                 const bonusDate=new Date(row.DATE||df);
                 if (dFromVal&&dToVal&&(bonusDate<dFrom||bonusDate>dTo)) continue;
-                workers[empId].pBonus += parseFloat(row.PERFORMANCE_BONUS)||0;
-                workers[empId].aBonus += parseFloat(row.ATTENDANCE_BONUS) ||0;
+                const rowId=row.ID||empId;
+                if (!workers[rowId]) continue;
+                workers[rowId].pBonus += parseFloat(row.PERFORMANCE_BONUS)||0;
+                workers[rowId].aBonus += parseFloat(row.ATTENDANCE_BONUS) ||0;
+                workers[rowId].fTrv += parseFloat(row.FIX_TRAVELLING)||0;
+                if (row.OTHERS!==undefined && row.OTHERS!==null)
+                  workers[rowId].manualOthers=parseFloat(row.OTHERS)||0;
               }
             }
           }
@@ -1494,11 +1600,13 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             if (postedData[id]&&postedData[id].status==="PAID") return;
             const advPending =parseInt((advData[id] ||{}).pending)||0;
             const finePending=parseInt((fineData[id]||{}).pending)||0;
-            const isCook=(w.des||"").trim().toUpperCase()==="COOK";
-            const rowTotalBasic=isCook?w.daily*w.pres:w.daily*w.norm;
-            // ✅ others + pBonus + aBonus gross এ যোগ হচ্ছে
-            const gross=rowTotalBasic+w.hol+w.sun+w.otA+w.others+w.pBonus+w.aBonus;
-            const npsCsgBase=rowTotalBasic+w.otA; // ✅ NPS/CSG শুধু normal pay + OT থেকে কাটবে
+            const isCook=w.isCook;
+            const rowTotalBasic=isCook?w.daily*w.pres:w.daily*(w.norm+w.sl+w.inj);
+            w.hol=isCook?0:parseFloat((w.daily*(w.hUnits||0)).toFixed(2));
+            w.sun=isCook?0:parseFloat((w.daily*(w.sUnits||0)).toFixed(2));
+            const postedOthers=w.manualOthers!==null?w.manualOthers:w.others;
+            const gross=rowTotalBasic+w.hol+w.sun+w.otA+postedOthers+w.pBonus+w.aBonus+w.fTrv;
+            const npsCsgBase=rowTotalBasic+w.hol+w.sun+w.otA;
             const nps  =Math.round(npsCsgBase*0.01);
             const csg  =Math.round(npsCsgBase*0.015);
             const totDed=advPending+finePending+nps+csg;
@@ -1508,9 +1616,10 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
             updates[`SALARY_POSTED/${monthYearKey}/${id}`]={
               status:"PAID", net, gross, totDed,
               adv:advPending, fine:finePending,
-              others:w.others||0,   // ✅ NEW
+              others:postedOthers,
               pBonus:w.pBonus||0,   // ✅ NEW
               aBonus:w.aBonus||0,   // ✅ NEW
+              fTrv:w.fTrv||0,
               postedAt, month:monthYearKey,
             };
 
