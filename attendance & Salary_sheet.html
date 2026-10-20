@@ -1974,6 +1974,7 @@
     </style>
   </head>
   <body>
+  <script src="auth-audit.js"></script>
     <div class="page-header">
       <div class="page-header-brand">
         <img
@@ -6041,6 +6042,10 @@
           }
           if (input.value.trim() === "") {
             await ref.remove();
+            await firebase
+              .database()
+              .ref(`BONUS_ENTRY/${getMonthKey(date)}/DATE_${date}/${empId}`)
+              .update({ SAVED_BY: window.getAuditUserId() });
           } else {
             await firebase
               .database()
@@ -6049,6 +6054,7 @@
                 ID: empId,
                 DATE: date,
                 [field]: parseFloat(input.value) || 0,
+                SAVED_BY: window.getAuditUserId(),
               });
           }
           input.dataset.previousValue = input.value;
@@ -6175,6 +6181,7 @@
             if (hasNewValue || hasOldValue) {
               updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/ID`] = id;
               updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/DATE`] = date;
+              updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/SAVED_BY`] = window.getAuditUserId();
               Object.entries(fieldValues).forEach(([field, rawValue]) => {
                 updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/${field}`] =
                   rawValue ? parseFloat(rawValue) || 0 : null;
@@ -8110,6 +8117,7 @@
             HOLIDAY_WORK: holiday,
             SUNDAY_WORK: sunday,
             FINE: fine,
+            SAVED_BY: window.getAuditUserId(),
           };
           if (["INJURY", "SICK LEAVE"].includes(status)) {
             update.REMARK = "NORMAL WORK";
@@ -8121,7 +8129,7 @@
             parseFloat(document.getElementById("deField_hrs").value) || 0;
           const rate =
             parseFloat(document.getElementById("deField_rate").value) || 0;
-          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate };
+          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate, SAVED_BY: window.getAuditUserId() };
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         } else if (type === "advance") {
@@ -8133,7 +8141,7 @@
           const note = (
             document.getElementById("deField_note").value || ""
           ).trim();
-          const update = { type: t, amount, note };
+          const update = { type: t, amount, note, SAVED_BY: window.getAuditUserId() };
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         }
@@ -8236,7 +8244,10 @@
             if (type === "attendance") {
               await firebase.firestore().doc(r.path).delete();
             } else if (type === "fine") {
-              await firebase.firestore().doc(r.path).update({ FINE: 0 });
+              await firebase.firestore().doc(r.path).update({
+                FINE: 0,
+                SAVED_BY: window.getAuditUserId(),
+              });
             } else if (type === "ot" || type === "advance") {
               await firebase.database().ref(r.path).remove();
             }
@@ -8286,6 +8297,7 @@
             before: before || null,
             after: after || null,
             reason: reason || "",
+            userId: window.getAuditUserId(),
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           });
         } catch (e) {

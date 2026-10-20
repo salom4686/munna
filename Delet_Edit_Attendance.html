@@ -1663,6 +1663,7 @@
     </style>
 </head>
 <body>
+  <script src="auth-audit.js"></script>
   <div class="page-header">
     <h2>ALOMHOW CO LTD</h2>
     <span class="header-badge">🗑️ DELETE / EDIT MANAGER</span>
@@ -2553,7 +2554,10 @@
             if (type === "attendance") {
               await firebase.firestore().doc(r.path).delete();
             } else if (type === "fine") {
-              await firebase.firestore().doc(r.path).update({ FINE: 0 });
+              await firebase.firestore().doc(r.path).update({
+                FINE: 0,
+                SAVED_BY: window.getAuditUserId(),
+              });
             } else if (type === "ot" || type === "advance") {
               await firebase.database().ref(r.path).remove();
             }
@@ -2763,6 +2767,7 @@
             SUNDAY_WORK: sunday,
             FINE: fine,
             SIDE_NAME: site,
+            SAVED_BY: window.getAuditUserId(),
           };
           await firebase.firestore().doc(r.path).update(update);
           after = { ...before, ...update };
@@ -2774,7 +2779,7 @@
           const site = (
             document.getElementById("deField_site").value || ""
           ).trim();
-          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate, Site: site };
+          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate, Site: site, SAVED_BY: window.getAuditUserId() };
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         } else if (type === "advance") {
@@ -2786,7 +2791,7 @@
           const note = (
             document.getElementById("deField_note").value || ""
           ).trim();
-          const update = { type: t, amount, note };
+          const update = { type: t, amount, note, SAVED_BY: window.getAuditUserId() };
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         }
@@ -2900,7 +2905,10 @@
             if (type === "attendance") {
               await firebase.firestore().doc(r.path).delete();
             } else if (type === "fine") {
-              await firebase.firestore().doc(r.path).update({ FINE: 0 });
+              await firebase.firestore().doc(r.path).update({
+                FINE: 0,
+                SAVED_BY: window.getAuditUserId(),
+              });
             } else if (type === "ot" || type === "advance") {
               await firebase.database().ref(r.path).remove();
             }
@@ -2963,6 +2971,7 @@
           before: before || null,
           after: after || null,
           reason: reason || "",
+          userId: window.getAuditUserId(),
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
         });
       }

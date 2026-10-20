@@ -502,6 +502,7 @@
     </style>
   </head>
   <body class="p-2 md:p-4">
+  <script src="auth-audit.js"></script>
     <div id="loadingOverlay">
       <img
         src="https://lh3.googleusercontent.com/d/11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo"
@@ -2392,6 +2393,7 @@
                 DATE: selectedDate,
                 ATTENDANCE_BONUS: v.att || 0,
                 PERFORMANCE_BONUS: v.perf || 0,
+                SAVED_BY: window.getAuditUserId(),
                 UPDATED_AT: new Date().toISOString(),
               };
               count++;
@@ -3610,6 +3612,8 @@
               const key = item.firebaseKey;
               const record = { ...item };
               delete record.firebaseKey;
+              record.SAVED_BY = window.getAuditUserId();
+              record.UPDATED_AT = new Date().toISOString();
               updates[`/ATTENDANCE/${monthName}/${key}`] = record;
             });
 
@@ -4613,6 +4617,7 @@
                   SUNDAY_WORK: Number(entry.sundayWork) || 0, // ➔ যুক্ত করা হলো
                   REMARK: entry.remark || "",
                   AMOUNT: Number(entry.amount) || 0,
+                  SAVED_BY: window.getAuditUserId(),
                   CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
                 });
                 savedCount++;
@@ -4657,6 +4662,7 @@
                   HOLIDAY_WORK: Number(entry.holidayWork) || 0, // ➔ যুক্ত করা হলো
                   SUNDAY_WORK: Number(entry.sundayWork) || 0, // ➔ যুক্ত করা হলো
                   REMARK: entry.remark || "",
+                  SAVED_BY: window.getAuditUserId(),
                   CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
                 });
                 savedCount++;

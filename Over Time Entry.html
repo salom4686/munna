@@ -528,6 +528,7 @@
     </script>
   </head>
   <body>
+  <script src="auth-audit.js"></script>
     <!-- লোডিং ওভারলে স্ক্রিন -->
     <div id="loadingOverlay">
       <div class="mb-6 bg-white p-3 rounded-xl">
@@ -1973,6 +1974,7 @@
               Remark: remark,
               Entry_Date: new Date().toString(),
               Entry_Time: new Date().toString(),
+              SAVED_BY: window.getAuditUserId(),
             });
 
           otInput.setAttribute("readonly", true);
@@ -2078,6 +2080,7 @@
               Remark: item.remark || "-",
               Entry_Date: new Date().toString(),
               Entry_Time: new Date().toString(),
+              SAVED_BY: window.getAuditUserId(),
             };
           });
 

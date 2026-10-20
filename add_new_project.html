@@ -369,6 +369,7 @@
   </style>
 </head>
 <body>
+  <script src="auth-audit.js"></script>
 <div class="wrapper">
 
   <!-- ═══ HEADER ═══ -->
@@ -580,7 +581,7 @@ window.saveProject = async function() {
     await addDoc(collection(db, COLL),{
       FIELD_A:parseInt(sl,10),FIELD_B:projId,NAME:projName,
       DATE:date,START_DATE:startDate,FIELD_D:remark,
-      FIELD_E:'',timestamp:new Date().toISOString(),
+      FIELD_E:'',timestamp:new Date().toISOString(),SAVED_BY:window.getAuditUserId(),
     });
     toast(`✦ ${projId} saved successfully!`,'success');
     resetForm(); await generateIds(); loadRecords();
@@ -657,7 +658,7 @@ window.saveEdit = async function(id){
   const remark = document.getElementById('ed_remark')?.value.trim();
   if(!name){ toast('Project Name is required!','error'); return; }
   try{
-    await updateDoc(doc(db,COLL,id),{NAME:name,START_DATE:start||'',FIELD_D:remark||''});
+    await updateDoc(doc(db,COLL,id),{NAME:name,START_DATE:start||'',FIELD_D:remark||'',SAVED_BY:window.getAuditUserId()});
     toast('Project updated!','success'); loadRecords();
   } catch(e){ toast('Update failed: '+e.message,'error'); }
 };

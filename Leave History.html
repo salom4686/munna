@@ -417,6 +417,7 @@
     </style>
   </head>
   <body>
+  <script src="auth-audit.js"></script>
     <header>
       <h1>ALAMHOW CO LTD — Leave History</h1>
     </header>
@@ -853,6 +854,7 @@
                 EMPLOYEE_NAME: employee.name,
                 CL_ENTITLED: cl,
                 SL_ENTITLED: sl,
+                SAVED_BY: window.getAuditUserId(),
                 UPDATED_AT: saveTimestamp,
               });
             });
@@ -888,6 +890,7 @@
                 STATUS: "CASUAL LEAVE",
                 DAYS: days,
                 REMARK: remark,
+                SAVED_BY: window.getAuditUserId(),
                 CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
               });
             });
