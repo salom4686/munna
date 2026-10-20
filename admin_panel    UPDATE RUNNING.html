@@ -1169,6 +1169,7 @@
     </style>
   </head>
   <body>
+  <script src="auth-audit.js"></script>
     <div id="splash">
       <div class="splash-logo">🔥 Munna ACL Admin</div>
       <div class="splash-msg" id="splash-msg">Connecting to Firebase...</div>
@@ -2383,6 +2384,7 @@
           toast("❌ Please add at least one field", "err");
           return;
         }
+        data.SAVED_BY = window.getAuditUserId();
 
         var isFromDocView = currentType === "document";
         var targetCollectionPath = isFromDocView

@@ -456,6 +456,7 @@
     </style>
   </head>
   <body>
+  <script src="auth-audit.js"></script>
     <div class="search-container">
       <div class="brand-section">
         <img
@@ -859,6 +860,7 @@
             salary: document.getElementById("regSalary").value,
             otRate: document.getElementById("regOT").value,
             status: document.getElementById("regStatus").value,
+            SAVED_BY: window.getAuditUserId(),
           };
 
           try {
@@ -871,6 +873,7 @@
               const historyEntry = {
                 ...oldData,
                 editedAt: new Date().toLocaleString(),
+                editedBy: window.getAuditUserId(),
               };
               delete historyEntry.history;
               await docRef.update({
@@ -908,6 +911,7 @@
           snapshot.forEach((doc) =>
             batch.update(db.collection("EMPLOYEE_LIST").doc(doc.id), {
               otRate: newRate,
+              SAVED_BY: window.getAuditUserId(),
             }),
           );
           await batch.commit();
@@ -972,6 +976,7 @@
           await db.collection("EMPLOYEE_LIST").doc(key).update({
             status: newStatus,
             statusUpdatedAt: new Date().toLocaleString(),
+            SAVED_BY: window.getAuditUserId(),
           });
           Swal.fire("Updated", `Employee is now ${action}.`, "success");
         } catch (err) {

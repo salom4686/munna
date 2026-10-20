@@ -440,7 +440,7 @@
                     <i class="fa-solid fa-eye pass-eye" id="passEye" onclick="togglePass()"></i>
                 </div>
                 <button class="login-btn" id="loginBtn" onclick="handleLogin()">Login</button>
-                <div class="error-msg" id="errorMsg" style="display:none!important;"></div>
+                <div class="error-msg" id="errorMsg"></div>
             </div>
         </div>
     </div>
@@ -843,7 +843,10 @@
                 const empData = spFoundEmployee;
                 /* PASSWORD field নাম detect করা */
                 const fieldName = empData.PASSWORD !== undefined ? "PASSWORD" : "password";
-                await updateDoc(doc(db, "EMPLOYEE_LIST", empData.docId), { [fieldName]: newPass });
+                await updateDoc(doc(db, "EMPLOYEE_LIST", empData.docId), {
+                    [fieldName]: newPass,
+                    SAVED_BY: sessionStorage.getItem("savedId") || "",
+                });
                 showToast("Password for " + (empData.name || empData.id) + " has been set successfully!", "success");
                 /* সফল হলে ফিল্ড ক্লিয়ার */
                 document.getElementById("spNewPass").value = "";
@@ -922,7 +925,10 @@
                 const empData = snap2.docs[0].data();
                 const fieldName = empData.PASSWORD !== undefined ? "PASSWORD" : "password";
 
-                await updateDoc(doc(db, "EMPLOYEE_LIST", empDocId), { [fieldName]: newPass });
+                await updateDoc(doc(db, "EMPLOYEE_LIST", empDocId), {
+                    [fieldName]: newPass,
+                    SAVED_BY: sessionStorage.getItem("savedId") || "",
+                });
 
                 showToast("Password changed successfully!", "success");
                 /* সব ফিল্ড ক্লিয়ার */
@@ -963,10 +969,9 @@
         function showError(msg) { showToast(msg, "error"); }
         function resetBtn() { const btn = document.getElementById("loginBtn"); btn.disabled = false; btn.innerHTML = "Login"; }
         function shake() { const card = document.querySelector(".login-card"); card.style.animation = "shake 0.3s ease"; setTimeout(() => { card.style.animation = ""; }, 300); }
-/*
-        /* লগইন চেক করবে লগইন সফল হলে পেজ লোডে session check — লগইন থাকলে সরাসরি ড্যাশবোর্ড */
-        /*window.addEventListener("load", () => {
-            if (sessionStorage.getItem("isLoggedIn") === "true") {
+        /* Restore only a session created by successful login. */
+        window.addEventListener("load", () => {
+            if (sessionStorage.getItem("isLoggedIn") === "true" && sessionStorage.getItem("savedId")) {
                 const id    = sessionStorage.getItem("savedId");
                 const name  = sessionStorage.getItem("savedName");
                 const desig = sessionStorage.getItem("savedDesignation");
@@ -977,25 +982,10 @@
                 updateMarquee(id, name, desig, time);
                 document.getElementById("loginScreen").style.display    = "none";
                 document.getElementById("dashboardScreen").style.display = "block";
+            } else {
+                sessionStorage.clear();
             }
-        });*/
-  
-        /*লগইন ছাড়া সরাসরি হোম পেজে নিয়ে যাবে */
-       window.addEventListener("load", () => {
-    
-    sessionStorage.setItem("isLoggedIn",       "true");
-    sessionStorage.setItem("savedId",          "ACL-0001");
-    sessionStorage.setItem("savedName",        "ADMIN");
-    sessionStorage.setItem("savedDesignation", "Administrator");
-    sessionStorage.setItem("loginTime",        new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',second:'2-digit'}));
-
-    document.getElementById("welcomeName").innerText     = "ADMIN";
-    document.getElementById("sideProfileName").innerText = "ADMIN";
-    document.getElementById("sideProfileRole").innerText = "Administrator";
-    updateMarquee("ACL-0001", "ADMIN", "Administrator", sessionStorage.getItem("loginTime"));
-    document.getElementById("loginScreen").style.display    = "none";
-    document.getElementById("dashboardScreen").style.display = "block";
-});
+        });
 
         /* মার্কি আপডেট ফাংশন */
         function updateMarquee(id, name, desig, time) {
@@ -1030,18 +1020,32 @@
             document.getElementById("desigBadge").style.display = "none";
         };
 
-        /* নতুন পেজ খোলা এবং BroadcastChannel দিয়ে user info পাঠানো */
+        /* Open same-origin tools with an isolated copy of the authenticated session. */
         window.openPage = function(url) {
-            window.open(url, '_blank');
-            const authChannel = new BroadcastChannel('alamhow_user_auth');
-            setTimeout(() => {
-                authChannel.postMessage({
-                    userId:      sessionStorage.getItem("savedId"),
-                    userName:    sessionStorage.getItem("savedName"),
-                    designation: sessionStorage.getItem("savedDesignation")
+            if (sessionStorage.getItem("isLoggedIn") !== "true" || !sessionStorage.getItem("savedId")) {
+                window.location.replace("index.html");
+                return;
+            }
+            const page = window.open("about:blank", "_blank");
+            if (!page) {
+                showToast("Please allow pop-ups to open this page.", "error");
+                return;
+            }
+            ["isLoggedIn", "savedId", "savedName", "savedDesignation", "loginTime", "savedDocId"]
+                .forEach(key => {
+                    const value = sessionStorage.getItem(key);
+                    if (value !== null) page.sessionStorage.setItem(key, value);
                 });
-            }, 800);
+            page.location.replace(url);
         };
+
+        document.addEventListener("click", event => {
+            const target = event.target;
+            const link = target instanceof Element ? target.closest('a[target="_blank"]') : null;
+            if (!link) return;
+            event.preventDefault();
+            window.openPage(link.href);
+        });
     </script>
 
     <script>

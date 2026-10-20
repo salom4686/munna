@@ -54,6 +54,7 @@
     </style>
   </head>
   <body class="bg-[#0f1e33] min-h-screen py-6 text-white">
+  <script src="auth-audit.js"></script>
 
     <div id="page-init-loader">
       <div class="mb-6 bg-white p-3 rounded-2xl border-2 border-[#d4af37]">
@@ -735,7 +736,7 @@
 
         const li=employeeBalances[id]||{totalAdvance:0,totalAdjusted:0,pending:0};
         const pp=li.pending,cp=currentMode==="advance"?pp+amt:pp-amt;
-        const entry={advanceNo:nv,tsDate:new Date().toLocaleDateString("en-GB"),tsTime:new Date().toLocaleTimeString("en-GB"),recordDate:rd,id:id,name:document.getElementById("display-name").value,desig:document.getElementById("display-desig").value,passport:document.getElementById("auto-passport").value,amount:amt,amountWords:numberToWords(amt),reference:document.getElementById("reference").value||"",remark:document.getElementById("remark").value||"",entryType:currentMode,prevPending:pp,newPending:cp,newPendingWords:numberToWords(cp)};
+        const entry={advanceNo:nv,tsDate:new Date().toLocaleDateString("en-GB"),tsTime:new Date().toLocaleTimeString("en-GB"),recordDate:rd,id:id,name:document.getElementById("display-name").value,desig:document.getElementById("display-desig").value,passport:document.getElementById("auto-passport").value,amount:amt,amountWords:numberToWords(amt),reference:document.getElementById("reference").value||"",remark:document.getElementById("remark").value||"",entryType:currentMode,prevPending:pp,newPending:cp,newPendingWords:numberToWords(cp),SAVED_BY:window.getAuditUserId()};
         lastSavedEntries=[entry];
         const rn=currentMode==="advance"?"ADVANCE":"ADJUSTMENT";
         const updates={};
@@ -779,7 +780,7 @@
 
         const fi=fineEmployeeBalances[id]||{totalFine:0,pending:0};
         const pp=fi.pending,np=pp+amt;
-        const entry={fineNo:fn,tsDate:new Date().toLocaleDateString("en-GB"),tsTime:new Date().toLocaleTimeString("en-GB"),recordDate:rd,id:id,name:document.getElementById("fine-display-name").value,desig:document.getElementById("fine-display-desig").value,passport:document.getElementById("fine-auto-passport").value,amount:amt,amountWords:numberToWords(amt),reason:re,remark:document.getElementById("fine-remark").value||"",entryType:"fine",prevPending:pp,newPending:np,newPendingWords:numberToWords(np)};
+        const entry={fineNo:fn,tsDate:new Date().toLocaleDateString("en-GB"),tsTime:new Date().toLocaleTimeString("en-GB"),recordDate:rd,id:id,name:document.getElementById("fine-display-name").value,desig:document.getElementById("fine-display-desig").value,passport:document.getElementById("fine-auto-passport").value,amount:amt,amountWords:numberToWords(amt),reason:re,remark:document.getElementById("fine-remark").value||"",entryType:"fine",prevPending:pp,newPending:np,newPendingWords:numberToWords(np),SAVED_BY:window.getAuditUserId()};
         lastSavedFineEntry=entry;
         const updates={};
         updates[`FINE/${my}/${rd}/${id}_${fn}`]=entry;
@@ -1037,7 +1038,7 @@
           const sd={};let ga=0,gj=0;
           snap.forEach(ms=>{ms.forEach(ds=>{ds.forEach(ts=>{const tx=ts.val(),ei=tx.id;if(!ei)return;const am=parseFloat(tx.amount||0),ty=tx.entryType;if(!sd[ei])sd[ei]={name:tx.name||"Unknown",desig:tx.desig||"---",passport:tx.passport||"---",lastDate:tx.recordDate||"---",totalAdvance:0,totalAdjusted:0,pending:0};if(ty==="advance"){sd[ei].totalAdvance+=am;sd[ei].pending+=am;ga+=am;}else if(ty==="adjustment"){sd[ei].totalAdjusted+=am;sd[ei].pending-=am;gj+=am;}if(parseDateString(tx.recordDate)>parseDateString(sd[ei].lastDate))sd[ei].lastDate=tx.recordDate;});});});
           const u={};u["ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL"]={totalAdvance:ga,totalAdjusted:gj,pending:ga-gj};u["ADVANCE_ADJUSTMENT_SUMMARY/USERS"]=sd;
-          await rtb.ref().update(u);await refreshSystemData(true);document.getElementById("loader").classList.add("hidden");alert("All advance/adjustment summaries rebuilt successfully!");
+          u["ADVANCE_ADJUSTMENT_SUMMARY/GLOBAL/SAVED_BY"]=window.getAuditUserId();await rtb.ref().update(u);await refreshSystemData(true);document.getElementById("loader").classList.add("hidden");alert("All advance/adjustment summaries rebuilt successfully!");
         }catch(e){document.getElementById("loader").classList.add("hidden");showAlert("Sync failed! Check internet connection.");}
       }
 
@@ -1050,7 +1051,7 @@
           const sd={};let gt=0;
           snap.forEach(ms=>{ms.forEach(ds=>{ds.forEach(ts=>{const tx=ts.val(),ei=tx.id;if(!ei)return;const am=parseFloat(tx.amount||0);if(!sd[ei])sd[ei]={name:tx.name||"Unknown",desig:tx.desig||"---",passport:tx.passport||"---",lastDate:tx.recordDate||"---",totalFine:0,pending:0};sd[ei].totalFine+=am;sd[ei].pending+=am;gt+=am;if(parseDateString(tx.recordDate)>parseDateString(sd[ei].lastDate))sd[ei].lastDate=tx.recordDate;});});});
           const u={};u["FINE_SUMMARY/GLOBAL"]={totalFine:gt,pending:gt};u["FINE_SUMMARY/USERS"]=sd;
-          await rtb.ref().update(u);await refreshSystemData(true);document.getElementById("loader").classList.add("hidden");alert("All fine summaries rebuilt successfully!");
+          u["FINE_SUMMARY/GLOBAL/SAVED_BY"]=window.getAuditUserId();await rtb.ref().update(u);await refreshSystemData(true);document.getElementById("loader").classList.add("hidden");alert("All fine summaries rebuilt successfully!");
         }catch(e){document.getElementById("loader").classList.add("hidden");showAlert("Fine sync failed! Check internet connection.");}
       }
 

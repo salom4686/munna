@@ -187,6 +187,7 @@
     </style>
   </head>
   <body>
+  <script src="auth-audit.js"></script>
     <div class="page-header">
       <h2>ALAMHOW CO LTD</h2>
       <span class="header-badge">SALARY & PAYSLIP</span>
@@ -1621,6 +1622,7 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
               aBonus:w.aBonus||0,   // ✅ NEW
               fTrv:w.fTrv||0,
               postedAt, month:monthYearKey,
+              SAVED_BY:window.getAuditUserId(),
             };
 
             // Advance auto-adjust
@@ -1638,6 +1640,7 @@ async function openDetailsTab(empId, dFromVal, dToVal) {
                 remark:`Auto adjustment on salary post for ${monthYearKey}`,
                 entryType:"adjustment", prevPending, newPending,
                 newPendingWords:numberToWordsLocal(newPending),
+                SAVED_BY:window.getAuditUserId(),
               };
               updates[`ADJUSTMENT/${monthYearKey}/${postedAt}/${id}_${adjNo}`]=adjEntry;
               updates[`ADVANCE_ADJUSTMENT_TRANSACTIONS/${monthYearKey}/${postedAt}/${id}_${adjNo}`]=adjEntry;
