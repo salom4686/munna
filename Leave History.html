@@ -1,0 +1,1086 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Leave History — ALAMHOW CO LTD</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3:wght@400;600;700&display=swap"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: "Source Sans 3", Arial, sans-serif;
+        color: #e0e8f4;
+        background: #002147;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #002147; }
+      [hidden] { display: none !important; }
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        padding: 18px 32px;
+        color: #ffd700;
+        background: #002147;
+        border-bottom: 4px solid #ffd700;
+      }
+      header h1 { margin: 0; font-family: "Playfair Display", Georgia, serif; font-size: 22px; letter-spacing: 1px; }
+      main { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+      .panel {
+        margin-bottom: 16px;
+        padding: 16px;
+        background: #001530;
+        border: 1px solid #335185;
+        border-top: 2px solid #ffd700;
+        border-radius: 8px;
+        box-shadow: 0 4px 16px #0005;
+      }
+      .panel h2 { margin: 0 0 12px; color: #ffd700; font-size: 15px; letter-spacing: 0.4px; }
+      .form-row {
+        display: flex;
+        align-items: end;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .report-dropdown { position: relative; }
+      .report-dropdown summary {
+        min-height: 36px;
+        padding: 8px 12px;
+        border-radius: 5px;
+        color: #002147;
+        background: #ffd700;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        list-style: none;
+      }
+      .report-dropdown summary::-webkit-details-marker { display: none; }
+      .report-dropdown summary::after { content: " ▾"; }
+      .report-dropdown[open] summary::after { content: " ▴"; }
+      .report-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        z-index: 30;
+        min-width: 210px;
+        padding: 5px;
+        border: 1px solid #335185;
+        border-radius: 5px;
+        background: #001530;
+        box-shadow: 0 8px 20px #0009;
+      }
+      .report-dropdown-menu button {
+        display: block;
+        width: 100%;
+        margin: 2px 0;
+        color: #e0e8f4;
+        background: transparent;
+        text-align: left;
+      }
+      .report-dropdown-menu button:hover,
+      .report-dropdown-menu button:focus { color: #002147; background: #ffd700; }
+      .employee-filter-menu {
+        width: 300px;
+        max-height: min(420px, 70vh);
+        overflow-y: auto;
+      }
+      .employee-filter-search {
+        position: sticky;
+        top: -5px;
+        z-index: 1;
+        width: 100%;
+        margin-bottom: 5px;
+        color: #e0e8f4;
+        background: #001a3d;
+      }
+      .employee-filter-actions {
+        display: flex;
+        gap: 6px;
+        padding: 4px;
+        border-bottom: 1px solid #335185;
+      }
+      .employee-filter-actions button { min-height: 30px; padding: 5px 8px; }
+      .employee-filter-menu .employee-check-option { margin: 0; }
+      .employee-filter-field {
+        display: grid;
+        min-width: 260px;
+        gap: 5px;
+        color: #ffd700;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+      .entitlement-layout {
+        display: grid;
+        grid-template-columns: minmax(280px, 1fr);
+        gap: 16px;
+        align-items: start;
+      }
+      .employee-checklist {
+        max-height: 230px;
+        overflow-y: auto;
+        padding: 8px;
+        border: 1px solid #3a5a8a;
+        border-radius: 6px;
+        background: #001a3d;
+      }
+      .employee-checklist-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 7px;
+      }
+      .employee-checklist-actions button {
+        min-height: 28px;
+        padding: 4px 8px;
+        font-size: 11px;
+      }
+      .employee-check-option {
+        display: flex;
+        grid-template-columns: none;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 3px;
+        color: #e0e8f4;
+        cursor: pointer;
+      }
+      .employee-check-option input {
+        min-width: 16px;
+        min-height: 16px;
+        margin: 0;
+        accent-color: #ffd700;
+      }
+      .entitlement-fields {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: end;
+        gap: 10px;
+      }
+      .entry-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        overflow-y: auto;
+        background: rgb(0 8 24 / 75%);
+      }
+      .entry-modal .entry-panel {
+        width: min(900px, 100%);
+        max-height: calc(100vh - 40px);
+        margin: auto;
+        overflow-y: auto;
+        box-shadow: 0 16px 48px #0009;
+      }
+      #casualLeavePanel {
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      #casualLeavePanel .entry-panel {
+        width: min(820px, 100%);
+        max-height: calc(100vh - 40px);
+        margin: auto;
+        overflow: visible;
+      }
+      #casualLeavePanel .form-row {
+        display: grid;
+        grid-template-columns: minmax(180px, 1.4fr) minmax(125px, 1fr) minmax(100px, 0.8fr) minmax(130px, 1fr) auto;
+        gap: 8px;
+      }
+      #casualLeavePanel label,
+      #casualLeavePanel input,
+      #casualLeavePanel select {
+        min-width: 0;
+        width: 100%;
+      }
+      .selected-employee {
+        display: flex;
+        align-items: center;
+        min-height: 36px;
+        min-width: 0;
+        padding: 7px 9px;
+        overflow: hidden;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 5px;
+        color: #e0e8f4;
+        background: #001a3d;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+      .cl-selected-employees {
+        margin-top: 12px;
+        padding: 9px 10px;
+        border: 1px solid #335185;
+        border-radius: 5px;
+        background: #001a3d;
+      }
+      .cl-selected-employees h3 {
+        margin: 0 0 5px;
+        color: #ffd700;
+        font-size: 12px;
+      }
+      .cl-selected-employees ul {
+        display: grid;
+        gap: 3px;
+        max-height: 120px;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+        list-style: none;
+      }
+      .cl-selected-employees li {
+        color: #e0e8f4;
+        font-size: 12px;
+      }
+      @media (max-width: 800px) {
+        #casualLeavePanel .form-row {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        #casualLeavePanel #saveCasualLeave {
+          width: 100%;
+        }
+      }
+      .entry-modal-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .entry-modal-heading h2 { margin-bottom: 12px; }
+      .close-entry-modal {
+        flex: 0 0 auto;
+        min-height: 30px;
+        margin-bottom: 12px;
+        padding: 4px 10px;
+      }
+      label { display: grid; gap: 5px; color: #ffd700; font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+      input, select, button {
+        min-height: 36px;
+        padding: 7px 9px;
+        border: 1.5px solid #3a5a8a;
+        border-radius: 5px;
+        font: inherit;
+      }
+      input, select { min-width: 130px; color: #e0e8f4; background: #001a3d; outline: none; }
+      input:focus, select:focus { border-color: #ffd700; box-shadow: 0 0 0 2px #ffd7002e; }
+      input::placeholder { color: #6a88aa; }
+      select.employee-select { min-width: 260px; }
+      button {
+        border: 0;
+        color: #002147;
+        background: #ffd700;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover { background: #ffe766; }
+      button.danger { color: #fff; background: #b42318; }
+      button.danger:hover { background: #8f1d15; }
+      .status { min-height: 20px; margin-top: 10px; color: #a0c4ff; font-size: 12px; }
+      .status.error { color: #ff8585; }
+      .status.success { color: #7ee0a1; }
+      .table-wrap { overflow-x: auto; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 9px 8px; border: 1px solid #335185; text-align: left; }
+      th { color: #ffd700; background: #002147; font-size: 11px; letter-spacing: 0.3px; white-space: nowrap; }
+      td { color: #e0e8f4; background: #001a3d; font-size: 13px; }
+      tbody tr:nth-child(even) td { background: #052044; }
+      tbody tr:hover td { background: #0a2b50; }
+      td.number, th.number { text-align: right; }
+      td.serial-number, th.serial-number { text-align: center; }
+      td.employee-id, th.employee-id { white-space: nowrap; }
+      .empty { padding: 20px; color: #8da6c4; text-align: center; }
+      .note { margin: 8px 0 0; color: #8da6c4; font-size: 12px; }
+      .report-signatures {
+        display: none;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 20px;
+        margin: 56px 8px 16px;
+        color: #e0e8f4;
+      }
+      .print-metadata { display: none; }
+      .print-summary-pages { display: none; }
+      .signature-block { text-align: center; }
+      .signature-line {
+        width: min(240px, 100%);
+        margin: 0 auto 8px;
+        border-top: 1px solid currentColor;
+      }
+      .signature-role { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+      .signature-role { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+      .flatpickr-calendar { border: 1px solid #335185; background: #001530; box-shadow: 0 8px 24px #0008; }
+      .flatpickr-calendar, .flatpickr-calendar * { color: #e0e8f4; }
+      .flatpickr-months, .flatpickr-weekdays { background: #002147; }
+      .flatpickr-current-month, .flatpickr-weekday { color: #ffd700 !important; }
+      .flatpickr-day { border-color: transparent; }
+      .flatpickr-day:hover, .flatpickr-day:focus { background: #173b61; border-color: #173b61; }
+      .flatpickr-day.selected, .flatpickr-day.selected:hover { color: #002147 !important; background: #ffd700; border-color: #ffd700; }
+      .flatpickr-day.is-sunday { color: #ff7777; font-weight: 700; }
+      .flatpickr-day.is-holiday { color: #ff7777; font-weight: 700; text-decoration: underline; }
+      @page {
+        size: A4 portrait;
+        margin: 0.5in;
+        @bottom-left {
+          content: var(--print-timestamp);
+          color: #000;
+          font: 9pt Arial, sans-serif;
+        }
+        @bottom-center {
+          content: "Page " counter(page) " of " counter(pages);
+          color: #000;
+          font: 9pt Arial, sans-serif;
+        }
+      }
+      @media (max-width: 640px) {
+        header { align-items: flex-start; flex-direction: column; }
+        .form-row > label, .form-row input, .form-row select { width: 100%; }
+        select.employee-select { min-width: 0; }
+        .entitlement-layout { grid-template-columns: 1fr; }
+        .entitlement-fields > label, .entitlement-fields input { width: 100%; }
+        .report-signatures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      }
+      @media print {
+        :root { color-scheme: light; }
+        :root, body { color: #000 !important; background: #fff !important; }
+        body { display: block; min-height: 0; padding: 0; }
+        /* Header and signatures are fixed, so they repeat on every page.
+           main reserves room for them at the top and bottom of EVERY page
+           (box-decoration-break: clone repeats its padding on each page),
+           so they never overlap the table rows. */
+        header {
+          position: fixed;
+          top: 0;
+          right: 0;
+          left: 0;
+          padding: 8px 0;
+          color: #000 !important;
+          background: #fff !important;
+          border-bottom: 1px solid #000;
+        }
+        header h1, .panel h2, label, .note, .status { color: #000 !important; }
+        .entry-modal, .filter-panel, .no-print, .status { display: none !important; }
+        main {
+          max-width: none;
+          margin: 0;
+          padding: 0.75in 0 1.05in;
+          -webkit-box-decoration-break: clone;
+          box-decoration-break: clone;
+        }
+        .panel { margin: 0; padding: 0; border: 0; box-shadow: none; background: #fff !important; }
+        .panel h2 { break-after: avoid; page-break-after: avoid; }
+        table, thead, tbody, tr, th, td { color: #000 !important; background: #fff !important; }
+        th, td { border: 1px solid #000 !important; }
+        th { font-weight: 700; }
+        thead { display: table-header-group; }
+        tr { break-inside: avoid; page-break-inside: avoid; }
+        tbody tr:nth-child(even) td, tbody tr:hover td { background: #fff !important; }
+        .table-wrap { overflow: visible; }
+        #annualSummaryPanel > h2,
+        #annualSummaryPanel > .table-wrap { display: none !important; }
+        .print-summary-pages { display: block !important; }
+        th, td { padding: 4px 5px; }
+        tr[data-page-break] { break-before: page; page-break-before: always; }
+        .print-summary-page {
+          break-after: page;
+          page-break-after: always;
+        }
+        .print-summary-page:last-child {
+          break-after: auto;
+          page-break-after: auto;
+        }
+        .report-signatures {
+          position: fixed;
+          right: 0;
+          bottom: 0.25in;
+          left: 0;
+          display: grid;
+          margin: 0;
+          padding: 8px 0 0;
+          color: #000 !important;
+          background: #fff !important;
+          break-inside: avoid;
+        }
+        .print-metadata {
+          display: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>ALAMHOW CO LTD — Leave History</h1>
+    </header>
+    <main>
+      <section class="panel filter-panel">
+        <h2>Leave Year Report</h2>
+        <div class="form-row">
+          <label>Year
+            <input id="leaveYear" type="number" min="2000" max="2100" />
+          </label>
+          <div class="employee-filter-field">
+            <span>Employee</span>
+            <details id="employeeFilterDropdown" class="report-dropdown">
+              <summary id="reportEmployeeSummary">All Employees</summary>
+              <div class="report-dropdown-menu employee-filter-menu">
+                <input id="reportEmployeeSearch" class="employee-filter-search" type="search" placeholder="Type employee name or ID" autocomplete="off" />
+                <div class="employee-filter-actions">
+                  <button id="selectAllReportEmployees" type="button">Select All</button>
+                  <button id="clearReportEmployees" type="button">Clear</button>
+                </div>
+                <div id="reportEmployeeOptions" aria-label="Select employees for leave report">
+                  <span class="note">Loading employees…</span>
+                </div>
+              </div>
+            </details>
+          </div>
+          <button id="refreshReport" type="button">View / Refresh</button>
+          <details id="leaveActionsDropdown" class="report-dropdown no-print">
+            <summary>Leave Actions</summary>
+            <div class="report-dropdown-menu">
+              <button id="openEntitlementPanel" type="button" data-entry-modal="entitlementPanel" aria-expanded="false" aria-haspopup="dialog">Contract Leave Entitlement</button>
+              <button id="openCasualLeavePanel" type="button" data-entry-modal="casualLeavePanel" aria-expanded="false" aria-haspopup="dialog">Record Casual Leave (CL)</button>
+            </div>
+          </details>
+          <details class="report-dropdown no-print">
+            <summary>Leave Reports</summary>
+            <div class="report-dropdown-menu">
+              <button type="button" data-report-panel="annualSummaryPanel">Annual Leave Summary</button>
+              <button type="button" data-report-panel="sickLeavePanel">Sick Leave</button>
+              <button type="button" data-report-panel="casualLeaveRecordsPanel">Casual Leave</button>
+            </div>
+          </details>
+          <button class="no-print" type="button" onclick="window.print()">Print Report</button>
+        </div>
+        <div id="reportStatus" class="status" role="status" aria-live="polite"></div>
+        <p class="note">CL entries are stored separately in the CASUAL_LEAVE collection. SL usage is counted from Sick Leave attendance records.</p>
+      </section>
+
+      <div class="entry-modal" id="entitlementPanel" hidden>
+      <section class="panel entry-panel" role="dialog" aria-modal="true" aria-labelledby="entitlementTitle">
+        <div class="entry-modal-heading">
+          <h2 id="entitlementTitle">Contract Leave Entitlement</h2>
+          <button class="close-entry-modal" type="button" data-close-modal="entitlementPanel" aria-label="Close contract leave entitlement">Close</button>
+        </div>
+        <div class="entitlement-layout">
+          <div>
+            <div class="entitlement-fields">
+              <label>CL entitlement / year
+                <input id="clEntitlement" type="number" min="0" step="0.5" placeholder="Contract days" />
+              </label>
+              <label>SL entitlement / year
+                <input id="slEntitlement" type="number" min="0" step="0.5" placeholder="Contract days" />
+              </label>
+              <button id="saveEntitlement" type="button">Save Selected Employees</button>
+            </div>
+            <p id="entitlementSelectionCount" class="note">Select employees in Leave Year Report.</p>
+          </div>
+        </div>
+        <div id="entitlementStatus" class="status" role="status" aria-live="polite"></div>
+        <p class="note">Select one or more employees in Leave Year Report, enter their shared CL and SL allowance from the contract, then save. Saving again updates the selected employees' allowance for the selected year.</p>
+      </section>
+      </div>
+
+      <div class="entry-modal" id="casualLeavePanel" hidden>
+      <section class="panel entry-panel" role="dialog" aria-modal="true" aria-labelledby="casualLeaveTitle">
+        <div class="entry-modal-heading">
+          <h2 id="casualLeaveTitle">Record Casual Leave (CL)</h2>
+          <button class="close-entry-modal" type="button" data-close-modal="casualLeavePanel" aria-label="Close casual leave form">Close</button>
+        </div>
+        <div class="form-row">
+          <label>Employee
+            <output id="clSelectedEmployee" class="selected-employee">Select an employee in Leave Year Report</output>
+          </label>
+          <label>Leave date
+            <input id="clDate" type="text" placeholder="Select leave date" readonly />
+          </label>
+          <label>Days
+            <input id="clDays" type="number" min="0.5" step="0.5" value="1" />
+          </label>
+          <label>Remark
+            <input id="clRemark" type="text" maxlength="200" placeholder="Optional" />
+          </label>
+          <button id="saveCasualLeave" type="button">Save CL</button>
+        </div>
+        <div id="clSelectedEmployeeList" class="cl-selected-employees" aria-live="polite" hidden>
+          <h3>Selected Employees</h3>
+          <ul></ul>
+        </div>
+        <div id="clStatus" class="status" role="status" aria-live="polite"></div>
+      </section>
+      </div>
+
+      <section class="panel" id="annualSummaryPanel" hidden>
+        <h2>Annual Leave Summary</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="serial-number">SL NO</th><th class="employee-id">EMP ID</th><th>Employee Name</th>
+                <th class="number">CL Entitled</th><th class="number">CL Used</th><th class="number">CL Balance</th>
+                <th class="number">SL Entitled</th><th class="number">SL Used</th><th class="number">SL Balance</th>
+              </tr>
+            </thead>
+            <tbody id="summaryBody"><tr><td class="empty" colspan="9">Loading employees…</td></tr></tbody>
+          </table>
+        </div>
+        <div id="printSummaryPages" class="print-summary-pages"></div>
+      </section>
+
+      <section class="panel" id="sickLeavePanel" hidden>
+        <h2>Sick Leave Records (from Attendance)</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>EMP ID</th><th>Employee Name</th><th class="number">Days</th><th>Remark</th></tr></thead>
+            <tbody id="sickRecordsBody"><tr><td class="empty" colspan="5">No records loaded.</td></tr></tbody>
+          </table>
+        </div>
+        <p class="note">Sick Leave entries saved from Attendance appear here automatically and are counted in SL Used.</p>
+      </section>
+
+      <section class="panel" id="casualLeaveRecordsPanel" hidden>
+        <h2>Casual Leave Records</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>EMP ID</th><th>Employee Name</th><th class="number">Days</th><th>Remark</th><th class="no-print">Action</th></tr></thead>
+            <tbody id="recordsBody"><tr><td class="empty" colspan="6">No records loaded.</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+      <footer class="report-signatures">
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p class="signature-role">PREPARED BY</p>
+        </div>
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p class="signature-role">HR MANAGEMENT</p>
+        </div>
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p class="signature-role">AUTHORIZED BY</p>
+        </div>
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p class="signature-role">DIRECTOR</p>
+        </div>
+      </footer>
+      <div id="printMetadata" class="print-metadata"></div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
+        authDomain: "munna-acl-fda7c.firebaseapp.com",
+        databaseURL: "https://munna-acl-fda7c-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "munna-acl-fda7c",
+        storageBucket: "munna-acl-fda7c.firebasestorage.app",
+        messagingSenderId: "371130316468",
+        appId: "1:371130316468:web:61b4cba0dbbd5f027589e1",
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const ENTITLEMENTS = "LEAVE_ENTITLEMENTS";
+      const CASUAL_LEAVE = "CASUAL_LEAVE";
+      let employees = [];
+      let currentEntitlements = [];
+      let currentCasualLeave = [];
+      let currentSickLeave = [];
+      const leaveHolidayDates = new Set();
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, (character) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+        })[character]);
+      }
+
+      function setStatus(id, message, isError = false) {
+        const el = document.getElementById(id);
+        el.textContent = message;
+        el.className = `status${message ? (isError ? " error" : " success") : ""}`;
+      }
+
+      function selectedYear() {
+        const year = Number(document.getElementById("leaveYear").value);
+        if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+          throw new Error("Enter a valid leave year.");
+        }
+        return year;
+      }
+
+      function employeeById(id) {
+        return employees.find((employee) => employee.id === id);
+      }
+
+      function selectedReportEmployees() {
+        return [...document.querySelectorAll(".report-employee-checkbox:checked")]
+          .map((checkbox) => employeeById(checkbox.value))
+          .filter(Boolean);
+      }
+
+      function fillEmployeeOptions() {
+        const list = document.getElementById("reportEmployeeOptions");
+        if (!employees.length) {
+          list.innerHTML = '<span class="note">No active employees found.</span>';
+          return;
+        }
+        list.innerHTML = employees.map((employee) => `
+          <label class="employee-check-option">
+            <input type="checkbox" class="report-employee-checkbox" value="${escapeHtml(employee.id)}" />
+            <span><strong>${escapeHtml(employee.id)}</strong> — ${escapeHtml(employee.name)}</span>
+          </label>
+        `).join("");
+        list.querySelectorAll(".report-employee-checkbox").forEach((checkbox) => {
+          checkbox.addEventListener("change", updateReportEmployeeSelection);
+        });
+        filterReportEmployeeOptions();
+        updateReportEmployeeSelection();
+      }
+
+      function filterReportEmployeeOptions() {
+        const query = document.getElementById("reportEmployeeSearch").value.trim().toLocaleLowerCase();
+        document.querySelectorAll("#reportEmployeeOptions .employee-check-option").forEach((option) => {
+          option.hidden = !option.textContent.toLocaleLowerCase().includes(query);
+        });
+      }
+
+      function updateReportEmployeeSelection() {
+        const selected = selectedReportEmployees();
+        const summary = document.getElementById("reportEmployeeSummary");
+        summary.textContent = selected.length
+          ? `${selected.length} employee${selected.length === 1 ? "" : "s"} selected`
+          : "All Employees";
+        renderReport(Number(document.getElementById("leaveYear").value));
+        updateCasualLeaveEmployee();
+        updateEntitlementSelection();
+      }
+
+      function updateCasualLeaveEmployee() {
+        const selected = selectedReportEmployees();
+        const summary = document.getElementById("clSelectedEmployee");
+        const list = document.getElementById("clSelectedEmployeeList");
+        const employeeList = list.querySelector("ul");
+        summary.textContent = selected.length
+          ? `${selected.length} employee${selected.length === 1 ? "" : "s"} selected`
+          : "Select employee(s) in Leave Year Report";
+        employeeList.replaceChildren(...selected.map((employee) => {
+          const item = document.createElement("li");
+          item.textContent = `${employee.id} — ${employee.name}`;
+          return item;
+        }));
+        list.hidden = selected.length === 0;
+      }
+
+      function updateEntitlementSelection() {
+        const selected = selectedReportEmployees();
+        const count = document.getElementById("entitlementSelectionCount");
+        count.textContent = selected.length
+          ? `${selected.length} selected employee${selected.length === 1 ? "" : "s"} will receive this entitlement.`
+          : "Select employees in Leave Year Report.";
+        if (selected.length === 1) {
+          updateEntitlementFields(selected[0].id);
+        } else {
+          document.getElementById("clEntitlement").value = "";
+          document.getElementById("slEntitlement").value = "";
+        }
+      }
+
+      function refreshSelectedEntitlementFields() {
+        const selected = selectedReportEmployees();
+        if (selected.length !== 1) return;
+        updateEntitlementFields(selected[0].id);
+      }
+
+      function updateEntitlementFields(employeeId) {
+        const year = Number(document.getElementById("leaveYear").value);
+        const record = currentEntitlements.find((item) => item.EMP_ID === employeeId && Number(item.YEAR) === year);
+        document.getElementById("clEntitlement").value = record ? record.CL_ENTITLED : "";
+        document.getElementById("slEntitlement").value = record ? record.SL_ENTITLED : "";
+      }
+
+      async function loadEmployees() {
+        const snapshot = await db.collection("EMPLOYEE_LIST").get();
+        employees = snapshot.docs.map((doc) => {
+          const data = doc.data() || {};
+          const status = String(data.status ?? data.STATUS ?? "active").trim().toLowerCase();
+          return {
+            id: String(data.id || doc.id).trim(),
+            name: String(data.name || data.EMPLOYEE_NAME || "").trim(),
+            status,
+          };
+        }).filter((employee) => employee.id && employee.status !== "inactive")
+          .sort((a, b) => a.id.localeCompare(b.id));
+        fillEmployeeOptions();
+      }
+
+      async function loadReport() {
+        setStatus("reportStatus", "Loading leave records…");
+        document.getElementById("summaryBody").innerHTML = '<tr><td class="empty" colspan="9">Loading…</td></tr>';
+        document.getElementById("sickRecordsBody").innerHTML = '<tr><td class="empty" colspan="5">Loading…</td></tr>';
+        document.getElementById("recordsBody").innerHTML = '<tr><td class="empty" colspan="6">Loading…</td></tr>';
+        try {
+          const year = selectedYear();
+          const start = `${year}-01-01`;
+          const end = `${year}-12-31`;
+          const [entitlementSnapshot, casualSnapshot, attendanceSnapshot] = await Promise.all([
+            db.collection(ENTITLEMENTS).where("YEAR", "==", year).get(),
+            db.collection(CASUAL_LEAVE).where("YEAR", "==", year).get(),
+            db.collectionGroup("Present_Absent").where("DATE", ">=", start).where("DATE", "<=", end).get(),
+          ]);
+          currentEntitlements = entitlementSnapshot.docs.map((doc) => ({ ...doc.data(), _id: doc.id }));
+          currentCasualLeave = casualSnapshot.docs.map((doc) => ({ ...doc.data(), _id: doc.id }))
+            .filter((record) => record.STATUS === "CASUAL LEAVE");
+          currentSickLeave = [];
+          attendanceSnapshot.forEach((doc) => {
+            const data = doc.data() || {};
+            if (String(data.STATUS || "").trim().toUpperCase() !== "SICK LEAVE" || !data.ID) return;
+            currentSickLeave.push({
+              EMP_ID: String(data.ID).trim(),
+              EMPLOYEE_NAME: String(data.EMPLOYEE_NAME || "").trim(),
+              DATE: String(data.DATE || "").slice(0, 10),
+              DAYS: Number(data.LEAVE_DAYS) > 0 ? Number(data.LEAVE_DAYS) : 1,
+              REMARK: String(data.REMARK || "").trim(),
+            });
+          });
+          refreshSelectedEntitlementFields();
+          renderReport(year);
+          setStatus("reportStatus", `Loaded ${year} leave history.`);
+        } catch (error) {
+          console.error("Leave history load failed:", error);
+          setStatus("reportStatus", `Could not load leave history: ${error.message}`, true);
+          document.getElementById("summaryBody").innerHTML = '<tr><td class="empty" colspan="9">Unable to load leave summary.</td></tr>';
+          document.getElementById("sickRecordsBody").innerHTML = '<tr><td class="empty" colspan="5">Unable to load Sick Leave records.</td></tr>';
+          document.getElementById("recordsBody").innerHTML = '<tr><td class="empty" colspan="6">Unable to load CL records.</td></tr>';
+        }
+      }
+
+      function renderReport(year) {
+        const selectedEmployeeIds = new Set(selectedReportEmployees().map((employee) => employee.id));
+        const filterEmployee = (employeeId) => !selectedEmployeeIds.size || selectedEmployeeIds.has(employeeId);
+        const casualByEmployee = new Map();
+        const sickByEmployee = new Map();
+        currentCasualLeave.forEach((record) => {
+          const id = String(record.EMP_ID || "").trim();
+          casualByEmployee.set(id, (casualByEmployee.get(id) || 0) + (Number(record.DAYS) || 0));
+        });
+        currentSickLeave.forEach((record) => {
+          sickByEmployee.set(record.EMP_ID, (sickByEmployee.get(record.EMP_ID) || 0) + record.DAYS);
+        });
+        const entitlementByEmployee = new Map(currentEntitlements.map((record) => [record.EMP_ID, record]));
+        const rows = employees.filter((employee) => filterEmployee(employee.id)).map((employee, index) => {
+          const entitlement = entitlementByEmployee.get(employee.id);
+          const clUsed = casualByEmployee.get(employee.id) || 0;
+          const slUsed = sickByEmployee.get(employee.id) || 0;
+          const clEntitled = entitlement ? Number(entitlement.CL_ENTITLED) || 0 : null;
+          const slEntitled = entitlement ? Number(entitlement.SL_ENTITLED) || 0 : null;
+          const format = (value) => value === null ? "—" : value.toFixed(value % 1 ? 1 : 0);
+          return `<tr>
+            <td class="serial-number">${index + 1}</td><td class="employee-id">${escapeHtml(employee.id)}</td><td>${escapeHtml(employee.name)}</td>
+            <td class="number">${format(clEntitled)}</td><td class="number">${format(clUsed)}</td>
+            <td class="number">${format(clEntitled === null ? null : clEntitled - clUsed)}</td>
+            <td class="number">${format(slEntitled)}</td><td class="number">${format(slUsed)}</td>
+            <td class="number">${format(slEntitled === null ? null : slEntitled - slUsed)}</td>
+          </tr>`;
+        });
+        document.getElementById("summaryBody").innerHTML = rows.length ? rows.join("") : '<tr><td class="empty" colspan="9">No employees found.</td></tr>';
+
+        const filteredSickRecords = currentSickLeave.filter((record) =>
+          filterEmployee(record.EMP_ID) && record.DATE.startsWith(String(year))
+        ).sort((a, b) => b.DATE.localeCompare(a.DATE) || a.EMP_ID.localeCompare(b.EMP_ID));
+        const sickRecordRows = filteredSickRecords.map((record) => {
+          const employee = employeeById(record.EMP_ID);
+          return `<tr>
+            <td>${escapeHtml(record.DATE)}</td><td>${escapeHtml(record.EMP_ID)}</td>
+            <td>${escapeHtml(record.EMPLOYEE_NAME || employee?.name || "")}</td>
+            <td class="number">${record.DAYS}</td><td>${escapeHtml(record.REMARK)}</td>
+          </tr>`;
+        });
+        document.getElementById("sickRecordsBody").innerHTML = sickRecordRows.length
+          ? sickRecordRows.join("")
+          : '<tr><td class="empty" colspan="5">No Sick Leave records for this year.</td></tr>';
+
+        const filteredRecords = currentCasualLeave.filter((record) => {
+          const id = String(record.EMP_ID || "").trim();
+          return filterEmployee(id) && String(record.DATE || "").startsWith(String(year));
+        }).sort((a, b) => String(b.DATE).localeCompare(String(a.DATE)));
+        const recordRows = filteredRecords.map((record) => {
+          const employee = employeeById(String(record.EMP_ID || "").trim());
+          return `<tr>
+            <td>${escapeHtml(record.DATE)}</td><td>${escapeHtml(record.EMP_ID)}</td>
+            <td>${escapeHtml(record.EMPLOYEE_NAME || employee?.name || "")}</td>
+            <td class="number">${Number(record.DAYS) || 0}</td><td>${escapeHtml(record.REMARK || "")}</td>
+            <td class="no-print"><button class="danger delete-cl" type="button" data-record-id="${escapeHtml(record._id)}">Delete</button></td>
+          </tr>`;
+        });
+        document.getElementById("recordsBody").innerHTML = recordRows.length
+          ? recordRows.join("")
+          : '<tr><td class="empty" colspan="6">No CL records for this year.</td></tr>';
+        document.querySelectorAll(".delete-cl").forEach((button) => {
+          button.addEventListener("click", () => deleteCasualLeave(button.dataset.recordId));
+        });
+      }
+
+      async function saveEntitlement() {
+        setStatus("entitlementStatus", "");
+        try {
+          const selectedEmployees = selectedReportEmployees();
+          if (!selectedEmployees.length) throw new Error("Select at least one employee.");
+          const year = selectedYear();
+          const cl = Number(document.getElementById("clEntitlement").value);
+          const sl = Number(document.getElementById("slEntitlement").value);
+          if (!Number.isFinite(cl) || cl < 0 || !Number.isFinite(sl) || sl < 0) {
+            throw new Error("Enter valid non-negative CL and SL entitlement days.");
+          }
+          const saveTimestamp = firebase.firestore.FieldValue.serverTimestamp();
+          for (let start = 0; start < selectedEmployees.length; start += 500) {
+            const batch = db.batch();
+            selectedEmployees.slice(start, start + 500).forEach((employee) => {
+              batch.set(db.collection(ENTITLEMENTS).doc(`${year}_${employee.id}`), {
+                YEAR: year,
+                EMP_ID: employee.id,
+                EMPLOYEE_NAME: employee.name,
+                CL_ENTITLED: cl,
+                SL_ENTITLED: sl,
+                UPDATED_AT: saveTimestamp,
+              });
+            });
+            await batch.commit();
+          }
+          setStatus("entitlementStatus", `Entitlement saved for ${selectedEmployees.length} employee${selectedEmployees.length === 1 ? "" : "s"} (${year}).`);
+          await loadReport();
+        } catch (error) {
+          console.error("Leave entitlement save failed:", error);
+          setStatus("entitlementStatus", `Could not save entitlement: ${error.message}`, true);
+        }
+      }
+
+      async function saveCasualLeave() {
+        setStatus("clStatus", "");
+        try {
+          const selectedEmployees = selectedReportEmployees();
+          if (!selectedEmployees.length) throw new Error("Select one or more employees in Leave Year Report first.");
+          const date = document.getElementById("clDate").value;
+          if (!date) throw new Error("Select the leave date.");
+          const days = Number(document.getElementById("clDays").value);
+          if (!Number.isFinite(days) || days <= 0) throw new Error("Enter leave days greater than zero.");
+          const year = new Date(`${date}T00:00:00`).getFullYear();
+          const remark = document.getElementById("clRemark").value.trim();
+          for (let start = 0; start < selectedEmployees.length; start += 500) {
+            const batch = db.batch();
+            selectedEmployees.slice(start, start + 500).forEach((employee) => {
+              batch.set(db.collection(CASUAL_LEAVE).doc(), {
+                YEAR: year,
+                DATE: date,
+                EMP_ID: employee.id,
+                EMPLOYEE_NAME: employee.name,
+                STATUS: "CASUAL LEAVE",
+                DAYS: days,
+                REMARK: remark,
+                CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
+              });
+            });
+            await batch.commit();
+          }
+          document.getElementById("leaveYear").value = year;
+          document.getElementById("clDays").value = "1";
+          document.getElementById("clRemark").value = "";
+          setStatus("clStatus", `CL record saved for ${selectedEmployees.length} employee${selectedEmployees.length === 1 ? "" : "s"} on ${date}.`);
+          await loadReport();
+        } catch (error) {
+          console.error("Casual leave save failed:", error);
+          setStatus("clStatus", `Could not save CL record: ${error.message}`, true);
+        }
+      }
+
+      async function deleteCasualLeave(recordId) {
+        if (!recordId || !window.confirm("Delete this CL record?")) return;
+        try {
+          await db.collection(CASUAL_LEAVE).doc(recordId).delete();
+          setStatus("reportStatus", "CL record deleted.");
+          await loadReport();
+        } catch (error) {
+          console.error("Casual leave delete failed:", error);
+          setStatus("reportStatus", `Could not delete CL record: ${error.message}`, true);
+        }
+      }
+
+      document.getElementById("refreshReport").addEventListener("click", loadReport);
+      document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) loadReport();
+      });
+      document.querySelectorAll(".report-dropdown > summary").forEach((summary) => {
+        summary.addEventListener("click", () => {
+          const currentDropdown = summary.parentElement;
+          document.querySelectorAll(".report-dropdown[open]").forEach((dropdown) => {
+            if (dropdown !== currentDropdown) dropdown.open = false;
+          });
+        });
+      });
+      document.addEventListener("click", (event) => {
+        if (event.target.closest(".report-dropdown")) return;
+        document.querySelectorAll(".report-dropdown[open]").forEach((dropdown) => {
+          dropdown.open = false;
+        });
+      });
+      document.querySelectorAll("[data-report-panel]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const panelId = button.dataset.reportPanel;
+          const panel = document.getElementById(panelId);
+          const shouldOpen = panel.hidden;
+          ["annualSummaryPanel", "sickLeavePanel", "casualLeaveRecordsPanel"].forEach((id) => {
+            document.getElementById(id).hidden = true;
+          });
+          panel.hidden = !shouldOpen;
+          button.closest(".report-dropdown").open = false;
+        });
+      });
+      function openEntryModal(modalId, buttonId) {
+        const modal = document.getElementById(modalId);
+        modal.hidden = false;
+        document.getElementById(buttonId).setAttribute("aria-expanded", "true");
+        modal.querySelector(".close-entry-modal").focus();
+      }
+
+      function closeEntryModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal.hidden) return;
+        modal.hidden = true;
+        const opener = document.querySelector(`[data-entry-modal="${modalId}"]`);
+        opener.setAttribute("aria-expanded", "false");
+        opener.focus();
+      }
+
+      document.querySelectorAll("[data-entry-modal]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const modalId = button.dataset.entryModal;
+          document.getElementById("leaveActionsDropdown").open = false;
+          const selectedEmployees = selectedReportEmployees();
+          if (modalId === "casualLeavePanel" && !selectedEmployees.length) {
+            setStatus("reportStatus", "Select one or more employees in Leave Year Report before recording Casual Leave.", true);
+            return;
+          }
+          if (modalId === "entitlementPanel" && !selectedEmployees.length) {
+            setStatus("reportStatus", "Select one or more employees in Leave Year Report before setting entitlement.", true);
+            return;
+          }
+          if (modalId === "casualLeavePanel") updateCasualLeaveEmployee();
+          openEntryModal(modalId, button.id);
+        });
+      });
+      document.querySelectorAll("[data-close-modal]").forEach((button) => {
+        button.addEventListener("click", () => closeEntryModal(button.dataset.closeModal));
+      });
+      document.querySelectorAll(".entry-modal").forEach((modal) => {
+        modal.addEventListener("click", (event) => {
+          if (event.target === modal) closeEntryModal(modal.id);
+        });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key !== "Escape") return;
+        const openModal = [...document.querySelectorAll(".entry-modal")].find((modal) => !modal.hidden);
+        if (openModal) closeEntryModal(openModal.id);
+      });
+      document.getElementById("selectAllReportEmployees").addEventListener("click", () => {
+        document.querySelectorAll(".report-employee-checkbox").forEach((checkbox) => { checkbox.checked = true; });
+        updateReportEmployeeSelection();
+      });
+      document.getElementById("reportEmployeeSearch").addEventListener("input", filterReportEmployeeOptions);
+      document.getElementById("clearReportEmployees").addEventListener("click", () => {
+        document.querySelectorAll(".report-employee-checkbox").forEach((checkbox) => { checkbox.checked = false; });
+        updateReportEmployeeSelection();
+      });
+      document.getElementById("saveEntitlement").addEventListener("click", saveEntitlement);
+      document.getElementById("saveCasualLeave").addEventListener("click", saveCasualLeave);
+      document.getElementById("leaveYear").addEventListener("change", loadReport);
+      const ROWS_PER_PAGE = 25;
+      function paginateRecordTables() {
+        ["sickRecordsBody", "recordsBody"].forEach((id) => {
+          [...document.getElementById(id).rows].forEach((row, index) => {
+            if (index > 0 && index % ROWS_PER_PAGE === 0) row.dataset.pageBreak = "1";
+          });
+        });
+      }
+      function renderPrintSummaryPages() {
+        const pages = document.getElementById("printSummaryPages");
+        const sourceTable = document.querySelector("#annualSummaryPanel table");
+        const sourceRows = [...sourceTable.tBodies[0].rows];
+        pages.replaceChildren();
+        for (let start = 0; start < sourceRows.length; start += ROWS_PER_PAGE) {
+          const page = document.createElement("div");
+          page.className = "print-summary-page";
+          const heading = document.createElement("h2");
+          heading.textContent = "Annual Leave Summary";
+          const table = sourceTable.cloneNode(false);
+          table.append(sourceTable.tHead.cloneNode(true));
+          const body = document.createElement("tbody");
+          sourceRows.slice(start, start + ROWS_PER_PAGE).forEach((row) => body.append(row.cloneNode(true)));
+          table.append(body);
+          page.append(heading, table);
+          pages.append(page);
+        }
+      }
+      window.addEventListener("beforeprint", () => {
+        renderPrintSummaryPages();
+        paginateRecordTables();
+        const now = new Date();
+        const pad = (value) => String(value).padStart(2, "0");
+        const date = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+        const time = now.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+          hour12: true,
+        }).toLowerCase();
+        const timestamp = `Printing: ${date}  ${time}`;
+        document.getElementById("printMetadata").textContent = timestamp;
+        document.documentElement.style.setProperty("--print-timestamp", `"${timestamp}"`);
+      });
+      window.addEventListener("afterprint", () => {
+        document.getElementById("printSummaryPages").replaceChildren();
+        document.querySelectorAll("tr[data-page-break]").forEach((row) => delete row.dataset.pageBreak);
+      });
+
+      async function initializeLeaveHistory() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const pad = (number) => String(number).padStart(2, "0");
+        document.getElementById("leaveYear").value = year;
+        flatpickr("#clDate", {
+          dateFormat: "Y-m-d",
+          defaultDate: `${year}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
+          onDayCreate: (_dateObject, _dateString, _instance, dayElement) => {
+            const date = dayElement.dateObj;
+            if (!date) return;
+            if (date.getDay() === 0) dayElement.classList.add("is-sunday");
+            const dateString = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+            if (leaveHolidayDates.has(dateString)) dayElement.classList.add("is-holiday");
+          },
+        });
+        try {
+          await loadEmployees();
+          await loadReport();
+          const holidaySnapshot = await db.collection("HOLIDAY_LIST").get();
+          holidaySnapshot.forEach((document) => leaveHolidayDates.add(document.id));
+          document.getElementById("clDate")._flatpickr.redraw();
+        } catch (error) {
+          console.error("Leave history initialization failed:", error);
+          setStatus("reportStatus", `Could not initialize leave history: ${error.message}`, true);
+        }
+      }
+
+      initializeLeaveHistory();
+    </script>
+  </body>
+</html>
