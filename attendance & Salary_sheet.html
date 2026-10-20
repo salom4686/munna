@@ -3144,6 +3144,12 @@
         return result;
       }
 
+      function isCookWorkingAs(record) {
+        return String(record.WORKING_AS || "")
+          .trim()
+          .toUpperCase() === "COOK";
+      }
+
       // ══════════════════════════════════════════
       //  MONTHLY SUMMARY — EMPLOYEE FILTER (multi-select checkbox dropdown)
       // ══════════════════════════════════════════
@@ -3262,6 +3268,7 @@
           if (!attendance[id])
             attendance[id] = {
               norm: 0,
+              isCook: false,
               // ✅ AUTO-CALC: holDays/sunDays = worked-day counts, the actual
               // pay is derived later as Daily Rate × multiplier (not read
               // from the raw HOLIDAY_WORK/SUNDAY_WORK field anymore).
@@ -3275,6 +3282,7 @@
               others: 0,
             };
           const rec = attendance[id];
+          rec.isCook = rec.isCook || isCookWorkingAs(d);
           if (d.STATUS === "ABSENT") rec.abs++;
           if (d.STATUS === "PRESENT") rec.pres++;
           if (d.REMARK === "NORMAL WORK") rec.norm++;
@@ -3371,10 +3379,10 @@
         // payslip period (dToVal), same rule as Monthly Summary, so both
         // documents always agree and past periods stay stable.
         const salary = getSalaryAsOf(emp, dToVal);
-        const isCook = (emp.desig || "").trim().toUpperCase() === "COOK";
         const dailyRate = parseFloat((salary / workingDays).toFixed(2));
         const att = rangeData.attendance[empId] || {
           norm: 0,
+          isCook: false,
           holDays: 0,
           sunDays: 0,
           holUnits: 0,
@@ -3384,6 +3392,7 @@
           fine: 0,
           others: 0,
         };
+        const isCook = att.isCook;
         const totalOT = rangeData.otMap[empId] || 0;
         const totalAdvance = _cache.advMap[empId] || 0;
         const totalFine = _cache.fineMap[empId] || 0;
@@ -3906,8 +3915,7 @@
               const sunW = parseInt(r.SUNDAY_WORK) || 0;
               const empId = String(r.ID || "").trim();
               const date = r.DATE;
-              const isCook =
-                (r.DESIGNATION || "").trim().toUpperCase() === "COOK";
+              const isCook = isCookWorkingAs(r);
 
               // Daily earned share = monthly SALARY ÷ report's working days
               // — Holiday/Sunday work days get Daily Rate × multiplier
@@ -4574,8 +4582,10 @@
             if (!employees[empId])
               employees[empId] = {
                 name: d.EMPLOYEE_NAME || empId,
-                isCook: (d.DESIGNATION || "").trim() === "Cook",
+                isCook: false,
               };
+            employees[empId].isCook =
+              employees[empId].isCook || isCookWorkingAs(d);
             if (!attendanceMap[empId]) attendanceMap[empId] = {};
             const st = (d.STATUS || "").trim().toUpperCase();
             let shortStat = "-";
@@ -6413,6 +6423,7 @@
                 name: d.EMPLOYEE_NAME,
                 passport: d.PASSPORT,
                 des: d.DESIGNATION,
+                isCook: isCookWorkingAs(d),
                 sal: sal,
                 daily: getDailyRate(sal),
                 norm: 0,
@@ -6438,6 +6449,8 @@
                 sUnits: 0,
               };
             }
+            workers[d.ID].isCook =
+              workers[d.ID].isCook || isCookWorkingAs(d);
             if (d.STATUS === "PRESENT") workers[d.ID].pres++;
             else if (d.STATUS === "ABSENT") workers[d.ID].abs++;
             if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
@@ -6565,7 +6578,7 @@
             .sort()
             .forEach((id) => {
               const w = workers[id];
-              const isCook = (w.des || "").trim().toUpperCase() === "COOK";
+              const isCook = w.isCook;
               const rowTotalBasic = isCook
                 ? w.daily * w.pres
                 : w.daily * w.norm;
