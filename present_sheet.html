@@ -332,13 +332,17 @@
           const empId = String(d.ID).trim();
           if (!employees[empId]) employees[empId] = {
             name: d.EMPLOYEE_NAME || empId,
-            isCook: (d.DESIGNATION || "").trim() === "Cook"
+            isCook: false
           };
+          employees[empId].isCook = employees[empId].isCook ||
+            String(d.WORKING_AS || "").trim().toUpperCase() === "COOK";
           if (!attendanceMap[empId]) attendanceMap[empId] = {};
 
           const st = (d.STATUS || "").trim().toUpperCase();
           let shortStat = "-";
           if      (st.startsWith("P")) shortStat = "P";
+          else if (st === "INJURY") shortStat = "I";
+          else if (st === "SICK LEAVE") shortStat = "SL";
           else if (st.startsWith("A")) shortStat = "A";
           else if (st.startsWith("L")) shortStat = "L";
           else if (st.startsWith("H")) shortStat = "H";
@@ -359,7 +363,8 @@
         let dayTotalsSun = Array(dateRange.length).fill(0);
         let dayTotalsHol = Array(dateRange.length).fill(0);
         let dayTotalsA   = Array(dateRange.length).fill(0);
-        let grandTotalP = 0, grandTotalA = 0, grandTotalSun = 0, grandTotalHol = 0;
+        let dayTotalsSL  = Array(dateRange.length).fill(0);
+        let grandTotalP = 0, grandTotalA = 0, grandTotalSun = 0, grandTotalHol = 0, grandTotalSL = 0;
 
         // TABLE HEADER
         const tableHeader = `<thead>
@@ -376,7 +381,7 @@
       </div>
     </div>
   </th>
-  <th colspan="4" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
+  <th colspan="5" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
 </tr>
 <tr style="height:35px;">
   ${dateRange.map((d) => {
@@ -411,13 +416,14 @@
   <th style="width:25px; background:#dc3545; padding:1px;">A</th>
   <th style="width:25px; background:#ffc107; color:#000; padding:1px;">SUN</th>
   <th style="width:25px; background:#6c757d; padding:1px;">HOL</th>
+  <th style="width:25px; background:#0d9488; padding:1px;">SL</th>
 </tr>
 </thead>`;
 
         // TABLE BODY
         const tableBody = sortedIds.map((id, idx) => {
           const isCook = employees[id]?.isCook || false;
-          let countP = 0, countA = 0, countSun = 0, countHol = 0;
+          let countP = 0, countA = 0, countSun = 0, countHol = 0, countSL = 0;
 
           const daysHtml = dateRange.map((d, dIdx) => {
             const ds       = toLocalDateStr(d);
@@ -428,7 +434,12 @@
 
             let stat = attendanceMap[id] ? (attendanceMap[id][ds] || "-") : "-";
 
-            if (stat === "P") {
+            const isLeaveStatus = stat === "I" || stat === "SL";
+            const isPaidPresent = stat === "P" || isLeaveStatus;
+            if (isLeaveStatus) {
+              dayTotalsSL[dIdx]++;
+              countSL++;
+            } else if (stat === "P") {
               if (!isCook && isSunday)      { dayTotalsSun[dIdx]++; countSun++; }
               else if (!isCook && isPubHol) { dayTotalsHol[dIdx]++; countHol++; }
               else                          { dayTotalsP[dIdx]++;   countP++;   }
@@ -438,12 +449,12 @@
             if (isSunday || isPubHol) {
               const bg = "background-color:#fff0f0; border:1px solid #000;";
               if (stat === "A") return `<td class="cell-absent" style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
-              if (stat === "P") return `<td style="${bg} color:green; font-weight:bold;">P</td>`;
+              if (isPaidPresent) return `<td style="${bg} color:green; font-weight:bold;">${stat}</td>`;
               if (stat === "L" || stat === "H") return `<td style="${bg} color:green;">${stat}</td>`;
               return `<td style="${bg}"></td>`;
             }
 
-            if (stat === "P") return `<td style="color:green; font-weight:bold;">P</td>`;
+            if (isPaidPresent) return `<td style="color:green; font-weight:bold;">${stat}</td>`;
             if (stat === "A") return `<td class="cell-absent" style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
             if (stat === "L" || stat === "H") return `<td style="color:green;">${stat}</td>`;
             return `<td></td>`;
@@ -453,6 +464,7 @@
           grandTotalA   += countA;
           grandTotalSun += countSun;
           grandTotalHol += countHol;
+          grandTotalSL  += countSL;
 
           return `<tr>
   <td>${idx + 1}</td>
@@ -462,6 +474,7 @@
   <td class="cell-absent" style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
   <td style="font-weight:bold; background:#fff9e6; color:#92400e;">${countSun}</td>
   <td style="font-weight:bold; background:#f3f0ff; color:#5b21b6;">${countHol}</td>
+  <td style="font-weight:bold; background:#ccfbf1; color:#0f766e;">${countSL}</td>
 </tr>`;
         }).join("");
 
@@ -470,13 +483,14 @@
   <td colspan="2" style="text-align:left; padding:4px 8px; font-weight:bold; background:#1d3a6d; color:#ffd700;">DAILY TOTAL</td>
   ${dayTotalsP.map((_, idx) => {
     if (dateRange[idx] < inputStart || dateRange[idx] > inputEnd) return `<td style="background:#1d3a6d;"></td>`;
-    const allP = dayTotalsP[idx] + dayTotalsSun[idx] + dayTotalsHol[idx];
+    const allP = dayTotalsP[idx] + dayTotalsSun[idx] + dayTotalsHol[idx] + dayTotalsSL[idx];
     return `<td style="text-align:center; font-weight:bold; background:#1d3a6d; color:#ffd700; font-size:9px;">${allP || ""}</td>`;
   }).join("")}
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalP}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalA}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSun}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalHol}</td>
+  <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSL}</td>
 </tr>`;
 
         // Open in new tab
@@ -600,6 +614,7 @@
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; border:1px solid #ccc;">Total Normal Working Days</td><td style="font-weight:bold; width:60px; border:1px solid #ccc; text-align:center;">${grandTotalP}</td></tr>
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:#b58900; border:1px solid #ccc;">Total Sunday Working Days</td><td style="font-weight:bold; color:#b58900; border:1px solid #ccc; text-align:center;">${grandTotalSun}</td></tr>
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; border:1px solid #ccc;">Total Holiday Working Days</td><td style="font-weight:bold; border:1px solid #ccc; text-align:center;">${grandTotalHol}</td></tr>
+        <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:#0f766e; border:1px solid #ccc;">Total Injury / Sick Leave (SL)</td><td style="font-weight:bold; color:#0f766e; border:1px solid #ccc; text-align:center;">${grandTotalSL}</td></tr>
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:red; border:1px solid #ccc;">Total Absent</td><td style="font-weight:bold; color:red; border:1px solid #ccc; text-align:center;">${grandTotalA}</td></tr>
       </tbody>
     </table>
