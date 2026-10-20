@@ -1029,6 +1029,8 @@
             <select id="attStatus" class="custom-select-trigger">
               <option value="PRESENT" selected>PRESENT</option>
               <option value="ABSENT">ABSENT</option>
+              <option value="INJURY">INJURY</option>
+              <option value="SICK LEAVE">SICK LEAVE</option>
               <option value="OTHERS">OTHERS</option>
             </select>
           </div>
@@ -1346,7 +1348,11 @@
                 selectedEmps.length > 0 &&
                 selectedEmps.every(isCookEmployee);
               const bulkSideName = document.getElementById("bulkSideName");
-              if (bulkStatus === "PRESENT") {
+              if (isWorkLeaveStatus(bulkStatus)) {
+                ensureNoWorkOption(bulkSideName);
+                bulkSideName.value = "No Work";
+                bulkSideName.disabled = true;
+              } else if (isPaidPresentStatus(bulkStatus)) {
                 if (allCooks) {
                   // Add Kitchen option if needed
                   let exists = Array.from(bulkSideName.options).some(
@@ -1548,6 +1554,8 @@
         <select id="bulkStatus" class="custom-select-trigger" style="width: 100%; height: 42px;">
           <option value="PRESENT"${initialStatus === "PRESENT" ? " selected" : ""}>PRESENT</option>
           <option value="ABSENT"${initialStatus === "ABSENT" ? " selected" : ""}>ABSENT</option>
+          <option value="INJURY"${initialStatus === "INJURY" ? " selected" : ""}>INJURY</option>
+          <option value="SICK LEAVE"${initialStatus === "SICK LEAVE" ? " selected" : ""}>SICK LEAVE</option>
           <option value="OTHERS"${initialStatus === "OTHERS" ? " selected" : ""}>OTHERS</option>
         </select>
       </div>
@@ -1934,6 +1942,7 @@
                     )
                   : 0;
               const isCook = isCookEmployee(emp);
+              const isWorkLeave = isWorkLeaveStatus(selectedStatus);
               let hWork = "";
               let sWork = "";
               let rem = "NORMAL WORK";
@@ -1943,8 +1952,8 @@
                 rem = "ABSENT";
                 hWork = 0;
                 sWork = 0;
-              } else if (selectedStatus === "PRESENT") {
-                if (isCook) {
+              } else if (isPaidPresentStatus(selectedStatus)) {
+                if (isCook || isWorkLeave) {
                   rem = "NORMAL WORK";
                   hWork = 0;
                   sWork = 0;
@@ -1973,8 +1982,10 @@
 
               // --- পরিবর্তন ৩: ডাটা সেভ করার সময় কুকদের জন্য কিচেন নিশ্চিত করা ---
               const siteValue =
-                selectedStatus === "PRESENT" && isCook
-                  ? "Kitchen"
+                isWorkLeave
+                  ? "No Work"
+                  : isPaidPresentStatus(selectedStatus) && isCook
+                    ? "Kitchen"
                   : selectedSite;
 
               attendanceData.push({
@@ -3223,6 +3234,25 @@
             .querySelectorAll(".custom-select-options")
             .forEach((el) => (el.style.display = "none"));
         });
+
+        function setWorkLeaveMode() {
+          const sideSelect = document.getElementById("sideName");
+          const sunEl = document.getElementById("sundayWork");
+          const holEl = document.getElementById("holidayWork");
+          const remarkEl = document.getElementById("attRemark");
+
+          ensureNoWorkOption(sideSelect);
+          sideSelect.value = "No Work";
+          sideSelect.disabled = true;
+          if (sunEl) sunEl.value = "0";
+          if (holEl) holEl.value = "0";
+          if (remarkEl) {
+            remarkEl.value = "NORMAL WORK";
+            remarkEl.readOnly = true;
+          }
+          initCustomSelect("sideName");
+        }
+
         function setAbsentMode() {
           const sideSelect = document.getElementById("sideName");
           const sunEl = document.getElementById("sundayWork");
@@ -3233,17 +3263,7 @@
           const attDateEl = document.getElementById("attDate");
 
           // Add No Work option if needed
-          let exists = Array.from(sideSelect.options).some(
-            (opt) => opt.value === "No Work",
-          );
-          if (!exists) {
-            const newOpt = document.createElement("option");
-            newOpt.value = "No Work";
-            newOpt.text = "No Work";
-            // Ensure the option is added to the original select element
-            // before re-initializing the custom select
-            sideSelect.add(newOpt);
-          }
+          ensureNoWorkOption(sideSelect);
           sideSelect.value = "No Work";
           sideSelect.disabled = true;
 
@@ -3398,6 +3418,8 @@
           .addEventListener("change", function () {
             if (this.value === "ABSENT") {
               setAbsentMode();
+            } else if (isWorkLeaveStatus(this.value)) {
+              setWorkLeaveMode();
             } else if (this.value === "OTHERS") {
               setOthersMode();
             } else {
@@ -3409,6 +3431,8 @@
         const initialStatus = document.getElementById("attStatus").value;
         if (initialStatus === "ABSENT") {
           setAbsentMode();
+        } else if (isWorkLeaveStatus(initialStatus)) {
+          setWorkLeaveMode();
         } else if (initialStatus === "OTHERS") {
           setOthersMode();
         } else {
@@ -3744,8 +3768,15 @@
             return;
           }
 
+          if (isWorkLeaveStatus(status)) {
+            if (sunEl) sunEl.value = "0";
+            if (holEl) holEl.value = "0";
+            if (remarkEl) remarkEl.value = "NORMAL WORK";
+            return;
+          }
+
           // Only calculate Sunday/Holiday if status is PRESENT
-          if (status === "PRESENT") {
+          if (isPaidPresentStatus(status)) {
             if (sunEl) sunEl.value = 0;
             if (holEl) holEl.value = 0;
 
@@ -3896,6 +3927,35 @@
               normalizeEmpId(record.ID || record.empId) === employeeId &&
               getWorkingAsValue(record).toLowerCase().includes("cook"),
           );
+        }
+
+        function isPaidPresentStatus(status) {
+          return ["PRESENT", "INJURY", "SICK LEAVE"].includes(
+            String(status || "")
+              .trim()
+              .toUpperCase(),
+          );
+        }
+
+        function isWorkLeaveStatus(status) {
+          return ["INJURY", "SICK LEAVE"].includes(
+            String(status || "")
+              .trim()
+              .toUpperCase(),
+          );
+        }
+
+        function ensureNoWorkOption(select) {
+          let noWorkOption = Array.from(select.options).find(
+            (opt) => opt.value.trim().toLowerCase() === "no work",
+          );
+          if (!noWorkOption) {
+            noWorkOption = document.createElement("option");
+            noWorkOption.value = "No Work";
+            noWorkOption.text = "No Work";
+            select.add(noWorkOption);
+          }
+          return noWorkOption;
         }
 
         function getWorkingAsValue(record) {
@@ -4137,9 +4197,15 @@
               workingAs: window.currentWorkingAs,
             });
           const sideSelect = document.getElementById("sideName");
+            const forceNoWork = isWorkLeaveStatus(selectedStatus);
             const forceKitchen =
-              isCook && selectedStatus !== "ABSENT" && selectedStatus !== "OTHERS";
-            if (forceKitchen) {
+              !forceNoWork && isCook && isPaidPresentStatus(selectedStatus);
+            if (forceNoWork) {
+              ensureNoWorkOption(sideSelect);
+              sideSelect.value = "No Work";
+              sideSelect.disabled = true;
+              initCustomSelect("sideName");
+            } else if (forceKitchen) {
             let kitchenOption = Array.from(sideSelect.options).find(
               (opt) => opt.value.trim().toLowerCase() === "kitchen",
             );
@@ -4153,7 +4219,11 @@
             sideSelect.disabled = false;
             initCustomSelect("sideName");
           }
-          const site = forceKitchen ? "Kitchen" : sideSelect.value;
+          const site = forceNoWork
+            ? "No Work"
+            : forceKitchen
+              ? "Kitchen"
+              : sideSelect.value;
 
           // ?. ?????????? (??? ???????? ???? ?????????)
           if (!rawEmpId) {
