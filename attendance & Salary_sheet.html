@@ -1842,53 +1842,59 @@
           width: 3.2% !important;
         } /* A */
         #reportTable colgroup col:nth-child(10) {
+          width: 3.2% !important;
+        } /* SL */
+        #reportTable colgroup col:nth-child(11) {
+          width: 3.2% !important;
+        } /* Injury */
+        #reportTable colgroup col:nth-child(12) {
           width: 3.7% !important;
         } /* Total P */
-        #reportTable colgroup col:nth-child(14) {
+        #reportTable colgroup col:nth-child(16) {
           width: 3.2% !important;
         } /* OT Hours */
-        #reportTable colgroup col:nth-child(13) {
+        #reportTable colgroup col:nth-child(15) {
           width: 4.2% !important;
         } /* OT Amount */
-        #reportTable colgroup col:nth-child(15) {
+        #reportTable colgroup col:nth-child(17) {
           width: 3.2% !important;
         } /* Oth */
-        #reportTable colgroup col:nth-child(16) {
+        #reportTable colgroup col:nth-child(18) {
           width: 3.7% !important;
         } /* P-Bonus */
-        #reportTable colgroup col:nth-child(17) {
+        #reportTable colgroup col:nth-child(19) {
           width: 3.7% !important;
         } /* A-Bonus */
-        #reportTable colgroup col:nth-child(18) {
-          width: 3.2% !important;
-        } /* F Trv */
-        #reportTable colgroup col:nth-child(19) {
-          width: 5% !important;
-        } /* Gross Salary */
         #reportTable colgroup col:nth-child(20) {
           width: 3.2% !important;
-        } /* Adv */
+        } /* F Trv */
         #reportTable colgroup col:nth-child(21) {
+          width: 5% !important;
+        } /* Gross Salary */
+        #reportTable colgroup col:nth-child(22) {
+          width: 3.2% !important;
+        } /* Adv */
+        #reportTable colgroup col:nth-child(23) {
           width: 3.2% !important;
         } /* Fine */
-        #reportTable colgroup col:nth-child(22) {
-          width: 3.7% !important;
-        } /* NPS 1% */
-        #reportTable colgroup col:nth-child(23) {
-          width: 4.2% !important;
-        } /* CSG 1.5% */
         #reportTable colgroup col:nth-child(24) {
           width: 3.7% !important;
-        } /* Total (deductions) */
+        } /* NPS 1% */
         #reportTable colgroup col:nth-child(25) {
+          width: 4.2% !important;
+        } /* CSG 1.5% */
+        #reportTable colgroup col:nth-child(26) {
+          width: 3.7% !important;
+        } /* Total (deductions) */
+        #reportTable colgroup col:nth-child(27) {
           width: 5% !important;
         } /* Net Salary */
         #reportTable th:nth-child(1),
         #reportTable th:nth-child(2),
         #reportTable th:nth-child(4),
         #reportTable th:nth-child(5),
-        #reportTable th:nth-child(19),
-        #reportTable th:nth-child(25) {
+        #reportTable th:nth-child(21),
+        #reportTable th:nth-child(27) {
           white-space: nowrap !important;
           overflow: visible !important;
         }
@@ -3150,6 +3156,14 @@
           .toUpperCase() === "COOK";
       }
 
+      function isPaidPresentStatus(status) {
+        return ["PRESENT", "INJURY", "SICK LEAVE"].includes(
+          String(status || "")
+            .trim()
+            .toUpperCase(),
+        );
+      }
+
       // ══════════════════════════════════════════
       //  MONTHLY SUMMARY — EMPLOYEE FILTER (multi-select checkbox dropdown)
       // ══════════════════════════════════════════
@@ -3278,13 +3292,18 @@
               sunUnits: 0,
               abs: 0,
               pres: 0,
+              sickLeave: 0,
+              injury: 0,
               fine: 0,
               others: 0,
             };
           const rec = attendance[id];
           rec.isCook = rec.isCook || isCookWorkingAs(d);
-          if (d.STATUS === "ABSENT") rec.abs++;
-          if (d.STATUS === "PRESENT") rec.pres++;
+          const status = String(d.STATUS || "").trim().toUpperCase();
+          if (status === "ABSENT") rec.abs++;
+          if (isPaidPresentStatus(status)) rec.pres++;
+          if (status === "SICK LEAVE") rec.sickLeave++;
+          else if (status === "INJURY") rec.injury++;
           if (d.REMARK === "NORMAL WORK") rec.norm++;
           if ((parseFloat(d.HOLIDAY_WORK) || 0) > 0) {
             rec.holDays++;
@@ -3389,6 +3408,8 @@
           sunUnits: 0,
           abs: 0,
           pres: 0,
+          sickLeave: 0,
+          injury: 0,
           fine: 0,
           others: 0,
         };
@@ -3396,7 +3417,13 @@
         const totalOT = rangeData.otMap[empId] || 0;
         const totalAdvance = _cache.advMap[empId] || 0;
         const totalFine = _cache.fineMap[empId] || 0;
-        const normalAmt = isCook ? dailyRate * att.pres : dailyRate * att.norm;
+        const paidLeaveDays = (att.sickLeave || 0) + (att.injury || 0);
+        const normalAmt = isCook
+          ? dailyRate * att.pres
+          : dailyRate * (att.norm + paidLeaveDays);
+        const sickLeavePay = dailyRate * (att.sickLeave || 0);
+        const injuryPay = dailyRate * (att.injury || 0);
+        const regularWorkPay = normalAmt - sickLeavePay - injuryPay;
         // ✅ AUTO-CALC: Holiday/Sunday pay = Daily Rate × multiplier × worked days.
         // Cooks are excluded — a Cook working a Holiday/Sunday is just a normal
         // present day at the flat daily rate, no separate Holiday/Sunday pay.
@@ -3477,11 +3504,21 @@
           time: now.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
           }),
           serviceLength,
-          normalWork: normalAmt.toFixed(2),
+          normalWork: regularWorkPay.toFixed(2),
+          sickLeavePay: sickLeavePay.toFixed(2),
+          injuryPay: injuryPay.toFixed(2),
+          leavePay: (sickLeavePay + injuryPay).toFixed(2),
           holidayWork: holidayPay.toFixed(2),
           sundayWork: sundayPay.toFixed(2),
+          holidaySundayPay: (holidayPay + sundayPay).toFixed(2),
+          holidayDays: att.holDays || 0,
+          sundayDays: att.sunDays || 0,
+          sickLeaveDays: att.sickLeave || 0,
+          injuryDays: att.injury || 0,
           overtime: totalOT.toFixed(2),
           others: (att.others || 0).toFixed(2),
           gross: gross.toFixed(2),
@@ -3880,7 +3917,7 @@
           let uniqueEmps = new Set(),
             uniqueDates = new Set();
           records.forEach((r) => {
-            if (r.STATUS === "PRESENT") totPresent++;
+            if (isPaidPresentStatus(r.STATUS)) totPresent++;
             else if (r.STATUS === "ABSENT") totAbsent++;
             if (parseInt(r.HOLIDAY_WORK) > 0)
               totHoliday += parseInt(r.HOLIDAY_WORK);
@@ -4590,6 +4627,8 @@
             const st = (d.STATUS || "").trim().toUpperCase();
             let shortStat = "-";
             if (st.startsWith("P")) shortStat = "P";
+            else if (st === "INJURY") shortStat = "I";
+            else if (st === "SICK LEAVE") shortStat = "SL";
             else if (st.startsWith("A")) shortStat = "A";
             else if (st.startsWith("L")) shortStat = "L";
             else if (st.startsWith("H")) shortStat = "H";
@@ -4614,11 +4653,13 @@
           let dayTotalsP = Array(dateRange.length).fill(0),
             dayTotalsSun = Array(dateRange.length).fill(0);
           let dayTotalsHol = Array(dateRange.length).fill(0),
-            dayTotalsA = Array(dateRange.length).fill(0);
+            dayTotalsA = Array(dateRange.length).fill(0),
+            dayTotalsSL = Array(dateRange.length).fill(0);
           let grandTotalP = 0,
             grandTotalA = 0,
             grandTotalSun = 0,
-            grandTotalHol = 0;
+            grandTotalHol = 0,
+            grandTotalSL = 0;
           const tableHeader = `<thead>
 <tr style="height:22px;">
   <th rowspan="2" style="width:20px; padding:1px;">SL</th>
@@ -4631,7 +4672,7 @@
       <div style="flex:1; text-align:right; font-size:9px; font-weight:normal;">Printed on: ${printDateTime}</div>
     </div>
   </th>
-  <th colspan="4" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
+  <th colspan="5" style="background:#0d685b; padding:1px; font-size:10px;">SUMMARY</th>
 </tr>
 <tr style="height:35px;">
   ${dateRange
@@ -4668,6 +4709,7 @@
   <th style="width:25px; background:#dc3545; padding:1px;">A</th>
   <th style="width:25px; background:#ffc107; color:#000; padding:1px;">SUN</th>
   <th style="width:25px; background:#6c757d; padding:1px;">HOL</th>
+  <th style="width:25px; background:#0d9488; padding:1px;">SL</th>
 </tr>
 </thead>`;
           const tableBody = sortedIds
@@ -4676,7 +4718,8 @@
               let countP = 0,
                 countA = 0,
                 countSun = 0,
-                countHol = 0;
+                countHol = 0,
+                countSL = 0;
               const daysHtml = dateRange
                 .map((d, dIdx) => {
                   const ds = toLocalDateStr(d);
@@ -4686,7 +4729,12 @@
                   let stat = attendanceMap[id]
                     ? attendanceMap[id][ds] || "-"
                     : "-";
-                  if (stat === "P") {
+                  const isLeaveStatus = stat === "I" || stat === "SL";
+                  const isPaidPresent = stat === "P" || isLeaveStatus;
+                  if (isLeaveStatus) {
+                    dayTotalsSL[dIdx]++;
+                    countSL++;
+                  } else if (stat === "P") {
                     if (!isCook && isSunday) {
                       dayTotalsSun[dIdx]++;
                       countSun++;
@@ -4707,14 +4755,14 @@
                       "background-color:#fff0f0; border:1px solid #000;";
                     if (stat === "A")
                       return `<td class="cell-absent" style="${bg} background-color:#ffe066 !important; color:red; font-weight:bold;">A</td>`;
-                    if (stat === "P")
-                      return `<td style="${bg} color:green; font-weight:bold;">P</td>`;
+                    if (isPaidPresent)
+                      return `<td style="${bg} color:green; font-weight:bold;">${stat}</td>`;
                     if (stat === "L" || stat === "H")
                       return `<td style="${bg} color:green;">${stat}</td>`;
                     return `<td style="${bg}"></td>`;
                   }
-                  if (stat === "P")
-                    return `<td style="color:green; font-weight:bold;">P</td>`;
+                  if (isPaidPresent)
+                    return `<td style="color:green; font-weight:bold;">${stat}</td>`;
                   if (stat === "A")
                     return `<td class="cell-absent" style="background-color:#ffe066; color:red; font-weight:bold;">A</td>`;
                   if (stat === "L" || stat === "H")
@@ -4726,6 +4774,7 @@
               grandTotalA += countA;
               grandTotalSun += countSun;
               grandTotalHol += countHol;
+              grandTotalSL += countSL;
               return `<tr>
   <td>${idx + 1}</td>
   <td class="text-start">${id} — ${employees[id].name}</td>
@@ -4734,6 +4783,7 @@
   <td class="cell-absent" style="font-weight:bold; background:#fff0f0; color:#991b1b;">${countA}</td>
   <td style="font-weight:bold; background:#fff9e6; color:#92400e;">${countSun}</td>
   <td style="font-weight:bold; background:#f3f0ff; color:#5b21b6;">${countHol}</td>
+  <td style="font-weight:bold; background:#ccfbf1; color:#0f766e;">${countSL}</td>
 </tr>`;
             })
             .join("");
@@ -4743,7 +4793,11 @@
     .map((_, idx) => {
       if (dateRange[idx] < inputStart || dateRange[idx] > inputEnd)
         return `<td style="background:#1d3a6d;"></td>`;
-      const allP = dayTotalsP[idx] + dayTotalsSun[idx] + dayTotalsHol[idx];
+      const allP =
+        dayTotalsP[idx] +
+        dayTotalsSun[idx] +
+        dayTotalsHol[idx] +
+        dayTotalsSL[idx];
       return `<td style="text-align:center; font-weight:bold; background:#1d3a6d; color:#ffd700; font-size:9px;">${allP || ""}</td>`;
     })
     .join("")}
@@ -4751,6 +4805,7 @@
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalA}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSun}</td>
   <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalHol}</td>
+  <td style="font-weight:bold; background:#1d3a6d; color:#ffd700;">${grandTotalSL}</td>
 </tr>`;
           matOut.innerHTML =
             '<p style="padding:20px; text-align:center; color:#4ade80; font-size:13px;">✅ Generating Present Sheet ...</p>';
@@ -4823,6 +4878,7 @@
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; border:1px solid #ccc;">Total Normal Working Days</td><td style="font-weight:bold; width:60px; border:1px solid #ccc; text-align:center;">${grandTotalP}</td></tr>
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:#b58900; border:1px solid #ccc;">Total Sunday Working Days</td><td style="font-weight:bold; color:#b58900; border:1px solid #ccc; text-align:center;">${grandTotalSun}</td></tr>
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; border:1px solid #ccc;">Total Holiday Working Days</td><td style="font-weight:bold; border:1px solid #ccc; text-align:center;">${grandTotalHol}</td></tr>
+        <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:#0f766e; border:1px solid #ccc;">Total Injury / Sick Leave (SL)</td><td style="font-weight:bold; color:#0f766e; border:1px solid #ccc; text-align:center;">${grandTotalSL}</td></tr>
         <tr><td style="text-align:left; padding:3px 10px; font-weight:bold; color:red; border:1px solid #ccc;">Total Absent</td><td style="font-weight:bold; color:red; border:1px solid #ccc; text-align:center;">${grandTotalA}</td></tr>
       </tbody>
     </table>
@@ -5587,8 +5643,8 @@
                 <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings</div>
                 <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWork}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidayWork}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.sundayWork}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays/Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidaySundayPay}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">SICK LEAVE / INJURY</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.leavePay}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fTrv}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
                   <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.pBonus}</td></tr>
@@ -5620,15 +5676,15 @@
                 <span style="font-weight:700">IN WORDS:</span> ${d.netPayWords}
               </div>
             </div>
-            <table style="width:100%;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
+            <table style="width:100%;table-layout:fixed;font-size:10px;border-collapse:collapse;text-align:center;margin-top:8px">
               <thead><tr style="background:#f3f4f6">
                 <th style="border:1px solid #9ca3af;padding:3px">A.L</th><th style="border:1px solid #9ca3af;padding:3px">S.L</th>
-                <th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
+                <th style="border:1px solid #9ca3af;padding:3px">L.L</th><th style="border:1px solid #9ca3af;padding:3px">INJURY</th>
                 <th style="border:1px solid #9ca3af;padding:3px">&nbsp;</th>
               </tr></thead>
               <tbody><tr>
-                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
-                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
+                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">${d.sickLeaveDays}</td>
+                <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td><td style="border:1px solid #9ca3af;padding:3px">${d.injuryDays}</td>
                 <td style="border:1px solid #9ca3af;padding:3px">&nbsp;</td>
               </tr></tbody>
             </table>
@@ -5676,6 +5732,7 @@
           *{box-sizing:border-box;margin:0;padding:0}
           body{background:#f3f4f6;font-family:'Source Sans 3',Arial,sans-serif;padding:10mm}
           .page{display:grid;grid-template-columns:1fr 1fr;gap:20mm;max-width:277mm;margin:0 auto 10mm;background:white;padding:6mm;border-radius:8px;position:relative}
+          .page, .page *{color:#000!important}
           .page::after{content:"";position:absolute;top:4mm;bottom:4mm;left:50%;transform:translateX(-50%);width:0;border-left:2px dashed #ccc;pointer-events:none}
           .page::before{content:"✂";position:absolute;top:0;left:50%;transform:translateX(-50%);font-size:14px;color:#bbb;pointer-events:none;background:white;padding:0 3px;line-height:1}
           .no-print{text-align:center;margin-bottom:8mm}
@@ -6156,6 +6213,8 @@
         if (!tbody) return;
         let totBasic = 0,
           totNorm = 0,
+          totSL = 0,
+          totInj = 0,
           totHol = 0,
           totSun = 0,
           totPres = 0,
@@ -6188,6 +6247,8 @@
           if (!empId) return;
           totBasic += parseFloat(tr.dataset.basic || 0);
           totNorm += parseFloat(tr.dataset.norm || 0);
+          totSL += parseFloat(tr.dataset.sl || 0);
+          totInj += parseFloat(tr.dataset.inj || 0);
           totHol += parseFloat(tr.dataset.hol || 0);
           totSun += parseFloat(tr.dataset.sun || 0);
           totPres += parseFloat(tr.dataset.pres || 0);
@@ -6236,6 +6297,8 @@
         if (!tf) return;
         tf.querySelector(".tf-basic").textContent = totBasic.toFixed(2);
         tf.querySelector(".tf-norm").textContent = totNorm;
+        tf.querySelector(".tf-sl").textContent = totSL;
+        tf.querySelector(".tf-inj").textContent = totInj;
         tf.querySelector(".tf-hol").textContent = totHol.toFixed(2);
         tf.querySelector(".tf-sun").textContent = totSun.toFixed(2);
         tf.querySelector(".tf-pres").textContent = totPres;
@@ -6427,6 +6490,8 @@
                 sal: sal,
                 daily: getDailyRate(sal),
                 norm: 0,
+                sl: 0,
+                inj: 0,
                 hol: 0,
                 sun: 0,
                 pres: 0,
@@ -6451,9 +6516,20 @@
             }
             workers[d.ID].isCook =
               workers[d.ID].isCook || isCookWorkingAs(d);
-            if (d.STATUS === "PRESENT") workers[d.ID].pres++;
-            else if (d.STATUS === "ABSENT") workers[d.ID].abs++;
-            if (d.REMARK === "NORMAL WORK") workers[d.ID].norm++;
+            const attendanceStatus = String(d.STATUS || "")
+              .trim()
+              .toUpperCase();
+            if (isPaidPresentStatus(attendanceStatus))
+              workers[d.ID].pres++;
+            else if (attendanceStatus === "ABSENT") workers[d.ID].abs++;
+            if (attendanceStatus === "SICK LEAVE") workers[d.ID].sl++;
+            else if (attendanceStatus === "INJURY") workers[d.ID].inj++;
+            if (
+              attendanceStatus === "PRESENT" &&
+              d.REMARK === "NORMAL WORK"
+            ) {
+              workers[d.ID].norm++;
+            }
             // ✅ AUTO-CALC: only count worked-days here; hol/sun AMOUNT is
             // derived below as Daily Rate × multiplier × day count.
             if ((parseFloat(d.SUNDAY_WORK) || 0) > 0) {
@@ -6552,6 +6628,8 @@
             hol: 0,
             sun: 0,
             pres: 0,
+            sl: 0,
+            inj: 0,
             abs: 0,
             otA: 0,
             otH: 0,
@@ -6581,7 +6659,7 @@
               const isCook = w.isCook;
               const rowTotalBasic = isCook
                 ? w.daily * w.pres
-                : w.daily * w.norm;
+                : w.daily * (w.norm + w.sl + w.inj);
               // ✅ AUTO-CALC: Holiday/Sunday pay = Daily Rate × multiplier ×
               // worked days. Cooks excluded (flat daily rate only, no extra).
               w.hol = isCook
@@ -6621,6 +6699,8 @@
               totals.hol += w.hol;
               totals.sun += w.sun;
               totals.pres += w.pres;
+              totals.sl += w.sl;
+              totals.inj += w.inj;
               totals.abs += w.abs;
               totals.otA += w.otA;
               totals.hDay += w.hDay;
@@ -6643,7 +6723,7 @@
               rows += `<tr data-empid="${id}"
               data-basic="${rowTotalBasic}"
               data-norm="${w.norm}" data-hol="${w.hol}" data-sun="${w.sun}"
-              data-pres="${w.pres}" data-abs="${w.abs}"
+              data-pres="${w.pres}" data-sl="${w.sl}" data-inj="${w.inj}" data-abs="${w.abs}"
               data-hday="${w.hDay}" data-sday="${w.sDay}"
               data-ot="${w.otA}" data-oth="${w.others}" data-othrs="${w.otH}"
               data-adv="${w.adv}" data-fine="${w.fine}">
@@ -6659,6 +6739,8 @@
 <td class="text-right">${w.hDay}</td>
 <td class="text-right">${w.sDay}</td>
 <td class="text-right">${w.abs}</td>
+<td class="text-right">${w.sl}</td>
+<td class="text-right">${w.inj}</td>
 <td class="text-right">${w.pres}</td>
 <td class="text-right">${w.hol.toFixed(2)}</td>
 <td class="text-right">${w.sun.toFixed(2)}</td>
@@ -6744,16 +6826,17 @@
             <colgroup>
               <col><col><col><col><col>
               <col><col><col><col><col>
-              <col class="col-holiday"><col class="col-sunday"><col class="col-otamt"><col>
+              <col>
+              <col><col class="col-holiday"><col class="col-sunday"><col class="col-otamt">
               <col><col><col><col>
               <col>
-              <col><col><col><col><col>
+              <col><col><col><col><col><col>
               <col>
               <col class="col-signature">
             </colgroup>
             <thead>
               <tr class="print-repeat-report-info">
-                <th colspan="26">Monthly Salary Sheet <span class="repeat-period">Period: ${dFromVal || "…"} to ${dToVal || "…"}</span><span class="repeat-printed">Printed: ${formatDateTime()}</span></th>
+                <th colspan="28">Monthly Salary Sheet <span class="repeat-period">Period: ${dFromVal || "…"} to ${dToVal || "…"}</span><span class="repeat-printed">Printed: ${formatDateTime()}</span></th>
               </tr>
               <!-- ══ ROW 1: Main Group Headers ══ -->
               <tr>
@@ -6763,7 +6846,8 @@
                 <th rowspan="3">Designation</th>
                 <th rowspan="3"> Basic</th>
                 <!-- ATTENDANCE STATUS group -->
-                <th colspan="5" class="th-att-group">ATTENDANCE STATUS</th>
+                <th colspan="6" class="th-att-group">ATTENDANCE STATUS</th>
+                <th rowspan="3" class="th-att-sub"><span class="att-status-total">Total</span><span class="att-status-label">PRESENT</span></th>
                 <!-- EARNING DETAILS group -->
                 <th colspan="8" class="th-earn-group">EARNING DETAILS</th>
                 <!-- Gross -->
@@ -6780,7 +6864,7 @@
                 <th rowspan="2" class="th-att-sub">HILI<br>DAY</th>
                 <th rowspan="2" class="th-att-sub">SUN<br>DAY</th>
                 <th rowspan="2" class="th-att-sub"><span class="att-status-main">A</span><span class="att-status-label">ABSENT</span></th>
-                <th rowspan="2" class="th-att-sub"><span class="att-status-total">Total</span><span class="att-status-label">PRESENT</span></th>
+                <th colspan="2" class="th-att-sub">SICK LEAVE</th>
                 <!-- Earning sub -->
                 <th rowspan="2" class="th-earn-sub">Holi day</th>
                 <th rowspan="2" class="th-earn-sub">Sun day</th>
@@ -6798,6 +6882,8 @@
               </tr>
               <!-- ══ ROW 3: OT Sub-Sub Headers ══ -->
               <tr>
+                <th class="th-att-sub"><span class="att-status-main">SL</span></th>
+                <th class="th-att-sub"><span class="att-status-main">INJ</span></th>
                 <th class="th-earn-sub ot-compact-header">Amount</th>
                 <th class="th-earn-sub ot-compact-header">Hrs</th>
               </tr>
@@ -6814,6 +6900,8 @@
                 <td class="text-right tf-hday">${totals.hDay}</td>
                 <td class="text-right tf-sday">${totals.sDay}</td>
                 <td class="text-right tf-abs">${totals.abs}</td>
+                <td class="text-right tf-sl">${totals.sl}</td>
+                <td class="text-right tf-inj">${totals.inj}</td>
                 <td class="text-right tf-pres">${totals.pres}</td>
                 <td class="text-right tf-hol">${totals.hol.toFixed(2)}</td>
                 <td class="text-right tf-sun">${totals.sun.toFixed(2)}</td>
@@ -6833,13 +6921,13 @@
                 <td></td>
               </tr>
               <tr class="no-print-hide">
-                <td colspan="26" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
+                <td colspan="28" style="padding:8px 6px;border-top:1pt solid #000!important;border-left:none!important;border-right:none!important;border-bottom:none!important">
                   <span class="print-net-words-label" style="font-weight:bold;font-size:9px">In Words: </span>
                   <span id="netWordsRow" class="print-net-words" style="font-size:9px;font-style:italic">${numberToWordsGlobal(totals.net)}</span>
                 </td>
               </tr>
               <tr class="print-footer-signature">
-                <td colspan="26" style="border:none!important;padding:80px 0 20px 0!important">
+                <td colspan="28" style="border:none!important;padding:80px 0 20px 0!important">
                   <div class="signature-area" style="margin-top:0;display:flex;justify-content:space-around">
                     <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
                     <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
@@ -7895,6 +7983,8 @@
               <select id="deField_status" style="width:100%;padding:8px 10px;border-radius:6px;border:1.5px solid #3a5a8a;background:#001530;color:#e0e8f4;font-size:12px;outline:none;box-sizing:border-box">
                 <option value="PRESENT" ${r.status === "PRESENT" ? "selected" : ""}>PRESENT</option>
                 <option value="ABSENT" ${r.status === "ABSENT" ? "selected" : ""}>ABSENT</option>
+                <option value="INJURY" ${r.status === "INJURY" ? "selected" : ""}>INJURY</option>
+                <option value="SICK LEAVE" ${r.status === "SICK LEAVE" ? "selected" : ""}>SICK LEAVE</option>
               </select>
             </div>
             <div style="margin-bottom:10px">
@@ -8021,6 +8111,9 @@
             SUNDAY_WORK: sunday,
             FINE: fine,
           };
+          if (["INJURY", "SICK LEAVE"].includes(status)) {
+            update.REMARK = "NORMAL WORK";
+          }
           await firebase.firestore().doc(r.path).update(update);
           after = { ...before, ...update };
         } else if (type === "ot") {
