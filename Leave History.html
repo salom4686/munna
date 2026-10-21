@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Leave History — ALAMHOW CO LTD</title>
+    <title>Leave Management</title>
+     <link rel="icon" type="image/png" href="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500"/>
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css"
@@ -32,6 +33,7 @@
         background: #002147;
         border-bottom: 4px solid #ffd700;
       }
+      header img { width: 68px; height: 68px; flex: 0 0 auto; object-fit: contain; }
       header h1 { margin: 0; font-family: "Playfair Display", Georgia, serif; font-size: 22px; letter-spacing: 1px; }
       main { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
       .panel {
@@ -355,7 +357,9 @@
         }
       }
       @media (max-width: 640px) {
-        header { align-items: flex-start; flex-direction: column; }
+        header { gap: 10px; padding: 14px 16px; }
+        header img { width: 52px; height: 52px; }
+        header h1 { font-size: 18px; }
         .form-row > label, .form-row input, .form-row select { width: 100%; }
         select.employee-select { min-width: 0; }
         .entitlement-layout { grid-template-columns: 1fr; }
@@ -435,6 +439,7 @@
   </head>
   <body>
     <header>
+      <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" alt="ALAMHOW CO LTD logo" />
       <h1>ALAMHOW CO LTD — Leave History</h1>
     </header>
     <main>
@@ -1281,7 +1286,7 @@
         }
       }
 
-      document.getElementById("refreshReport").addEventListener("click", loadReport);
+      document.getElementById("refreshReport").addEventListener("click", () => window.location.reload());
       document.addEventListener("visibilitychange", () => {
         const modalOpen = [...document.querySelectorAll(".entry-modal")].some((modal) => !modal.hidden);
         if (!document.hidden && !modalOpen) loadReport();
