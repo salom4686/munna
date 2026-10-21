@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Leave History</title>
+    <title>Leave History — ALAMHOW CO LTD</title>
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+      href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.css"
     />
     <link
       rel="stylesheet"
@@ -182,25 +182,25 @@
         overflow-y: auto;
         box-shadow: 0 16px 48px #0009;
       }
-      #casualLeavePanel {
+      :is(#casualLeavePanel, #sickLeaveEntryPanel) {
         align-items: center;
         justify-content: center;
         padding: 20px;
       }
-      #casualLeavePanel .entry-panel {
+      :is(#casualLeavePanel, #sickLeaveEntryPanel) .entry-panel {
         width: min(820px, 100%);
         max-height: calc(100vh - 40px);
         margin: auto;
         overflow: visible;
       }
-      #casualLeavePanel .form-row {
+      :is(#casualLeavePanel, #sickLeaveEntryPanel) .form-row {
         display: grid;
         grid-template-columns: minmax(180px, 1.4fr) minmax(125px, 1fr) minmax(100px, 0.8fr) minmax(130px, 1fr) auto;
         gap: 8px;
       }
-      #casualLeavePanel label,
-      #casualLeavePanel input,
-      #casualLeavePanel select {
+      :is(#casualLeavePanel, #sickLeaveEntryPanel) label,
+      :is(#casualLeavePanel, #sickLeaveEntryPanel) input,
+      :is(#casualLeavePanel, #sickLeaveEntryPanel) select {
         min-width: 0;
         width: 100%;
       }
@@ -244,10 +244,10 @@
         font-size: 12px;
       }
       @media (max-width: 800px) {
-        #casualLeavePanel .form-row {
+        :is(#casualLeavePanel, #sickLeaveEntryPanel) .form-row {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
-        #casualLeavePanel #saveCasualLeave {
+        :is(#casualLeavePanel, #sickLeaveEntryPanel) .save-entry {
           width: 100%;
         }
       }
@@ -297,6 +297,7 @@
       tbody tr:nth-child(even) td { background: #052044; }
       tbody tr:hover td { background: #0a2b50; }
       td.number, th.number { text-align: right; }
+      td.negative { color: #ff8585; font-weight: 700; }
       td.serial-number, th.serial-number { text-align: center; }
       td.employee-id, th.employee-id { white-space: nowrap; }
       .empty { padding: 20px; color: #8da6c4; text-align: center; }
@@ -317,7 +318,6 @@
         border-top: 1px solid currentColor;
       }
       .signature-role { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; }
-      .signature-role { margin: 0; font-size: 12px; font-weight: 700; text-transform: uppercase; }
       .flatpickr-calendar { border: 1px solid #335185; background: #001530; box-shadow: 0 8px 24px #0008; }
       .flatpickr-calendar, .flatpickr-calendar * { color: #e0e8f4; }
       .flatpickr-months, .flatpickr-weekdays { background: #002147; }
@@ -327,6 +327,19 @@
       .flatpickr-day.selected, .flatpickr-day.selected:hover { color: #002147 !important; background: #ffd700; border-color: #ffd700; }
       .flatpickr-day.is-sunday { color: #ff7777; font-weight: 700; }
       .flatpickr-day.is-holiday { color: #ff7777; font-weight: 700; text-decoration: underline; }
+      #annualSummaryPanel th,
+      #annualSummaryPanel td,
+      #annualSummaryPanel tbody tr:nth-child(even) td,
+      #annualSummaryPanel tbody tr:hover td {
+        color: #000;
+        background: #fff;
+        border-color: #000;
+      }
+      #annualSummaryPanel tbody tr td.negative { color: #b42318; }
+      #monthlyLeavePanel th, #monthlyLeavePanel td { padding: 7px 6px; }
+      #monthlyLeavePanel td.month-total { font-weight: 700; }
+      #monthlyLeavePanel tr.total-row td { font-weight: 700; border-top: 2px solid #ffd700; }
+      #leaveDetailsPanel tr.month-row td { color: #ffd700; background: #002147; font-weight: 700; }
       @page {
         size: A4 portrait;
         margin: 0.5in;
@@ -380,7 +393,7 @@
         .panel h2 { break-after: avoid; page-break-after: avoid; }
         table, thead, tbody, tr, th, td { color: #000 !important; background: #fff !important; }
         th, td { border: 1px solid #000 !important; }
-        th { font-weight: 700; }
+        th, td.negative { font-weight: 700; }
         thead { display: table-header-group; }
         tr { break-inside: avoid; page-break-inside: avoid; }
         tbody tr:nth-child(even) td, tbody tr:hover td { background: #fff !important; }
@@ -389,6 +402,10 @@
         #annualSummaryPanel > .table-wrap { display: none !important; }
         .print-summary-pages { display: block !important; }
         th, td { padding: 4px 5px; }
+        #leaveDetailsPanel tr.month-row td { background: #e6e6e6 !important; font-weight: 700; }
+        #monthlyLeavePanel table { font-size: 8pt; }
+        #monthlyLeavePanel th, #monthlyLeavePanel td { padding: 3px 2px; }
+        #monthlyLeavePanel tr.total-row td { border-top: 2px solid #000 !important; }
         tr[data-page-break] { break-before: page; page-break-before: always; }
         .print-summary-page {
           break-after: page;
@@ -417,7 +434,6 @@
     </style>
   </head>
   <body>
-  <script src="auth-audit.js"></script>
     <header>
       <h1>ALAMHOW CO LTD — Leave History</h1>
     </header>
@@ -431,7 +447,7 @@
           <div class="employee-filter-field">
             <span>Employee</span>
             <details id="employeeFilterDropdown" class="report-dropdown">
-              <summary id="reportEmployeeSummary">All Employees</summary>
+              <summary id="reportEmployeeSummary">Employees</summary>
               <div class="report-dropdown-menu employee-filter-menu">
                 <input id="reportEmployeeSearch" class="employee-filter-search" type="search" placeholder="Type employee name or ID" autocomplete="off" />
                 <div class="employee-filter-actions">
@@ -444,12 +460,13 @@
               </div>
             </details>
           </div>
-          <button id="refreshReport" type="button">View / Refresh</button>
+          <button id="refreshReport" type="button">Refresh</button>
           <details id="leaveActionsDropdown" class="report-dropdown no-print">
             <summary>Leave Actions</summary>
             <div class="report-dropdown-menu">
               <button id="openEntitlementPanel" type="button" data-entry-modal="entitlementPanel" aria-expanded="false" aria-haspopup="dialog">Contract Leave Entitlement</button>
-              <button id="openCasualLeavePanel" type="button" data-entry-modal="casualLeavePanel" aria-expanded="false" aria-haspopup="dialog">Record Casual Leave (CL)</button>
+              <button id="openCasualLeavePanel" type="button" data-entry-modal="casualLeavePanel" aria-expanded="false" aria-haspopup="dialog">Casual Leave Apply(CL)</button>
+              <button id="openSickLeavePanel" type="button" data-entry-modal="sickLeaveEntryPanel" aria-expanded="false" aria-haspopup="dialog">Sick Leave Apply(SL)</button>
             </div>
           </details>
           <details class="report-dropdown no-print">
@@ -458,12 +475,14 @@
               <button type="button" data-report-panel="annualSummaryPanel">Annual Leave Summary</button>
               <button type="button" data-report-panel="sickLeavePanel">Sick Leave</button>
               <button type="button" data-report-panel="casualLeaveRecordsPanel">Casual Leave</button>
+              <button type="button" data-report-panel="monthlyLeavePanel">Monthly Leave</button>
+              <button type="button" data-report-panel="leaveDetailsPanel">Leave Details (Month-wise)</button>
             </div>
           </details>
-          <button class="no-print" type="button" onclick="window.print()">Print Report</button>
+          <button class="no-print" type="button" onclick="window.print()">Print</button>
         </div>
         <div id="reportStatus" class="status" role="status" aria-live="polite"></div>
-        <p class="note">CL entries are stored separately in the CASUAL_LEAVE collection. SL usage is counted from Sick Leave attendance records.</p>
+        <p class="note">CL entries are stored separately in the CASUAL_LEAVE collection. SL usage is counted from Sick Leave attendance records plus SL entries recorded here (SICK_LEAVE collection).</p>
       </section>
 
       <div class="entry-modal" id="entitlementPanel" hidden>
@@ -487,7 +506,7 @@
           </div>
         </div>
         <div id="entitlementStatus" class="status" role="status" aria-live="polite"></div>
-        <p class="note">Select one or more employees in Leave Year Report, enter their shared CL and SL allowance from the contract, then save. Saving again updates the selected employees' allowance for the selected year.</p>
+        <p class="note">Select one or more employees in Leave Year Report, enter their shared CL and SL allowance for the year (unused CL lapses at year end, unused SL is settled to the employee), then save. Saving again updates the selected employees' allowance for the selected year.</p>
       </section>
       </div>
 
@@ -501,22 +520,53 @@
           <label>Employee
             <output id="clSelectedEmployee" class="selected-employee">Select an employee in Leave Year Report</output>
           </label>
-          <label>Leave date
-            <input id="clDate" type="text" placeholder="Select leave date" readonly />
+          <label>Leave date(s)
+            <input id="clDate" type="text" placeholder="Select one or more dates" readonly />
           </label>
-          <label>Days
+          <label>Days (per date)
             <input id="clDays" type="number" min="0.5" step="0.5" value="1" />
           </label>
           <label>Remark
             <input id="clRemark" type="text" maxlength="200" placeholder="Optional" />
           </label>
-          <button id="saveCasualLeave" type="button">Save CL</button>
+          <button id="saveCasualLeave" class="save-entry" type="button">Save CL</button>
         </div>
+        <p id="clDateSummary" class="note"></p>
         <div id="clSelectedEmployeeList" class="cl-selected-employees" aria-live="polite" hidden>
           <h3>Selected Employees</h3>
           <ul></ul>
         </div>
         <div id="clStatus" class="status" role="status" aria-live="polite"></div>
+      </section>
+      </div>
+
+      <div class="entry-modal" id="sickLeaveEntryPanel" hidden>
+      <section class="panel entry-panel" role="dialog" aria-modal="true" aria-labelledby="sickLeaveTitle">
+        <div class="entry-modal-heading">
+          <h2 id="sickLeaveTitle">Record Sick Leave (SL)</h2>
+          <button class="close-entry-modal" type="button" data-close-modal="sickLeaveEntryPanel" aria-label="Close sick leave form">Close</button>
+        </div>
+        <div class="form-row">
+          <label>Employee
+            <output id="slSelectedEmployee" class="selected-employee">Select an employee in Leave Year Report</output>
+          </label>
+          <label>Leave date(s)
+            <input id="slDate" type="text" placeholder="Select one or more dates" readonly />
+          </label>
+          <label>Days (per date)
+            <input id="slDays" type="number" min="0.5" step="0.5" value="1" />
+          </label>
+          <label>Remark
+            <input id="slRemark" type="text" maxlength="200" placeholder="Optional" />
+          </label>
+          <button id="saveSickLeave" class="save-entry" type="button">Save SL</button>
+        </div>
+        <p id="slDateSummary" class="note"></p>
+        <div id="slSelectedEmployeeList" class="cl-selected-employees" aria-live="polite" hidden>
+          <h3>Selected Employees</h3>
+          <ul></ul>
+        </div>
+        <div id="slStatus" class="status" role="status" aria-live="polite"></div>
       </section>
       </div>
 
@@ -528,12 +578,13 @@
               <tr>
                 <th class="serial-number">SL NO</th><th class="employee-id">EMP ID</th><th>Employee Name</th>
                 <th class="number">CL Entitled</th><th class="number">CL Used</th><th class="number">CL Balance</th>
-                <th class="number">SL Entitled</th><th class="number">SL Used</th><th class="number">SL Balance</th>
+                <th class="number">SL Entitled</th><th class="number">SL Used</th><th class="number">SL Balance (Payable)</th>
               </tr>
             </thead>
             <tbody id="summaryBody"><tr><td class="empty" colspan="9">Loading employees…</td></tr></tbody>
           </table>
         </div>
+        <p class="note no-print">CL: yearly allowance, can be taken any time in the year; unused CL lapses at year end (nothing is paid or carried forward). SL: yearly allowance, can be taken any time in the year; unused SL is settled (paid) to the employee at year end, it does not carry forward.</p>
         <div id="printSummaryPages" class="print-summary-pages"></div>
       </section>
 
@@ -541,11 +592,11 @@
         <h2>Sick Leave Records (from Attendance)</h2>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Date</th><th>EMP ID</th><th>Employee Name</th><th class="number">Days</th><th>Remark</th></tr></thead>
-            <tbody id="sickRecordsBody"><tr><td class="empty" colspan="5">No records loaded.</td></tr></tbody>
+            <thead><tr><th>Date</th><th>EMP ID</th><th>Employee Name</th><th class="number">Days</th><th>Remark</th><th class="no-print">Source</th></tr></thead>
+            <tbody id="sickRecordsBody"><tr><td class="empty" colspan="6">No records loaded.</td></tr></tbody>
           </table>
         </div>
-        <p class="note">Sick Leave entries saved from Attendance appear here automatically and are counted in SL Used.</p>
+        <p class="note">Sick Leave from Attendance and entries recorded here are counted in SL Used. Only entries recorded here can be deleted from this page.</p>
       </section>
 
       <section class="panel" id="casualLeaveRecordsPanel" hidden>
@@ -556,6 +607,40 @@
             <tbody id="recordsBody"><tr><td class="empty" colspan="6">No records loaded.</td></tr></tbody>
           </table>
         </div>
+      </section>
+      <section class="panel" id="monthlyLeavePanel" hidden>
+        <h2 id="monthlyLeaveHeading">Monthly Leave Summary</h2>
+        <div class="form-row no-print" style="margin-bottom: 10px;">
+          <label>Leave type
+            <select id="monthlyLeaveType">
+              <option value="all">CL + SL (Total)</option>
+              <option value="cl">CL only</option>
+              <option value="sl">SL only</option>
+            </select>
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="serial-number">SL NO</th><th class="employee-id">EMP ID</th><th>Employee Name</th>
+                <th class="number">Jan</th><th class="number">Feb</th><th class="number">Mar</th><th class="number">Apr</th><th class="number">May</th><th class="number">Jun</th><th class="number">Jul</th><th class="number">Aug</th><th class="number">Sep</th><th class="number">Oct</th><th class="number">Nov</th><th class="number">Dec</th><th class="number">Total</th>
+              </tr>
+            </thead>
+            <tbody id="monthlyBody"><tr><td class="empty" colspan="16">Loading…</td></tr></tbody>
+          </table>
+        </div>
+        <p class="note">Days taken per month, by leave date. Blank means no leave that month.</p>
+      </section>
+      <section class="panel" id="leaveDetailsPanel" hidden>
+        <h2 id="leaveDetailsHeading">Leave Details</h2>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Date</th><th>EMP ID</th><th>Employee Name</th><th>Type</th><th class="number">Days</th><th>Remark</th></tr></thead>
+            <tbody id="leaveDetailsBody"><tr><td class="empty" colspan="6">No records loaded.</td></tr></tbody>
+          </table>
+        </div>
+        <p class="note">Select an employee in Leave Year Report to see only that employee. Each month shows its CL and SL records with a monthly total.</p>
       </section>
       <footer class="report-signatures">
         <div class="signature-block">
@@ -580,7 +665,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.13/dist/flatpickr.min.js"></script>
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
@@ -595,6 +680,7 @@
       const db = firebase.firestore();
       const ENTITLEMENTS = "LEAVE_ENTITLEMENTS";
       const CASUAL_LEAVE = "CASUAL_LEAVE";
+      const SICK_LEAVE = "SICK_LEAVE";
       let employees = [];
       let currentEntitlements = [];
       let currentCasualLeave = [];
@@ -662,10 +748,26 @@
         const summary = document.getElementById("reportEmployeeSummary");
         summary.textContent = selected.length
           ? `${selected.length} employee${selected.length === 1 ? "" : "s"} selected`
-          : "All Employees";
+          : "Employees";
         renderReport(Number(document.getElementById("leaveYear").value));
         updateCasualLeaveEmployee();
+        updateSickLeaveEmployee();
         updateEntitlementSelection();
+      }
+
+      function updateSickLeaveEmployee() {
+        const selected = selectedReportEmployees();
+        const summary = document.getElementById("slSelectedEmployee");
+        const list = document.getElementById("slSelectedEmployeeList");
+        summary.textContent = selected.length
+          ? `${selected.length} employee${selected.length === 1 ? "" : "s"} selected`
+          : "Select employee(s) in Leave Year Report";
+        list.querySelector("ul").replaceChildren(...selected.map((employee) => {
+          const item = document.createElement("li");
+          item.textContent = `${employee.id} — ${employee.name}`;
+          return item;
+        }));
+        list.hidden = selected.length === 0;
       }
 
       function updateCasualLeaveEmployee() {
@@ -722,23 +824,24 @@
             status,
           };
         }).filter((employee) => employee.id && employee.status !== "inactive")
-          .sort((a, b) => a.id.localeCompare(b.id));
+          .sort((a, b) => a.id.localeCompare(b.id, undefined, { numeric: true }));
         fillEmployeeOptions();
       }
 
       async function loadReport() {
         setStatus("reportStatus", "Loading leave records…");
         document.getElementById("summaryBody").innerHTML = '<tr><td class="empty" colspan="9">Loading…</td></tr>';
-        document.getElementById("sickRecordsBody").innerHTML = '<tr><td class="empty" colspan="5">Loading…</td></tr>';
+        document.getElementById("sickRecordsBody").innerHTML = '<tr><td class="empty" colspan="6">Loading…</td></tr>';
         document.getElementById("recordsBody").innerHTML = '<tr><td class="empty" colspan="6">Loading…</td></tr>';
         try {
           const year = selectedYear();
           const start = `${year}-01-01`;
           const end = `${year}-12-31`;
-          const [entitlementSnapshot, casualSnapshot, attendanceSnapshot] = await Promise.all([
+          const [entitlementSnapshot, casualSnapshot, attendanceSnapshot, manualSickSnapshot] = await Promise.all([
             db.collection(ENTITLEMENTS).where("YEAR", "==", year).get(),
             db.collection(CASUAL_LEAVE).where("YEAR", "==", year).get(),
             db.collectionGroup("Present_Absent").where("DATE", ">=", start).where("DATE", "<=", end).get(),
+            db.collection(SICK_LEAVE).where("YEAR", "==", year).get(),
           ]);
           currentEntitlements = entitlementSnapshot.docs.map((doc) => ({ ...doc.data(), _id: doc.id }));
           currentCasualLeave = casualSnapshot.docs.map((doc) => ({ ...doc.data(), _id: doc.id }))
@@ -748,10 +851,28 @@
             const data = doc.data() || {};
             if (String(data.STATUS || "").trim().toUpperCase() !== "SICK LEAVE" || !data.ID) return;
             currentSickLeave.push({
+              SOURCE: "attendance",
               EMP_ID: String(data.ID).trim(),
               EMPLOYEE_NAME: String(data.EMPLOYEE_NAME || "").trim(),
               DATE: String(data.DATE || "").slice(0, 10),
               DAYS: Number(data.LEAVE_DAYS) > 0 ? Number(data.LEAVE_DAYS) : 1,
+              REMARK: String(data.REMARK || "").trim(),
+            });
+          });
+          const attendanceSickKeys = new Set(currentSickLeave.map((record) => `${record.EMP_ID}|${record.DATE}`));
+          manualSickSnapshot.forEach((doc) => {
+            const data = doc.data() || {};
+            const empId = String(data.EMP_ID || "").trim();
+            const date = String(data.DATE || "").slice(0, 10);
+            if (String(data.STATUS || "").trim().toUpperCase() !== "SICK LEAVE" || !empId) return;
+            if (attendanceSickKeys.has(`${empId}|${date}`)) return; // already counted from Attendance
+            currentSickLeave.push({
+              SOURCE: "manual",
+              _id: doc.id,
+              EMP_ID: empId,
+              EMPLOYEE_NAME: String(data.EMPLOYEE_NAME || "").trim(),
+              DATE: date,
+              DAYS: Number(data.DAYS) > 0 ? Number(data.DAYS) : 1,
               REMARK: String(data.REMARK || "").trim(),
             });
           });
@@ -762,7 +883,7 @@
           console.error("Leave history load failed:", error);
           setStatus("reportStatus", `Could not load leave history: ${error.message}`, true);
           document.getElementById("summaryBody").innerHTML = '<tr><td class="empty" colspan="9">Unable to load leave summary.</td></tr>';
-          document.getElementById("sickRecordsBody").innerHTML = '<tr><td class="empty" colspan="5">Unable to load Sick Leave records.</td></tr>';
+          document.getElementById("sickRecordsBody").innerHTML = '<tr><td class="empty" colspan="6">Unable to load Sick Leave records.</td></tr>';
           document.getElementById("recordsBody").innerHTML = '<tr><td class="empty" colspan="6">Unable to load CL records.</td></tr>';
         }
       }
@@ -787,12 +908,17 @@
           const clEntitled = entitlement ? Number(entitlement.CL_ENTITLED) || 0 : null;
           const slEntitled = entitlement ? Number(entitlement.SL_ENTITLED) || 0 : null;
           const format = (value) => value === null ? "—" : value.toFixed(value % 1 ? 1 : 0);
+          const balanceCell = (entitled, used) => {
+            if (entitled === null) return '<td class="number">—</td>';
+            const balance = entitled - used;
+            return `<td class="number${balance < 0 ? " negative" : ""}">${format(balance)}</td>`;
+          };
           return `<tr>
             <td class="serial-number">${index + 1}</td><td class="employee-id">${escapeHtml(employee.id)}</td><td>${escapeHtml(employee.name)}</td>
             <td class="number">${format(clEntitled)}</td><td class="number">${format(clUsed)}</td>
-            <td class="number">${format(clEntitled === null ? null : clEntitled - clUsed)}</td>
+            ${balanceCell(clEntitled, clUsed)}
             <td class="number">${format(slEntitled)}</td><td class="number">${format(slUsed)}</td>
-            <td class="number">${format(slEntitled === null ? null : slEntitled - slUsed)}</td>
+            ${balanceCell(slEntitled, slUsed)}
           </tr>`;
         });
         document.getElementById("summaryBody").innerHTML = rows.length ? rows.join("") : '<tr><td class="empty" colspan="9">No employees found.</td></tr>';
@@ -806,11 +932,14 @@
             <td>${escapeHtml(record.DATE)}</td><td>${escapeHtml(record.EMP_ID)}</td>
             <td>${escapeHtml(record.EMPLOYEE_NAME || employee?.name || "")}</td>
             <td class="number">${record.DAYS}</td><td>${escapeHtml(record.REMARK)}</td>
+            <td class="no-print">${record.SOURCE === "manual"
+              ? `<button class="danger delete-sl" type="button" data-record-id="${escapeHtml(record._id)}">Delete</button>`
+              : "Attendance"}</td>
           </tr>`;
         });
         document.getElementById("sickRecordsBody").innerHTML = sickRecordRows.length
           ? sickRecordRows.join("")
-          : '<tr><td class="empty" colspan="5">No Sick Leave records for this year.</td></tr>';
+          : '<tr><td class="empty" colspan="6">No Sick Leave records for this year.</td></tr>';
 
         const filteredRecords = currentCasualLeave.filter((record) => {
           const id = String(record.EMP_ID || "").trim();
@@ -831,6 +960,153 @@
         document.querySelectorAll(".delete-cl").forEach((button) => {
           button.addEventListener("click", () => deleteCasualLeave(button.dataset.recordId));
         });
+        document.querySelectorAll(".delete-sl").forEach((button) => {
+          button.addEventListener("click", () => deleteSickLeave(button.dataset.recordId));
+        });
+        renderMonthlySummary(year);
+        renderLeaveDetails(year);
+      }
+
+      function renderMonthlySummary(year) {
+        const type = document.getElementById("monthlyLeaveType").value;
+        const labels = { all: "CL + SL", cl: "Casual Leave", sl: "Sick Leave" };
+        document.getElementById("monthlyLeaveHeading").textContent = `Monthly Leave Summary — ${year} (${labels[type]})`;
+        const selectedIds = new Set(selectedReportEmployees().map((employee) => employee.id));
+        const monthly = new Map();
+        const add = (empId, date, days) => {
+          if (!String(date).startsWith(String(year))) return;
+          const month = Number(String(date).slice(5, 7)) - 1;
+          if (!(month >= 0 && month < 12)) return;
+          if (!monthly.has(empId)) monthly.set(empId, Array(12).fill(0));
+          monthly.get(empId)[month] += days;
+        };
+        if (type !== "sl") currentCasualLeave.forEach((record) => add(String(record.EMP_ID || "").trim(), record.DATE, Number(record.DAYS) || 0));
+        if (type !== "cl") currentSickLeave.forEach((record) => add(record.EMP_ID, record.DATE, record.DAYS));
+        const num = (value) => value.toFixed(value % 1 ? 1 : 0);
+        const columnTotals = Array(12).fill(0);
+        const rows = employees.filter((employee) => !selectedIds.size || selectedIds.has(employee.id)).map((employee, index) => {
+          const months = monthly.get(employee.id) || Array(12).fill(0);
+          months.forEach((value, i) => { columnTotals[i] += value; });
+          const total = months.reduce((sum, value) => sum + value, 0);
+          return `<tr>
+            <td class="serial-number">${index + 1}</td><td class="employee-id">${escapeHtml(employee.id)}</td><td>${escapeHtml(employee.name)}</td>
+            ${months.map((value) => `<td class="number">${value ? num(value) : ""}</td>`).join("")}
+            <td class="number month-total">${num(total)}</td>
+          </tr>`;
+        });
+        if (rows.length) {
+          const grand = columnTotals.reduce((sum, value) => sum + value, 0);
+          rows.push(`<tr class="total-row"><td></td><td></td><td>Total</td>
+            ${columnTotals.map((value) => `<td class="number">${value ? num(value) : ""}</td>`).join("")}
+            <td class="number">${num(grand)}</td></tr>`);
+        }
+        document.getElementById("monthlyBody").innerHTML = rows.length ? rows.join("") : '<tr><td class="empty" colspan="16">No employees found.</td></tr>';
+      }
+
+      function renderLeaveDetails(year) {
+        const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        const selected = selectedReportEmployees();
+        const selectedIds = new Set(selected.map((employee) => employee.id));
+        const heading = document.getElementById("leaveDetailsHeading");
+        heading.textContent = selected.length === 1
+          ? `Leave Details — ${year} — ${selected[0].id} ${selected[0].name}`
+          : `Leave Details — ${year}`;
+        const records = [];
+        currentCasualLeave.forEach((record) => {
+          const empId = String(record.EMP_ID || "").trim();
+          records.push({ date: String(record.DATE || ""), empId, name: record.EMPLOYEE_NAME || employeeById(empId)?.name || "", type: "CL", days: Number(record.DAYS) || 0, remark: record.REMARK || "" });
+        });
+        currentSickLeave.forEach((record) => {
+          records.push({ date: record.DATE, empId: record.EMP_ID, name: record.EMPLOYEE_NAME || employeeById(record.EMP_ID)?.name || "", type: "SL", days: record.DAYS, remark: record.REMARK });
+        });
+        const filtered = records
+          .filter((record) => record.date.startsWith(String(year)) && (!selectedIds.size || selectedIds.has(record.empId)))
+          .sort((a, b) => a.date.localeCompare(b.date) || a.empId.localeCompare(b.empId, undefined, { numeric: true }));
+        const num = (value) => value.toFixed(value % 1 ? 1 : 0);
+        const html = [];
+        for (let month = 0; month < 12; month += 1) {
+          const monthRecords = filtered.filter((record) => Number(record.date.slice(5, 7)) - 1 === month);
+          if (!monthRecords.length) continue;
+          const cl = monthRecords.filter((record) => record.type === "CL").reduce((sum, record) => sum + record.days, 0);
+          const sl = monthRecords.filter((record) => record.type === "SL").reduce((sum, record) => sum + record.days, 0);
+          html.push(`<tr class="month-row"><td colspan="6">${monthNames[month]} ${year} — CL ${num(cl)}, SL ${num(sl)}, Total ${num(cl + sl)} day${cl + sl === 1 ? "" : "s"}</td></tr>`);
+          monthRecords.forEach((record) => {
+            html.push(`<tr>
+              <td>${escapeHtml(record.date)}</td><td>${escapeHtml(record.empId)}</td><td>${escapeHtml(record.name)}</td>
+              <td>${record.type}</td><td class="number">${num(record.days)}</td><td>${escapeHtml(record.remark)}</td>
+            </tr>`);
+          });
+        }
+        document.getElementById("leaveDetailsBody").innerHTML = html.length
+          ? html.join("")
+          : '<tr><td class="empty" colspan="6">No leave records for this selection.</td></tr>';
+      }
+
+      async function loadYearBalances(year) {
+        const [entitlementSnapshot, casualSnapshot, attendanceSnapshot, manualSickSnapshot] = await Promise.all([
+          db.collection(ENTITLEMENTS).where("YEAR", "==", year).get(),
+          db.collection(CASUAL_LEAVE).where("YEAR", "==", year).get(),
+          db.collectionGroup("Present_Absent").where("DATE", ">=", `${year}-01-01`).where("DATE", "<=", `${year}-12-31`).get(),
+          db.collection(SICK_LEAVE).where("YEAR", "==", year).get(),
+        ]);
+        const limits = new Map();
+        entitlementSnapshot.forEach((doc) => {
+          const data = doc.data() || {};
+          limits.set(String(data.EMP_ID || "").trim(), { cl: Number(data.CL_ENTITLED) || 0, sl: Number(data.SL_ENTITLED) || 0 });
+        });
+        const clUsed = new Map();
+        casualSnapshot.forEach((doc) => {
+          const data = doc.data() || {};
+          if (data.STATUS !== "CASUAL LEAVE") return;
+          const id = String(data.EMP_ID || "").trim();
+          clUsed.set(id, (clUsed.get(id) || 0) + (Number(data.DAYS) || 0));
+        });
+        const slUsed = new Map();
+        const attendanceKeys = new Set();
+        attendanceSnapshot.forEach((doc) => {
+          const data = doc.data() || {};
+          if (String(data.STATUS || "").trim().toUpperCase() !== "SICK LEAVE" || !data.ID) return;
+          const id = String(data.ID).trim();
+          attendanceKeys.add(`${id}|${String(data.DATE || "").slice(0, 10)}`);
+          slUsed.set(id, (slUsed.get(id) || 0) + (Number(data.LEAVE_DAYS) > 0 ? Number(data.LEAVE_DAYS) : 1));
+        });
+        manualSickSnapshot.forEach((doc) => {
+          const data = doc.data() || {};
+          const id = String(data.EMP_ID || "").trim();
+          if (String(data.STATUS || "").trim().toUpperCase() !== "SICK LEAVE" || !id) return;
+          if (attendanceKeys.has(`${id}|${String(data.DATE || "").slice(0, 10)}`)) return;
+          slUsed.set(id, (slUsed.get(id) || 0) + (Number(data.DAYS) > 0 ? Number(data.DAYS) : 1));
+        });
+        return { limits, clUsed, slUsed };
+      }
+
+      function selectedLeaveDates(inputId) {
+        return [...new Set(document.getElementById(inputId).value.split(",").map((text) => text.trim()).filter(Boolean))].sort();
+      }
+
+      async function confirmIfOverLimit(pairs, days, kind) {
+        const label = kind === "cl" ? "CL" : "SL";
+        const num = (value) => value.toFixed(value % 1 ? 1 : 0);
+        const lines = [];
+        for (const yearText of new Set(pairs.map((pair) => pair.date.slice(0, 4)))) {
+          const balances = await loadYearBalances(Number(yearText));
+          const used = kind === "cl" ? balances.clUsed : balances.slUsed;
+          const adding = new Map();
+          pairs.filter((pair) => pair.date.startsWith(yearText)).forEach((pair) => {
+            adding.set(pair.employee.id, (adding.get(pair.employee.id) || 0) + days);
+          });
+          adding.forEach((addDays, id) => {
+            const limit = balances.limits.get(id)?.[kind];
+            if (limit === undefined) return;
+            const already = used.get(id) || 0;
+            if (already + addDays > limit) {
+              lines.push(`${id} ${employeeById(id)?.name || ""}: ${yearText} — used ${num(already)} of ${num(limit)}, adding ${num(addDays)}`);
+            }
+          });
+        }
+        if (lines.length && !window.confirm(`${label} entitlement would be exceeded:\n\n${lines.join("\n")}\n\nSave anyway?`)) {
+          throw new Error(`Not saved — ${label} entitlement would be exceeded.`);
+        }
       }
 
       async function saveEntitlement() {
@@ -854,7 +1130,6 @@
                 EMPLOYEE_NAME: employee.name,
                 CL_ENTITLED: cl,
                 SL_ENTITLED: sl,
-                SAVED_BY: window.getAuditUserId(),
                 UPDATED_AT: saveTimestamp,
               });
             });
@@ -873,37 +1148,124 @@
         try {
           const selectedEmployees = selectedReportEmployees();
           if (!selectedEmployees.length) throw new Error("Select one or more employees in Leave Year Report first.");
-          const date = document.getElementById("clDate").value;
-          if (!date) throw new Error("Select the leave date.");
+          const dates = selectedLeaveDates("clDate");
+          if (!dates.length) throw new Error("Select at least one leave date.");
           const days = Number(document.getElementById("clDays").value);
           if (!Number.isFinite(days) || days <= 0) throw new Error("Enter leave days greater than zero.");
-          const year = new Date(`${date}T00:00:00`).getFullYear();
           const remark = document.getElementById("clRemark").value.trim();
-          for (let start = 0; start < selectedEmployees.length; start += 500) {
+          const existing = await db.collection(CASUAL_LEAVE)
+            .where("DATE", ">=", dates[0]).where("DATE", "<=", dates[dates.length - 1]).get();
+          const have = new Set();
+          existing.forEach((doc) => {
+            const data = doc.data() || {};
+            if (data.STATUS === "CASUAL LEAVE") have.add(`${String(data.EMP_ID || "").trim()}|${String(data.DATE || "").slice(0, 10)}`);
+          });
+          const pairs = [];
+          const skipped = [];
+          selectedEmployees.forEach((employee) => dates.forEach((date) => {
+            (have.has(`${employee.id}|${date}`) ? skipped : pairs).push({ employee, date });
+          }));
+          if (!pairs.length) throw new Error("CL is already recorded for the selected employee(s) on the selected date(s).");
+          await confirmIfOverLimit(pairs, days, "cl");
+          for (let start = 0; start < pairs.length; start += 500) {
             const batch = db.batch();
-            selectedEmployees.slice(start, start + 500).forEach((employee) => {
+            pairs.slice(start, start + 500).forEach(({ employee, date }) => {
               batch.set(db.collection(CASUAL_LEAVE).doc(), {
-                YEAR: year,
+                YEAR: Number(date.slice(0, 4)),
                 DATE: date,
                 EMP_ID: employee.id,
                 EMPLOYEE_NAME: employee.name,
                 STATUS: "CASUAL LEAVE",
                 DAYS: days,
                 REMARK: remark,
-                SAVED_BY: window.getAuditUserId(),
                 CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
               });
             });
             await batch.commit();
           }
-          document.getElementById("leaveYear").value = year;
+          document.getElementById("leaveYear").value = Number(dates[0].slice(0, 4));
           document.getElementById("clDays").value = "1";
           document.getElementById("clRemark").value = "";
-          setStatus("clStatus", `CL record saved for ${selectedEmployees.length} employee${selectedEmployees.length === 1 ? "" : "s"} on ${date}.`);
+          document.getElementById("clDate")._flatpickr.clear();
+          const employeeCount = new Set(pairs.map((pair) => pair.employee.id)).size;
+          setStatus("clStatus", `CL saved: ${pairs.length} record${pairs.length === 1 ? "" : "s"} for ${employeeCount} employee${employeeCount === 1 ? "" : "s"} (${dates.join(", ")}).` +
+            (skipped.length ? ` Skipped (already recorded): ${skipped.map((item) => `${item.employee.id} ${item.date}`).join(", ")}.` : ""));
           await loadReport();
         } catch (error) {
           console.error("Casual leave save failed:", error);
           setStatus("clStatus", `Could not save CL record: ${error.message}`, true);
+        }
+      }
+
+      async function saveSickLeave() {
+        setStatus("slStatus", "");
+        try {
+          const selectedEmployees = selectedReportEmployees();
+          if (!selectedEmployees.length) throw new Error("Select one or more employees in Leave Year Report first.");
+          const dates = selectedLeaveDates("slDate");
+          if (!dates.length) throw new Error("Select at least one leave date.");
+          const days = Number(document.getElementById("slDays").value);
+          if (!Number.isFinite(days) || days <= 0) throw new Error("Enter leave days greater than zero.");
+          const remark = document.getElementById("slRemark").value.trim();
+          const [manualSnapshot, attendanceSnapshot] = await Promise.all([
+            db.collection(SICK_LEAVE).where("DATE", ">=", dates[0]).where("DATE", "<=", dates[dates.length - 1]).get(),
+            db.collectionGroup("Present_Absent").where("DATE", ">=", dates[0]).where("DATE", "<=", `${dates[dates.length - 1]}\uf8ff`).get(),
+          ]);
+          const have = new Set();
+          manualSnapshot.forEach((doc) => {
+            const data = doc.data() || {};
+            if (String(data.STATUS || "").trim().toUpperCase() === "SICK LEAVE") have.add(`${String(data.EMP_ID || "").trim()}|${String(data.DATE || "").slice(0, 10)}`);
+          });
+          attendanceSnapshot.forEach((doc) => {
+            const data = doc.data() || {};
+            if (String(data.STATUS || "").trim().toUpperCase() === "SICK LEAVE" && data.ID) have.add(`${String(data.ID).trim()}|${String(data.DATE || "").slice(0, 10)}`);
+          });
+          const pairs = [];
+          const skipped = [];
+          selectedEmployees.forEach((employee) => dates.forEach((date) => {
+            (have.has(`${employee.id}|${date}`) ? skipped : pairs).push({ employee, date });
+          }));
+          if (!pairs.length) throw new Error("SL is already recorded for the selected employee(s) on the selected date(s).");
+          await confirmIfOverLimit(pairs, days, "sl");
+          for (let start = 0; start < pairs.length; start += 500) {
+            const batch = db.batch();
+            pairs.slice(start, start + 500).forEach(({ employee, date }) => {
+              batch.set(db.collection(SICK_LEAVE).doc(), {
+                YEAR: Number(date.slice(0, 4)),
+                DATE: date,
+                EMP_ID: employee.id,
+                EMPLOYEE_NAME: employee.name,
+                STATUS: "SICK LEAVE",
+                DAYS: days,
+                REMARK: remark,
+                CREATED_AT: firebase.firestore.FieldValue.serverTimestamp(),
+              });
+            });
+            await batch.commit();
+          }
+          document.getElementById("leaveYear").value = Number(dates[0].slice(0, 4));
+          document.getElementById("slDays").value = "1";
+          document.getElementById("slRemark").value = "";
+          document.getElementById("slDate")._flatpickr.clear();
+          const employeeCount = new Set(pairs.map((pair) => pair.employee.id)).size;
+          setStatus("slStatus", `SL saved: ${pairs.length} record${pairs.length === 1 ? "" : "s"} for ${employeeCount} employee${employeeCount === 1 ? "" : "s"} (${dates.join(", ")}).` +
+            (skipped.length ? ` Skipped (already recorded): ${skipped.map((item) => `${item.employee.id} ${item.date}`).join(", ")}.` : ""));
+          await loadReport();
+        } catch (error) {
+          console.error("Sick leave save failed:", error);
+          setStatus("slStatus", `Could not save SL record: ${error.message}`, true);
+        }
+      }
+
+      async function deleteSickLeave(recordId) {
+        if (!recordId || !window.confirm("Delete this SL record?")) return;
+        try {
+          await db.collection(SICK_LEAVE).doc(recordId).delete();
+          setStatus("reportStatus", "SL record deleted.");
+          await loadReport();
+        } catch (error) {
+          console.error("Sick leave delete failed:", error);
+          setStatus("reportStatus", `Could not delete SL record: ${error.message}`, true);
         }
       }
 
@@ -921,7 +1283,8 @@
 
       document.getElementById("refreshReport").addEventListener("click", loadReport);
       document.addEventListener("visibilitychange", () => {
-        if (!document.hidden) loadReport();
+        const modalOpen = [...document.querySelectorAll(".entry-modal")].some((modal) => !modal.hidden);
+        if (!document.hidden && !modalOpen) loadReport();
       });
       document.querySelectorAll(".report-dropdown > summary").forEach((summary) => {
         summary.addEventListener("click", () => {
@@ -942,7 +1305,7 @@
           const panelId = button.dataset.reportPanel;
           const panel = document.getElementById(panelId);
           const shouldOpen = panel.hidden;
-          ["annualSummaryPanel", "sickLeavePanel", "casualLeaveRecordsPanel"].forEach((id) => {
+          ["annualSummaryPanel", "sickLeavePanel", "casualLeaveRecordsPanel", "monthlyLeavePanel", "leaveDetailsPanel"].forEach((id) => {
             document.getElementById(id).hidden = true;
           });
           panel.hidden = !shouldOpen;
@@ -962,7 +1325,7 @@
         modal.hidden = true;
         const opener = document.querySelector(`[data-entry-modal="${modalId}"]`);
         opener.setAttribute("aria-expanded", "false");
-        opener.focus();
+        document.getElementById("refreshReport").focus();
       }
 
       document.querySelectorAll("[data-entry-modal]").forEach((button) => {
@@ -970,6 +1333,10 @@
           const modalId = button.dataset.entryModal;
           document.getElementById("leaveActionsDropdown").open = false;
           const selectedEmployees = selectedReportEmployees();
+          if (modalId === "sickLeaveEntryPanel" && !selectedEmployees.length) {
+            setStatus("reportStatus", "Select one or more employees in Leave Year Report before recording Sick Leave.", true);
+            return;
+          }
           if (modalId === "casualLeavePanel" && !selectedEmployees.length) {
             setStatus("reportStatus", "Select one or more employees in Leave Year Report before recording Casual Leave.", true);
             return;
@@ -979,6 +1346,7 @@
             return;
           }
           if (modalId === "casualLeavePanel") updateCasualLeaveEmployee();
+          if (modalId === "sickLeaveEntryPanel") updateSickLeaveEmployee();
           openEntryModal(modalId, button.id);
         });
       });
@@ -1006,10 +1374,12 @@
       });
       document.getElementById("saveEntitlement").addEventListener("click", saveEntitlement);
       document.getElementById("saveCasualLeave").addEventListener("click", saveCasualLeave);
+      document.getElementById("saveSickLeave").addEventListener("click", saveSickLeave);
+      document.getElementById("monthlyLeaveType").addEventListener("change", () => renderMonthlySummary(Number(document.getElementById("leaveYear").value)));
       document.getElementById("leaveYear").addEventListener("change", loadReport);
       const ROWS_PER_PAGE = 25;
       function paginateRecordTables() {
-        ["sickRecordsBody", "recordsBody"].forEach((id) => {
+        ["sickRecordsBody", "recordsBody", "monthlyBody", "leaveDetailsBody"].forEach((id) => {
           [...document.getElementById(id).rows].forEach((row, index) => {
             if (index > 0 && index % ROWS_PER_PAGE === 0) row.dataset.pageBreak = "1";
           });
@@ -1060,8 +1430,16 @@
         const year = today.getFullYear();
         const pad = (number) => String(number).padStart(2, "0");
         document.getElementById("leaveYear").value = year;
-        flatpickr("#clDate", {
+        const pickerOptions = {
+          mode: "multiple",
+          conjunction: ", ",
           dateFormat: "Y-m-d",
+          onChange: (selectedDates, _dateString, instance) => {
+            const target = document.getElementById(instance.input.id === "clDate" ? "clDateSummary" : "slDateSummary");
+            target.textContent = selectedDates.length
+              ? `${selectedDates.length} date${selectedDates.length === 1 ? "" : "s"} selected — total ${selectedDates.length} × days per date`
+              : "";
+          },
           defaultDate: `${year}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`,
           onDayCreate: (_dateObject, _dateString, _instance, dayElement) => {
             const date = dayElement.dateObj;
@@ -1070,16 +1448,23 @@
             const dateString = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
             if (leaveHolidayDates.has(dateString)) dayElement.classList.add("is-holiday");
           },
-        });
+        };
+        flatpickr("#clDate", pickerOptions);
+        flatpickr("#slDate", pickerOptions);
         try {
           await loadEmployees();
           await loadReport();
-          const holidaySnapshot = await db.collection("HOLIDAY_LIST").get();
-          holidaySnapshot.forEach((document) => leaveHolidayDates.add(document.id));
-          document.getElementById("clDate")._flatpickr.redraw();
         } catch (error) {
           console.error("Leave history initialization failed:", error);
           setStatus("reportStatus", `Could not initialize leave history: ${error.message}`, true);
+        }
+        try {
+          const holidaySnapshot = await db.collection("HOLIDAY_LIST").get();
+          holidaySnapshot.forEach((holidayDoc) => leaveHolidayDates.add(holidayDoc.id));
+          document.getElementById("clDate")._flatpickr.redraw();
+          document.getElementById("slDate")._flatpickr.redraw();
+        } catch (error) {
+          console.warn("Holiday list could not be loaded:", error);
         }
       }
 
