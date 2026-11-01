@@ -656,11 +656,13 @@
             <div class="modal-msg" id="cpMsg"></div>
         </div>
     </div>
-
     <!-- Firebase Module -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getFirestore, collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged,
+                 EmailAuthProvider, reauthenticateWithCredential, updatePassword }
+            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
@@ -672,322 +674,146 @@
             appId: "1:371130316468:web:61b4cba0dbbd5f027589e1"
         };
 
-        const app = initializeApp(firebaseConfig);
-        const db  = getFirestore(app);
+        const app  = initializeApp(firebaseConfig);
+        const db   = getFirestore(app);
+        const auth = getAuth(app);
 
-        let idTimer = null;
-        let foundEmployee = null;
+        const ADMIN_ID = "IPI-004686";
+        const ADMIN_INFO = { name: "SHOFIUL ALOM", designation: "ADMIN" };
+        const toEmail = id => id.trim().toLowerCase() + "@alamhow.app";
 
-        /* ID ইনপুটে টাইপ করলে কর্মী খোঁজা */
+        /* ID লিখলে অ্যাডমিনের নাম ও পদবি দেখানো */
         window.onIdInput = function(val) {
-            clearTimeout(idTimer);
             const nameInput  = document.getElementById("userName");
             const desigInput = document.getElementById("userDesignation");
-            const spinner    = document.getElementById("idSpinner");
             const checkIcon  = document.getElementById("idCheck");
             const crossIcon  = document.getElementById("idCross");
             const nameBadge  = document.getElementById("nameBadge");
             const desigBadge = document.getElementById("desigBadge");
-
+            document.getElementById("idSpinner").style.display = "none";
             nameInput.value = ""; desigInput.value = "";
             checkIcon.style.display = "none"; crossIcon.style.display = "none";
             nameBadge.style.display = "none"; desigBadge.style.display = "none";
-            foundEmployee = null;
-
-            if (!val.trim()) { spinner.style.display = "none"; return; }
-            spinner.style.display = "inline-block";
-
-            /* ৬০০ms debounce — বারবার Firebase call না করতে */
-            idTimer = setTimeout(async () => {
-                try {
-                    const upperVal = val.trim().toUpperCase();
-                    const q = query(collection(db, "EMPLOYEE_LIST"), where("id", "==", upperVal));
-                    const snap = await getDocs(q);
-                    spinner.style.display = "none";
-
-                    if (!snap.empty) {
-                        const data = snap.docs[0].data();
-                        foundEmployee = { docId: snap.docs[0].id, ...data };
-                        nameInput.value  = data.name        || "";
-                        desigInput.value = data.designation || "";
-                        checkIcon.style.display = "inline-block";
-                        crossIcon.style.display = "none";
-                        if (data.name)        nameBadge.style.display = "inline-block";
-                        if (data.designation) desigBadge.style.display = "inline-block";
-                    } else {
-                        checkIcon.style.display = "none";
-                        crossIcon.style.display = "inline-block";
-                    }
-                } catch (err) { spinner.style.display = "none"; console.error(err); }
-            }, 600);
+            if (val.trim().toUpperCase() === ADMIN_ID) {
+                nameInput.value = ADMIN_INFO.name;
+                desigInput.value = ADMIN_INFO.designation;
+                checkIcon.style.display = "inline-block";
+                nameBadge.style.display = "inline-block";
+                desigBadge.style.display = "inline-block";
+            }
         };
 
-        /* লগইন হ্যান্ডলার — পাসওয়ার্ড String() দিয়ে convert করা হয়েছে number type এড়াতে */
+        /* লগইন: Firebase Authentication দিয়ে */
         window.handleLogin = async function() {
             const idInput   = document.getElementById("userId").value.trim().toUpperCase();
             const passInput = document.getElementById("password").value;
-            const errorMsg  = document.getElementById("errorMsg");
             const loginBtn  = document.getElementById("loginBtn");
 
-            errorMsg.style.display = "none";
-            if (!idInput || !passInput) { errorMsg.textContent = "Please fill all fields!"; errorMsg.style.display = "block"; return; }
+            if (!idInput || !passInput) { showToast("Please fill all fields!", "error"); return; }
 
             loginBtn.disabled = true;
             loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying...';
 
             try {
-                /* foundEmployee না থাকলে Firebase থেকে আবার আনো */
-                if (!foundEmployee || (foundEmployee.id || "").toUpperCase() !== idInput) {
-                    const q = query(collection(db, "EMPLOYEE_LIST"), where("id", "==", idInput));
-                    const snap = await getDocs(q);
-                    foundEmployee = !snap.empty ? { docId: snap.docs[0].id, ...snap.docs[0].data() } : null;
+                await signInWithEmailAndPassword(auth, toEmail(idInput), passInput);
+
+                let name = idInput, desig = "", docId = "";
+                if (idInput === ADMIN_ID) {
+                    name = ADMIN_INFO.name; desig = ADMIN_INFO.designation;
+                } else {
+                    try {
+                        const snap = await getDocs(query(collection(db, "EMPLOYEE_LIST"), where("id", "==", idInput)));
+                        if (!snap.empty) {
+                            const d = snap.docs[0].data();
+                            name = d.name || idInput; desig = d.designation || "";
+                            docId = snap.docs[0].id;
+                        }
+                    } catch (e) { console.warn("Employee info not loaded:", e); }
                 }
 
-                if (!foundEmployee) { showError("Employee ID not found!"); resetBtn(); return; }
-
-                /* String() ব্যবহার — Firebase-এ number হিসেবে stored থাকলেও কাজ করবে */
-                const storedPass = String(foundEmployee.PASSWORD ?? foundEmployee.password ?? "").trim();
-                if (!storedPass) { showError("No password set. Contact admin!"); resetBtn(); return; }
-                if (passInput !== storedPass) { showError("Incorrect password!"); resetBtn(); shake(); return; }
-
                 const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                const name  = foundEmployee.name        || idInput;
-                const desig = foundEmployee.designation || "";
-
-                /* Session storage-এ লগইন তথ্য সংরক্ষণ */
                 sessionStorage.setItem("isLoggedIn",       "true");
                 sessionStorage.setItem("savedId",          idInput);
                 sessionStorage.setItem("savedName",        name);
                 sessionStorage.setItem("savedDesignation", desig);
                 sessionStorage.setItem("loginTime",        currentTime);
-                sessionStorage.setItem("savedDocId",       foundEmployee.docId || "");
+                sessionStorage.setItem("savedDocId",       docId);
 
-                document.getElementById("welcomeName").innerText     = name;
-                document.getElementById("sideProfileName").innerText = name;
-                document.getElementById("sideProfileRole").innerText = desig;
-                updateMarquee(idInput, name, desig, currentTime);
-
-                /* লগইন স্ক্রিন fade out করে ড্যাশবোর্ড দেখানো */
-                const loginScreen = document.getElementById("loginScreen");
-                loginScreen.style.opacity = "0";
-                setTimeout(() => {
-                    loginScreen.style.display = "none";
-                    document.getElementById("dashboardScreen").style.display = "block";
-                    loginScreen.style.opacity = "1";
-                }, 300);
-                resetBtn();
-
-            } catch (err) { showError("Connection error: " + err.message); resetBtn(); }
+                showDashboard(idInput, name, desig, currentTime);
+            } catch (err) {
+                const bad = ["auth/invalid-credential","auth/user-not-found","auth/wrong-password","auth/invalid-email"];
+                if (bad.includes(err.code)) { showToast("ID or password incorrect!", "error"); shake(); }
+                else if (err.code === "auth/too-many-requests") showToast("Too many attempts. Try again later.", "error");
+                else showToast("Connection error: " + err.message, "error");
+            }
+            resetBtn();
         };
 
-        /* ===== কর্মীর পাসওয়ার্ড সেট করা (Admin only) ===== */
-        let spFoundEmployee = null;
+        function showDashboard(id, name, desig, time) {
+            document.getElementById("welcomeName").innerText     = name;
+            document.getElementById("sideProfileName").innerText = name;
+            document.getElementById("sideProfileRole").innerText = desig;
+            updateMarquee(id, name, desig, time);
+            const loginScreen = document.getElementById("loginScreen");
+            loginScreen.style.opacity = "0";
+            setTimeout(() => {
+                loginScreen.style.display = "none";
+                document.getElementById("dashboardScreen").style.display = "block";
+                loginScreen.style.opacity = "1";
+            }, 300);
+        }
 
-        window.searchEmployee = async function() {
-            const val = document.getElementById("spSearchId").value.trim().toUpperCase();
-            const card = document.getElementById("spEmpCard");
-            const fields = document.getElementById("spPassFields");
-            const msg = document.getElementById("spMsg");
-            msg.className = "modal-msg"; msg.style.display = "none";
-            card.classList.remove("visible");
-            fields.style.display = "none";
-            spFoundEmployee = null;
-
-            if (!val) { showToast("Please enter an Employee ID!", "warning"); return; }
-
-            const btn = document.querySelector(".sp-search-btn");
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
-            try {
-                const q = query(collection(db, "EMPLOYEE_LIST"), where("id", "==", val));
-                const snap = await getDocs(q);
-                if (snap.empty) {
-                    /* কোনো কর্মী পাওয়া যায়নি */
-                    showToast("No employee found!", "error");
-                } else {
-                    const data = snap.docs[0].data();
-                    spFoundEmployee = { docId: snap.docs[0].id, ...data };
-                    document.getElementById("spEmpName").innerHTML =
-                        (data.name || "—") + `<span class="sp-emp-badge">${data.id || val}</span>`;
-                    document.getElementById("spEmpMeta").textContent =
-                        (data.designation || "—") + " | " + (data.workingas || "—");
-                    card.classList.add("visible");
-                    fields.style.display = "block";
-                    /* ফিল্ড ক্লিয়ার করা */
-                    document.getElementById("spNewPass").value = "";
-                    document.getElementById("spConfirmPass").value = "";
-                    document.getElementById("spStrengthFill").style.width = "0%";
-                    document.getElementById("spStrengthLabel").textContent = "";
-                }
-            } catch(err) { showToast("Error: " + err.message, "error"); }
-
-            btn.innerHTML = '<i class="fa-solid fa-search"></i>';
-            btn.disabled = false;
-        };
-
-        window.saveSetPassword = async function() {
-            const newPass     = document.getElementById("spNewPass").value;
-            const confirmPass = document.getElementById("spConfirmPass").value;
-
-            if (!spFoundEmployee) { showToast("Please search for an employee first!", "warning"); return; }
-            if (!newPass)         { showToast("Please enter a password!", "warning"); return; }
-            if (newPass.length < 4) { showToast("Password must be at least 4 characters!", "warning"); return; }
-            if (newPass !== confirmPass) { showToast("Passwords do not match!", "error"); return; }
-
-            const saveBtn = document.getElementById("spSaveBtn");
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
-            try {
-                const empData = spFoundEmployee;
-                /* PASSWORD field নাম detect করা */
-                const fieldName = empData.PASSWORD !== undefined ? "PASSWORD" : "password";
-                await updateDoc(doc(db, "EMPLOYEE_LIST", empData.docId), {
-                    [fieldName]: newPass,
-                    SAVED_BY: sessionStorage.getItem("savedId") || "",
-                });
-                showToast("Password for " + (empData.name || empData.id) + " has been set successfully!", "success");
-                /* সফল হলে ফিল্ড ক্লিয়ার */
-                document.getElementById("spNewPass").value = "";
-                document.getElementById("spConfirmPass").value = "";
-                document.getElementById("spStrengthFill").style.width = "0%";
-                document.getElementById("spStrengthLabel").textContent = "";
-                setTimeout(() => {
-                    document.getElementById("spEmpCard").classList.remove("visible");
-                    document.getElementById("spPassFields").style.display = "none";
-                    document.getElementById("spSearchId").value = "";
-                    spFoundEmployee = null;
-                }, 2500);
-            } catch(err) { showToast("Error: " + err.message, "error"); }
-
-            saveBtn.disabled = false;
-            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Set Password';
-        };
-
-        /* ===== নিজের পাসওয়ার্ড পরিবর্তন ===== */
+        /* নিজের পাসওয়ার্ড পরিবর্তন */
         window.saveNewPassword = async function() {
             const currentPass = document.getElementById("cpCurrentPass").value;
             const newPass     = document.getElementById("cpNewPass").value;
             const confirmPass = document.getElementById("cpConfirmPass").value;
-            const msgEl       = document.getElementById("cpMsg");
             const saveBtn     = document.getElementById("cpSaveBtn");
 
-            msgEl.className = "modal-msg";
-            msgEl.style.display = "none";
-
-            if (!currentPass || !newPass || !confirmPass) {
-                showToast("Please fill in all fields!", "warning"); return;
-            }
-            if (newPass.length < 4) {
-                showToast("New password must be at least 4 characters!", "warning"); return;
-            }
-            if (newPass !== confirmPass) {
-                showToast("New passwords do not match!", "error"); return;
-            }
-
-            const docId = sessionStorage.getItem("savedDocId");
-            const empId = sessionStorage.getItem("savedId");
-
-            if (!docId && !empId) { showToast("Session data not found. Please login again.", "error"); return; }
+            if (!currentPass || !newPass || !confirmPass) { showToast("Please fill in all fields!", "warning"); return; }
+            if (newPass.length < 6) { showToast("New password must be at least 6 characters!", "warning"); return; }
+            if (newPass !== confirmPass) { showToast("New passwords do not match!", "error"); return; }
+            const user = auth.currentUser;
+            if (!user) { showToast("Session expired. Please login again.", "error"); return; }
 
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
-
             try {
-                let empDocId = docId;
-                let storedPass = "";
-
-                if (empDocId) {
-                    /* docId দিয়ে কর্মী খোঁজা */
-                    const snap = await getDocs(query(collection(db, "EMPLOYEE_LIST"), where("id", "==", empId)));
-                    if (!snap.empty) {
-                        const data = snap.docs[0].data();
-                        empDocId = snap.docs[0].id;
-                        /* String() দিয়ে number/string উভয় type handle করা */
-                        storedPass = String(data.PASSWORD ?? data.password ?? "").trim();
-                    }
-                } else {
-                    /* docId না থাকলে ID দিয়ে খোঁজা */
-                    const snap = await getDocs(query(collection(db, "EMPLOYEE_LIST"), where("id", "==", empId)));
-                    if (!snap.empty) {
-                        empDocId = snap.docs[0].id;
-                        const d = snap.docs[0].data();
-                        storedPass = String(d.PASSWORD ?? d.password ?? "").trim();
-                    }
-                }
-
-                if (!storedPass) { showToast("Employee data not found!", "error"); resetSaveBtn(); return; }
-                if (currentPass !== storedPass) { showToast("Current password is incorrect!", "error"); resetSaveBtn(); return; }
-
-                /* কোন field name ব্যবহার হচ্ছে সেটা detect করা */
-                const snap2 = await getDocs(query(collection(db, "EMPLOYEE_LIST"), where("id", "==", empId)));
-                const empData = snap2.docs[0].data();
-                const fieldName = empData.PASSWORD !== undefined ? "PASSWORD" : "password";
-
-                await updateDoc(doc(db, "EMPLOYEE_LIST", empDocId), {
-                    [fieldName]: newPass,
-                    SAVED_BY: sessionStorage.getItem("savedId") || "",
-                });
-
+                await reauthenticateWithCredential(user, EmailAuthProvider.credential(user.email, currentPass));
+                await updatePassword(user, newPass);
                 showToast("Password changed successfully!", "success");
-                /* সব ফিল্ড ক্লিয়ার */
-                document.getElementById("cpCurrentPass").value = "";
-                document.getElementById("cpNewPass").value     = "";
-                document.getElementById("cpConfirmPass").value = "";
-                document.getElementById("strengthFill").style.width = "0%";
-                document.getElementById("strengthLabel").textContent = "";
-
-                /* পাসওয়ার্ড পরিবর্তন সফল — ২ সেকেন্ড পর logout করে login page এ নিয়ে যাওয়া */
-                setTimeout(() => {
-                    closeChangePasswordModal();
-                    /* session clear করে login screen দেখানো */
-                    sessionStorage.clear();
-                    document.getElementById("marqueeContainer").style.display = "none";
-                    document.getElementById("dashboardScreen").style.display  = "none";
-                    document.getElementById("loginScreen").style.display      = "flex";
-                    document.getElementById("loginForm").querySelectorAll("input").forEach(i => i.value = "");
-                    document.getElementById("idCheck").style.display   = "none";
-                    document.getElementById("idCross").style.display   = "none";
-                    document.getElementById("nameBadge").style.display  = "none";
-                    document.getElementById("desigBadge").style.display = "none";
-                    showToast("Please login again with your new password.", "info");
-                }, 2000);
-
+                setTimeout(() => { closeChangePasswordModal(); window.handleLogout(); showToast("Please login again with your new password.", "info"); }, 2000);
             } catch (err) {
-                showToast("Error: " + err.message, "error");
+                if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password")
+                    showToast("Current password is incorrect!", "error");
+                else showToast("Error: " + err.message, "error");
             }
-            resetSaveBtn();
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Password';
         };
 
-        function resetSaveBtn() {
-            const btn = document.getElementById("cpSaveBtn");
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Password';
-        }
-
-        function showError(msg) { showToast(msg, "error"); }
         function resetBtn() { const btn = document.getElementById("loginBtn"); btn.disabled = false; btn.innerHTML = "Login"; }
         function shake() { const card = document.querySelector(".login-card"); card.style.animation = "shake 0.3s ease"; setTimeout(() => { card.style.animation = ""; }, 300); }
-        /* Restore only a session created by successful login. */
-        window.addEventListener("load", () => {
-            if (sessionStorage.getItem("isLoggedIn") === "true" && sessionStorage.getItem("savedId")) {
-                const id    = sessionStorage.getItem("savedId");
-                const name  = sessionStorage.getItem("savedName");
-                const desig = sessionStorage.getItem("savedDesignation");
-                const time  = sessionStorage.getItem("loginTime");
-                document.getElementById("welcomeName").innerText     = name;
-                document.getElementById("sideProfileName").innerText = name;
-                document.getElementById("sideProfileRole").innerText = desig;
-                updateMarquee(id, name, desig, time);
-                document.getElementById("loginScreen").style.display    = "none";
-                document.getElementById("dashboardScreen").style.display = "block";
-            } else {
+
+        /* পেজ লোডে: Firebase-এ সত্যিই লগইন থাকলেই ড্যাশবোর্ড দেখানো */
+        onAuthStateChanged(auth, user => {
+            if (user && sessionStorage.getItem("isLoggedIn") === "true" && sessionStorage.getItem("savedId")) {
+                showDashboardInstant();
+            } else if (!user) {
                 sessionStorage.clear();
             }
-        });
+        }, () => {});
 
-        /* মার্কি আপডেট ফাংশন */
+        function showDashboardInstant() {
+            const g = k => sessionStorage.getItem(k) || "";
+            document.getElementById("welcomeName").innerText     = g("savedName");
+            document.getElementById("sideProfileName").innerText = g("savedName");
+            document.getElementById("sideProfileRole").innerText = g("savedDesignation");
+            updateMarquee(g("savedId"), g("savedName"), g("savedDesignation"), g("loginTime"));
+            document.getElementById("loginScreen").style.display     = "none";
+            document.getElementById("dashboardScreen").style.display = "block";
+        }
+
         function updateMarquee(id, name, desig, time) {
             const track = document.getElementById("infoMarquee");
             const container = document.getElementById("marqueeContainer");
@@ -1000,37 +826,27 @@
                 Welcome back to your dashboard! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             `;
             container.style.display = "block";
-            const textLen = track.innerText.length;
-            track.style.animationDuration = Math.max(20, textLen * 0.18) + "s";
+            track.style.animationDuration = Math.max(20, track.innerText.length * 0.18) + "s";
         }
 
-        /* লগআউট — session clear করে লগইন স্ক্রিনে ফেরা */
-        window.handleLogout = function() {
-            const authChannel = new BroadcastChannel('alamhow_user_auth');
-            authChannel.postMessage({ loggedOut: true });
+        window.handleLogout = async function() {
+            try { new BroadcastChannel('alamhow_user_auth').postMessage({ loggedOut: true }); } catch(e) {}
+            try { await signOut(auth); } catch(e) {}
             sessionStorage.clear();
             document.getElementById("marqueeContainer").style.display = "none";
             document.getElementById("dashboardScreen").style.display  = "none";
             document.getElementById("loginScreen").style.display      = "flex";
             document.getElementById("loginForm").querySelectorAll("input").forEach(i => i.value = "");
-            foundEmployee = null;
-            document.getElementById("idCheck").style.display   = "none";
-            document.getElementById("idCross").style.display   = "none";
-            document.getElementById("nameBadge").style.display  = "none";
-            document.getElementById("desigBadge").style.display = "none";
+            ["idCheck","idCross","nameBadge","desigBadge"].forEach(id => document.getElementById(id).style.display = "none");
         };
 
-        /* Open same-origin tools with an isolated copy of the authenticated session. */
         window.openPage = function(url) {
             if (sessionStorage.getItem("isLoggedIn") !== "true" || !sessionStorage.getItem("savedId")) {
                 window.location.replace("index.html");
                 return;
             }
             const page = window.open("about:blank", "_blank");
-            if (!page) {
-                showToast("Please allow pop-ups to open this page.", "error");
-                return;
-            }
+            if (!page) { showToast("Please allow pop-ups to open this page.", "error"); return; }
             ["isLoggedIn", "savedId", "savedName", "savedDesignation", "loginTime", "savedDocId"]
                 .forEach(key => {
                     const value = sessionStorage.getItem(key);
@@ -1049,7 +865,7 @@
     </script>
 
     <script>
-        /* পাসওয়ার্ড দেখানো/লুকানো টগল */
+        /* পাসওয়ার্ড দেখানো/লুকানো */
         function togglePass() {
             const inp = document.getElementById("password");
             const eye = document.getElementById("passEye");
@@ -1063,17 +879,16 @@
             else { inp.type = "password"; eyeIcon.classList.replace("fa-eye-slash", "fa-eye"); }
         }
 
-        /* পাসওয়ার্ড শক্তি মাপার ফাংশন */
+        /* পাসওয়ার্ড শক্তি মাপা */
         function checkStrength(val) {
             const fill  = document.getElementById("strengthFill");
             const label = document.getElementById("strengthLabel");
             let score = 0;
-            if (val.length >= 4) score++;
-            if (val.length >= 8) score++;
+            if (val.length >= 6) score++;
+            if (val.length >= 10) score++;
             if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
             if (/[0-9]/.test(val)) score++;
             if (/[^A-Za-z0-9]/.test(val)) score++;
-
             const levels = [
                 { w: "0%",   color: "#e2e8f0", text: "" },
                 { w: "25%",  color: "#e74c3c", text: "Weak" },
@@ -1089,55 +904,7 @@
             label.style.color     = lvl.color;
         }
 
-        /* Admin check — শুধু ACL-0001 এই ফিচার ব্যবহার করতে পারবে */
-        window.openSetPasswordModal = function() {
-            const currentId = sessionStorage.getItem("savedId") || "";
-            if (currentId !== "ACL-0001") {
-                showToast("⛔ This feature is only available for Admin (ACL-0001)!", "error");
-                return;
-            }
-            document.getElementById("spSearchId").value = "";
-            document.getElementById("spEmpCard").classList.remove("visible");
-            document.getElementById("spPassFields").style.display = "none";
-            document.getElementById("spMsg").className = "modal-msg";
-            document.getElementById("spMsg").style.display = "none";
-            document.getElementById("setPassModal").classList.add("active");
-            closeSidebar();
-        };
-
-        window.closeSetPasswordModal = function() {
-            document.getElementById("setPassModal").classList.remove("active");
-        };
-
-        /* Backdrop click-এ মোডাল বন্ধ */
-        document.getElementById("setPassModal").addEventListener("click", function(e) {
-            if (e.target === this) closeSetPasswordModal();
-        });
-
-        /* Set Password মোডালের শক্তি বার */
-        function checkStrengthSP(val) {
-            const fill  = document.getElementById("spStrengthFill");
-            const label = document.getElementById("spStrengthLabel");
-            let score = 0;
-            if (val.length >= 4) score++;
-            if (val.length >= 8) score++;
-            if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
-            if (/[0-9]/.test(val)) score++;
-            if (/[^A-Za-z0-9]/.test(val)) score++;
-            const levels = [
-                { w:"0%", color:"#e2e8f0", text:"" },
-                { w:"25%", color:"#e74c3c", text:"Weak" },
-                { w:"50%", color:"#f39c12", text:"Fair" },
-                { w:"75%", color:"#3498db", text:"Good" },
-                { w:"90%", color:"#27ae60", text:"Strong" },
-                { w:"100%", color:"#1abc9c", text:"Very Strong" },
-            ];
-            const lvl = levels[Math.min(score, 5)];
-            fill.style.width = lvl.w; fill.style.background = lvl.color;
-            label.textContent = lvl.text; label.style.color = lvl.color;
-        }
-
-        /* পাসওয়ার্ড পরিবর্তন মোডাল খোলা */
+        /* পাসওয়ার্ড পরিবর্তন মোডাল */
         window.openChangePasswordModal = function() {
             const id   = sessionStorage.getItem("savedId")   || "—";
             const name = sessionStorage.getItem("savedName") || "—";
@@ -1157,7 +924,6 @@
             document.getElementById("changePassModal").classList.remove("active");
         };
 
-        /* Backdrop click-এ মোডাল বন্ধ */
         document.getElementById("changePassModal").addEventListener("click", function(e) {
             if (e.target === this) closeChangePasswordModal();
         });
@@ -1175,7 +941,6 @@
         if (mobileMenuTrigger) mobileMenuTrigger.onclick = toggleSidebar;
         if (overlay)           overlay.onclick           = closeSidebar;
 
-        /* মেনু আইটেম ক্লিক — একটি খুললে বাকি বন্ধ হবে */
         menuItems.forEach(item => {
             item.querySelector(".icon-link").onclick = function() {
                 const isOpen = item.classList.contains("showMenu");
@@ -1185,39 +950,36 @@
             };
         });
 
-        /* সাইডবার overflow হলে profile slide out হবে */
         function checkNavOverflow() {
             setTimeout(() => {
                 const navLinks = document.querySelector(".nav-links");
                 const profile  = document.querySelector(".sidebar-profile");
                 const isOverflowing = navLinks.scrollHeight > navLinks.clientHeight;
                 profile.classList.toggle("slide-out", isOverflowing);
-            }, 420); /* sub-menu animation শেষ হওয়ার পরে check */
+            }, 420);
         }
 
-        /* সাব-মেনু active state — multiple active সম্ভব */
         document.querySelectorAll(".sub-menu li a").forEach(link => {
             link.addEventListener("click", function() {
                 this.classList.toggle("active");
             });
         });
 
-        /* Home বাটনে click করলে সব active state clear */
         document.querySelector(".home-link").addEventListener("click", function() {
             document.querySelectorAll(".sub-menu li a").forEach(l => l.classList.remove("active"));
             checkNavOverflow();
         });
 
-        /* Keyboard shortcut: Escape = মোডাল বন্ধ, Enter = লগইন */
+        /* Escape = মোডাল বন্ধ, Enter = লগইন */
         document.addEventListener("keydown", e => {
-            if (e.key === "Escape") { closeChangePasswordModal(); closeSetPasswordModal(); }
+            if (e.key === "Escape") { closeChangePasswordModal(); }
             if (e.key === "Enter" && document.getElementById("loginScreen").style.display !== "none") {
                 window.handleLogin && window.handleLogin();
             }
         });
     </script>
 
-    <!-- ডার্ক মোড স্ক্রিপ্ট -->
+    <!-- ডার্ক মোড -->
     <script>
         const darkToggle = document.getElementById("darkToggle");
         const darkKnob   = document.getElementById("darkKnob");
@@ -1225,11 +987,9 @@
         function applyDark(on) {
             document.body.classList.toggle("dark-mode", on);
             darkKnob.textContent = on ? "🌙" : "☀️";
-            /* localStorage-এ preference সংরক্ষণ */
             localStorage.setItem("darkMode", on ? "1" : "0");
         }
 
-        /* পেজ লোডে saved preference apply করা */
         applyDark(localStorage.getItem("darkMode") === "1");
 
         darkToggle.addEventListener("click", () => {
@@ -1239,7 +999,7 @@
 
     <div id="toastContainer"></div>
 
-    <!-- টোস্ট নোটিফিকেশন ফাংশন -->
+    <!-- টোস্ট নোটিফিকেশন -->
     <script>
         window.showToast = function(message, type = "info", duration = 3500) {
             const icons = { success: "fa-circle-check", error: "fa-circle-xmark", warning: "fa-triangle-exclamation", info: "fa-circle-info" };
@@ -1253,7 +1013,6 @@
                 <div class="toast-progress" style="animation-duration:${duration}ms"></div>
             `;
             container.appendChild(toast);
-            /* duration পরে toast hide করা */
             setTimeout(() => {
                 toast.classList.add("hide");
                 setTimeout(() => toast.remove(), 300);
