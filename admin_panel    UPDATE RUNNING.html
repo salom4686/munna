@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <style>
       :root {
         /* Navy Blue & Golden Palette */
@@ -1335,7 +1336,10 @@
       // ==========================================
       // 🔑 ACCESS CONTROL MANAGEMENT
       // ==========================================
-      const ADMIN_PASSWORD = "admin1234"; // <--- আপনার পছন্দের পাসওয়ার্ডটি এখানে দিন
+      const ALLOWED_EMAILS = [
+        "ipi-004686@alamhow.app",
+        "acl-0004@alamhow.app",
+      ];
 
       const FB_CONFIG = {
         apiKey: "AIzaSyA3uvPJTI3XXKQ2tbbmlKhEHYjh5Sz_r_k",
@@ -1394,15 +1398,28 @@
           firebase.initializeApp(FB_CONFIG);
           fsDb = firebase.firestore();
           rtDb = firebase.database();
-          splashMsg.textContent = "Connected ✓";
-          fillEl.style.width = "100%";
-          clearInterval(fillInt);
-          setTimeout(function () {
-            document.getElementById("splash").classList.add("hide");
-            // Redirecting straight to Security Gate instead of direct db-picker
-            document.getElementById("auth-screen").style.display = "flex";
-            document.getElementById("admin-pass-input").focus();
-          }, 500);
+          splashMsg.textContent = "Checking login...";
+
+          firebase.auth().onAuthStateChanged(function (user) {
+            clearInterval(fillInt);
+            fillEl.style.width = "100%";
+
+            if (user && ALLOWED_EMAILS.indexOf(user.email) !== -1) {
+              splashMsg.textContent = "Connected ✓";
+              setTimeout(function () {
+                document.getElementById("splash").classList.add("hide");
+                document.getElementById("auth-screen").style.display = "none";
+                document.getElementById("db-picker").style.display = "flex";
+                pickDb("firestore");
+              }, 500);
+            } else {
+              splashMsg.textContent = "Login required. Redirecting...";
+              splashMsg.style.color = "#ff4a6b";
+              setTimeout(function () {
+                location.replace("index.html");
+              }, 1200);
+            }
+          });
         } catch (e) {
           splashMsg.textContent = "❌ " + e.message;
           splashMsg.style.color = "#ff4a6b";
@@ -1410,20 +1427,7 @@
         }
       })();
 
-      function verifyAdminPassword() {
-        const inputEl = document.getElementById("admin-pass-input");
-        if (inputEl.value === ADMIN_PASSWORD) {
-          toast("🔓 Access Granted! Welcome.", "ok");
-          document.getElementById("auth-screen").style.display = "none";
-          document.getElementById("db-picker").style.display = "flex";
-          pickDb("firestore");
-        } else {
-          toast("❌ Incorrect Password! Try again.", "err");
-          inputEl.value = "";
-          inputEl.focus();
-        }
-      }
-      window.verifyAdminPassword = verifyAdminPassword;
+      window.verifyAdminPassword = function () {};
 
       function pickDb(t) {
         selectedPick = t;
