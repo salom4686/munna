@@ -1836,14 +1836,12 @@
         #reportTable .screen-emp-header {
           display: none !important;
         }
-        #reportTable .print-merged-emp-header,
-        #reportTable .print-emp-id {
+        #reportTable .print-merged-emp-header {
           display: block !important;
         }
+        /* প্রিন্টে Employee ID দেখানো হবে না */
         #reportTable .print-emp-id {
-          font-size: 8px;
-          font-weight: 700;
-          color: #000 !important;
+          display: none !important;
         }
         #reportTable .print-net-words,
         #reportTable .print-net-words-label {
@@ -6966,7 +6964,7 @@
               <tr>
                 <th rowspan="3">SL</th>
                 <th rowspan="3"><span class="screen-emp-header">EMP ID</span></th>
-                <th rowspan="3"><span class="screen-emp-header">Employee Name Passport</span><span class="print-merged-emp-header">EMP ID<br>EMPLOYEE NAME<br>PASSPORT</span></th>
+                <th rowspan="3"><span class="screen-emp-header">Employee Name Passport</span><span class="print-merged-emp-header">EMPLOYEE NAME<br>PASSPORT</span></th>
                 <th rowspan="3">Designation</th>
                 <th rowspan="3"> Basic</th>
                 <!-- ATTENDANCE STATUS group -->
