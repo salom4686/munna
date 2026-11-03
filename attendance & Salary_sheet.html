@@ -1233,6 +1233,12 @@
         color: #6a88aa;
       }
 
+      .pm-sub {
+        display: none;
+      }
+      .pm-print-only {
+        display: none;
+      }
       .ot-amt-cell {
         font-family: monospace;
         font-weight: 700;
@@ -1767,6 +1773,27 @@
         col.col-otamt {
           visibility: visible;
         }
+        /* OT Hours এখন OT Amount-এর নিচে দেখায় — আলাদা কলাম প্রিন্টে লুকানো */
+        col.col-othrs {
+          visibility: collapse;
+        }
+        /* প্রিন্টে header-এ শুধু "OVER TIME" — নিচে Amount/Hrs লেখা থাকবে না */
+        .pm-print-hide {
+          display: none !important;
+        }
+        th.pm-print-only {
+          display: table-cell !important;
+        }
+        /* H.Day / S.Day-এর নিচে amount, OT Amount-এর নিচে hours */
+        .pm-sub {
+          display: block !important;
+          font-size: 7px;
+          font-weight: 600;
+          line-height: 1.15;
+          color: #000;
+          margin-top: 1px;
+          white-space: nowrap;
+        }
         col.col-signature {
           width: 140px !important;
         }
@@ -1833,11 +1860,11 @@
           width: 3.2% !important;
         } /* P */
         #reportTable colgroup col:nth-child(7) {
-          width: 3.2% !important;
-        } /* H Day */
+          width: 4.6% !important;
+        } /* H Day (+ amount below) */
         #reportTable colgroup col:nth-child(8) {
-          width: 3.2% !important;
-        } /* S Day */
+          width: 4.6% !important;
+        } /* S Day (+ amount below) */
         #reportTable colgroup col:nth-child(9) {
           width: 3.2% !important;
         } /* A */
@@ -1854,8 +1881,8 @@
           width: 3.2% !important;
         } /* OT Hours */
         #reportTable colgroup col:nth-child(15) {
-          width: 4.2% !important;
-        } /* OT Amount */
+          width: 4.8% !important;
+        } /* OT Amount (+ hours below) */
         #reportTable colgroup col:nth-child(17) {
           width: 3.2% !important;
         } /* Oth */
@@ -3533,9 +3560,9 @@
           (att.others || 0) +
           pBonus +
           aBonus;
-        // ✅ NPS/CSG basis = Basic + Holiday + Sunday + OT
-        // (Others, P Bonus, A Bonus, F Trv excluded)
-        const npsCsgBasis = normalAmt + holidayPay + sundayPay + totalOT;
+        // ✅ NPS/CSG basis = শুধু Basic (Normal Pay)
+        // (Holiday, Sunday, OT, Others, P Bonus, A Bonus, F Trv excluded)
+        const npsCsgBasis = normalAmt;
         // ✅ FIX: Round to whole Taka, same as Monthly Summary's nps/csg —
         // previously this rounded to 2 decimals here but whole numbers in the
         // summary table, causing a 1-taka Net Pay mismatch for some employees.
@@ -5990,7 +6017,7 @@
         const aBonus = parseFloat(aBonusInput.value) || 0;
         const fTrv = parseFloat(fTrvInput?.value) || 0;
         const others = parseFloat(othersInput?.value) || 0;
-        // NPS/CSG basis = Normal Pay + OT only — fixed at render time, unaffected by
+        // NPS/CSG basis = Basic (Normal Pay) only — fixed at render time, unaffected by
         // Bonus/F Trv edits, so we keep whatever is already shown in the cells.
         const nps = parseFloat(npsCell.textContent) || 0;
         const csg = parseFloat(csgCell.textContent) || 0;
@@ -6397,6 +6424,11 @@
         tf.querySelector(".tf-abs").textContent = totAbs;
         tf.querySelector(".tf-ot").textContent = totOt.toFixed(2);
         tf.querySelector(".tf-othrs").textContent = totOtHrs.toFixed(1);
+        // Print layout: Holiday/Sunday amount sits under the day count,
+        // OT hours sits under the OT amount.
+        tf.querySelector(".tf-hol-p").textContent = totHol.toFixed(2);
+        tf.querySelector(".tf-sun-p").textContent = totSun.toFixed(2);
+        tf.querySelector(".tf-othrs-p").textContent = totOtHrs.toFixed(1) + " h";
         tf.querySelector(".tf-oth").textContent = totOth.toFixed(2);
         tf.querySelector(".tf-pb").textContent = totPB.toFixed(2);
         tf.querySelector(".tf-ab").textContent = totAB.toFixed(2);
@@ -6775,9 +6807,9 @@
               const initFTrv = w.fTrv || 0;
               // Gross paid still includes Holiday/Sunday/Others/Bonus (F Trv excluded, added separately)
               const grossBase = baseGross + initPB + initAB;
-              // ✅ NPS/CSG basis = Basic + Holiday + Sunday + OT
-              // (Others, P Bonus, A Bonus, F Trv excluded)
-              const npsCsgBasis = rowTotalBasic + w.hol + w.sun + w.otA;
+              // ✅ NPS/CSG basis = শুধু Basic (Normal Pay)
+              // (Holiday, Sunday, OT, Others, P Bonus, A Bonus, F Trv excluded)
+              const npsCsgBasis = rowTotalBasic;
               const nps = Math.round(npsCsgBasis * 0.01);
               const csg = Math.round(npsCsgBasis * 0.015);
               const totDed = w.adv + w.fine + nps + csg;
@@ -6828,15 +6860,15 @@
                 <div style="font-size:9px;color:#666;font-style:italic">(${dailyDisplay})</div>
               </td>
              <td class="text-right">${w.norm}</td>
-<td class="text-right">${w.hDay}</td>
-<td class="text-right">${w.sDay}</td>
+<td class="text-right">${w.hDay}${w.hol > 0 ? `<div class="pm-sub">${w.hol.toFixed(2)}</div>` : ""}</td>
+<td class="text-right">${w.sDay}${w.sun > 0 ? `<div class="pm-sub">${w.sun.toFixed(2)}</div>` : ""}</td>
 <td class="text-right">${w.abs}</td>
 <td class="text-right">${w.sl}</td>
 <td class="text-right">${w.inj}</td>
 <td class="text-right">${w.pres}</td>
 <td class="text-right">${w.hol.toFixed(2)}</td>
 <td class="text-right">${w.sun.toFixed(2)}</td>
-              <td class="text-right">${w.otA.toFixed(2)}</td>
+              <td class="text-right">${w.otA.toFixed(2)}${w.otH > 0 ? `<div class="pm-sub">${w.otH.toFixed(1)} h</div>` : ""}</td>
               <td class="text-right">${w.otH.toFixed(1)}</td>
               <td class="text-right" style="padding:0">
                 <input type="number" id="oth_${id}" class="bonus-input" value="${initOth || ""}"
@@ -6920,7 +6952,7 @@
               <col><col><col><col><col>
               <col>
               <col><col class="col-holiday"><col class="col-sunday"><col class="col-otamt">
-              <col><col><col><col>
+              <col class="col-othrs"><col><col><col>
               <col>
               <col><col><col><col><col><col>
               <col>
@@ -6960,7 +6992,8 @@
                 <!-- Earning sub -->
                 <th rowspan="2" class="th-earn-sub">Holi day</th>
                 <th rowspan="2" class="th-earn-sub">Sun day</th>
-                <th colspan="2" class="th-earn-sub ot-group-header">OVER TIME</th>
+                <th colspan="2" class="th-earn-sub ot-group-header pm-print-hide">OVER TIME</th>
+                <th colspan="2" rowspan="2" class="th-earn-sub ot-group-header pm-print-only">OVER TIME</th>
                 <th rowspan="2" class="th-earn-sub"><span class="earning-others-screen">OTHERS</span><span class="earning-others-print">Oth</span></th>
                 <th rowspan="2" class="th-pbonus" title="Performance Bonus"><span class="earning-label-screen">PERFO<br>BONUS</span><span class="earning-label-print">P<br><span class="bonus-label">Bonus</span></span></th>
                 <th rowspan="2" class="th-abonus" title="Attendance Bonus"><span class="earning-label-screen">ATTEN<br>BONUS</span><span class="earning-label-print">A<br><span class="bonus-label">Bonus</span></span></th>
@@ -6976,8 +7009,8 @@
               <tr>
                 <th class="th-att-sub"><span class="att-status-main">SL</span></th>
                 <th class="th-att-sub"><span class="att-status-main">INJ</span></th>
-                <th class="th-earn-sub ot-compact-header">Amount</th>
-                <th class="th-earn-sub ot-compact-header">Hrs</th>
+                <th class="th-earn-sub ot-compact-header pm-print-hide">Amount</th>
+                <th class="th-earn-sub ot-compact-header pm-print-hide">Hrs</th>
               </tr>
             </thead>
             <tbody>${rows}</tbody>
@@ -6989,15 +7022,15 @@
                   <div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div>
                 </td>
                 <td class="text-right tf-norm">${totals.norm}</td>
-                <td class="text-right tf-hday">${totals.hDay}</td>
-                <td class="text-right tf-sday">${totals.sDay}</td>
+                <td class="text-right"><span class="tf-hday">${totals.hDay}</span><div class="pm-sub tf-hol-p">${totals.hol.toFixed(2)}</div></td>
+                <td class="text-right"><span class="tf-sday">${totals.sDay}</span><div class="pm-sub tf-sun-p">${totals.sun.toFixed(2)}</div></td>
                 <td class="text-right tf-abs">${totals.abs}</td>
                 <td class="text-right tf-sl">${totals.sl}</td>
                 <td class="text-right tf-inj">${totals.inj}</td>
                 <td class="text-right tf-pres">${totals.pres}</td>
                 <td class="text-right tf-hol">${totals.hol.toFixed(2)}</td>
                 <td class="text-right tf-sun">${totals.sun.toFixed(2)}</td>
-                <td class="text-right tf-ot">${totals.otA.toFixed(2)}</td>
+                <td class="text-right"><span class="tf-ot">${totals.otA.toFixed(2)}</span><div class="pm-sub tf-othrs-p">${totals.otH.toFixed(1)} h</div></td>
                 <td class="text-right tf-othrs">${totals.otH.toFixed(1)}</td>
                 <td class="text-right tf-oth">${totals.others.toFixed(2)}</td>
                 <td class="text-right tf-pb">${totals.pBonus.toFixed(2)}</td>
