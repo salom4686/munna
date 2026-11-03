@@ -1974,7 +1974,6 @@
     </style>
   </head>
   <body>
-  <script src="auth-audit.js"></script>
     <div class="page-header">
       <div class="page-header-brand">
         <img
@@ -3151,6 +3150,91 @@
         return result;
       }
 
+      // ✅ AUTO OT RATE (Over Time Entry-র নিয়মেই)
+      //   Hourly OT Rate = (Monthly Basic ÷ Working Days ÷ 8) × 1.5
+      //   Sunday / Public Holiday / Season হলে Rate × 2
+      // Basic = OT-র তারিখে কার্যকর salary (getSalaryAsOf), Working Days =
+      // Salary Sheet-এর getWorkingDays()-এর নিয়মে ওই মাসের হিসাব।
+      // Salary / Working Days না পেলে ডেটাবেসে সেভ থাকা OT_Rate-ই ব্যবহার হবে।
+      const OT_BASIC_MULTIPLIER = 1.5;
+      const OT_DOUBLE_DAY_MULTIPLIER = 2;
+      const OT_DOUBLE_STATUSES = ["Public Holiday", "Season"];
+      let _otHolidayDocs = null;
+      let _otHolidayPromise = null;
+      const _otWdCache = {};
+
+      function ensureOtRateContext() {
+        if (_otHolidayDocs) return Promise.resolve();
+        if (!_otHolidayPromise) {
+          _otHolidayPromise = firebase
+            .firestore()
+            .collection("HOLIDAY_LIST")
+            .get()
+            .then((snap) => {
+              const docs = [];
+              snap.forEach((doc) =>
+                docs.push({ id: doc.id, status: doc.data().HOLIDAY_STATUS }),
+              );
+              _otHolidayDocs = docs;
+            })
+            .catch((e) => {
+              console.error("OT rate: holiday load error:", e);
+              _otHolidayPromise = null; // পরের বার আবার চেষ্টা হবে
+            });
+        }
+        return _otHolidayPromise;
+      }
+
+      function _otWorkingDaysFor(year, month0) {
+        const key = `${year}-${month0}`;
+        if (_otWdCache[key] !== undefined) return _otWdCache[key];
+        const totalDays = new Date(year, month0 + 1, 0).getDate();
+        let sundays = 0;
+        for (let i = 1; i <= totalDays; i++) {
+          if (new Date(year, month0, i).getDay() === 0) sundays++;
+        }
+        let holidays = 0;
+        (_otHolidayDocs || []).forEach((h) => {
+          const hd = new Date(h.id);
+          if (hd.getFullYear() === year && hd.getMonth() === month0) {
+            if (hd.getDay() !== 0) holidays++;
+          }
+        });
+        return (_otWdCache[key] = totalDays - sundays - holidays);
+      }
+
+      // row.OT_Rate-কে auto-calculated rate দিয়ে বদলে দেয় (DB-তে লেখে না)।
+      // সফল হলে নতুন rate, না হলে null রিটার্ন করে (আগের rate অপরিবর্তিত)।
+      function applyAutoOtRate(row, fallbackDateKey) {
+        if (!row || !_otHolidayDocs) return null;
+        const m =
+          String(row.OT_Date || "").match(/\d{4}-\d{2}-\d{2}/) ||
+          String(fallbackDateKey || "").match(/\d{4}-\d{2}-\d{2}/);
+        if (!m) return null;
+        const dateStr = m[0];
+        const emp = _cache.empMap[String(row.ID || "").trim()];
+        if (!emp) return null;
+        const salary = getSalaryAsOf(emp, dateStr);
+        const d = new Date(`${dateStr}T00:00:00`);
+        const wd = _otWorkingDaysFor(d.getFullYear(), d.getMonth());
+        if (!salary || !wd || wd <= 0) return null;
+        const isDouble =
+          d.getDay() === 0 ||
+          _otHolidayDocs.some(
+            (h) => h.id === dateStr && OT_DOUBLE_STATUSES.includes(h.status),
+          );
+        const base = parseFloat(
+          ((salary / wd / 8) * OT_BASIC_MULTIPLIER).toFixed(2),
+        );
+        const rate = parseFloat(
+          (base * (isDouble ? OT_DOUBLE_DAY_MULTIPLIER : 1)).toFixed(2),
+        );
+        if (row._storedOtRate === undefined)
+          row._storedOtRate = row.OT_Rate;
+        row.OT_Rate = rate;
+        return rate;
+      }
+
       function isCookWorkingAs(record) {
         return String(record.WORKING_AS || "")
           .trim()
@@ -3339,6 +3423,7 @@
         const otMap = {};
         const otSnap = await rtdb.ref("OVER_TIME").once("value");
         const otData = otSnap.val() || {};
+        await ensureOtRateContext();
         for (const monthKey in otData) {
           const monthObj = otData[monthKey];
           if (typeof monthObj !== "object" || !monthObj) continue;
@@ -3352,6 +3437,7 @@
               if (!otDateStr) continue;
               if (otDateStr < dFromVal || otDateStr > dToVal) continue;
               const id = String(row.ID).trim();
+              applyAutoOtRate(row, otDateStr);
               const otHrs = parseFloat(
                 row.TOTAL_OT_HOURS || row.Total_OT_Hours || 0,
               );
@@ -5204,6 +5290,7 @@
           const otSnap = await rtdb.ref("OVER_TIME").once("value");
           const otData = otSnap.val() || {};
           let otMap = {};
+          await ensureOtRateContext();
           for (const my in otData) {
             const md = otData[my];
             if (typeof md !== "object") continue;
@@ -5212,8 +5299,10 @@
               if (typeof dr !== "object") continue;
               for (const rk in dr) {
                 const row = dr[rk];
-                if (row && String(row.ID) === String(empId))
+                if (row && String(row.ID) === String(empId)) {
+                  applyAutoOtRate(row, df);
                   otMap[row.OT_Date || df] = row;
+                }
               }
             }
           }
@@ -6042,10 +6131,6 @@
           }
           if (input.value.trim() === "") {
             await ref.remove();
-            await firebase
-              .database()
-              .ref(`BONUS_ENTRY/${getMonthKey(date)}/DATE_${date}/${empId}`)
-              .update({ SAVED_BY: window.getAuditUserId() });
           } else {
             await firebase
               .database()
@@ -6054,7 +6139,6 @@
                 ID: empId,
                 DATE: date,
                 [field]: parseFloat(input.value) || 0,
-                SAVED_BY: window.getAuditUserId(),
               });
           }
           input.dataset.previousValue = input.value;
@@ -6181,7 +6265,6 @@
             if (hasNewValue || hasOldValue) {
               updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/ID`] = id;
               updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/DATE`] = date;
-              updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/SAVED_BY`] = window.getAuditUserId();
               Object.entries(fieldValues).forEach(([field, rawValue]) => {
                 updates[`BONUS_ENTRY/${monthKey}/${dateKey}/${id}/${field}`] =
                   rawValue ? parseFloat(rawValue) || 0 : null;
@@ -6561,7 +6644,8 @@
             workers[d.ID].others += parseFloat(d.AMOUNT) || 0;
           });
 
-          // OT loop (unchanged)
+          // OT loop — OT rate auto-calculated (Basic ÷ WD ÷ 8 × 1.5, Sun/Holiday ×2)
+          await ensureOtRateContext();
           for (const my in otData) {
             const md = otData[my];
             if (typeof md !== "object") continue;
@@ -6574,6 +6658,7 @@
                   const otDate = new Date(row.OT_Date || df);
                   if (dFromVal && dToVal && (otDate < dFrom || otDate > dTo))
                     continue;
+                  applyAutoOtRate(row, df);
                   workers[row.ID].otH += parseFloat(row.TOTAL_OT_HOURS) || 0;
                   workers[row.ID].otA +=
                     parseFloat(row.TOTAL_OT_HOURS || 0) *
@@ -7043,6 +7128,7 @@
           const otSnap = await rtdb.ref("OVER_TIME").once("value");
           const otData = otSnap.val() || {};
           const records = [];
+          await ensureOtRateContext();
           for (const my in otData) {
             const md = otData[my];
             if (typeof md !== "object") continue;
@@ -7051,7 +7137,10 @@
               if (typeof dr !== "object") continue;
               for (const rk in dr) {
                 const row = dr[rk];
-                if (row && row.ID) records.push(row);
+                if (row && row.ID) {
+                  applyAutoOtRate(row, df);
+                  records.push(row);
+                }
               }
             }
           }
@@ -7113,6 +7202,7 @@
             const otSnap = await rtdb.ref("OVER_TIME").once("value");
             const otData = otSnap.val() || {};
             _otCache = [];
+            await ensureOtRateContext();
             for (const my in otData) {
               const md = otData[my];
               if (typeof md !== "object") continue;
@@ -7121,7 +7211,10 @@
                 if (typeof dr !== "object") continue;
                 for (const rk in dr) {
                   const row = dr[rk];
-                  if (row && row.ID) _otCache.push(row);
+                  if (row && row.ID) {
+                    applyAutoOtRate(row, df);
+                    _otCache.push(row);
+                  }
                 }
               }
             }
@@ -8117,7 +8210,6 @@
             HOLIDAY_WORK: holiday,
             SUNDAY_WORK: sunday,
             FINE: fine,
-            SAVED_BY: window.getAuditUserId(),
           };
           if (["INJURY", "SICK LEAVE"].includes(status)) {
             update.REMARK = "NORMAL WORK";
@@ -8129,7 +8221,7 @@
             parseFloat(document.getElementById("deField_hrs").value) || 0;
           const rate =
             parseFloat(document.getElementById("deField_rate").value) || 0;
-          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate, SAVED_BY: window.getAuditUserId() };
+          const update = { TOTAL_OT_HOURS: hrs, OT_Rate: rate };
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         } else if (type === "advance") {
@@ -8141,7 +8233,7 @@
           const note = (
             document.getElementById("deField_note").value || ""
           ).trim();
-          const update = { type: t, amount, note, SAVED_BY: window.getAuditUserId() };
+          const update = { type: t, amount, note };
           await firebase.database().ref(r.path).update(update);
           after = { ...before, ...update };
         }
@@ -8244,10 +8336,7 @@
             if (type === "attendance") {
               await firebase.firestore().doc(r.path).delete();
             } else if (type === "fine") {
-              await firebase.firestore().doc(r.path).update({
-                FINE: 0,
-                SAVED_BY: window.getAuditUserId(),
-              });
+              await firebase.firestore().doc(r.path).update({ FINE: 0 });
             } else if (type === "ot" || type === "advance") {
               await firebase.database().ref(r.path).remove();
             }
@@ -8297,7 +8386,6 @@
             before: before || null,
             after: after || null,
             reason: reason || "",
-            userId: window.getAuditUserId(),
             timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           });
         } catch (e) {
