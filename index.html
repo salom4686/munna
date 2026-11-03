@@ -39,7 +39,8 @@
         body.dark-mode .login-card p { color: #7f8c8d; }
         body.dark-mode .input-group input { background: #0f1923; border-color: #2a3a50; color: #e0e6ed; }
         body.dark-mode .input-group input:focus { background: #1a2535; border-color: var(--accent-gold); }
-        body.dark-mode .input-group input:read-only { background: #0f1923; color: #7f8c8d; }
+        body.dark-mode .input-group input:read-only { background: #0f1923; color: #f1f5f9; -webkit-text-fill-color: #f1f5f9; }
+        body.dark-mode .input-group input:read-only::placeholder { color: #5f6f82; -webkit-text-fill-color: #5f6f82; }
 
         body.dark-mode .sidebar { background-color: #0d1b2a; }
         body.dark-mode .icon-link { background: #1e3a5f; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
@@ -119,7 +120,8 @@
             font-family: 'Poppins', sans-serif;
         }
         .input-group input:focus { border-color: var(--primary-blue); background: #fff; box-shadow: 0 0 0 4px rgba(27, 54, 93, 0.1); }
-        .input-group input:read-only { background: #eef2f7; color: #555; cursor: default; }
+        .input-group input:read-only { background: #eef2f7; color: var(--primary-blue); font-weight: 500; opacity: 1; -webkit-text-fill-color: var(--primary-blue); cursor: default; }
+        .input-group input:read-only::placeholder { color: #a0aab2; -webkit-text-fill-color: #a0aab2; font-weight: 400; }
         .input-group input:read-only:focus { border-color: #e2e8f0; box-shadow: none; }
 
         .id-spinner { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--primary-blue); font-size: 14px; display: none; animation: spin 0.8s linear infinite; }
@@ -427,12 +429,10 @@
                 <div class="input-group">
                     <i class="fa-solid fa-user field-icon"></i>
                     <input type="text" id="userName" placeholder="Full Name" readonly>
-                    <span class="autofill-badge" id="nameBadge">AUTO</span>
                 </div>
                 <div class="input-group">
                     <i class="fa-solid fa-briefcase field-icon"></i>
                     <input type="text" id="userDesignation" placeholder="Designation" readonly>
-                    <span class="autofill-badge" id="desigBadge">AUTO</span>
                 </div>
                 <div class="input-group">
                     <i class="fa-solid fa-lock field-icon"></i>
@@ -682,25 +682,55 @@
         const ADMIN_INFO = { name: "SHOFIUL ALOM", designation: "ADMIN" };
         const toEmail = id => id.trim().toLowerCase() + "@alamhow.app";
 
-        /* ID লিখলে অ্যাডমিনের নাম ও পদবি দেখানো */
+        /* ID লিখলে নাম ও পদবি অটো দেখানো (Admin + EMPLOYEE_LIST) */
+        let idLookupTimer = null;
+        let idLookupSeq = 0;
+        const idLookupCache = {};
+
+        function resetIdUI() {
+            document.getElementById("userName").value = "";
+            document.getElementById("userDesignation").value = "";
+            ["idSpinner", "idCheck", "idCross"]
+                .forEach(id => document.getElementById(id).style.display = "none");
+        }
+
+        function fillIdUI(name, desig) {
+            document.getElementById("userName").value = name;
+            document.getElementById("userDesignation").value = desig;
+            document.getElementById("idCheck").style.display = "inline-block";
+        }
+
         window.onIdInput = function(val) {
-            const nameInput  = document.getElementById("userName");
-            const desigInput = document.getElementById("userDesignation");
-            const checkIcon  = document.getElementById("idCheck");
-            const crossIcon  = document.getElementById("idCross");
-            const nameBadge  = document.getElementById("nameBadge");
-            const desigBadge = document.getElementById("desigBadge");
-            document.getElementById("idSpinner").style.display = "none";
-            nameInput.value = ""; desigInput.value = "";
-            checkIcon.style.display = "none"; crossIcon.style.display = "none";
-            nameBadge.style.display = "none"; desigBadge.style.display = "none";
-            if (val.trim().toUpperCase() === ADMIN_ID) {
-                nameInput.value = ADMIN_INFO.name;
-                desigInput.value = ADMIN_INFO.designation;
-                checkIcon.style.display = "inline-block";
-                nameBadge.style.display = "inline-block";
-                desigBadge.style.display = "inline-block";
-            }
+            const id = val.trim().toUpperCase();
+            clearTimeout(idLookupTimer);
+            const seq = ++idLookupSeq;      // পুরনো সার্চের রেজাল্ট যেন নতুনটাকে না ঢেকে দেয়
+            resetIdUI();
+            if (!id) return;
+
+            if (id === ADMIN_ID) { fillIdUI(ADMIN_INFO.name, ADMIN_INFO.designation); return; }
+            if (idLookupCache[id]) { fillIdUI(idLookupCache[id].name, idLookupCache[id].desig); return; }
+
+            // টাইপ থামার ০.৪ সেকেন্ড পরে সার্চ হবে
+            idLookupTimer = setTimeout(async () => {
+                const spinner = document.getElementById("idSpinner");
+                spinner.style.display = "inline-block";
+                try {
+                    const snap = await getDocs(query(collection(db, "EMPLOYEE_LIST"), where("id", "==", id)));
+                    if (seq !== idLookupSeq) return;
+                    if (!snap.empty) {
+                        const d = snap.docs[0].data();
+                        const info = { name: d.name || id, desig: d.designation || "" };
+                        idLookupCache[id] = info;
+                        fillIdUI(info.name, info.desig);
+                    } else {
+                        document.getElementById("idCross").style.display = "inline-block";
+                    }
+                } catch (e) {
+                    console.warn("Employee lookup failed:", e);
+                } finally {
+                    if (seq === idLookupSeq) spinner.style.display = "none";
+                }
+            }, 400);
         };
 
         /* লগইন: Firebase Authentication দিয়ে */
@@ -837,7 +867,7 @@
             document.getElementById("dashboardScreen").style.display  = "none";
             document.getElementById("loginScreen").style.display      = "flex";
             document.getElementById("loginForm").querySelectorAll("input").forEach(i => i.value = "");
-            ["idCheck","idCross","nameBadge","desigBadge"].forEach(id => document.getElementById(id).style.display = "none");
+            ["idCheck","idCross"].forEach(id => document.getElementById(id).style.display = "none");
         };
 
         window.openPage = function(url) {
