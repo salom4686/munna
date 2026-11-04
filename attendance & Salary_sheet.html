@@ -653,6 +653,9 @@
       .print-repeat-report-info {
         display: none;
       }
+      .print-repeat-brand {
+        display: none;
+      }
       .page-header .header-badge {
         position: absolute;
         right: 32px;
@@ -1239,6 +1242,12 @@
       .pm-print-only {
         display: none;
       }
+      .print-sign-fixed {
+        display: none;
+      }
+      .pm-prt-only {
+        display: none;
+      }
       .ot-amt-cell {
         font-family: monospace;
         font-weight: 700;
@@ -1569,9 +1578,36 @@
           font-family: "Playfair Display", serif;
           font-size: 13px;
         }
+        /* লোগো + কোম্পানির নাম এখন টেবিল হেডারের প্রথম সারিতে — প্রতি পৃষ্ঠায় আসবে */
         .salary-print-header {
-          display: block !important;
-          margin-bottom: 4px !important;
+          display: none !important;
+        }
+        #reportTable .print-repeat-brand {
+          display: table-row !important;
+        }
+        #reportTable .print-repeat-brand th {
+          background: #fff !important;
+          border: none !important;
+          padding: 2px 0 6px 0 !important;
+          text-align: center !important;
+          white-space: nowrap !important;
+          overflow: visible !important;
+        }
+        #reportTable .print-repeat-brand img {
+          height: 46px !important;
+          width: auto !important;
+          vertical-align: middle;
+          margin-right: 12px;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
+        #reportTable .print-repeat-brand .repeat-company {
+          font-family: "Playfair Display", serif;
+          font-size: 24px;
+          font-weight: 700;
+          color: #000 !important;
+          vertical-align: middle;
+          text-transform: uppercase;
         }
         .salary-print-brand {
           display: flex !important;
@@ -1777,9 +1813,61 @@
         col.col-othrs {
           visibility: collapse;
         }
+        /* লুকানো (collapse) কলামের % width শূন্য করা হলো — নইলে Chrome টেবিলটা
+           ছোট করে ফেলে এবং ডানে বাড়তি মার্জিন থেকে যায় */
+        #reportTable colgroup col.col-othrs[class],
+        #reportTable colgroup col.col-holiday[class],
+        #reportTable colgroup col.col-sunday[class] {
+          width: 0 !important;
+        }
         /* প্রিন্টে header-এ শুধু "OVER TIME" — নিচে Amount/Hrs লেখা থাকবে না */
         .pm-print-hide {
           display: none !important;
+        }
+        /* Others / P Bonus / A Bonus / F Trv input — প্রিন্টে লেখা যেন না কাটে */
+        #reportTable .bonus-input {
+          width: 100% !important;
+          min-width: 0 !important;
+          max-width: 100% !important;
+          padding: 0 !important;
+          font-size: 9px !important;
+          text-align: right !important;
+          overflow: visible !important;
+          -moz-appearance: textfield;
+          appearance: textfield;
+        }
+        #reportTable .bonus-input::-webkit-outer-spin-button,
+        #reportTable .bonus-input::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+        #reportTable td:has(.bonus-input) {
+          width: auto !important;
+          min-width: 0 !important;
+          max-width: none !important;
+          padding: 5px 4px !important;
+          overflow: visible !important;
+        }
+        /* Prepared / Checked / Authorized By — প্রতিটি পৃষ্ঠার নিচে */
+        .print-sign-fixed {
+          display: flex !important;
+          position: fixed;
+          bottom: 4mm;
+          left: 5mm;
+          right: 5mm;
+          justify-content: space-around;
+          align-items: flex-end;
+          background: #fff;
+          z-index: 5;
+        }
+        #reportTable tr.print-footer-signature {
+          display: none !important;
+        }
+        .pm-scr-only {
+          display: none !important;
+        }
+        .pm-prt-only {
+          display: block !important;
         }
         th.pm-print-only {
           display: table-cell !important;
@@ -1795,7 +1883,7 @@
           white-space: nowrap;
         }
         col.col-signature {
-          width: 140px !important;
+          width: 115px !important;
         }
         #reportTable th:last-child,
         #reportTable td:last-child {
@@ -1821,7 +1909,7 @@
           width: 0 !important;
         }
         #reportTable colgroup col:nth-child(3) {
-          width: 18.5% !important;
+          width: 14.5% !important;
         }
         #reportTable thead tr:first-child th:nth-child(2),
         #reportTable tbody td:nth-child(2) {
@@ -1849,7 +1937,7 @@
           line-height: 1.3;
         }
         #reportTable colgroup col:nth-child(4) {
-          width: 9% !important;
+          width: 10% !important;
         } /* Designation */
         #reportTable colgroup col:nth-child(5) {
           width: 6% !important;
@@ -1894,7 +1982,7 @@
           width: 3.2% !important;
         } /* F Trv */
         #reportTable colgroup col:nth-child(21) {
-          width: 5% !important;
+          width: 6.2% !important;
         } /* Gross Salary */
         #reportTable colgroup col:nth-child(22) {
           width: 3.2% !important;
@@ -1909,10 +1997,10 @@
           width: 4.2% !important;
         } /* CSG 1.5% */
         #reportTable colgroup col:nth-child(26) {
-          width: 3.7% !important;
+          width: 5% !important;
         } /* Total (deductions) */
         #reportTable colgroup col:nth-child(27) {
-          width: 5% !important;
+          width: 6.2% !important;
         } /* Net Salary */
         #reportTable th:nth-child(1),
         #reportTable th:nth-child(2),
@@ -1941,6 +2029,51 @@
         }
         .bonus-input {
           border: none !important;
+        }
+        /* ── প্রিন্টে টেবিল পুরো পাতার প্রস্থ নেবে (ডানে বাড়তি মার্জিন নেই) ──
+           দৃশ্যমান কলামগুলোর (NPS ও CSG সহ) মোট প্রস্থ ঠিক ১০০%; লুকানো কলামগুলো ০ */
+        #reportTable {
+          width: 100% !important;
+        }
+        #reportTable colgroup col:nth-child(1) { width: 2.2% !important; }
+        #reportTable colgroup col:nth-child(3) { width: 13.9% !important; }
+        #reportTable colgroup col:nth-child(4) { width: 7.6% !important; }
+        #reportTable colgroup col:nth-child(5) { width: 3.9% !important; }
+        #reportTable colgroup col:nth-child(6) { width: 2.8% !important; }
+        #reportTable colgroup col:nth-child(7) { width: 3.9% !important; }
+        #reportTable colgroup col:nth-child(8) { width: 3.9% !important; }
+        #reportTable colgroup col:nth-child(9) { width: 2.8% !important; }
+        #reportTable colgroup col:nth-child(10) { width: 2.8% !important; }
+        #reportTable colgroup col:nth-child(11) { width: 2.8% !important; }
+        #reportTable colgroup col:nth-child(12) { width: 3.0% !important; }
+        #reportTable colgroup col:nth-child(15) { width: 4.0% !important; }
+        #reportTable colgroup col:nth-child(17) { width: 2.6% !important; }
+        #reportTable colgroup col:nth-child(18) { width: 3.1% !important; }
+        #reportTable colgroup col:nth-child(19) { width: 3.1% !important; }
+        #reportTable colgroup col:nth-child(20) { width: 2.8% !important; }
+        #reportTable colgroup col:nth-child(21) { width: 5.2% !important; }
+        #reportTable colgroup col:nth-child(22) { width: 2.6% !important; }
+        #reportTable colgroup col:nth-child(23) { width: 2.6% !important; }
+        #reportTable colgroup col:nth-child(24) { width: 3.4% !important; }
+        #reportTable colgroup col:nth-child(25) { width: 3.6% !important; }
+        #reportTable colgroup col:nth-child(26) { width: 4.0% !important; }
+        #reportTable colgroup col:nth-child(27) { width: 5.2% !important; }
+        #reportTable colgroup col.col-signature {
+          width: 8.2% !important;
+        }
+        /* প্রিন্টে BASIC কলামের লেখা সেন্টারে */
+        #reportTable td.pm-basic-center,
+        #reportTable td.pm-basic-center > div {
+          text-align: center !important;
+        }
+        /* BASIC কলামে ওপরের অঙ্ক ও নিচের ব্র্যাকেটের লেখা একই সাইজে */
+        #reportTable td.pm-basic-center > div {
+          font-size: 9px !important;
+          line-height: 1.25;
+        }
+        #reportTable th:last-child,
+        #reportTable td:last-child {
+          min-width: 0 !important;
         }
         /* Chrome print preview renders 0.5pt grid lines too heavily; use a
            lighter hairline for the complete salary table. */
@@ -6424,6 +6557,8 @@
         tf.querySelector(".tf-othrs").textContent = totOtHrs.toFixed(1);
         // Print layout: Holiday/Sunday amount sits under the day count,
         // OT hours sits under the OT amount.
+        tf.querySelector(".tf-hday-p").textContent = totHDay;
+        tf.querySelector(".tf-sday-p").textContent = totSDay;
         tf.querySelector(".tf-hol-p").textContent = totHol.toFixed(2);
         tf.querySelector(".tf-sun-p").textContent = totSun.toFixed(2);
         tf.querySelector(".tf-othrs-p").textContent = totOtHrs.toFixed(1) + " h";
@@ -6853,13 +6988,13 @@
               <td class="text-left" style="font-weight:bold;color:var(--brand-blue)">${w.id}</td>
               <td class="text-left"><div class="print-emp-id">ID: ${w.id}</div><div style="font-weight:700;font-size:11px">${w.name}</div><div style="font-size:9px;color:#666;font-style:italic">${w.passport}</div></td>
               <td class="text-left">${w.des}<div style="font-size:9px;color:#666;font-style:italic">(Salary: ${w.sal})</div></td>
-              <td class="text-right">
+              <td class="text-right pm-basic-center">
                 <div style="font-weight:bold">${rowTotalBasic.toFixed(2)}</div>
                 <div style="font-size:9px;color:#666;font-style:italic">(${dailyDisplay})</div>
               </td>
              <td class="text-right">${w.norm}</td>
-<td class="text-right">${w.hDay}${w.hol > 0 ? `<div class="pm-sub">${w.hol.toFixed(2)}</div>` : ""}</td>
-<td class="text-right">${w.sDay}${w.sun > 0 ? `<div class="pm-sub">${w.sun.toFixed(2)}</div>` : ""}</td>
+<td class="text-right"><span class="pm-scr-only">${w.hDay}</span>${w.hol > 0 ? `<div class="pm-prt-only">${w.hol.toFixed(2)}</div><div class="pm-sub">${w.hDay}</div>` : `<div class="pm-prt-only">${w.hDay}</div>`}</td>
+<td class="text-right"><span class="pm-scr-only">${w.sDay}</span>${w.sun > 0 ? `<div class="pm-prt-only">${w.sun.toFixed(2)}</div><div class="pm-sub">${w.sDay}</div>` : `<div class="pm-prt-only">${w.sDay}</div>`}</td>
 <td class="text-right">${w.abs}</td>
 <td class="text-right">${w.sl}</td>
 <td class="text-right">${w.inj}</td>
@@ -6952,11 +7087,17 @@
               <col><col class="col-holiday"><col class="col-sunday"><col class="col-otamt">
               <col class="col-othrs"><col><col><col>
               <col>
-              <col><col><col><col><col><col>
+              <col><col><col><col class="col-nps"><col class="col-csg"><col>
               <col>
               <col class="col-signature">
             </colgroup>
             <thead>
+              <tr class="print-repeat-brand">
+                <th colspan="28">
+                  <img src="https://drive.google.com/thumbnail?id=11bxOPboUUmQxIkT6gMYWYqxfh9jZSiLo&sz=w500" alt="" />
+                  <span class="repeat-company">ALAMHOW CO LTD</span>
+                </th>
+              </tr>
               <tr class="print-repeat-report-info">
                 <th colspan="28">Monthly Salary Sheet <span class="repeat-period">Period: ${dFromVal || "…"} to ${dToVal || "…"}</span><span class="repeat-printed">Printed: ${formatDateTime()}</span></th>
               </tr>
@@ -7015,13 +7156,13 @@
             <tfoot>
               <tr class="total-row" id="reportTotalsRow">
                 <td colspan="4" class="text-right" style="letter-spacing:1px">GRAND TOTAL</td>
-                <td class="text-right">
+                <td class="text-right pm-basic-center">
                   <div class="tf-basic">${totals.totBasic.toFixed(2)}</div>
                   <div style="font-size:8.5px;color:#cbd5e1;font-style:italic;font-weight:normal">(${totals.totDaily.toFixed(2)})</div>
                 </td>
                 <td class="text-right tf-norm">${totals.norm}</td>
-                <td class="text-right"><span class="tf-hday">${totals.hDay}</span><div class="pm-sub tf-hol-p">${totals.hol.toFixed(2)}</div></td>
-                <td class="text-right"><span class="tf-sday">${totals.sDay}</span><div class="pm-sub tf-sun-p">${totals.sun.toFixed(2)}</div></td>
+                <td class="text-right"><span class="tf-hday pm-scr-only">${totals.hDay}</span><div class="pm-prt-only tf-hol-p">${totals.hol.toFixed(2)}</div><div class="pm-sub tf-hday-p">${totals.hDay}</div></td>
+                <td class="text-right"><span class="tf-sday pm-scr-only">${totals.sDay}</span><div class="pm-prt-only tf-sun-p">${totals.sun.toFixed(2)}</div><div class="pm-sub tf-sday-p">${totals.sDay}</div></td>
                 <td class="text-right tf-abs">${totals.abs}</td>
                 <td class="text-right tf-sl">${totals.sl}</td>
                 <td class="text-right tf-inj">${totals.inj}</td>
@@ -7060,6 +7201,11 @@
               </tr>
             </tfoot>
           </table>
+          <div class="print-sign-fixed">
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
+            <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Authorized By</div></div>
+          </div>
           <div class="signature-area screen-signature">
             <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Prepared By</div></div>
             <div class="sig-block"><div class="sig-line"></div><div class="sig-label">Checked By</div></div>
@@ -8661,6 +8807,48 @@
       switchTab("monthly");
       window.addEventListener("load", preloadStaticData);
       window.addEventListener("load", checkMonthlyDuplicatesOnLoad);
+    
+      // ✅ PRINT: Monthly Salary Summary-র সব টাকার অঙ্ক পূর্ণ সংখ্যায় (দশমিক ছাড়া)
+      // শুধু প্রিন্টের সময় বদলায়; প্রিন্ট শেষে স্ক্রিনের মান আগের মতো ফিরে আসে।
+      (function () {
+        let _printRounded = [];
+        let _printInputs = [];
+        function roundTextNodes() {
+          const table = document.getElementById("reportTable");
+          if (!table || _printRounded.length) return;
+          table.querySelectorAll("input.bonus-input").forEach((inp) => {
+            const v = parseFloat(inp.value);
+            if (!isNaN(v) && String(v) !== String(Math.round(v))) {
+              _printInputs.push([inp, inp.value]);
+              inp.value = String(Math.round(v));
+            }
+          });
+          const walker = document.createTreeWalker(table, NodeFilter.SHOW_TEXT);
+          const re = /-?\d[\d,]*\.\d{2}(?!\d)/g;
+          let node;
+          while ((node = walker.nextNode())) {
+            const orig = node.nodeValue;
+            if (!orig || !re.test(orig)) { re.lastIndex = 0; continue; }
+            re.lastIndex = 0;
+            const out = orig.replace(re, (m) => {
+              const n = Math.round(parseFloat(m.replace(/,/g, "")));
+              return m.includes(",") ? n.toLocaleString("en-US") : String(n);
+            });
+            if (out !== orig) {
+              _printRounded.push([node, orig]);
+              node.nodeValue = out;
+            }
+          }
+        }
+        function restoreTextNodes() {
+          _printRounded.forEach(([node, orig]) => { node.nodeValue = orig; });
+          _printRounded = [];
+          _printInputs.forEach(([inp, orig]) => { inp.value = orig; });
+          _printInputs = [];
+        }
+        window.addEventListener("beforeprint", roundTextNodes);
+        window.addEventListener("afterprint", restoreTextNodes);
+      })();
     </script>
   </body>
 </html>
