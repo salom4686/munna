@@ -785,7 +785,7 @@ const EDIT_EARNING_FIELDS = [
 // Deduction লাইনগুলো — সব কটাই অটোমেটিক (CSG/NPS গ্রস থেকে % হিসাবে, বাকিগুলো সিস্টেম থেকে অটো-ফেচ করা, ম্যানুয়ালি টাইপ করার দরকার নেই)
 const AUTO_DEDUCTION_LABELS = [
   ["csgEmp", "CSG Emp. (1.5%)"], ["npsEmp", "NPS Emp. (1%)"], ["incomeTax", "Income Tax"],
-  ["advanceRefund", "Advance Refund"], ["fine", "Fine"], ["prgfDed", "P.R.G.F"],
+  ["advanceRefund", "Advance Refund"], ["prgfDed", "P.R.G.F"],
 ];
 
 // ডাটা না থাকলে (0) ইনপুট বক্স ফাঁকা দেখাবে, টাইপ করা সহজ হবে
@@ -1063,7 +1063,7 @@ function buildOneSlip(d, period, title) {
             <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">NPS Emp. <span style="color:#888">(1%)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px" id="si_${uid}_npsEmp">${d.npsEmp}</td></tr>
             <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Income Tax</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.incomeTax}</td></tr>
             <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Advance Refund</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.advanceRefund}</td></tr>
-            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fine</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fine}</td></tr>
+            <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
             <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Absent <span style="color:#aaa;font-size:9px">(info)</span></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.absentDays} Days</td></tr>
             <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.prgfDed}</td></tr>
             <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">&nbsp;</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td></tr>
@@ -1300,7 +1300,6 @@ async function loadHomeSummary(dFromOverride, dToOverride) {
       ["P BONUS",         fmt(totPBonus), ""],
       ["GROSS SALARY",    fmt(totGross), "positive"],
       ["ADV",             fmt(totAdv), "negative"],
-      ["FINE",            fmt(totFine), "negative"],
       ["NPS 1%",          fmt(totNps), "negative"],
       ["CSG 1.5%",        fmt(totCsg), "negative"],
       ["NET SALARY",      fmt(totNet), "positive"],
