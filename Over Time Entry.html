@@ -1614,6 +1614,12 @@
         return parseFloat(((monthlySalary / workingDays / 8) * 1.5).toFixed(2));
       }
 
+      function isActiveEmployee(employee) {
+        return String(employee.status ?? employee.STATUS ?? "active")
+          .trim()
+          .toLowerCase() !== "inactive";
+      }
+
       // ৫. ওটি এন্ট্রি সার্চ তালিকা লোড
       async function fetchWorkersFromDatabase() {
         const date = document.getElementById("targetDate").value;
@@ -1664,7 +1670,7 @@
 
         let visibleCount = 0;
 
-        employees.forEach((w) => {
+        employees.filter(isActiveEmployee).forEach((w) => {
           const id = w.id || w.docId || "N/A";
 
           if (existingDbRecordsMap[id] === true) {
@@ -1720,7 +1726,7 @@
           tbody.innerHTML = `
             <tr>
               <td colspan="8" class="p-10 text-center text-slate-500 font-bold">
-                All registered employees already have OT entries recorded for this project on the selected date.
+                All active employees already have OT entries recorded for this project on the selected date.
               </td>
             </tr>`;
         }
@@ -2347,6 +2353,7 @@
 
         const filtered = employees
           .filter((e) => {
+            if (currentViewMode === "SINGLE" && !isActiveEmployee(e)) return false;
             const empId = String(e.id || e.docId);
             const matchesQuery =
               empId.toLowerCase().includes(query) ||
