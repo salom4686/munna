@@ -3579,6 +3579,7 @@
           attendance[id].others += parseFloat(d.AMOUNT) || 0;
         });
         const otMap = {};
+        const otHoursMap = {};
         const otSnap = await rtdb.ref("OVER_TIME").once("value");
         const otData = otSnap.val() || {};
         await ensureOtRateContext();
@@ -3603,10 +3604,11 @@
                 row.OT_Rate || row.ot_rate || row.OT_RATE || 0,
               );
               otMap[id] = (otMap[id] || 0) + otHrs * otRate;
+              otHoursMap[id] = (otHoursMap[id] || 0) + otHrs;
             }
           }
         }
-        const result = { attendance, otMap };
+        const result = { attendance, otMap, otHoursMap };
         _attRangeCache[key] = result;
         setStatus(
           "ok",
@@ -3753,6 +3755,9 @@
             hour12: true,
           }),
           serviceLength,
+          normalWorkDays: isCook
+            ? Math.max(0, (att.pres || 0) - paidLeaveDays)
+            : att.norm,
           normalWork: regularWorkPay.toFixed(2),
           sickLeavePay: sickLeavePay.toFixed(2),
           injuryPay: injuryPay.toFixed(2),
@@ -3764,6 +3769,7 @@
           sundayDays: att.sunDays || 0,
           sickLeaveDays: att.sickLeave || 0,
           injuryDays: att.injury || 0,
+          overtimeHours: (rangeData.otHoursMap[empId] || 0),
           overtime: totalOT.toFixed(2),
           others: (att.others || 0).toFixed(2),
           gross: gross.toFixed(2),
@@ -5889,16 +5895,17 @@
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
               <div>
                 <div style="font-weight:700;font-size:10px;text-transform:uppercase;background:#e5e7eb;color:#111111;padding:3px 4px;text-align:center;letter-spacing:1px;border:1px solid #d1d5db;border-bottom:none;">Earnings</div>
-                <table style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWork}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays/Sundays</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidaySundayPay}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">SICK LEAVE / INJURY</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.leavePay}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fTrv}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.pBonus}</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.aBonus}</td></tr>                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
-                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Other</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.others}</td></tr>
-                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.gross}</td></tr>
+                <style>.payslip-earnings-table td:first-child{border-right:none!important}.payslip-earnings-table td:nth-child(2){border-left:none!important}</style>
+                <table class="payslip-earnings-table" style="width:100%;font-size:10px;border-collapse:collapse;border:1px solid #e5e7eb">
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Normal Work</td><td style="text-align:center;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWorkDays}</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.normalWork}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Holidays/Sundays</td><td style="text-align:center;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidayDays + d.sundayDays}</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.holidaySundayPay}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">SICK LEAVE / INJURY</td><td style="text-align:center;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.sickLeaveDays + d.injuryDays}</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.leavePay}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Fix Travelling</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.fTrv}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Overtime</td><td style="text-align:center;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtimeHours}</td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.overtime}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Performance Bonus</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.pBonus}</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Attendance Bonus</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.aBonus}</td></tr>                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">P.R.G.F</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">00</td></tr>
+                  <tr><td style="border:1px solid #e5e7eb;padding:1px 3px">Other</td><td style="border:1px solid #e5e7eb;padding:1px 3px"></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:1px 3px">${d.others}</td></tr>
+                  <tr style="font-weight:700;border-top:1px solid black"><td style="border:1px solid #e5e7eb;padding:3px">GROSS</td><td style="border:1px solid #e5e7eb;padding:3px"></td><td style="text-align:right;font-family:monospace;border:1px solid #e5e7eb;padding:3px">${d.gross}</td></tr>
                 </table>
               </div>
               <div>
